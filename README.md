@@ -10,6 +10,10 @@ The product rule is:
 
 > **Reuse → inspect → verify → adapt → integrate → test → build only the gap.**
 
+Implementation is experiment-first: freeze a falsifiable scenario, exercise the smallest real
+vertical slice with positive and broken controls, inspect the artifacts, and only then expand the
+code. Mocks and green CI protect regressions; they do not prove that a capability works.
+
 Blackridge does not blindly merge repositories and does not treat GitHub stars as proof of
 quality. Every candidate moves through explicit evidence levels before it may enter a generated
 system.

@@ -12,6 +12,24 @@ The verification loop is:
 5. record a named `pass`, `fail`, or `blocked` verdict with observations and caveats;
 6. keep failed and superseded evidence instead of rewriting history.
 
+## Experiment-first implementation rule
+
+Manual verification controls the order of implementation, not only the final verdict. Before a
+new segment grows beyond a thin vertical slice:
+
+1. write the capability claim, representative real input, expected observation, and explicit
+   failure condition;
+2. freeze a baseline plus a deliberately broken or adverse control;
+3. implement only enough of the real integration to exercise the risky assumption;
+4. run it against an exact upstream revision or artifact in the intended environment;
+5. inspect the complete artifacts and record `PASS`, `FAIL`, or `BLOCKED`;
+6. expand or generalize only after `PASS`; otherwise retain the failure and change or stop the
+   approach.
+
+Mocks and automated tests may protect deterministic behavior after the experiment. They cannot
+replace the real run. A generic framework must not be justified solely by expected future use; the
+same mechanism must first work with at least two meaningfully different real subjects.
+
 `ProbeEvidence` deliberately has no verdict field. `ManualReview` cannot be created without a
 reviewer, expected behavior, concrete observations, explanatory notes, and the SHA-256 digest of
 the exact probe file that was inspected.

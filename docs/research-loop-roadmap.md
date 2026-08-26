@@ -17,6 +17,33 @@ The valuable claim is deliberately narrower than "find the globally best archite
 This claim must be earned by repeated A/B experiments. Market impact, percentage success
 predictions, and autonomous scientific discovery are hypotheses, not roadmap acceptance criteria.
 
+## Experiment before expansion
+
+Blackridge must test its riskiest assumption before building the surrounding platform. Every new
+capability, integration, solver strategy, or research mechanism starts as the smallest vertical
+slice that can falsify a written hypothesis on a real component and representative input.
+
+The mandatory order is:
+
+```text
+hypothesis and failure condition
+    -> frozen real scenario and baseline
+    -> smallest executable integration
+    -> positive and deliberately broken control
+    -> raw artifact inspection and named verdict
+    -> continue, change direction, or stop
+```
+
+Code may expand only after the experiment produces the expected observable behavior. If the result
+is failed, blocked, unstable, or ambiguous, Blackridge retains it and resolves the uncertainty
+before adding abstractions around it. A feature backed only by mocks, unit tests, generated prose,
+or a successful exit code remains **NOT RUN** as a product capability.
+
+Before generalizing a mechanism, exercise it against at least two meaningfully different real
+subjects. Before promoting a complete system, run its frozen end-to-end workload in a clean
+environment. This is the defense against writing a large framework whose central assumption was
+never tested.
+
 ## Why this direction is worth pursuing
 
 The plan joins three assets that reinforce one another:
