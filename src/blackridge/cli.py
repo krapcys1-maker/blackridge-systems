@@ -18,6 +18,12 @@ from blackridge.adaptation import (
     CompositionPairProbe,
     JsonPatchAdapterProbe,
 )
+from blackridge.benchmark import (
+    BENCHMARK_SOURCE,
+    BenchmarkCalibrationProbe,
+    BenchmarkComparisonProbe,
+    BenchmarkEvaluator,
+)
 from blackridge.blueprint import build_blueprint
 from blackridge.depsdev import DepsDevClient, PackageSystem
 from blackridge.doctor import check_tools
@@ -434,6 +440,176 @@ def probe_supply_chain(
     )
     console.print(f"Evidence written to {output}")
     console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
+
+
+@app.command("benchmark-evaluate")
+def benchmark_evaluate(
+    definition_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    run_plan_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/benchmark-run-probe.json"
+    ),
+) -> None:
+    """Execute frozen benchmark cases and retain artifact-level observations."""
+
+    try:
+        probe = BenchmarkEvaluator().evaluate(definition_file, run_plan_file)
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-benchmark-harness/1",
+            subject=f"{definition_file}::{run_plan_file}",
+            request={
+                "definition_file": str(definition_file),
+                "run_plan_file": str(run_plan_file),
+            },
+            sources=[BENCHMARK_SOURCE],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, output)
+        console.print(f"[red]Benchmark evaluation failed:[/red] {exc}")
+        if output.exists():
+            console.print(f"Failure evidence written to {output}")
+        raise typer.Exit(code=2) from exc
+
+    observations = probe.observations
+    console.print(f"[bold]Raw benchmark evidence:[/bold] {probe.subject}")
+    console.print(
+        "Critical checks matched: "
+        f"{observations['matched_critical_check_count']}/"
+        f"{observations['critical_check_count']}"
+    )
+    console.print(f"All critical checks matched: {observations['all_critical_matched']}")
+    console.print(f"Evidence written to {output}")
+    console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
+
+
+@app.command("benchmark-calibrate")
+def benchmark_calibrate(
+    definition_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    reference_plan_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    broken_plan_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/benchmark-calibration-probe.json"
+    ),
+) -> None:
+    """Compare a known-good fixture with a green-exit broken control."""
+
+    try:
+        probe = BenchmarkCalibrationProbe().probe(
+            definition_file,
+            reference_plan_file,
+            broken_plan_file,
+        )
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-benchmark-calibration/1",
+            subject=f"{reference_plan_file}::vs::{broken_plan_file}",
+            request={
+                "definition_file": str(definition_file),
+                "reference_plan_file": str(reference_plan_file),
+                "broken_plan_file": str(broken_plan_file),
+            },
+            sources=[BENCHMARK_SOURCE],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, output)
+        console.print(f"[red]Benchmark calibration failed:[/red] {exc}")
+        if output.exists():
+            console.print(f"Failure evidence written to {output}")
+        raise typer.Exit(code=2) from exc
+
+    comparison = probe.observations["comparison"]
+    console.print(f"[bold]Raw benchmark calibration:[/bold] {probe.subject}")
+    console.print(
+        "Reference all critical matched: "
+        f"{comparison['reference_all_critical_matched']}"
+    )
+    console.print(
+        "Broken processes all exited zero: "
+        f"{comparison['broken_all_processes_exited_zero']}"
+    )
+    console.print(
+        "Broken all critical matched: "
+        f"{comparison['broken_all_critical_matched']}"
+    )
+    console.print(
+        f"Detected broken checks: {comparison['detected_broken_check_count']}"
+    )
+    console.print(f"Evidence written to {output}")
+    console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
+
+
+@app.command("benchmark-compare")
+def benchmark_compare(
+    definition_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    baseline_plan_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    blackridge_plan_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/benchmark-comparison-probe.json"
+    ),
+) -> None:
+    """Run one controlled from-scratch versus Blackridge pair."""
+
+    try:
+        probe = BenchmarkComparisonProbe().probe(
+            definition_file,
+            baseline_plan_file,
+            blackridge_plan_file,
+        )
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-benchmark-comparison/1",
+            subject=f"{baseline_plan_file}::vs::{blackridge_plan_file}",
+            request={
+                "definition_file": str(definition_file),
+                "baseline_plan_file": str(baseline_plan_file),
+                "blackridge_plan_file": str(blackridge_plan_file),
+            },
+            sources=[BENCHMARK_SOURCE],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, output)
+        console.print(f"[red]Benchmark comparison failed:[/red] {exc}")
+        if output.exists():
+            console.print(f"Failure evidence written to {output}")
+        raise typer.Exit(code=2) from exc
+
+    baseline = probe.observations["baseline"]
+    blackridge = probe.observations["blackridge"]
+    console.print(f"[bold]Raw controlled comparison:[/bold] {probe.subject}")
+    console.print(
+        f"Baseline: task_success={baseline['task_success']}, "
+        f"critical_match_rate={baseline['critical_match_rate']}"
+    )
+    console.print(
+        f"Blackridge: task_success={blackridge['task_success']}, "
+        f"critical_match_rate={blackridge['critical_match_rate']}"
+    )
+    console.print("Automatic winner: none")
+    console.print(f"Evidence written to {output}")
+    console.print("[yellow]A named manual comparison is still required.[/yellow]")
 
 
 @app.command("review-probe")

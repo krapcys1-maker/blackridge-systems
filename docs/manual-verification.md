@@ -43,3 +43,10 @@ digests and argv, Scorecard status, OSV exit/findings/scope, every distribution 
 source-tree cleanliness, and container cleanup. A valid Git commit signature is not package
 provenance. A scenario may pass because missing and adverse evidence was represented correctly
 while the inspected release itself remains blocked.
+
+For benchmark probes, compare the evaluator-module, definition, public-specification, input-contract,
+output-contract, model, budget, timeout, environment, and measurement-source controls. Inspect every
+candidate exit code and complete stdout artifact, independently cross-check source identities and
+quotes against the case corpus, and confirm that a green broken control fails concrete boundaries.
+A harness-calibration pass is not an A/B method result. A real comparison must retain raw arms,
+leave weighted score and automatic winner empty, and refuse mismatched controls before execution.

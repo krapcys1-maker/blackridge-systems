@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackridge.systems/contracts/research-output-v1.schema.json",
+  "title": "research-output/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "status", "answer", "claims", "sources"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "request_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["answered", "insufficient-evidence"]},
+    "answer": {"type": "string", "minLength": 1},
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "citations"],
+        "properties": {
+          "text": {"type": "string", "minLength": 1},
+          "citations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["document_id", "quote"],
+              "properties": {
+                "document_id": {"type": "string", "minLength": 1},
+                "quote": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["document_id", "title"],
+        "properties": {
+          "document_id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

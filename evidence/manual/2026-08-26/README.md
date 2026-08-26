@@ -23,6 +23,9 @@ time-stamped snapshot and may change upstream.
 | system verification / `deliberate-negative-case` | PASS | Working and one-operation-broken compositions used identical input and schema. Both patches executed without an exception, but artifact validation accepted only the working output and rejected missing `document.name`. |
 | complete supply-chain evaluation / `known-repository-review` | PASS for evidence behavior; candidate BLOCKED | The exact PaperQA commit was inspected independently with GitHub, deps.dev, Scorecard, Syft, OSV-Scanner, and PyPI Integrity. Missing posture, license coverage, provenance, and vulnerability findings remained explicit, so the release was not approved. |
 | built-wheel installation | PASS after defect correction | The first build failed because the dev environment did not declare `build`. After correcting it, the wheel contents were inspected and a clean venv loaded the exact experiment, exposed the CLI options, and passed dependency checks. A polluted system-site control still failed and was retained. |
+| benchmark calibration / `green-broken-artifact-detected` | PASS for harness calibration; A/B NOT RUN | The reference matched 19/19 critical checks and excluded all distractors. Both broken processes exited zero and emitted schema-valid JSON, but the artifact matched only 9/19; ten concrete grounding, source, relevance, coverage, concept, and abstention boundaries were detected. |
+| benchmark comparison guard / `mismatched-comparison-controls-refused` | PASS | Changing only `model_identifier` stopped comparison before either candidate was evaluated, retained the named mismatch, and created no task result or winner. A matching plumbing control ran both arms and still assigned no automatic winner. |
+| public benchmark schema / `public-output-contract-enforced` | PASS | Both schema-negative processes exited zero, but the exact published Draft 2020-12 schema rejected `unchecked_payload`. No deeper correctness checks were fabricated after contract failure. |
 
 ## Important findings
 
@@ -58,6 +61,18 @@ time-stamped snapshot and may change upstream.
 15. Evidence files use canonical LF bytes and are marked `-text` in `.gitattributes`. This prevents
     Windows checkout conversion from invalidating the recorded hashes; review digests were updated
     once during that content-preserving normalization and then re-audited against staged Git blobs.
+16. The frozen benchmark reference matched all 19 critical checks. Its bounded answer used exactly
+    10 unique support sources, excluded all five distractors, and retained 10 claims whose cited
+    quotes were independently found in the named documents.
+17. The broken candidate returned exit 0 and schema-valid JSON for both cases. Artifact inspection
+    still detected a fabricated paper, insufficient source count, uncited and ungrounded claims,
+    missing concepts/evidence, and a false answer where clean abstention was required.
+18. The comparison layer refuses unequal model controls before candidate evaluation. With matching
+    plumbing fixtures it retains both raw arms and their delta, but `automatic_winner` and weighted
+    success score remain null. No real from-scratch versus Blackridge run has happened yet.
+19. The evaluator now hashes and executes the same input/output JSON Schemas published to builders,
+    and hashes its own module bytes. A schema-negative green process was rejected in both cases;
+    evaluation stopped at the contract boundary instead of inferring deeper correctness.
 
 ## Retained artifacts
 
@@ -96,6 +111,17 @@ time-stamped snapshot and may change upstream.
   these are retained rather than replacing the detailed findings with a summary.
 - `packaging-build-missing-tool.txt` — failed first wheel build, corrected content inspection, clean
   installation control, and the separately retained polluted-environment failure.
+- `benchmark-reference-probe.json`, `benchmark-broken-probe.json`, and
+  `benchmark-calibration-probe.json` — complete stdout, parsed artifacts, objective checks, frozen
+  input hashes, and paired calibration observations.
+- `benchmark-calibration-review.json` — named review that passes only the evaluator calibration,
+  explicitly not either A/B method.
+- `benchmark-comparator-control-probe.json` — matching comparator plumbing fixtures with both raw
+  arms, no weighted score, and no automatic winner.
+- `benchmark-comparator-mismatched-controls-failure.json` and its review — retained pre-execution
+  refusal when only the model identity differs.
+- `benchmark-schema-invalid-probe.json` and its review — green-exit unexpected-field control proving
+  that the exact public Draft 2020-12 output contract is executed before deeper artifact checks.
 
 SHA-256 checksums of the canonical bytes retained in Git:
 
@@ -130,4 +156,13 @@ paperqa-2026-08-12-supply-chain.spdx.json           f7dc8d67b98c121554e169ac37d9
 paperqa-2026-08-12-supply-chain.cdx.json            56fc40d40fd0e8789f30237863e46f6ae79d2f1d2a604ba68973a47b10624cd4
 paperqa-2026-08-12-supply-chain.osv.json            8d7582f0cb39e6c4def0cbcecda5ad13a9a2457a1a3e707948de6045017ab1ac
 packaging-build-missing-tool.txt                    d7fd652eb917ecc0c55ba45b7a0fc7e15085e6aa0359556973b701bda7c82bfa
+benchmark-broken-probe.json                         1ab99a2ff8d99d40c3c3bdd3e506342d4c5335b4c157a647b23473515fcb9248
+benchmark-calibration-probe.json                    3d7068b555df1f832fdf1b9820ae079dde04d1380d31f5ecfb81fb6c3f3fa5a6
+benchmark-calibration-review.json                   a40a03b2b90e5bfad6f8c9982f536e96d1e0b0818494b4f9dc914a0a68d3efe2
+benchmark-comparator-control-probe.json             ebc210d38245c0b6ac9ab0d98c7b4e147bb78a79c9016fea05b128208b427a82
+benchmark-comparator-mismatched-controls-failure.json ff221bd20f364085aeabd2ebe6788f87d567132a5d51ecd221fa9c47d9830bd9
+benchmark-comparator-mismatched-controls-review.json cdad80c87f789931bd4b4c6d7a36b236d0c98ff6a0492900359303e695c166b3
+benchmark-reference-probe.json                      6ada3794550931671ca7af9726d77ed0782a6363303c5ac8eee6f0af8ff67244
+benchmark-schema-invalid-probe.json                 adb0957abfb15f67345d6b6843d1323566625ffc2dce83ae5c0502efda6f5173
+benchmark-schema-invalid-review.json                806357dab86180b7a7fe5c48b1da0ee5106cfe8fa036e012be7a0ece92e3541e
 ```

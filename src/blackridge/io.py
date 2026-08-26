@@ -40,18 +40,20 @@ def load_run(path: Path) -> DiscoveryRun:
 
 def write_run(run: DiscoveryRun, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(run.model_dump_json(indent=2), encoding="utf-8")
+    path.write_text(run.model_dump_json(indent=2), encoding="utf-8", newline="\n")
 
 
 def write_blueprint(blueprint: SystemBlueprint, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     primitive = json.loads(blueprint.model_dump_json())
-    path.write_text(yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8")
+    path.write_text(
+        yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8", newline="\n"
+    )
 
 
 def write_probe(probe: ProbeEvidence, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(probe.model_dump_json(indent=2), encoding="utf-8")
+    path.write_text(probe.model_dump_json(indent=2), encoding="utf-8", newline="\n")
 
 
 def load_probe(path: Path) -> ProbeEvidence:
@@ -60,4 +62,4 @@ def load_probe(path: Path) -> ProbeEvidence:
 
 def write_manual_review(review: ManualReview, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(review.model_dump_json(indent=2), encoding="utf-8")
+    path.write_text(review.model_dump_json(indent=2), encoding="utf-8", newline="\n")

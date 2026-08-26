@@ -1,0 +1,279 @@
+{
+  "schema_version": "1",
+  "probe_id": "0ceca8376ae84a24b594500e2eddb4bb",
+  "observed_at": "2026-08-26T18:50:18.452684Z",
+  "provider": "blackridge-benchmark-harness/1",
+  "subject": "scientific-researcher-v1@1.0::scientific-researcher-calibration-schema-invalid",
+  "request": {
+    "definition": {
+      "schema_version": "1",
+      "task_id": "scientific-researcher-v1",
+      "version": "1.0",
+      "description": "Frozen smoke benchmark for grounded synthesis, citation integrity, abstention, and artifact inspection before any from-scratch or Blackridge builder is allowed to run.",
+      "public_spec_file": "../public/benchmark-spec.md",
+      "input_contract_file": "../public/research-input.schema.json",
+      "output_contract_file": "../public/research-output.schema.json",
+      "cases": [
+        {
+          "id": "grounded-ten-source-synthesis",
+          "category": "functional",
+          "critical": true,
+          "request_file": "cases/grounded-ten-source-request.json",
+          "expectation": {
+            "expected_status": "answered",
+            "minimum_unique_sources": 10,
+            "maximum_unique_sources": 10,
+            "maximum_answer_characters": 2500,
+            "required_concept_groups": [
+              [
+                "exact commit",
+                "immutable revision"
+              ],
+              [
+                "negative control",
+                "deliberately broken"
+              ],
+              [
+                "manual review",
+                "human review"
+              ],
+              [
+                "independent evidence",
+                "separate observations"
+              ],
+              [
+                "provenance",
+                "attestation"
+              ]
+            ],
+            "required_document_ids": [
+              "evidence-01",
+              "evidence-02",
+              "evidence-03",
+              "evidence-04",
+              "evidence-05",
+              "evidence-06",
+              "evidence-07",
+              "evidence-08",
+              "evidence-09",
+              "evidence-10"
+            ],
+            "allowed_document_ids": [
+              "evidence-01",
+              "evidence-02",
+              "evidence-03",
+              "evidence-04",
+              "evidence-05",
+              "evidence-06",
+              "evidence-07",
+              "evidence-08",
+              "evidence-09",
+              "evidence-10"
+            ],
+            "minimum_required_document_coverage": 8
+          }
+        },
+        {
+          "id": "insufficient-corpus-abstention",
+          "category": "robustness",
+          "critical": true,
+          "request_file": "cases/insufficient-corpus-request.json",
+          "expectation": {
+            "expected_status": "insufficient-evidence",
+            "minimum_unique_sources": 0,
+            "maximum_unique_sources": 0,
+            "maximum_answer_characters": null,
+            "required_concept_groups": [],
+            "required_document_ids": [],
+            "allowed_document_ids": [],
+            "minimum_required_document_coverage": 0
+          }
+        }
+      ]
+    },
+    "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\benchmark.yaml",
+    "definition_sha256": "b04db0e1105b896eccee835c102f3c3924ca1cfa248b3a215d5fe9108241e108",
+    "evaluator_module_sha256": "618eb984a96781cc977e890127f568923c6abf5d71a23a4320aafc3fd8f9cb69",
+    "public_spec_sha256": "12ab5bd80045ec9f4e32b771c7ca8cdd9030524cdcf8b2f96b7cb344c23a75ab",
+    "input_contract_sha256": "bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f",
+    "output_contract_sha256": "5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409",
+    "run_plan": {
+      "schema_version": "1",
+      "run_id": "scientific-researcher-calibration-schema-invalid",
+      "task_id": "scientific-researcher-v1",
+      "method": "calibration-broken",
+      "model_identifier": "deterministic-protocol-fixture",
+      "model_configuration": {
+        "mode": "deterministic",
+        "temperature": 0
+      },
+      "attempt": 1,
+      "builder_time_budget_seconds": 60,
+      "candidate": {
+        "argv": [
+          "{python}",
+          "{benchmark_root}/fixtures/schema_invalid_candidate.py"
+        ],
+        "cwd": "{benchmark_root}",
+        "timeout_seconds_per_case": 10.0,
+        "environment_allowlist": []
+      },
+      "telemetry": {
+        "builder_wall_seconds": null,
+        "model_cost_usd": null,
+        "repair_iterations": 0,
+        "generated_source_lines": null,
+        "reused_source_lines": null,
+        "clean_install": "not-run",
+        "measurement_source": "unavailable",
+        "notes": [
+          "Deliberately violates the exact public research-output/v1 schema."
+        ]
+      }
+    },
+    "run_plan_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\calibration-schema-invalid.yaml",
+    "run_plan_sha256": "425a4963d366cc47650046904a94f8432ad350937f50717f0423e6aca6d06dfe"
+  },
+  "observations": {
+    "probe_completed": true,
+    "duration_seconds": 0.091,
+    "case_count": 2,
+    "check_count": 4,
+    "matched_check_count": 2,
+    "critical_check_count": 4,
+    "matched_critical_check_count": 2,
+    "critical_match_rate": 0.5,
+    "all_critical_matched": false,
+    "cases": [
+      {
+        "case_id": "grounded-ten-source-synthesis",
+        "category": "functional",
+        "critical": true,
+        "request_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\cases\\grounded-ten-source-request.json",
+        "request_sha256": "e0891d343d6f3218478e4139fbb6574f1c5034164aab7c08c99771a51a4b8ed4",
+        "command": {
+          "argv": [
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1/fixtures/schema_invalid_candidate.py"
+          ],
+          "cwd": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1",
+          "environment_names": [
+            "PATH",
+            "SYSTEMROOT",
+            "TEMP",
+            "TMP"
+          ],
+          "timeout_seconds": 10.0
+        },
+        "duration_seconds": 0.05,
+        "exit_code": 0,
+        "timed_out": false,
+        "stdout": "{\"schema_version\": \"1\", \"request_id\": \"grounded-controls\", \"status\": \"insufficient-evidence\", \"answer\": \"No answer was produced.\", \"claims\": [], \"sources\": [], \"unchecked_payload\": true}",
+        "stderr": "",
+        "parsed_output": null,
+        "checks": [
+          {
+            "check_id": "process-completed",
+            "critical": true,
+            "expected": {
+              "exit_code": 0,
+              "timed_out": false
+            },
+            "observed": {
+              "exit_code": 0,
+              "timed_out": false
+            },
+            "matched": true,
+            "detail": "Process completion is retained but is not sufficient artifact proof."
+          },
+          {
+            "check_id": "output-contract",
+            "critical": true,
+            "expected": "research-output/v1 JSON",
+            "observed": {
+              "parsed": false,
+              "error": "ValueError: Additional properties are not allowed ('unchecked_payload' was unexpected)"
+            },
+            "matched": false,
+            "detail": "Stdout must contain exactly one strict output artifact."
+          }
+        ]
+      },
+      {
+        "case_id": "insufficient-corpus-abstention",
+        "category": "robustness",
+        "critical": true,
+        "request_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\cases\\insufficient-corpus-request.json",
+        "request_sha256": "108619c67ae286b243e477ea1ab310cbf7ec579c51619c911d8a3e31f7a277a3",
+        "command": {
+          "argv": [
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1/fixtures/schema_invalid_candidate.py"
+          ],
+          "cwd": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1",
+          "environment_names": [
+            "PATH",
+            "SYSTEMROOT",
+            "TEMP",
+            "TMP"
+          ],
+          "timeout_seconds": 10.0
+        },
+        "duration_seconds": 0.039,
+        "exit_code": 0,
+        "timed_out": false,
+        "stdout": "{\"schema_version\": \"1\", \"request_id\": \"insufficient-gardening-corpus\", \"status\": \"insufficient-evidence\", \"answer\": \"No answer was produced.\", \"claims\": [], \"sources\": [], \"unchecked_payload\": true}",
+        "stderr": "",
+        "parsed_output": null,
+        "checks": [
+          {
+            "check_id": "process-completed",
+            "critical": true,
+            "expected": {
+              "exit_code": 0,
+              "timed_out": false
+            },
+            "observed": {
+              "exit_code": 0,
+              "timed_out": false
+            },
+            "matched": true,
+            "detail": "Process completion is retained but is not sufficient artifact proof."
+          },
+          {
+            "check_id": "output-contract",
+            "critical": true,
+            "expected": "research-output/v1 JSON",
+            "observed": {
+              "parsed": false,
+              "error": "ValueError: Additional properties are not allowed ('unchecked_payload' was unexpected)"
+            },
+            "matched": false,
+            "detail": "Stdout must contain exactly one strict output artifact."
+          }
+        ]
+      }
+    ],
+    "telemetry": {
+      "builder_wall_seconds": null,
+      "model_cost_usd": null,
+      "repair_iterations": 0,
+      "generated_source_lines": null,
+      "reused_source_lines": null,
+      "clean_install": "not-run",
+      "measurement_source": "unavailable",
+      "notes": [
+        "Deliberately violates the exact public research-output/v1 schema."
+      ]
+    },
+    "weighted_success_score": null
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/benchmarks/scientific-researcher-v1"
+  ],
+  "warnings": [
+    "The evaluator records objective matches; a named manual review is still required.",
+    "Builder telemetry keeps its declared measurement source and is not auto-trusted.",
+    "At least one run metric was not measured by the orchestrator."
+  ]
+}

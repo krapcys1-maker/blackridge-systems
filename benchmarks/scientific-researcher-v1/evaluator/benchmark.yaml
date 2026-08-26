@@ -1,0 +1,61 @@
+schema_version: "1"
+task_id: scientific-researcher-v1
+version: "1.0"
+description: >-
+  Frozen smoke benchmark for grounded synthesis, citation integrity, abstention, and artifact
+  inspection before any from-scratch or Blackridge builder is allowed to run.
+public_spec_file: ../public/benchmark-spec.md
+input_contract_file: ../public/research-input.schema.json
+output_contract_file: ../public/research-output.schema.json
+cases:
+  - id: grounded-ten-source-synthesis
+    category: functional
+    critical: true
+    request_file: cases/grounded-ten-source-request.json
+    expectation:
+      expected_status: answered
+      minimum_unique_sources: 10
+      maximum_unique_sources: 10
+      maximum_answer_characters: 2500
+      required_concept_groups:
+        - [exact commit, immutable revision]
+        - [negative control, deliberately broken]
+        - [manual review, human review]
+        - [independent evidence, separate observations]
+        - [provenance, attestation]
+      required_document_ids:
+        - evidence-01
+        - evidence-02
+        - evidence-03
+        - evidence-04
+        - evidence-05
+        - evidence-06
+        - evidence-07
+        - evidence-08
+        - evidence-09
+        - evidence-10
+      allowed_document_ids:
+        - evidence-01
+        - evidence-02
+        - evidence-03
+        - evidence-04
+        - evidence-05
+        - evidence-06
+        - evidence-07
+        - evidence-08
+        - evidence-09
+        - evidence-10
+      minimum_required_document_coverage: 8
+  - id: insufficient-corpus-abstention
+    category: robustness
+    critical: true
+    request_file: cases/insufficient-corpus-request.json
+    expectation:
+      expected_status: insufficient-evidence
+      minimum_unique_sources: 0
+      maximum_unique_sources: 0
+      maximum_answer_characters: null
+      required_concept_groups: []
+      required_document_ids: []
+      allowed_document_ids: []
+      minimum_required_document_coverage: 0

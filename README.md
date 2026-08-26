@@ -28,7 +28,8 @@ This repository contains an executable, manually reviewed vertical slice:
 8. adapt and validate JSON contracts with RFC 6902 and JSON Schema, including a broken control;
 9. inspect an exact release independently with Syft, OSV-Scanner, Scorecard, deps.dev, GitHub,
    and PyPI Integrity;
-10. emit an auditable discovery run and a **provisional** system blueprint.
+10. freeze and calibrate an artifact-first A/B benchmark before either builder is run;
+11. emit an auditable discovery run and a **provisional** system blueprint.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.
@@ -154,6 +155,22 @@ The probe keeps repository and direct-dependency licensing, SBOM license coverag
 posture, OSV findings, GitHub commit verification, and PyPI distribution provenance as separate
 observations. OSV exit 1 is retained as a finding result. A missing source remains unknown.
 
+### Calibrate the first A/B benchmark
+
+```powershell
+blackridge benchmark-calibrate `
+  benchmarks/scientific-researcher-v1/evaluator/benchmark.yaml `
+  benchmarks/scientific-researcher-v1/calibration-reference.yaml `
+  benchmarks/scientific-researcher-v1/calibration-broken.yaml `
+  --output .blackridge/evidence/benchmark-calibration.json
+```
+
+The evaluator reads candidate JSON from stdout rather than trusting exit code zero. It retains
+individual critical checks and raw telemetry and deliberately emits no weighted success score.
+The frozen two-arm procedure and contamination boundary are documented in
+[`docs/benchmark-protocol.md`](docs/benchmark-protocol.md). Real baseline and Blackridge runs start
+only after this harness is manually calibrated.
+
 ### Verify a component adapter and its negative control
 
 ```powershell
@@ -183,9 +200,10 @@ upstream-catalog.yaml     pinned upstream choices and provenance
 
 Blackridge is not yet a one-command autonomous software factory. Discovery, package and
 exact-release supply-chain inspection, commit-pinned Docker experiments, declarative payload
-adapters, and paired negative contract verification now produce raw evidence. Production-scope
-dependency classification, compatibility solving, adapter synthesis beyond JSON Patch, hardened
-remote isolation through OpenSandbox, and full generated-system delivery are next.
+adapters, paired negative contract verification, and frozen benchmark calibration now produce raw
+evidence. The first isolated A/B attempts, production-scope dependency classification,
+compatibility solving, adapter synthesis beyond JSON Patch, hardened remote isolation through
+OpenSandbox, and full generated-system delivery are next.
 
 ## License
 

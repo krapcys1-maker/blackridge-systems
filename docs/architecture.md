@@ -114,3 +114,12 @@ generated-system/
 4. **Composer** — declarative JSON Patch adaptation and paired contract verification are active;
    compatibility solving, structural/AI adapter generation, and replacement loops remain next.
 5. **Foundry** — reusable integration memory and delivery of verified systems from natural-language goals.
+
+## Comparative benchmark boundary
+
+Benchmark tests are authored and frozen before builder execution. Builders receive only the public
+specification and output contract; the evaluator retains process observations and inspects the
+artifact. A baseline and Blackridge run are comparable only when model identity, budgets, runtime,
+network, secrets, starting state, benchmark bytes, and attempt policy match. Raw task success, time,
+cost, repairs, clean installation, and code-reuse measurements remain visible without an automatic
+weighted verdict. See [`benchmark-protocol.md`](benchmark-protocol.md).

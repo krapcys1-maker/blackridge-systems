@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "request_id": "insufficient-gardening-corpus",
+  "question": "Which operational controls reduce false confidence in automated software composition?",
+  "minimum_sources": 10,
+  "documents": [
+    {
+      "document_id": "garden-01",
+      "title": "Tomato Irrigation Notes",
+      "full_text": "Tomato plants benefit from consistent soil moisture and drainage during warm summer growth."
+    },
+    {
+      "document_id": "garden-02",
+      "title": "Composting Autumn Leaves",
+      "full_text": "Shredded autumn leaves can provide carbon-rich material for a balanced household compost pile."
+    },
+    {
+      "document_id": "garden-03",
+      "title": "Planning a Pollinator Border",
+      "full_text": "A pollinator border combines flowering plants with staggered bloom periods across the growing season."
+    }
+  ]
+}

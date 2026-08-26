@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T18:50:52.860128Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "benchmark-calibration",
+  "scenario_id": "public-output-contract-enforced",
+  "scenario_description": "The evaluator executes the exact output schema published to builders.",
+  "expected": [
+    "Both candidate processes exit zero and retain their complete stdout.",
+    "The Draft 2020-12 output contract rejects unchecked_payload in both cases.",
+    "No deeper artifact correctness is inferred from an invalid output contract.",
+    "Raw failure observations contain no manual verdict."
+  ],
+  "observed": [
+    "Both schema-negative candidate processes exited zero and retained complete stdout containing the deliberate unchecked_payload field.",
+    "The exact hashed Draft 2020-12 public output schema rejected unchecked_payload in both functional and robustness cases.",
+    "Each case retained only process-completed and output-contract checks; parsed_output remained null and the evaluator created no deeper source, citation, concept, or abstention conclusions.",
+    "The raw probe has all_critical_matched false, 2 of 4 critical checks matched, and no verdict field."
+  ],
+  "probe_id": "0ceca8376ae84a24b594500e2eddb4bb",
+  "probe_file": "evidence\\manual\\2026-08-26\\benchmark-schema-invalid-probe.json",
+  "probe_sha256": "adb0957abfb15f67345d6b6843d1323566625ffc2dce83ae5c0502efda6f5173",
+  "notes": "PASS applies to enforcement of the public output contract, not to the deliberately invalid candidate. The evaluator uses the same schema bytes published to builders."
+}

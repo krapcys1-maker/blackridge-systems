@@ -1,0 +1,1190 @@
+{
+  "schema_version": "1",
+  "probe_id": "798e9d8f7e614c2eb7554186fc36930b",
+  "observed_at": "2026-08-26T18:50:19.063700Z",
+  "provider": "blackridge-benchmark-calibration/1",
+  "subject": "scientific-researcher-v1@1.0::scientific-researcher-calibration-reference::vs::scientific-researcher-v1@1.0::scientific-researcher-calibration-broken",
+  "request": {
+    "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\benchmark.yaml",
+    "reference_plan_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\calibration-reference.yaml",
+    "broken_plan_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\calibration-broken.yaml"
+  },
+  "observations": {
+    "probe_completed": true,
+    "same_controls": {
+      "definition_sha256": true,
+      "evaluator_module_sha256": true,
+      "public_spec_sha256": true,
+      "input_contract_sha256": true,
+      "output_contract_sha256": true,
+      "model_identifier": true,
+      "model_configuration": true,
+      "builder_time_budget_seconds": true
+    },
+    "all_controls_identical": true,
+    "reference": {
+      "schema_version": "1",
+      "probe_id": "d5c202ff1ee24ecfb7b76ec0b04a88b1",
+      "observed_at": "2026-08-26T18:50:18.964573Z",
+      "provider": "blackridge-benchmark-harness/1",
+      "subject": "scientific-researcher-v1@1.0::scientific-researcher-calibration-reference",
+      "request": {
+        "definition": {
+          "schema_version": "1",
+          "task_id": "scientific-researcher-v1",
+          "version": "1.0",
+          "description": "Frozen smoke benchmark for grounded synthesis, citation integrity, abstention, and artifact inspection before any from-scratch or Blackridge builder is allowed to run.",
+          "public_spec_file": "../public/benchmark-spec.md",
+          "input_contract_file": "../public/research-input.schema.json",
+          "output_contract_file": "../public/research-output.schema.json",
+          "cases": [
+            {
+              "id": "grounded-ten-source-synthesis",
+              "category": "functional",
+              "critical": true,
+              "request_file": "cases/grounded-ten-source-request.json",
+              "expectation": {
+                "expected_status": "answered",
+                "minimum_unique_sources": 10,
+                "maximum_unique_sources": 10,
+                "maximum_answer_characters": 2500,
+                "required_concept_groups": [
+                  [
+                    "exact commit",
+                    "immutable revision"
+                  ],
+                  [
+                    "negative control",
+                    "deliberately broken"
+                  ],
+                  [
+                    "manual review",
+                    "human review"
+                  ],
+                  [
+                    "independent evidence",
+                    "separate observations"
+                  ],
+                  [
+                    "provenance",
+                    "attestation"
+                  ]
+                ],
+                "required_document_ids": [
+                  "evidence-01",
+                  "evidence-02",
+                  "evidence-03",
+                  "evidence-04",
+                  "evidence-05",
+                  "evidence-06",
+                  "evidence-07",
+                  "evidence-08",
+                  "evidence-09",
+                  "evidence-10"
+                ],
+                "allowed_document_ids": [
+                  "evidence-01",
+                  "evidence-02",
+                  "evidence-03",
+                  "evidence-04",
+                  "evidence-05",
+                  "evidence-06",
+                  "evidence-07",
+                  "evidence-08",
+                  "evidence-09",
+                  "evidence-10"
+                ],
+                "minimum_required_document_coverage": 8
+              }
+            },
+            {
+              "id": "insufficient-corpus-abstention",
+              "category": "robustness",
+              "critical": true,
+              "request_file": "cases/insufficient-corpus-request.json",
+              "expectation": {
+                "expected_status": "insufficient-evidence",
+                "minimum_unique_sources": 0,
+                "maximum_unique_sources": 0,
+                "maximum_answer_characters": null,
+                "required_concept_groups": [],
+                "required_document_ids": [],
+                "allowed_document_ids": [],
+                "minimum_required_document_coverage": 0
+              }
+            }
+          ]
+        },
+        "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\benchmark.yaml",
+        "definition_sha256": "b04db0e1105b896eccee835c102f3c3924ca1cfa248b3a215d5fe9108241e108",
+        "evaluator_module_sha256": "618eb984a96781cc977e890127f568923c6abf5d71a23a4320aafc3fd8f9cb69",
+        "public_spec_sha256": "12ab5bd80045ec9f4e32b771c7ca8cdd9030524cdcf8b2f96b7cb344c23a75ab",
+        "input_contract_sha256": "bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f",
+        "output_contract_sha256": "5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409",
+        "run_plan": {
+          "schema_version": "1",
+          "run_id": "scientific-researcher-calibration-reference",
+          "task_id": "scientific-researcher-v1",
+          "method": "calibration-reference",
+          "model_identifier": "deterministic-protocol-fixture",
+          "model_configuration": {
+            "mode": "deterministic",
+            "temperature": 0
+          },
+          "attempt": 1,
+          "builder_time_budget_seconds": 60,
+          "candidate": {
+            "argv": [
+              "{python}",
+              "{benchmark_root}/fixtures/reference_candidate.py"
+            ],
+            "cwd": "{benchmark_root}",
+            "timeout_seconds_per_case": 10.0,
+            "environment_allowlist": []
+          },
+          "telemetry": {
+            "builder_wall_seconds": null,
+            "model_cost_usd": null,
+            "repair_iterations": 0,
+            "generated_source_lines": null,
+            "reused_source_lines": null,
+            "clean_install": "not-run",
+            "measurement_source": "unavailable",
+            "notes": [
+              "Calibration fixture only; not a builder performance run."
+            ]
+          }
+        },
+        "run_plan_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\calibration-reference.yaml",
+        "run_plan_sha256": "8d8ad8ba062db713b9b6f524def8cd3b6a77de8581d8d68b92f4e046b6dcfbac"
+      },
+      "observations": {
+        "probe_completed": true,
+        "duration_seconds": 0.084,
+        "case_count": 2,
+        "check_count": 19,
+        "matched_check_count": 19,
+        "critical_check_count": 19,
+        "matched_critical_check_count": 19,
+        "critical_match_rate": 1.0,
+        "all_critical_matched": true,
+        "cases": [
+          {
+            "case_id": "grounded-ten-source-synthesis",
+            "category": "functional",
+            "critical": true,
+            "request_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\cases\\grounded-ten-source-request.json",
+            "request_sha256": "e0891d343d6f3218478e4139fbb6574f1c5034164aab7c08c99771a51a4b8ed4",
+            "command": {
+              "argv": [
+                "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+                "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1/fixtures/reference_candidate.py"
+              ],
+              "cwd": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1",
+              "environment_names": [
+                "PATH",
+                "SYSTEMROOT",
+                "TEMP",
+                "TMP"
+              ],
+              "timeout_seconds": 10.0
+            },
+            "duration_seconds": 0.044,
+            "exit_code": 0,
+            "timed_out": false,
+            "stdout": "{\"schema_version\": \"1\", \"request_id\": \"grounded-controls\", \"status\": \"answered\", \"answer\": \"An exact commit prevents a moving branch from silently changing the component under evaluation. The observed checkout identity must equal the requested revision. A negative control should be deliberately broken at a known boundary. A useful evaluator must reject it even when the surrounding command exits successfully. Manual review compares retained observations with expectations written before execution. The reviewer records concrete reasons instead of trusting a green badge. Independent evidence keeps repository posture separate from known vulnerability results. Missing posture data remains unknown rather than becoming a passing score. Package provenance requires a distribution attestation or equivalent release evidence. A valid source commit signature alone does not attest the published package file. Process success shows only that execution completed. Functional confidence requires inspecting the produced artifact against the consumer contract. A repository license does not clear every dependency license. Unknown, non-standard, and policy-sensitive dependency results must remain visible to reviewers. Candidate code should run at an immutable revision inside a disposable bounded environment. Host integrity and container cleanup are separate observations. Compatibility is demonstrated by applying the same workload to working and broken connections. Schema validation can expose a missing edge that raised no runtime exception. Task success rate, wall time, cost, repair iterations, change success, and generated code should remain visible as raw metrics. A weighted score must not hide them.\", \"claims\": [{\"text\": \"An exact commit prevents a moving branch from silently changing the component under evaluation. The observed checkout identity must equal the requested revision.\", \"citations\": [{\"document_id\": \"evidence-01\", \"quote\": \"An exact commit prevents a moving branch from silently changing the component under evaluation. The observed checkout identity must equal the requested revision.\"}]}, {\"text\": \"A negative control should be deliberately broken at a known boundary. A useful evaluator must reject it even when the surrounding command exits successfully.\", \"citations\": [{\"document_id\": \"evidence-02\", \"quote\": \"A negative control should be deliberately broken at a known boundary. A useful evaluator must reject it even when the surrounding command exits successfully.\"}]}, {\"text\": \"Manual review compares retained observations with expectations written before execution. The reviewer records concrete reasons instead of trusting a green badge.\", \"citations\": [{\"document_id\": \"evidence-03\", \"quote\": \"Manual review compares retained observations with expectations written before execution. The reviewer records concrete reasons instead of trusting a green badge.\"}]}, {\"text\": \"Independent evidence keeps repository posture separate from known vulnerability results. Missing posture data remains unknown rather than becoming a passing score.\", \"citations\": [{\"document_id\": \"evidence-04\", \"quote\": \"Independent evidence keeps repository posture separate from known vulnerability results. Missing posture data remains unknown rather than becoming a passing score.\"}]}, {\"text\": \"Package provenance requires a distribution attestation or equivalent release evidence. A valid source commit signature alone does not attest the published package file.\", \"citations\": [{\"document_id\": \"evidence-05\", \"quote\": \"Package provenance requires a distribution attestation or equivalent release evidence. A valid source commit signature alone does not attest the published package file.\"}]}, {\"text\": \"Process success shows only that execution completed. Functional confidence requires inspecting the produced artifact against the consumer contract.\", \"citations\": [{\"document_id\": \"evidence-06\", \"quote\": \"Process success shows only that execution completed. Functional confidence requires inspecting the produced artifact against the consumer contract.\"}]}, {\"text\": \"A repository license does not clear every dependency license. Unknown, non-standard, and policy-sensitive dependency results must remain visible to reviewers.\", \"citations\": [{\"document_id\": \"evidence-07\", \"quote\": \"A repository license does not clear every dependency license. Unknown, non-standard, and policy-sensitive dependency results must remain visible to reviewers.\"}]}, {\"text\": \"Candidate code should run at an immutable revision inside a disposable bounded environment. Host integrity and container cleanup are separate observations.\", \"citations\": [{\"document_id\": \"evidence-08\", \"quote\": \"Candidate code should run at an immutable revision inside a disposable bounded environment. Host integrity and container cleanup are separate observations.\"}]}, {\"text\": \"Compatibility is demonstrated by applying the same workload to working and broken connections. Schema validation can expose a missing edge that raised no runtime exception.\", \"citations\": [{\"document_id\": \"evidence-09\", \"quote\": \"Compatibility is demonstrated by applying the same workload to working and broken connections. Schema validation can expose a missing edge that raised no runtime exception.\"}]}, {\"text\": \"Task success rate, wall time, cost, repair iterations, change success, and generated code should remain visible as raw metrics. A weighted score must not hide them.\", \"citations\": [{\"document_id\": \"evidence-10\", \"quote\": \"Task success rate, wall time, cost, repair iterations, change success, and generated code should remain visible as raw metrics. A weighted score must not hide them.\"}]}], \"sources\": [{\"document_id\": \"evidence-01\", \"title\": \"Immutable Inputs for Reproducible Integration\"}, {\"document_id\": \"evidence-02\", \"title\": \"Negative Controls in Software Experiments\"}, {\"document_id\": \"evidence-03\", \"title\": \"Human Oversight of Machine Evidence\"}, {\"document_id\": \"evidence-04\", \"title\": \"Separating Security Signals\"}, {\"document_id\": \"evidence-05\", \"title\": \"Release Attestations and Provenance\"}, {\"document_id\": \"evidence-06\", \"title\": \"Artifact Validation Beyond Exit Codes\"}, {\"document_id\": \"evidence-07\", \"title\": \"License Evidence Across Dependency Graphs\"}, {\"document_id\": \"evidence-08\", \"title\": \"Disposable Environments for Candidate Code\"}, {\"document_id\": \"evidence-09\", \"title\": \"Contract Tests at Component Boundaries\"}, {\"document_id\": \"evidence-10\", \"title\": \"Raw Metrics for Agent Benchmarks\"}]}",
+            "stderr": "",
+            "parsed_output": {
+              "schema_version": "1",
+              "request_id": "grounded-controls",
+              "status": "answered",
+              "answer": "An exact commit prevents a moving branch from silently changing the component under evaluation. The observed checkout identity must equal the requested revision. A negative control should be deliberately broken at a known boundary. A useful evaluator must reject it even when the surrounding command exits successfully. Manual review compares retained observations with expectations written before execution. The reviewer records concrete reasons instead of trusting a green badge. Independent evidence keeps repository posture separate from known vulnerability results. Missing posture data remains unknown rather than becoming a passing score. Package provenance requires a distribution attestation or equivalent release evidence. A valid source commit signature alone does not attest the published package file. Process success shows only that execution completed. Functional confidence requires inspecting the produced artifact against the consumer contract. A repository license does not clear every dependency license. Unknown, non-standard, and policy-sensitive dependency results must remain visible to reviewers. Candidate code should run at an immutable revision inside a disposable bounded environment. Host integrity and container cleanup are separate observations. Compatibility is demonstrated by applying the same workload to working and broken connections. Schema validation can expose a missing edge that raised no runtime exception. Task success rate, wall time, cost, repair iterations, change success, and generated code should remain visible as raw metrics. A weighted score must not hide them.",
+              "claims": [
+                {
+                  "text": "An exact commit prevents a moving branch from silently changing the component under evaluation. The observed checkout identity must equal the requested revision.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-01",
+                      "quote": "An exact commit prevents a moving branch from silently changing the component under evaluation. The observed checkout identity must equal the requested revision."
+                    }
+                  ]
+                },
+                {
+                  "text": "A negative control should be deliberately broken at a known boundary. A useful evaluator must reject it even when the surrounding command exits successfully.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-02",
+                      "quote": "A negative control should be deliberately broken at a known boundary. A useful evaluator must reject it even when the surrounding command exits successfully."
+                    }
+                  ]
+                },
+                {
+                  "text": "Manual review compares retained observations with expectations written before execution. The reviewer records concrete reasons instead of trusting a green badge.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-03",
+                      "quote": "Manual review compares retained observations with expectations written before execution. The reviewer records concrete reasons instead of trusting a green badge."
+                    }
+                  ]
+                },
+                {
+                  "text": "Independent evidence keeps repository posture separate from known vulnerability results. Missing posture data remains unknown rather than becoming a passing score.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-04",
+                      "quote": "Independent evidence keeps repository posture separate from known vulnerability results. Missing posture data remains unknown rather than becoming a passing score."
+                    }
+                  ]
+                },
+                {
+                  "text": "Package provenance requires a distribution attestation or equivalent release evidence. A valid source commit signature alone does not attest the published package file.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-05",
+                      "quote": "Package provenance requires a distribution attestation or equivalent release evidence. A valid source commit signature alone does not attest the published package file."
+                    }
+                  ]
+                },
+                {
+                  "text": "Process success shows only that execution completed. Functional confidence requires inspecting the produced artifact against the consumer contract.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-06",
+                      "quote": "Process success shows only that execution completed. Functional confidence requires inspecting the produced artifact against the consumer contract."
+                    }
+                  ]
+                },
+                {
+                  "text": "A repository license does not clear every dependency license. Unknown, non-standard, and policy-sensitive dependency results must remain visible to reviewers.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-07",
+                      "quote": "A repository license does not clear every dependency license. Unknown, non-standard, and policy-sensitive dependency results must remain visible to reviewers."
+                    }
+                  ]
+                },
+                {
+                  "text": "Candidate code should run at an immutable revision inside a disposable bounded environment. Host integrity and container cleanup are separate observations.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-08",
+                      "quote": "Candidate code should run at an immutable revision inside a disposable bounded environment. Host integrity and container cleanup are separate observations."
+                    }
+                  ]
+                },
+                {
+                  "text": "Compatibility is demonstrated by applying the same workload to working and broken connections. Schema validation can expose a missing edge that raised no runtime exception.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-09",
+                      "quote": "Compatibility is demonstrated by applying the same workload to working and broken connections. Schema validation can expose a missing edge that raised no runtime exception."
+                    }
+                  ]
+                },
+                {
+                  "text": "Task success rate, wall time, cost, repair iterations, change success, and generated code should remain visible as raw metrics. A weighted score must not hide them.",
+                  "citations": [
+                    {
+                      "document_id": "evidence-10",
+                      "quote": "Task success rate, wall time, cost, repair iterations, change success, and generated code should remain visible as raw metrics. A weighted score must not hide them."
+                    }
+                  ]
+                }
+              ],
+              "sources": [
+                {
+                  "document_id": "evidence-01",
+                  "title": "Immutable Inputs for Reproducible Integration"
+                },
+                {
+                  "document_id": "evidence-02",
+                  "title": "Negative Controls in Software Experiments"
+                },
+                {
+                  "document_id": "evidence-03",
+                  "title": "Human Oversight of Machine Evidence"
+                },
+                {
+                  "document_id": "evidence-04",
+                  "title": "Separating Security Signals"
+                },
+                {
+                  "document_id": "evidence-05",
+                  "title": "Release Attestations and Provenance"
+                },
+                {
+                  "document_id": "evidence-06",
+                  "title": "Artifact Validation Beyond Exit Codes"
+                },
+                {
+                  "document_id": "evidence-07",
+                  "title": "License Evidence Across Dependency Graphs"
+                },
+                {
+                  "document_id": "evidence-08",
+                  "title": "Disposable Environments for Candidate Code"
+                },
+                {
+                  "document_id": "evidence-09",
+                  "title": "Contract Tests at Component Boundaries"
+                },
+                {
+                  "document_id": "evidence-10",
+                  "title": "Raw Metrics for Agent Benchmarks"
+                }
+              ]
+            },
+            "checks": [
+              {
+                "check_id": "process-completed",
+                "critical": true,
+                "expected": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "observed": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "matched": true,
+                "detail": "Process completion is retained but is not sufficient artifact proof."
+              },
+              {
+                "check_id": "output-contract",
+                "critical": true,
+                "expected": "research-output/v1 JSON",
+                "observed": {
+                  "parsed": true,
+                  "error": null
+                },
+                "matched": true,
+                "detail": "Stdout must contain exactly one strict output artifact."
+              },
+              {
+                "check_id": "request-identity",
+                "critical": true,
+                "expected": "grounded-controls",
+                "observed": "grounded-controls",
+                "matched": true,
+                "detail": "Output must belong to the exact benchmark request."
+              },
+              {
+                "check_id": "expected-status",
+                "critical": true,
+                "expected": "answered",
+                "observed": "answered",
+                "matched": true,
+                "detail": "The candidate must answer or abstain as required by available evidence."
+              },
+              {
+                "check_id": "source-identities",
+                "critical": true,
+                "expected": "unique document IDs with exact corpus titles",
+                "observed": {
+                  "ids": [
+                    "evidence-01",
+                    "evidence-02",
+                    "evidence-03",
+                    "evidence-04",
+                    "evidence-05",
+                    "evidence-06",
+                    "evidence-07",
+                    "evidence-08",
+                    "evidence-09",
+                    "evidence-10"
+                  ],
+                  "valid": true
+                },
+                "matched": true,
+                "detail": "Fabricated, duplicate, or title-mismatched bibliography entries are rejected."
+              },
+              {
+                "check_id": "minimum-source-count",
+                "critical": true,
+                "expected": 10,
+                "observed": 10,
+                "matched": true,
+                "detail": "Source count uses unique bibliography identities, not repeated citations."
+              },
+              {
+                "check_id": "maximum-source-count",
+                "critical": true,
+                "expected": 10,
+                "observed": 10,
+                "matched": true,
+                "detail": "Citing the complete corpus cannot substitute for source selection."
+              },
+              {
+                "check_id": "every-claim-cited",
+                "critical": true,
+                "expected": true,
+                "observed": true,
+                "matched": true,
+                "detail": "Every emitted factual claim requires at least one citation."
+              },
+              {
+                "check_id": "citation-quotes-grounded",
+                "critical": true,
+                "expected": true,
+                "observed": true,
+                "matched": true,
+                "detail": "Every citation ID must exist and its quote must occur in that document."
+              },
+              {
+                "check_id": "required-evidence-coverage",
+                "critical": true,
+                "expected": 8,
+                "observed": 10,
+                "matched": true,
+                "detail": "The answer must use enough of the independently selected support set."
+              },
+              {
+                "check_id": "irrelevant-source-exclusion",
+                "critical": true,
+                "expected": "sources and citations limited to the hidden support set",
+                "observed": {
+                  "disallowed_document_ids": []
+                },
+                "matched": true,
+                "detail": "Distractors cannot be used to inflate source or citation coverage."
+              },
+              {
+                "check_id": "required-concepts",
+                "critical": true,
+                "expected": [
+                  [
+                    "exact commit",
+                    "immutable revision"
+                  ],
+                  [
+                    "negative control",
+                    "deliberately broken"
+                  ],
+                  [
+                    "manual review",
+                    "human review"
+                  ],
+                  [
+                    "independent evidence",
+                    "separate observations"
+                  ],
+                  [
+                    "provenance",
+                    "attestation"
+                  ]
+                ],
+                "observed": {
+                  "missing_groups": []
+                },
+                "matched": true,
+                "detail": "Semantic expectations are groups of accepted alternatives, not exact prose."
+              },
+              {
+                "check_id": "answer-length-bound",
+                "critical": true,
+                "expected": {
+                  "maximum_characters": 2500
+                },
+                "observed": {
+                  "characters": 1615
+                },
+                "matched": true,
+                "detail": "Copying the complete corpus is not accepted as concise synthesis."
+              }
+            ]
+          },
+          {
+            "case_id": "insufficient-corpus-abstention",
+            "category": "robustness",
+            "critical": true,
+            "request_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\cases\\insufficient-corpus-request.json",
+            "request_sha256": "108619c67ae286b243e477ea1ab310cbf7ec579c51619c911d8a3e31f7a277a3",
+            "command": {
+              "argv": [
+                "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+                "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1/fixtures/reference_candidate.py"
+              ],
+              "cwd": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1",
+              "environment_names": [
+                "PATH",
+                "SYSTEMROOT",
+                "TEMP",
+                "TMP"
+              ],
+              "timeout_seconds": 10.0
+            },
+            "duration_seconds": 0.038,
+            "exit_code": 0,
+            "timed_out": false,
+            "stdout": "{\"schema_version\": \"1\", \"request_id\": \"insufficient-gardening-corpus\", \"status\": \"insufficient-evidence\", \"answer\": \"The supplied corpus does not contain enough relevant evidence to answer.\", \"claims\": [], \"sources\": []}",
+            "stderr": "",
+            "parsed_output": {
+              "schema_version": "1",
+              "request_id": "insufficient-gardening-corpus",
+              "status": "insufficient-evidence",
+              "answer": "The supplied corpus does not contain enough relevant evidence to answer.",
+              "claims": [],
+              "sources": []
+            },
+            "checks": [
+              {
+                "check_id": "process-completed",
+                "critical": true,
+                "expected": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "observed": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "matched": true,
+                "detail": "Process completion is retained but is not sufficient artifact proof."
+              },
+              {
+                "check_id": "output-contract",
+                "critical": true,
+                "expected": "research-output/v1 JSON",
+                "observed": {
+                  "parsed": true,
+                  "error": null
+                },
+                "matched": true,
+                "detail": "Stdout must contain exactly one strict output artifact."
+              },
+              {
+                "check_id": "request-identity",
+                "critical": true,
+                "expected": "insufficient-gardening-corpus",
+                "observed": "insufficient-gardening-corpus",
+                "matched": true,
+                "detail": "Output must belong to the exact benchmark request."
+              },
+              {
+                "check_id": "expected-status",
+                "critical": true,
+                "expected": "insufficient-evidence",
+                "observed": "insufficient-evidence",
+                "matched": true,
+                "detail": "The candidate must answer or abstain as required by available evidence."
+              },
+              {
+                "check_id": "source-identities",
+                "critical": true,
+                "expected": "unique document IDs with exact corpus titles",
+                "observed": {
+                  "ids": [],
+                  "valid": true
+                },
+                "matched": true,
+                "detail": "Fabricated, duplicate, or title-mismatched bibliography entries are rejected."
+              },
+              {
+                "check_id": "clean-abstention",
+                "critical": true,
+                "expected": {
+                  "claims": [],
+                  "sources": []
+                },
+                "observed": {
+                  "claim_count": 0,
+                  "source_count": 0
+                },
+                "matched": true,
+                "detail": "An insufficient-evidence response must not invent claims or sources."
+              }
+            ]
+          }
+        ],
+        "telemetry": {
+          "builder_wall_seconds": null,
+          "model_cost_usd": null,
+          "repair_iterations": 0,
+          "generated_source_lines": null,
+          "reused_source_lines": null,
+          "clean_install": "not-run",
+          "measurement_source": "unavailable",
+          "notes": [
+            "Calibration fixture only; not a builder performance run."
+          ]
+        },
+        "weighted_success_score": null
+      },
+      "sources": [
+        "https://github.com/krapcys1-maker/blackridge-systems/tree/main/benchmarks/scientific-researcher-v1"
+      ],
+      "warnings": [
+        "The evaluator records objective matches; a named manual review is still required.",
+        "Builder telemetry keeps its declared measurement source and is not auto-trusted.",
+        "At least one run metric was not measured by the orchestrator."
+      ]
+    },
+    "broken": {
+      "schema_version": "1",
+      "probe_id": "c46fd3426033495381338c49f179ea19",
+      "observed_at": "2026-08-26T18:50:19.062696Z",
+      "provider": "blackridge-benchmark-harness/1",
+      "subject": "scientific-researcher-v1@1.0::scientific-researcher-calibration-broken",
+      "request": {
+        "definition": {
+          "schema_version": "1",
+          "task_id": "scientific-researcher-v1",
+          "version": "1.0",
+          "description": "Frozen smoke benchmark for grounded synthesis, citation integrity, abstention, and artifact inspection before any from-scratch or Blackridge builder is allowed to run.",
+          "public_spec_file": "../public/benchmark-spec.md",
+          "input_contract_file": "../public/research-input.schema.json",
+          "output_contract_file": "../public/research-output.schema.json",
+          "cases": [
+            {
+              "id": "grounded-ten-source-synthesis",
+              "category": "functional",
+              "critical": true,
+              "request_file": "cases/grounded-ten-source-request.json",
+              "expectation": {
+                "expected_status": "answered",
+                "minimum_unique_sources": 10,
+                "maximum_unique_sources": 10,
+                "maximum_answer_characters": 2500,
+                "required_concept_groups": [
+                  [
+                    "exact commit",
+                    "immutable revision"
+                  ],
+                  [
+                    "negative control",
+                    "deliberately broken"
+                  ],
+                  [
+                    "manual review",
+                    "human review"
+                  ],
+                  [
+                    "independent evidence",
+                    "separate observations"
+                  ],
+                  [
+                    "provenance",
+                    "attestation"
+                  ]
+                ],
+                "required_document_ids": [
+                  "evidence-01",
+                  "evidence-02",
+                  "evidence-03",
+                  "evidence-04",
+                  "evidence-05",
+                  "evidence-06",
+                  "evidence-07",
+                  "evidence-08",
+                  "evidence-09",
+                  "evidence-10"
+                ],
+                "allowed_document_ids": [
+                  "evidence-01",
+                  "evidence-02",
+                  "evidence-03",
+                  "evidence-04",
+                  "evidence-05",
+                  "evidence-06",
+                  "evidence-07",
+                  "evidence-08",
+                  "evidence-09",
+                  "evidence-10"
+                ],
+                "minimum_required_document_coverage": 8
+              }
+            },
+            {
+              "id": "insufficient-corpus-abstention",
+              "category": "robustness",
+              "critical": true,
+              "request_file": "cases/insufficient-corpus-request.json",
+              "expectation": {
+                "expected_status": "insufficient-evidence",
+                "minimum_unique_sources": 0,
+                "maximum_unique_sources": 0,
+                "maximum_answer_characters": null,
+                "required_concept_groups": [],
+                "required_document_ids": [],
+                "allowed_document_ids": [],
+                "minimum_required_document_coverage": 0
+              }
+            }
+          ]
+        },
+        "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\benchmark.yaml",
+        "definition_sha256": "b04db0e1105b896eccee835c102f3c3924ca1cfa248b3a215d5fe9108241e108",
+        "evaluator_module_sha256": "618eb984a96781cc977e890127f568923c6abf5d71a23a4320aafc3fd8f9cb69",
+        "public_spec_sha256": "12ab5bd80045ec9f4e32b771c7ca8cdd9030524cdcf8b2f96b7cb344c23a75ab",
+        "input_contract_sha256": "bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f",
+        "output_contract_sha256": "5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409",
+        "run_plan": {
+          "schema_version": "1",
+          "run_id": "scientific-researcher-calibration-broken",
+          "task_id": "scientific-researcher-v1",
+          "method": "calibration-broken",
+          "model_identifier": "deterministic-protocol-fixture",
+          "model_configuration": {
+            "mode": "deterministic",
+            "temperature": 0
+          },
+          "attempt": 1,
+          "builder_time_budget_seconds": 60,
+          "candidate": {
+            "argv": [
+              "{python}",
+              "{benchmark_root}/fixtures/broken_candidate.py"
+            ],
+            "cwd": "{benchmark_root}",
+            "timeout_seconds_per_case": 10.0,
+            "environment_allowlist": []
+          },
+          "telemetry": {
+            "builder_wall_seconds": null,
+            "model_cost_usd": null,
+            "repair_iterations": 0,
+            "generated_source_lines": null,
+            "reused_source_lines": null,
+            "clean_install": "not-run",
+            "measurement_source": "unavailable",
+            "notes": [
+              "Deliberately broken green-exit artifact control."
+            ]
+          }
+        },
+        "run_plan_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\calibration-broken.yaml",
+        "run_plan_sha256": "d6184d66625830867f4515a6c39841596bf4cfe85ab9d2c86fe714391efe6a0e"
+      },
+      "observations": {
+        "probe_completed": true,
+        "duration_seconds": 0.089,
+        "case_count": 2,
+        "check_count": 19,
+        "matched_check_count": 9,
+        "critical_check_count": 19,
+        "matched_critical_check_count": 9,
+        "critical_match_rate": 0.47368421052631576,
+        "all_critical_matched": false,
+        "cases": [
+          {
+            "case_id": "grounded-ten-source-synthesis",
+            "category": "functional",
+            "critical": true,
+            "request_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\cases\\grounded-ten-source-request.json",
+            "request_sha256": "e0891d343d6f3218478e4139fbb6574f1c5034164aab7c08c99771a51a4b8ed4",
+            "command": {
+              "argv": [
+                "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+                "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1/fixtures/broken_candidate.py"
+              ],
+              "cwd": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1",
+              "environment_names": [
+                "PATH",
+                "SYSTEMROOT",
+                "TEMP",
+                "TMP"
+              ],
+              "timeout_seconds": 10.0
+            },
+            "duration_seconds": 0.05,
+            "exit_code": 0,
+            "timed_out": false,
+            "stdout": "{\"schema_version\": \"1\", \"request_id\": \"grounded-controls\", \"status\": \"answered\", \"answer\": \"Automation is reliable because every command completed successfully.\", \"claims\": [{\"text\": \"Every automated result is trustworthy.\", \"citations\": []}], \"sources\": [{\"document_id\": \"invented-paper\", \"title\": \"Imaginary Evidence\"}]}",
+            "stderr": "",
+            "parsed_output": {
+              "schema_version": "1",
+              "request_id": "grounded-controls",
+              "status": "answered",
+              "answer": "Automation is reliable because every command completed successfully.",
+              "claims": [
+                {
+                  "text": "Every automated result is trustworthy.",
+                  "citations": []
+                }
+              ],
+              "sources": [
+                {
+                  "document_id": "invented-paper",
+                  "title": "Imaginary Evidence"
+                }
+              ]
+            },
+            "checks": [
+              {
+                "check_id": "process-completed",
+                "critical": true,
+                "expected": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "observed": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "matched": true,
+                "detail": "Process completion is retained but is not sufficient artifact proof."
+              },
+              {
+                "check_id": "output-contract",
+                "critical": true,
+                "expected": "research-output/v1 JSON",
+                "observed": {
+                  "parsed": true,
+                  "error": null
+                },
+                "matched": true,
+                "detail": "Stdout must contain exactly one strict output artifact."
+              },
+              {
+                "check_id": "request-identity",
+                "critical": true,
+                "expected": "grounded-controls",
+                "observed": "grounded-controls",
+                "matched": true,
+                "detail": "Output must belong to the exact benchmark request."
+              },
+              {
+                "check_id": "expected-status",
+                "critical": true,
+                "expected": "answered",
+                "observed": "answered",
+                "matched": true,
+                "detail": "The candidate must answer or abstain as required by available evidence."
+              },
+              {
+                "check_id": "source-identities",
+                "critical": true,
+                "expected": "unique document IDs with exact corpus titles",
+                "observed": {
+                  "ids": [
+                    "invented-paper"
+                  ],
+                  "valid": false
+                },
+                "matched": false,
+                "detail": "Fabricated, duplicate, or title-mismatched bibliography entries are rejected."
+              },
+              {
+                "check_id": "minimum-source-count",
+                "critical": true,
+                "expected": 10,
+                "observed": 1,
+                "matched": false,
+                "detail": "Source count uses unique bibliography identities, not repeated citations."
+              },
+              {
+                "check_id": "maximum-source-count",
+                "critical": true,
+                "expected": 10,
+                "observed": 1,
+                "matched": true,
+                "detail": "Citing the complete corpus cannot substitute for source selection."
+              },
+              {
+                "check_id": "every-claim-cited",
+                "critical": true,
+                "expected": true,
+                "observed": false,
+                "matched": false,
+                "detail": "Every emitted factual claim requires at least one citation."
+              },
+              {
+                "check_id": "citation-quotes-grounded",
+                "critical": true,
+                "expected": true,
+                "observed": false,
+                "matched": false,
+                "detail": "Every citation ID must exist and its quote must occur in that document."
+              },
+              {
+                "check_id": "required-evidence-coverage",
+                "critical": true,
+                "expected": 8,
+                "observed": 0,
+                "matched": false,
+                "detail": "The answer must use enough of the independently selected support set."
+              },
+              {
+                "check_id": "irrelevant-source-exclusion",
+                "critical": true,
+                "expected": "sources and citations limited to the hidden support set",
+                "observed": {
+                  "disallowed_document_ids": [
+                    "invented-paper"
+                  ]
+                },
+                "matched": false,
+                "detail": "Distractors cannot be used to inflate source or citation coverage."
+              },
+              {
+                "check_id": "required-concepts",
+                "critical": true,
+                "expected": [
+                  [
+                    "exact commit",
+                    "immutable revision"
+                  ],
+                  [
+                    "negative control",
+                    "deliberately broken"
+                  ],
+                  [
+                    "manual review",
+                    "human review"
+                  ],
+                  [
+                    "independent evidence",
+                    "separate observations"
+                  ],
+                  [
+                    "provenance",
+                    "attestation"
+                  ]
+                ],
+                "observed": {
+                  "missing_groups": [
+                    [
+                      "exact commit",
+                      "immutable revision"
+                    ],
+                    [
+                      "negative control",
+                      "deliberately broken"
+                    ],
+                    [
+                      "manual review",
+                      "human review"
+                    ],
+                    [
+                      "independent evidence",
+                      "separate observations"
+                    ],
+                    [
+                      "provenance",
+                      "attestation"
+                    ]
+                  ]
+                },
+                "matched": false,
+                "detail": "Semantic expectations are groups of accepted alternatives, not exact prose."
+              },
+              {
+                "check_id": "answer-length-bound",
+                "critical": true,
+                "expected": {
+                  "maximum_characters": 2500
+                },
+                "observed": {
+                  "characters": 68
+                },
+                "matched": true,
+                "detail": "Copying the complete corpus is not accepted as concise synthesis."
+              }
+            ]
+          },
+          {
+            "case_id": "insufficient-corpus-abstention",
+            "category": "robustness",
+            "critical": true,
+            "request_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\evaluator\\cases\\insufficient-corpus-request.json",
+            "request_sha256": "108619c67ae286b243e477ea1ab310cbf7ec579c51619c911d8a3e31f7a277a3",
+            "command": {
+              "argv": [
+                "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+                "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1/fixtures/broken_candidate.py"
+              ],
+              "cwd": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1",
+              "environment_names": [
+                "PATH",
+                "SYSTEMROOT",
+                "TEMP",
+                "TMP"
+              ],
+              "timeout_seconds": 10.0
+            },
+            "duration_seconds": 0.038,
+            "exit_code": 0,
+            "timed_out": false,
+            "stdout": "{\"schema_version\": \"1\", \"request_id\": \"insufficient-gardening-corpus\", \"status\": \"answered\", \"answer\": \"Automation is reliable because every command completed successfully.\", \"claims\": [{\"text\": \"Every automated result is trustworthy.\", \"citations\": []}], \"sources\": [{\"document_id\": \"invented-paper\", \"title\": \"Imaginary Evidence\"}]}",
+            "stderr": "",
+            "parsed_output": {
+              "schema_version": "1",
+              "request_id": "insufficient-gardening-corpus",
+              "status": "answered",
+              "answer": "Automation is reliable because every command completed successfully.",
+              "claims": [
+                {
+                  "text": "Every automated result is trustworthy.",
+                  "citations": []
+                }
+              ],
+              "sources": [
+                {
+                  "document_id": "invented-paper",
+                  "title": "Imaginary Evidence"
+                }
+              ]
+            },
+            "checks": [
+              {
+                "check_id": "process-completed",
+                "critical": true,
+                "expected": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "observed": {
+                  "exit_code": 0,
+                  "timed_out": false
+                },
+                "matched": true,
+                "detail": "Process completion is retained but is not sufficient artifact proof."
+              },
+              {
+                "check_id": "output-contract",
+                "critical": true,
+                "expected": "research-output/v1 JSON",
+                "observed": {
+                  "parsed": true,
+                  "error": null
+                },
+                "matched": true,
+                "detail": "Stdout must contain exactly one strict output artifact."
+              },
+              {
+                "check_id": "request-identity",
+                "critical": true,
+                "expected": "insufficient-gardening-corpus",
+                "observed": "insufficient-gardening-corpus",
+                "matched": true,
+                "detail": "Output must belong to the exact benchmark request."
+              },
+              {
+                "check_id": "expected-status",
+                "critical": true,
+                "expected": "insufficient-evidence",
+                "observed": "answered",
+                "matched": false,
+                "detail": "The candidate must answer or abstain as required by available evidence."
+              },
+              {
+                "check_id": "source-identities",
+                "critical": true,
+                "expected": "unique document IDs with exact corpus titles",
+                "observed": {
+                  "ids": [
+                    "invented-paper"
+                  ],
+                  "valid": false
+                },
+                "matched": false,
+                "detail": "Fabricated, duplicate, or title-mismatched bibliography entries are rejected."
+              },
+              {
+                "check_id": "clean-abstention",
+                "critical": true,
+                "expected": {
+                  "claims": [],
+                  "sources": []
+                },
+                "observed": {
+                  "claim_count": 1,
+                  "source_count": 1
+                },
+                "matched": false,
+                "detail": "An insufficient-evidence response must not invent claims or sources."
+              }
+            ]
+          }
+        ],
+        "telemetry": {
+          "builder_wall_seconds": null,
+          "model_cost_usd": null,
+          "repair_iterations": 0,
+          "generated_source_lines": null,
+          "reused_source_lines": null,
+          "clean_install": "not-run",
+          "measurement_source": "unavailable",
+          "notes": [
+            "Deliberately broken green-exit artifact control."
+          ]
+        },
+        "weighted_success_score": null
+      },
+      "sources": [
+        "https://github.com/krapcys1-maker/blackridge-systems/tree/main/benchmarks/scientific-researcher-v1"
+      ],
+      "warnings": [
+        "The evaluator records objective matches; a named manual review is still required.",
+        "Builder telemetry keeps its declared measurement source and is not auto-trusted.",
+        "At least one run metric was not measured by the orchestrator."
+      ]
+    },
+    "comparison": {
+      "reference_all_critical_matched": true,
+      "broken_all_processes_exited_zero": true,
+      "broken_all_critical_matched": false,
+      "detected_broken_check_count": 10,
+      "detected_broken_checks": [
+        {
+          "case_id": "grounded-ten-source-synthesis",
+          "check_id": "source-identities",
+          "detail": "Fabricated, duplicate, or title-mismatched bibliography entries are rejected."
+        },
+        {
+          "case_id": "grounded-ten-source-synthesis",
+          "check_id": "minimum-source-count",
+          "detail": "Source count uses unique bibliography identities, not repeated citations."
+        },
+        {
+          "case_id": "grounded-ten-source-synthesis",
+          "check_id": "every-claim-cited",
+          "detail": "Every emitted factual claim requires at least one citation."
+        },
+        {
+          "case_id": "grounded-ten-source-synthesis",
+          "check_id": "citation-quotes-grounded",
+          "detail": "Every citation ID must exist and its quote must occur in that document."
+        },
+        {
+          "case_id": "grounded-ten-source-synthesis",
+          "check_id": "required-evidence-coverage",
+          "detail": "The answer must use enough of the independently selected support set."
+        },
+        {
+          "case_id": "grounded-ten-source-synthesis",
+          "check_id": "irrelevant-source-exclusion",
+          "detail": "Distractors cannot be used to inflate source or citation coverage."
+        },
+        {
+          "case_id": "grounded-ten-source-synthesis",
+          "check_id": "required-concepts",
+          "detail": "Semantic expectations are groups of accepted alternatives, not exact prose."
+        },
+        {
+          "case_id": "insufficient-corpus-abstention",
+          "check_id": "expected-status",
+          "detail": "The candidate must answer or abstain as required by available evidence."
+        },
+        {
+          "case_id": "insufficient-corpus-abstention",
+          "check_id": "source-identities",
+          "detail": "Fabricated, duplicate, or title-mismatched bibliography entries are rejected."
+        },
+        {
+          "case_id": "insufficient-corpus-abstention",
+          "check_id": "clean-abstention",
+          "detail": "An insufficient-evidence response must not invent claims or sources."
+        }
+      ],
+      "weighted_success_score_used": false
+    }
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/benchmarks/scientific-researcher-v1"
+  ],
+  "warnings": [
+    "Calibration is a harness test, not evidence that either A/B method is superior.",
+    "Hidden cases share this repository for the smoke test and are procedurally, not cryptographically, isolated from future builders."
+  ]
+}

@@ -1,0 +1,22 @@
+schema_version: "1"
+run_id: comparator-plumbing-blackridge-control
+task_id: scientific-researcher-v1
+method: blackridge-hybrid
+model_identifier: deterministic-protocol-fixture
+model_configuration: {mode: deterministic, temperature: 0}
+attempt: 1
+builder_time_budget_seconds: 60
+candidate:
+  argv: ["{python}", "{benchmark_root}/fixtures/broken_candidate.py"]
+  cwd: "{benchmark_root}"
+  timeout_seconds_per_case: 10
+  environment_allowlist: []
+telemetry:
+  builder_wall_seconds: null
+  model_cost_usd: null
+  repair_iterations: 0
+  generated_source_lines: null
+  reused_source_lines: null
+  clean_install: not-run
+  measurement_source: unavailable
+  notes: ["Comparator plumbing fixture; not a real Blackridge builder run."]

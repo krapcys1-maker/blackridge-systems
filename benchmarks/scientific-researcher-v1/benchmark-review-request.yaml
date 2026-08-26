@@ -1,0 +1,43 @@
+schema_version: "1"
+name: scientific-researcher-benchmark-calibration
+goal: >-
+  Demonstrate that the frozen benchmark accepts its known-good protocol fixture and rejects a
+  deliberately broken artifact even though every broken candidate process exits successfully.
+constraints:
+  builder_access: public-spec-only
+  verdict: named-manual-review
+capabilities:
+  - id: benchmark-calibration
+    description: Calibrate artifact-first scientific researcher evaluation before A/B builders run.
+    accepts: [candidate-command/v1, frozen-benchmark/v1]
+    produces: [benchmark-calibration-evidence/v1]
+    seeds: []
+    searches:
+      - keywords: [agent, benchmark, software, engineering]
+    acceptance:
+      - id: green-broken-artifact-detected
+        description: A green process cannot pass when its scientific artifact is fabricated.
+        given: One reference protocol fixture and one deliberately broken green-exit fixture.
+        when: Both execute against identical frozen functional and robustness cases.
+        then:
+          - Evaluator, definition, public specification, both contracts, model, and budget match.
+          - The reference fixture satisfies every critical check.
+          - Every broken process exits zero but the broken artifact fails critical checks.
+          - Detected failures identify concrete artifact boundaries rather than a weighted score.
+      - id: mismatched-comparison-controls-refused
+        description: A two-arm comparison cannot run when its model control differs.
+        given: Baseline and Blackridge plans that differ in model identifier.
+        when: The controlled benchmark comparison is requested.
+        then:
+          - The command exits unsuccessfully before evaluating either candidate.
+          - Failure evidence names model_identifier as the mismatched control.
+          - No comparative task result or automatic winner is fabricated.
+      - id: public-output-contract-enforced
+        description: The evaluator executes the exact output schema published to builders.
+        given: A green-exit fixture whose JSON contains one unexpected unchecked field.
+        when: The fixture executes against both frozen benchmark cases.
+        then:
+          - Both candidate processes exit zero and retain their complete stdout.
+          - The Draft 2020-12 output contract rejects unchecked_payload in both cases.
+          - No deeper artifact correctness is inferred from an invalid output contract.
+          - Raw failure observations contain no manual verdict.
