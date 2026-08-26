@@ -1,0 +1,349 @@
+{
+  "schema_version": "1",
+  "probe_id": "a06e8f1134d64d2d9b2727796dd9129c",
+  "observed_at": "2026-08-26T21:42:01.466672Z",
+  "provider": "blackridge-generated-sandbox-runtime/1",
+  "subject": "linear-research-composition",
+  "request": {
+    "bundle_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\composer-positive-system",
+    "runtime_sha256": "2e90ca9ec2a37b61791a7062673765329bf03183e8a2f6432c44fca0a8c655dc",
+    "runtime_module_sha256": "7e5f1841b99feb73389de455944575e15d02e6e6e48ba03aecc9359fc79c9a5f",
+    "provenance_sha256": "7359789a302ac228f2f08c38ab50a5a620bf5287ca7313bca147857a38edb5ed",
+    "bundle_integrity_mismatches": [],
+    "input_artifact": {
+      "topic": "evidence-driven composition"
+    },
+    "image_ref": "blackridge/swerex-runtime:1.4.0",
+    "resolved_image_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+  },
+  "observations": {
+    "probe_completed": true,
+    "runtime_mode": "calibration",
+    "initial_contract": "research-query/v1",
+    "initial_validation_errors": [],
+    "steps": [
+      {
+        "subject_id": "fixture-research-source",
+        "step_type": "component",
+        "status": "completed",
+        "input_contract": "research-query/v1",
+        "output_contract": "paper-record/v1",
+        "input_artifact": {
+          "topic": "evidence-driven composition"
+        },
+        "artifact_integrity": {
+          "file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+          "exists": true,
+          "expected_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "actual_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "matches": true,
+          "after_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "unchanged_after_execution": true
+        },
+        "process": {
+          "executor": "docker-exec-shell-free",
+          "declared_argv": [
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples/fixtures/research_source.py"
+          ],
+          "argv": [
+            "python",
+            "/workspace/components/component-1.py"
+          ],
+          "working_directory": "/workspace/components",
+          "environment_names": [
+            "PYTHONIOENCODING"
+          ],
+          "duration_seconds": 0.115789,
+          "timed_out": false,
+          "exit_code": 0,
+          "stdout": "{\"query\": {\"topic\": \"evidence-driven composition\"}, \"paper\": {\"title\": \"Evidence for evidence-driven composition\", \"identifier\": \"fixture-paper-001\"}, \"trace\": {\"source\": \"research-source-calibration\"}}",
+          "stderr": ""
+        },
+        "output_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          }
+        },
+        "output_validation_errors": [],
+        "output_contract_valid": true
+      },
+      {
+        "subject_id": "paper-title-to-document-name",
+        "step_type": "adapter",
+        "status": "completed",
+        "input_contract": "paper-record/v1",
+        "output_contract": "document-record/v1",
+        "input_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          }
+        },
+        "operations": [
+          {
+            "op": "add",
+            "path": "/document",
+            "value": {}
+          },
+          {
+            "op": "copy",
+            "from": "/paper/title",
+            "path": "/document/name"
+          }
+        ],
+        "patch_error": null,
+        "output_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          },
+          "document": {
+            "name": "Evidence for evidence-driven composition"
+          }
+        },
+        "output_validation_errors": [],
+        "output_contract_valid": true
+      },
+      {
+        "subject_id": "fixture-report-sink",
+        "step_type": "component",
+        "status": "completed",
+        "input_contract": "document-record/v1",
+        "output_contract": "research-report/v1",
+        "input_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          },
+          "document": {
+            "name": "Evidence for evidence-driven composition"
+          }
+        },
+        "artifact_integrity": {
+          "file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+          "exists": true,
+          "expected_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "actual_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "matches": true,
+          "after_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "unchanged_after_execution": true
+        },
+        "process": {
+          "executor": "docker-exec-shell-free",
+          "declared_argv": [
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples/fixtures/report_sink.py"
+          ],
+          "argv": [
+            "python",
+            "/workspace/components/component-2.py"
+          ],
+          "working_directory": "/workspace/components",
+          "environment_names": [
+            "PYTHONIOENCODING"
+          ],
+          "duration_seconds": 0.114006,
+          "timed_out": false,
+          "exit_code": 0,
+          "stdout": "{\"report\": {\"title\": \"Evidence for evidence-driven composition\", \"based_on\": \"fixture-paper-001\"}, \"trace\": {\"source\": \"research-source-calibration\", \"sink\": \"report-sink-calibration\"}}",
+          "stderr": ""
+        },
+        "output_artifact": {
+          "report": {
+            "title": "Evidence for evidence-driven composition",
+            "based_on": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration",
+            "sink": "report-sink-calibration"
+          }
+        },
+        "output_validation_errors": [],
+        "output_contract_valid": true
+      }
+    ],
+    "all_steps_completed": true,
+    "failure_reason": null,
+    "final_contract": "research-report/v1",
+    "required_output": "research-report/v1",
+    "final_artifact": {
+      "report": {
+        "title": "Evidence for evidence-driven composition",
+        "based_on": "fixture-paper-001"
+      },
+      "trace": {
+        "source": "research-source-calibration",
+        "sink": "report-sink-calibration"
+      }
+    },
+    "final_validation_errors": [],
+    "sandbox": {
+      "image": {
+        "requested_reference": "blackridge/swerex-runtime:1.4.0",
+        "resolved_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
+        "repo_digests": [
+          "blackridge/swerex-runtime@sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+        ],
+        "created": "2026-08-26T20:46:11.627496934Z",
+        "os": "linux",
+        "architecture": "amd64",
+        "labels": {
+          "org.opencontainers.image.base.digest": "sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17",
+          "org.opencontainers.image.base.name": "python:3.12-slim",
+          "org.opencontainers.image.licenses": "Apache-2.0 AND LicenseRef-Third-Party",
+          "org.opencontainers.image.source": "https://github.com/krapcys1-maker/blackridge-systems",
+          "org.opencontainers.image.title": "Blackridge pinned SWE-ReX runtime",
+          "systems.blackridge.debian.snapshot": "20260824T000000Z",
+          "systems.blackridge.swerex.version": "1.4.0"
+        }
+      },
+      "container_name": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-2137d0dc-587a-4deb-bbc5-387fcbcaabfc",
+      "security_options": [
+        "cap-drop=ALL",
+        "no-new-privileges",
+        "pids-limit=256",
+        "memory=1g",
+        "cpus=2"
+      ],
+      "copied_components": [
+        {
+          "subject_id": "fixture-research-source",
+          "argv": [
+            "docker",
+            "cp",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-2137d0dc-587a-4deb-bbc5-387fcbcaabfc:/workspace/components/component-1.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "target": "/workspace/components/component-1.py",
+          "expected_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "container_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "hash_matches": true
+        },
+        {
+          "subject_id": "fixture-report-sink",
+          "argv": [
+            "docker",
+            "cp",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-2137d0dc-587a-4deb-bbc5-387fcbcaabfc:/workspace/components/component-2.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "target": "/workspace/components/component-2.py",
+          "expected_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "container_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "hash_matches": true
+        }
+      ],
+      "execution_boundary": {
+        "requested": "none",
+        "applied": true,
+        "error": null,
+        "networks_before": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "08d69a408df90cfdfb482955dd596b13b9d670b48a8e77cdfef5e6359752c07d",
+            "EndpointID": "54529e1184b7fdc5febaac457389e4c1cea508ed188afa376a053795c03095e2",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.2",
+            "MacAddress": "f6:5b:0f:77:86:d5",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": null
+          }
+        },
+        "disconnect_commands": [
+          {
+            "argv": [
+              "docker",
+              "network",
+              "disconnect",
+              "--force",
+              "bridge",
+              "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-2137d0dc-587a-4deb-bbc5-387fcbcaabfc"
+            ],
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "networks_after": {},
+        "workload_executor": "docker-exec-shell-free",
+        "host_environment_forwarded": []
+      },
+      "preflight": {
+        "argv": [
+          "docker",
+          "exec",
+          "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-2137d0dc-587a-4deb-bbc5-387fcbcaabfc",
+          "python",
+          "-c",
+          "import json,os,socket;out={};socket.setdefaulttimeout(2);\nfor label,target in [('direct',('1.1.1.1',443)),('dns',('pypi.org',443))]:\n try:s=socket.create_connection(target,2);s.close();out[label]=True\n except OSError:out[label]=False\nneedles=('DEEPSEEK','GITHUB','OPENAI','TOKEN','SECRET','API_KEY');out['sensitive_environment_names']=sorted(k for k in os.environ if any(n in k.upper() for n in needles));print(json.dumps(out,sort_keys=True))"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"direct\": false, \"dns\": false, \"sensitive_environment_names\": []}\n",
+        "stderr": "",
+        "result": {
+          "direct": false,
+          "dns": false,
+          "sensitive_environment_names": []
+        }
+      },
+      "cleanup": {
+        "force_remove": {
+          "argv": [
+            "docker",
+            "rm",
+            "--force",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-2137d0dc-587a-4deb-bbc5-387fcbcaabfc"
+          ],
+          "exit_code": 0,
+          "stdout": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-2137d0dc-587a-4deb-bbc5-387fcbcaabfc\n",
+          "stderr": ""
+        },
+        "container_exists_after": false
+      }
+    }
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py",
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0",
+    "https://github.com/SWE-agent/SWE-ReX/tree/v1.4.0"
+  ],
+  "warnings": []
+}

@@ -125,3 +125,91 @@ baseline behavior stays equal. This is not yet a production composer backend or 
 hardened multi-tenant claim: preparation still has network access, the ephemeral
 container filesystem is writable, the process runs as root inside the container
 namespace, and Docker remains a trusted host boundary.
+
+Generated-system sandbox experiment
+-----------------------------------
+The preserved `composer-positive-system` was selected before a general backend was
+written. A one-off Docker experiment copied only `research_source.py` and
+`report_sink.py` into the exact image without a host mount. Both in-container hashes
+matched their locks, bridge was detached, each component consumed/emitted JSON through
+stdin/stdout, the trusted host applied the locked adapter and all four schemas, and the
+final report exactly matched the prior host calibration. Direct and DNS egress were
+false; exact cleanup exited zero.
+
+That first experiment exposed an existing host-runner evidence defect. python-json-patch
+1.33 mutated the empty object held by the adapter's `add` operation when the later copy
+wrote `/document/name`. The retained 2026-08-26 composer probe therefore showed a name
+inside `operations[0].value`, while the locked generated adapter file still contained
+`value: {}`. The runner now records one deep copy and applies a separate deep copy.
+A real host rerun preserved `value: {}`, completed all steps, and returned the unchanged
+final report.
+
+Final `compose-run-sandbox` positive observation:
+  provider: blackridge-generated-sandbox-runtime/1
+  resolved image: sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+  copied component hashes: 2/2 match
+  networks before/after: bridge / {}
+  preflight: direct=false, dns=false, sensitive_environment_names=[]
+  source and sink executor: docker-exec-shell-free
+  source, adapter, and sink output contracts: valid
+  adapter retained add value: {}
+  final artifact: exact match with host calibration
+  cleanup exit: 0; container remaining: false; warnings: 0
+
+Paired generated broken-output control:
+  source and adapter completed
+  broken sink process exit: 0
+  output contract valid: false
+  exact retained error paths: /report and /trace
+  all_steps_completed: false
+  preflight still passed
+  cleanup exit: 0; container remaining: false
+
+The backend remains calibration-only. Regression controls rewrite a temporary generated
+runtime and its lock, then prove that `mode: production` and a nonempty environment
+allowlist containing `DEEPSEEK_API_KEY` are rejected before Docker runtime types are
+requested. A first CLI-help text assertion missed the Rich line wrap; direct help output
+showed the command and the corrected whitespace-aware assertion passed. That harness
+mistake was not counted as a backend failure.
+
+Final artifact portability experiment
+-------------------------------------
+An initial attempt to invoke pytest through the unrelated global Python could not import
+Blackridge. The repository venv then collected and passed the targeted composition suite;
+the failed global collection was treated as an environment-selection error, not a product
+verdict.
+
+The first newly built wheel exposed a real portability defect that the editable checkout
+did not expose. It was installed with the sandbox extra in a fresh venv and passed
+`pip check`, but the generated bundle still declared the Python path captured from the
+repository venv. The wheel venv had a different `sys.executable`; the backend rejected
+that old absolute interpreter path and the real CLI run exited 2 before a component ran.
+Cleanup still removed the prepared container.
+
+The correction maps only argv position zero whose basename is `python`, `python.exe`,
+`python3`, or `python3.exe` to the trusted container interpreter. The locked component
+path is mapped separately, and any other absolute argv path still fails closed. A paired
+regression maps a prior-venv Python path and rejects an extra unlocked absolute path.
+
+A second clean wheel was built and installed in another new venv:
+  wheel SHA-256: ff58425b672e3e6288f0e90074d7b418905821dc6270589a07af0063e361787a
+  installed module: fresh venv site-packages, not the repository source tree
+  pip check: no broken requirements
+  real sandboxed generated-system CLI exit: 0
+  effective component argv: python /workspace/components/component-1.py and component-2.py
+  preflight: direct=false, dns=false, sensitive_environment_names=[]
+  cleanup exit: 0; container remaining: false
+
+The canonical positive and green-exit-invalid runs were then repeated once more against
+the final source. Their exits were 0 and 1 respectively, both retained exact cleanup, and
+their named manual reviews were regenerated against the new probe hashes. The inspection
+harness initially queried `output_contract_errors` and a nonexistent top-level host
+artifact path; inspecting the raw shape corrected those selectors to
+`output_validation_errors` and `observations.runtime.observations.final_artifact`.
+The corrected comparisons passed and the selector mistakes changed no product result.
+
+Final local regression after the portability correction:
+  ruff: pass
+  generated third-party notices: match
+  declared-copy provenance issues: 0
+  pytest: 60 passed

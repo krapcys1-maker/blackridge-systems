@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T21:42:16.385988Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "system-verification",
+  "scenario_id": "sandbox-green-invalid-output",
+  "scenario_description": "The sandboxed runtime still rejects a component that exits zero with invalid JSON shape.",
+  "expected": [
+    "The source and adapter pass before the deliberately broken sink runs.",
+    "The sink exits zero but both exact schema errors are retained and the runtime remains incomplete.",
+    "Network preflight and exact container cleanup still pass on the failed workload."
+  ],
+  "observed": [
+    "The source and adapter passed in the same sandbox before the broken sink executed.",
+    "The broken sink exited zero but output validation retained missing /report/title and /trace/source and kept all_steps_completed false.",
+    "Network and sensitive-name preflight passed and exact container cleanup still exited zero."
+  ],
+  "probe_id": "0a5250da410e40d3a38df09e1a72a4f4",
+  "probe_file": "evidence\\manual\\2026-08-27\\composer-sandbox-broken-output-probe.json",
+  "probe_sha256": "bd6ebacd7a5ff66539f924ef84143be1c097d613008522d962b5e8451971b9bc",
+  "notes": "PASS means the sandboxed verifier detected the deliberate green-exit invalid artifact; the broken pipeline itself failed as designed."
+}
