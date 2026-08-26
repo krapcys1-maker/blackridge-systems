@@ -110,5 +110,6 @@ generated-system/
 2. **Inspector** — commit-pinned source snapshots, API extraction, SBOM, license, and security gates.
 3. **Experimenter** — disposable sandbox boot is active for pinned public GitHub repositories;
    generalized boot recipes, contract suites, and resource measurements remain next.
-4. **Composer** — compatibility graph, solver, adapter generation, and alternative replacement loop.
+4. **Composer** — declarative JSON Patch adaptation and paired contract verification are active;
+   compatibility solving, structural/AI adapter generation, and replacement loops remain next.
 5. **Foundry** — reusable integration memory and delivery of verified systems from natural-language goals.

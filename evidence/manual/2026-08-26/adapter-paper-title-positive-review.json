@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T17:49:52.628492Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "component-adaptation",
+  "scenario_id": "schema-mismatch-adapter",
+  "scenario_description": "A concrete schema mismatch is fixed without rewriting either component.",
+  "expected": [
+    "The adapter maps the required field and preserves all unrelated input fields.",
+    "Contract tests fail before the adapter and pass after it.",
+    "The adapter source, rationale, and exact tests are reviewable."
+  ],
+  "observed": [
+    "Before the adapter, Draft 2020-12 validation failed at the root because document was required; after the adapter, validation returned no errors.",
+    "The RFC 6902 copy operation produced document.name equal to Evidence-Driven System Composition from paper.title.",
+    "The complete original paper, metadata, authors, year, and trace fields remained in the output; changed_or_missing_source_paths was empty and the source fixture was not mutated.",
+    "The retained request and patch observations match the YAML operations exactly after the deep-copy defect correction; definition_mutated is false and both upstream source links identify exact release tags."
+  ],
+  "probe_id": "a695d9ab7bbb4c84bd8dd8b5ddc65d7d",
+  "probe_file": "evidence\\manual\\2026-08-26\\adapter-paper-title-positive-probe.json",
+  "probe_sha256": "bffffadfc35893de0bbfd1207be43df9aa0a488536397ccd91460e3dee5bb6e7",
+  "notes": "Manually compared the input fixture, target schema, original RFC 6902 operations, before and after validation errors, complete output, preservation paths, mutation flags, and pinned source identities."
+}

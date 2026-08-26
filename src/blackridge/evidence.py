@@ -53,7 +53,7 @@ class ProbeEvidence(BaseModel):
                 "error": str(error),
             },
             sources=sources,
-            warnings=["The probe failed; no package facts were collected."],
+            warnings=["The probe failed; requested observations were not collected."],
         )
 
 

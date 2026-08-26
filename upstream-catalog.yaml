@@ -100,6 +100,26 @@ components:
     status: selected-next
     rationale: Containerized, typed, cached build and test functions that run locally or in CI.
 
+  - repository: stefankoegl/python-json-patch
+    role: declarative-payload-adaptation
+    version: v1.33
+    license: BSD-3-Clause
+    integration: python-library-rfc6902
+    status: active-in-mvp
+    rationale: >-
+      Mature dedicated RFC 6902 implementation. Blackridge deep-copies patch definitions because
+      chained add/copy operations can mutate a patch value object held in the working copy.
+
+  - repository: python-jsonschema/jsonschema
+    role: component-contract-validation
+    version: v4.26.0
+    license: MIT
+    integration: python-library-draft2020-12
+    status: active-in-mvp
+    rationale: >-
+      Standard JSON Schema validation with complete lazy error iteration, used to compare source,
+      adapted, and deliberately broken output artifacts.
+
   - repository: ast-grep/ast-grep
     role: structural-adaptation
     version: 0.45.2

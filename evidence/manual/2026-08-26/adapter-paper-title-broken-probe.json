@@ -1,0 +1,121 @@
+{
+  "schema_version": "1",
+  "probe_id": "82a22623708d4c3f9ec1fdeda2202199",
+  "observed_at": "2026-08-26T17:44:20.617844Z",
+  "provider": "jsonpatch-rfc6902+jsonschema-draft2020-12",
+  "subject": "paper-title-adapter-missing-copy",
+  "request": {
+    "schema_version": "1",
+    "name": "paper-title-adapter-missing-copy",
+    "description": "Deliberately omit the required title copy to prove that a successful patch application is not confused with target-contract success.",
+    "source_contract": "paper-record/v1",
+    "target_contract": "document-record/v1",
+    "source_fixture": {
+      "paper": {
+        "title": "Evidence-Driven System Composition"
+      },
+      "metadata": {
+        "id": "paper-001"
+      }
+    },
+    "target_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "required": [
+        "document"
+      ],
+      "properties": {
+        "document": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/document",
+        "value": {}
+      }
+    ]
+  },
+  "observations": {
+    "probe_completed": true,
+    "libraries": {
+      "jsonpatch": "1.33",
+      "jsonschema": "4.26.0"
+    },
+    "before_adapter": {
+      "instance": {
+        "paper": {
+          "title": "Evidence-Driven System Composition"
+        },
+        "metadata": {
+          "id": "paper-001"
+        }
+      },
+      "target_contract_valid": false,
+      "validation_errors": [
+        {
+          "message": "'document' is a required property",
+          "instance_path": "/",
+          "schema_path": "/required",
+          "validator": "required"
+        }
+      ]
+    },
+    "patch": {
+      "operations": [
+        {
+          "op": "add",
+          "path": "/document",
+          "value": {}
+        }
+      ],
+      "error": null,
+      "source_fixture_mutated": false,
+      "definition_mutated": false,
+      "working_copy_mutated": false
+    },
+    "after_adapter": {
+      "instance": {
+        "paper": {
+          "title": "Evidence-Driven System Composition"
+        },
+        "metadata": {
+          "id": "paper-001"
+        },
+        "document": {}
+      },
+      "target_contract_valid": false,
+      "validation_errors": [
+        {
+          "message": "'name' is a required property",
+          "instance_path": "/document",
+          "schema_path": "/properties/document/required",
+          "validator": "required"
+        }
+      ]
+    },
+    "preservation": {
+      "all_source_values_preserved": true,
+      "changed_or_missing_source_paths": []
+    }
+  },
+  "sources": [
+    "https://github.com/stefankoegl/python-json-patch/tree/1.33",
+    "https://github.com/python-jsonschema/jsonschema"
+  ],
+  "warnings": [
+    "The adapted output still violates the target contract."
+  ]
+}

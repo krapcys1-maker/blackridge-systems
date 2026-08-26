@@ -7,7 +7,7 @@ time-stamped snapshot and may change upstream.
 
 | Segment and scenario | Verdict | Manual observation |
 | --- | --- | --- |
-| capability contract schema | PASS | Six self-hosting capabilities and seven acceptance scenarios loaded. A deliberately duplicated scenario ID was rejected. |
+| capability contract schema | PASS | Six self-hosting capabilities and eight acceptance scenarios loaded. A deliberately duplicated scenario ID was rejected. |
 | deps.dev / `paper-qa-package-evidence` | PASS with blocker outside this scenario | `paper-qa@2026.8.12` resolved to 75 nodes and 16 direct dependencies. deps.dev reported `non-standard`; GitHub reported `Apache-2.0`, so package approval remains blocked pending license reconciliation. |
 | deps.dev negative package and version inputs | PASS | A nonexistent package and nonexistent requested version both exited 2 while retaining explicit failure evidence without a verdict. |
 | exact-version guard / `exact-version-not-substituted` | PASS | The failed GROBID 0.9.1 lookup retained the exact input and error and did not substitute another package version. |
@@ -19,8 +19,9 @@ time-stamped snapshot and may change upstream.
 | provisional blueprint gate | PASS | The artifact stays `release_ready: false`, evidence L0, requires L2, and warns that the leading candidate still needs inspection and sandbox boot. |
 | environment construction / `python-repository-clean-boot` | PASS | SWE-ReX 1.4.0 ran `pypa/sampleproject` at exact commit `621e497...`. The real unittest and independent `41 -> 42` JSON artifact matched; host hashes matched and the container was removed. |
 | sandbox negative boundary / `sandbox-failure-is-evidence` | PASS | The wrong expectation retained exit 1 and `expected 999, got 6`; the following sentinel was explicitly not run, the host stayed unchanged, and the container was removed. |
-| deterministic component adaptation | NOT RUN | Adapter execution and before/after contract fixture not implemented yet. |
-| composed-system end-to-end verification | NOT RUN | Requires the two preceding segments. |
+| component adaptation / `schema-mismatch-adapter` | PASS | The unadapted fixture failed because `document` was absent. The RFC 6902 adapter copied `paper.title` to `document.name`, passed Draft 2020-12 validation, and preserved every source value. |
+| system verification / `deliberate-negative-case` | PASS | Working and one-operation-broken compositions used identical input and schema. Both patches executed without an exception, but artifact validation accepted only the working output and rejected missing `document.name`. |
+| complete supply-chain evaluation / `known-repository-review` | NOT RUN | Scorecard missing-state behavior was tested, but exact-commit OSV, SBOM, provenance, and complete license evidence have not all run together. |
 
 ## Important findings
 
@@ -33,6 +34,14 @@ time-stamped snapshot and may change upstream.
    unpinned `pipx run swe-rex`; Blackridge must supply both the dependency and pinned server image.
 7. The effective container boundary was observed as zero Linux capabilities, `NoNewPrivs=1`,
    1 GiB memory, 256 processes, and two CPUs. This is not a hardened multi-tenant sandbox claim.
+8. `jsonpatch` v1.33 mutated the empty object held in its working `add` operation when a later
+   `copy` wrote beneath it. Passing a deep copy prevents the declarative definition and retained
+   request from changing; the upstream working-copy mutation remains an explicit observation.
+9. Both the working and broken patches applied without an exception. Only inspection of the output
+   against its consumer schema caught the missing connection, exactly as the manual-test policy
+   requires.
+10. A comparison using a different target contract/schema exited 2 and retained failure evidence;
+    the verifier does not draw a negative-control conclusion from different workloads.
 
 ## Retained artifacts
 
@@ -53,6 +62,18 @@ time-stamped snapshot and may change upstream.
 - `sampleproject-sandbox-negative-review.json` — named review of failure retention.
 - `swerex-1.4.0-integration-defects.txt` — fresh-environment reproduction of the missing
   `aiohttp` declaration and source-inspected unpinned fallback.
+- `adapter-mutated-definition-defect-probe.json` — retained first adapter run that exposed a
+  mutated patch definition in the evidence itself.
+- `adapter-paper-title-positive-invalid-source-probe.json` — corrected deep-copy run retained after
+  a source tag URL typo was found; it is superseded and has no active review.
+- `adapter-paper-title-positive-probe.json` and `adapter-paper-title-positive-review.json` — final
+  source-corrected before/after contract evidence and named review.
+- `adapter-paper-title-broken-probe.json` — early negative adapter result retained before the paired
+  workload was normalized.
+- `composition-working-vs-broken-probe.json` and its review — identical workload, one removed copy
+  operation, complete output artifacts, and the detected target-contract failure.
+- `composition-mismatched-workload-failure.json` — retained refusal to compare different target
+  contracts and schemas.
 
 SHA-256 checksums at creation time:
 
@@ -73,4 +94,12 @@ sampleproject-sandbox-negative-review.json   3c40fee33a4d28e5153c401b552e97a2aa6
 sampleproject-sandbox-positive-probe.json    1bb68ace709d368286c55f9b28e8ce6ed33e76328775e5d82d5763a614a71392
 sampleproject-sandbox-positive-review.json   fc80f1edb9b4a3ae8dbfa6b5716309c78bab2405ed4cca3b535bdfab7ea79205
 swerex-1.4.0-integration-defects.txt          73b791a1d107d6e99e437c08f6efa5899908b32dbf7b2fc6cee4aca3cd5a9567
+adapter-mutated-definition-defect-probe.json e9109acf3986e104993b5a9b368bafc476477260c559568d69d69af7158f9e30
+adapter-paper-title-broken-probe.json        7a3191d482fb30e302a6d0765bbc14520486837e3317b9ae06610a555bb25ee0
+adapter-paper-title-positive-invalid-source-probe.json 521880c3fb0bdb69cffca160f83919a1d7ff4279eb3cfdc77cf311375b7dc314
+adapter-paper-title-positive-probe.json      bffffadfc35893de0bbfd1207be43df9aa0a488536397ccd91460e3dee5bb6e7
+adapter-paper-title-positive-review.json     6e11e50517eb88f5484009d93e3936dcd6d192bccd430f0d25810d41a29dafe3
+composition-working-vs-broken-probe.json     5d7c2c1252b81b426d94eebd78265443f650fa4304d8b311108c378b46f85b21
+composition-working-vs-broken-review.json    0c39ac40f0e9953315ad51daceec1ac1b48f48bc12420fe949ea19edc06c99dc
+composition-mismatched-workload-failure.json a04804393c0bd9f604efdb33b782d1e59565d6617baafd44c354fcf3af293f77
 ```

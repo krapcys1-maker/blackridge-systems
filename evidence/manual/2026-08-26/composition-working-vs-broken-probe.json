@@ -1,0 +1,375 @@
+{
+  "schema_version": "1",
+  "probe_id": "58bea8e0105d4f0386590144f347868b",
+  "observed_at": "2026-08-26T17:49:33.780967Z",
+  "provider": "blackridge-composition-pair/jsonpatch+jsonschema",
+  "subject": "paper-title-to-document-name::vs::paper-title-adapter-missing-copy",
+  "request": {
+    "working": {
+      "schema_version": "1",
+      "name": "paper-title-to-document-name",
+      "description": "Bridge a source component that emits paper.title to a consumer that requires document.name while preserving the complete source payload.",
+      "source_contract": "paper-record/v1",
+      "target_contract": "document-record/v1",
+      "source_fixture": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        }
+      },
+      "target_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": [
+          "document"
+        ],
+        "properties": {
+          "document": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "patch": [
+        {
+          "op": "test",
+          "path": "/paper/title",
+          "value": "Evidence-Driven System Composition"
+        },
+        {
+          "op": "add",
+          "path": "/document",
+          "value": {}
+        },
+        {
+          "op": "copy",
+          "from": "/paper/title",
+          "path": "/document/name"
+        }
+      ]
+    },
+    "deliberate_negative": {
+      "schema_version": "1",
+      "name": "paper-title-adapter-missing-copy",
+      "description": "Deliberately omit the required title copy to prove that a successful patch application is not confused with target-contract success.",
+      "source_contract": "paper-record/v1",
+      "target_contract": "document-record/v1",
+      "source_fixture": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        }
+      },
+      "target_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": [
+          "document"
+        ],
+        "properties": {
+          "document": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "patch": [
+        {
+          "op": "test",
+          "path": "/paper/title",
+          "value": "Evidence-Driven System Composition"
+        },
+        {
+          "op": "add",
+          "path": "/document",
+          "value": {}
+        }
+      ]
+    }
+  },
+  "observations": {
+    "probe_completed": true,
+    "same_workload": {
+      "source_contract": true,
+      "target_contract": true,
+      "source_fixture": true,
+      "target_schema": true
+    },
+    "adapter_difference": {
+      "removed_operations": [
+        {
+          "op": "copy",
+          "from": "/paper/title",
+          "path": "/document/name"
+        }
+      ],
+      "added_operations": []
+    },
+    "working": {
+      "probe_completed": true,
+      "libraries": {
+        "jsonpatch": "1.33",
+        "jsonschema": "4.26.0"
+      },
+      "before_adapter": {
+        "instance": {
+          "paper": {
+            "title": "Evidence-Driven System Composition",
+            "authors": [
+              "Ada Example",
+              "Lin Example"
+            ]
+          },
+          "metadata": {
+            "id": "paper-001",
+            "year": 2026
+          },
+          "trace": {
+            "request_id": "manual-adapter-001"
+          }
+        },
+        "target_contract_valid": false,
+        "validation_errors": [
+          {
+            "message": "'document' is a required property",
+            "instance_path": "/",
+            "schema_path": "/required",
+            "validator": "required"
+          }
+        ]
+      },
+      "patch": {
+        "operations": [
+          {
+            "op": "test",
+            "path": "/paper/title",
+            "value": "Evidence-Driven System Composition"
+          },
+          {
+            "op": "add",
+            "path": "/document",
+            "value": {}
+          },
+          {
+            "op": "copy",
+            "from": "/paper/title",
+            "path": "/document/name"
+          }
+        ],
+        "error": null,
+        "source_fixture_mutated": false,
+        "definition_mutated": false,
+        "working_copy_mutated": true
+      },
+      "after_adapter": {
+        "instance": {
+          "paper": {
+            "title": "Evidence-Driven System Composition",
+            "authors": [
+              "Ada Example",
+              "Lin Example"
+            ]
+          },
+          "metadata": {
+            "id": "paper-001",
+            "year": 2026
+          },
+          "trace": {
+            "request_id": "manual-adapter-001"
+          },
+          "document": {
+            "name": "Evidence-Driven System Composition"
+          }
+        },
+        "target_contract_valid": true,
+        "validation_errors": []
+      },
+      "preservation": {
+        "all_source_values_preserved": true,
+        "changed_or_missing_source_paths": []
+      }
+    },
+    "deliberate_negative": {
+      "probe_completed": true,
+      "libraries": {
+        "jsonpatch": "1.33",
+        "jsonschema": "4.26.0"
+      },
+      "before_adapter": {
+        "instance": {
+          "paper": {
+            "title": "Evidence-Driven System Composition",
+            "authors": [
+              "Ada Example",
+              "Lin Example"
+            ]
+          },
+          "metadata": {
+            "id": "paper-001",
+            "year": 2026
+          },
+          "trace": {
+            "request_id": "manual-adapter-001"
+          }
+        },
+        "target_contract_valid": false,
+        "validation_errors": [
+          {
+            "message": "'document' is a required property",
+            "instance_path": "/",
+            "schema_path": "/required",
+            "validator": "required"
+          }
+        ]
+      },
+      "patch": {
+        "operations": [
+          {
+            "op": "test",
+            "path": "/paper/title",
+            "value": "Evidence-Driven System Composition"
+          },
+          {
+            "op": "add",
+            "path": "/document",
+            "value": {}
+          }
+        ],
+        "error": null,
+        "source_fixture_mutated": false,
+        "definition_mutated": false,
+        "working_copy_mutated": false
+      },
+      "after_adapter": {
+        "instance": {
+          "paper": {
+            "title": "Evidence-Driven System Composition",
+            "authors": [
+              "Ada Example",
+              "Lin Example"
+            ]
+          },
+          "metadata": {
+            "id": "paper-001",
+            "year": 2026
+          },
+          "trace": {
+            "request_id": "manual-adapter-001"
+          },
+          "document": {}
+        },
+        "target_contract_valid": false,
+        "validation_errors": [
+          {
+            "message": "'name' is a required property",
+            "instance_path": "/document",
+            "schema_path": "/properties/document/required",
+            "validator": "required"
+          }
+        ]
+      },
+      "preservation": {
+        "all_source_values_preserved": true,
+        "changed_or_missing_source_paths": []
+      }
+    },
+    "artifact_comparison": {
+      "both_patch_applications_returned_without_error": true,
+      "working_target_contract_valid": true,
+      "negative_target_contract_valid": false,
+      "working_output": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        },
+        "document": {
+          "name": "Evidence-Driven System Composition"
+        }
+      },
+      "negative_output": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        },
+        "document": {}
+      },
+      "negative_validation_errors": [
+        {
+          "message": "'name' is a required property",
+          "instance_path": "/document",
+          "schema_path": "/properties/document/required",
+          "validator": "required"
+        }
+      ]
+    }
+  },
+  "sources": [
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0"
+  ],
+  "warnings": []
+}

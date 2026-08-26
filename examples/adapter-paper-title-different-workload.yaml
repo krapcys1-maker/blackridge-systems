@@ -1,0 +1,31 @@
+schema_version: "1"
+name: paper-title-different-target-workload
+description: >-
+  Deliberately change the target contract so the paired verifier must reject
+  an invalid apples-to-oranges negative comparison before drawing conclusions.
+source_contract: paper-record/v1
+target_contract: different-document-record/v1
+source_fixture:
+  paper:
+    title: Evidence-Driven System Composition
+    authors: [Ada Example, Lin Example]
+  metadata:
+    id: paper-001
+    year: 2026
+  trace:
+    request_id: manual-adapter-001
+target_schema:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  type: object
+  required: [document]
+  properties:
+    document:
+      type: object
+      required: [label]
+      properties:
+        label: {type: string}
+  additionalProperties: true
+patch:
+  - op: add
+    path: /document
+    value: {}

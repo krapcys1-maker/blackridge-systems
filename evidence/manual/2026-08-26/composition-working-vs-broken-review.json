@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T17:49:53.012207Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "system-verification",
+  "scenario_id": "deliberate-negative-case",
+  "scenario_description": "Verification detects a deliberately broken component connection.",
+  "expected": [
+    "The working fixture produces the expected output and retained evidence.",
+    "The broken fixture fails at the expected contract boundary.",
+    "A green exit code alone is not accepted without inspecting the produced artifact."
+  ],
+  "observed": [
+    "The same source fixture, source contract, target contract, and target schema were used for both compositions.",
+    "The deliberate negative differs by exactly one removed RFC 6902 copy operation from /paper/title to /document/name, with no added operations.",
+    "Both patch applications returned without a patch error, yet the working artifact contained document.name and passed the target contract while the negative artifact contained an empty document and failed at /document because name was required.",
+    "The retained working output also preserved paper, authors, metadata, year, and trace fields, so the verdict is based on the produced artifact and contract validation rather than command completion."
+  ],
+  "probe_id": "58bea8e0105d4f0386590144f347868b",
+  "probe_file": "evidence\\manual\\2026-08-26\\composition-working-vs-broken-probe.json",
+  "probe_sha256": "5d7c2c1252b81b426d94eebd78265443f650fa4304d8b311108c378b46f85b21",
+  "notes": "Manually compared both complete requests, the one-operation difference, patch errors, output artifacts, preservation observations, Draft 2020-12 validation results, and exact upstream source tags."
+}

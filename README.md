@@ -102,6 +102,7 @@ Blackridge integrates tools at stable boundaries instead of copying their code:
 | compliance | OSS Review Toolkit + Syft | licenses, dependencies, and SBOMs |
 | execution | SWE-ReX / Docker; OpenSandbox next | pinned disposable execution backend |
 | experiments | Dagger | reproducible build and test DAGs |
+| payload adaptation | JSON Patch + JSON Schema | declarative field mapping and contract evidence |
 | adaptation | ast-grep / OpenRewrite | structural transforms instead of regex patches |
 | missing code | OpenHands software-agent-sdk | write only adapters or genuinely missing modules |
 
@@ -131,6 +132,20 @@ The Docker backend has outbound network access and is not presented as a hardene
 sandbox. No host path is mounted during this probe. OpenSandbox with a stronger isolation backend
 and egress policy remains the production boundary.
 
+### Verify a component adapter and its negative control
+
+```powershell
+blackridge probe-adapter examples/adapter-paper-title-to-document-name.yaml `
+  --output .blackridge/evidence/adapter.json
+blackridge probe-composition examples/adapter-paper-title-to-document-name.yaml `
+  examples/adapter-paper-title-broken.yaml `
+  --output .blackridge/evidence/composition.json
+```
+
+The adapter is a reviewable RFC 6902 document, not generated Python. The pair command refuses to
+compare different fixtures or schemas and retains both complete artifacts. In the supplied example,
+both patches apply without an exception; JSON Schema validation is what detects the broken edge.
+
 ## Repository map
 
 ```text
@@ -145,9 +160,9 @@ upstream-catalog.yaml     pinned upstream choices and provenance
 ## Scope boundary
 
 Blackridge is not yet a one-command autonomous software factory. Discovery, package inspection,
-and commit-pinned Docker experiments now produce raw evidence. Compatibility matrices, adapter
-synthesis, hardened remote isolation through OpenSandbox, and full generated-system delivery are
-the next milestones described in the architecture document.
+commit-pinned Docker experiments, declarative payload adapters, and paired negative contract
+verification now produce raw evidence. Compatibility solving, adapter synthesis beyond JSON Patch,
+hardened remote isolation through OpenSandbox, and full generated-system delivery are next.
 
 ## License
 

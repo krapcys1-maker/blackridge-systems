@@ -7,6 +7,7 @@ from pathlib import Path
 
 import yaml
 
+from blackridge.adaptation import AdapterExperiment
 from blackridge.evidence import ManualReview, ProbeEvidence
 from blackridge.models import DiscoveryRun, SystemBlueprint, SystemRequest
 from blackridge.sandbox import SandboxExperiment
@@ -20,6 +21,11 @@ def load_request(path: Path) -> SystemRequest:
 def load_sandbox_experiment(path: Path) -> SandboxExperiment:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     return SandboxExperiment.model_validate(data)
+
+
+def load_adapter_experiment(path: Path) -> AdapterExperiment:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return AdapterExperiment.model_validate(data)
 
 
 def load_run(path: Path) -> DiscoveryRun:

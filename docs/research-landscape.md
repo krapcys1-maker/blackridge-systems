@@ -100,6 +100,12 @@ finds vulnerabilities; ORT enforces license/policy; Syft emits SBOMs.
 ast-grep and OpenRewrite make adapter work reviewable and repeatable. The system should generate a
 structural rewrite recipe where possible instead of a one-off text patch.
 
+For payload-contract mismatches, a source rewrite is unnecessary. `python-json-patch` v1.33 gives
+Blackridge a compact RFC 6902 boundary, while `jsonschema` v4.26.0 supplies Draft 2020-12 validation
+and complete error iteration. A real chained `add {}` plus `copy` probe exposed that the JSON Patch
+working operation value can be mutated; Blackridge now deep-copies the declared operations and
+retains separate definition/working-copy mutation observations.
+
 deps.dev materially expands discovery beyond GitHub, but real probes exposed two important limits:
 package license metadata can disagree with repository metadata, and registry coverage may lag an
 upstream release. It is an evidence source, not an authority that may silently override conflicting

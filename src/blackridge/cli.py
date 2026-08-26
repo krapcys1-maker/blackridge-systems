@@ -12,6 +12,12 @@ from pydantic import ValidationError
 from rich.console import Console
 from rich.table import Table
 
+from blackridge.adaptation import (
+    JSON_PATCH_SOURCE,
+    JSON_SCHEMA_SOURCE,
+    CompositionPairProbe,
+    JsonPatchAdapterProbe,
+)
 from blackridge.blueprint import build_blueprint
 from blackridge.depsdev import DepsDevClient, PackageSystem
 from blackridge.doctor import check_tools
@@ -19,6 +25,7 @@ from blackridge.errors import BlackridgeError
 from blackridge.evidence import ManualReview, ManualVerdict, ProbeEvidence
 from blackridge.github import GitHubCli
 from blackridge.io import (
+    load_adapter_experiment,
     load_probe,
     load_request,
     load_run,
@@ -254,6 +261,102 @@ def probe_environment(
             f"[yellow]Captured failure:[/yellow] {failed['id']} exit={failed['exit_code']} "
             f"transport_error={failed['transport_error'] or 'none'}"
         )
+    console.print(f"Evidence written to {output}")
+    console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
+
+
+@app.command("probe-adapter")
+def probe_adapter(
+    experiment_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/adapter-probe.json"
+    ),
+) -> None:
+    """Apply a declarative JSON Patch and retain before/after contract evidence."""
+
+    experiment = None
+    try:
+        experiment = load_adapter_experiment(experiment_file)
+        probe = JsonPatchAdapterProbe().probe(experiment)
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        if experiment is not None:
+            failure = ProbeEvidence.failure(
+                provider="jsonpatch-rfc6902+jsonschema-draft2020-12",
+                subject=experiment.name,
+                request=experiment.model_dump(),
+                sources=[JSON_PATCH_SOURCE, JSON_SCHEMA_SOURCE],
+                error=exc,
+            )
+            with suppress(OSError):
+                write_probe(failure, output)
+        console.print(f"[red]Adapter probe failed:[/red] {exc}")
+        if output.exists():
+            console.print(f"Failure evidence written to {output}")
+        raise typer.Exit(code=2) from exc
+
+    before = probe.observations["before_adapter"]
+    after = probe.observations["after_adapter"]
+    patch = probe.observations["patch"]
+    preservation = probe.observations["preservation"]
+    console.print(f"[bold]Raw adapter evidence:[/bold] {probe.subject}")
+    console.print(f"Target valid before adapter: {before['target_contract_valid']}")
+    console.print(f"Patch error: {patch['error'] or 'none'}")
+    console.print(f"Target valid after adapter: {after['target_contract_valid']}")
+    console.print(f"All source values preserved: {preservation['all_source_values_preserved']}")
+    console.print(f"Evidence written to {output}")
+    console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
+
+
+@app.command("probe-composition")
+def probe_composition(
+    working_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    broken_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/composition-probe.json"
+    ),
+) -> None:
+    """Compare a working and one-operation-broken composition on the same workload."""
+
+    working = None
+    broken = None
+    try:
+        working = load_adapter_experiment(working_file)
+        broken = load_adapter_experiment(broken_file)
+        probe = CompositionPairProbe().probe(working, broken)
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        if working is not None and broken is not None:
+            failure = ProbeEvidence.failure(
+                provider="blackridge-composition-pair/jsonpatch+jsonschema",
+                subject=f"{working.name}::vs::{broken.name}",
+                request={
+                    "working": working.model_dump(),
+                    "deliberate_negative": broken.model_dump(),
+                },
+                sources=[JSON_PATCH_SOURCE, JSON_SCHEMA_SOURCE],
+                error=exc,
+            )
+            with suppress(OSError):
+                write_probe(failure, output)
+        console.print(f"[red]Composition probe failed:[/red] {exc}")
+        if output.exists():
+            console.print(f"Failure evidence written to {output}")
+        raise typer.Exit(code=2) from exc
+
+    comparison = probe.observations["artifact_comparison"]
+    difference = probe.observations["adapter_difference"]
+    console.print(f"[bold]Raw composition evidence:[/bold] {probe.subject}")
+    console.print(
+        "Both patch applications returned without error: "
+        f"{comparison['both_patch_applications_returned_without_error']}"
+    )
+    console.print(f"Working target valid: {comparison['working_target_contract_valid']}")
+    console.print(
+        "Deliberate negative target valid: "
+        f"{comparison['negative_target_contract_valid']}"
+    )
+    console.print(f"Removed operations in negative: {len(difference['removed_operations'])}")
     console.print(f"Evidence written to {output}")
     console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
 

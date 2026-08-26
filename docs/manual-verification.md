@@ -31,3 +31,8 @@ image ID, runtime identity and limits, every command's argv/exit/stdout/stderr, 
 before/after host hashes, commands skipped after a failure, and container cleanup. Docker isolation
 without a host mount is adequate for the current disposable boot experiment, but not evidence of a
 hardened adversarial or multi-tenant security boundary.
+
+For adapter and composition probes, inspect the unmodified declarative operations, before/after
+schema errors, complete output objects, source-preservation differences, and mutation flags. A
+patch that applies without raising is not a passing contract result. The paired negative must use
+the exact same input and target schema and differ by the explicitly retained operation delta.

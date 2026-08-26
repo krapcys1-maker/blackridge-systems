@@ -1,0 +1,162 @@
+{
+  "schema_version": "1",
+  "probe_id": "58a89a6645964e54aebcdd4941c2d3d3",
+  "observed_at": "2026-08-26T17:44:20.241196Z",
+  "provider": "jsonpatch-rfc6902+jsonschema-draft2020-12",
+  "subject": "paper-title-to-document-name",
+  "request": {
+    "schema_version": "1",
+    "name": "paper-title-to-document-name",
+    "description": "Bridge a source component that emits paper.title to a consumer that requires document.name while preserving the complete source payload.",
+    "source_contract": "paper-record/v1",
+    "target_contract": "document-record/v1",
+    "source_fixture": {
+      "paper": {
+        "title": "Evidence-Driven System Composition",
+        "authors": [
+          "Ada Example",
+          "Lin Example"
+        ]
+      },
+      "metadata": {
+        "id": "paper-001",
+        "year": 2026
+      },
+      "trace": {
+        "request_id": "manual-adapter-001"
+      }
+    },
+    "target_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "required": [
+        "document"
+      ],
+      "properties": {
+        "document": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
+    "patch": [
+      {
+        "op": "test",
+        "path": "/paper/title",
+        "value": "Evidence-Driven System Composition"
+      },
+      {
+        "op": "add",
+        "path": "/document",
+        "value": {}
+      },
+      {
+        "op": "copy",
+        "from": "/paper/title",
+        "path": "/document/name"
+      }
+    ]
+  },
+  "observations": {
+    "probe_completed": true,
+    "libraries": {
+      "jsonpatch": "1.33",
+      "jsonschema": "4.26.0"
+    },
+    "before_adapter": {
+      "instance": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        }
+      },
+      "target_contract_valid": false,
+      "validation_errors": [
+        {
+          "message": "'document' is a required property",
+          "instance_path": "/",
+          "schema_path": "/required",
+          "validator": "required"
+        }
+      ]
+    },
+    "patch": {
+      "operations": [
+        {
+          "op": "test",
+          "path": "/paper/title",
+          "value": "Evidence-Driven System Composition"
+        },
+        {
+          "op": "add",
+          "path": "/document",
+          "value": {}
+        },
+        {
+          "op": "copy",
+          "from": "/paper/title",
+          "path": "/document/name"
+        }
+      ],
+      "error": null,
+      "source_fixture_mutated": false,
+      "definition_mutated": false,
+      "working_copy_mutated": true
+    },
+    "after_adapter": {
+      "instance": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        },
+        "document": {
+          "name": "Evidence-Driven System Composition"
+        }
+      },
+      "target_contract_valid": true,
+      "validation_errors": []
+    },
+    "preservation": {
+      "all_source_values_preserved": true,
+      "changed_or_missing_source_paths": []
+    }
+  },
+  "sources": [
+    "https://github.com/stefankoegl/python-json-patch/tree/1.33",
+    "https://github.com/python-jsonschema/jsonschema"
+  ],
+  "warnings": []
+}
+
