@@ -1,0 +1,363 @@
+{
+  "schema_version": "1",
+  "probe_id": "e1a5732e29fa408aa8803bfb59b7acea",
+  "observed_at": "2026-08-26T21:17:33.148660Z",
+  "provider": "swe-rex-docker/1.4.0",
+  "subject": "https://github.com/pypa/sampleproject@621e4974ca25ce531773def586ba3ed8e736b3fc",
+  "request": {
+    "schema_version": "1",
+    "name": "pypa-sampleproject-unisolated-control",
+    "description": "Run the identical repository and hostile workload with inherited container networking to prove that the production boundary test detects the deliberately unsafe control.",
+    "repository_url": "https://github.com/pypa/sampleproject",
+    "commit": "621e4974ca25ce531773def586ba3ed8e736b3fc",
+    "image": "blackridge/swerex-runtime:1.4.0",
+    "workdir": "/workspace/repository",
+    "execution_profile": "calibration",
+    "execution_network": "inherit",
+    "preparation_commands": [
+      {
+        "id": "install-package",
+        "description": "Build and install the exact checked-out source before the control workload.",
+        "argv": [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "--disable-pip-version-check",
+          "."
+        ],
+        "timeout_seconds": 300.0
+      }
+    ],
+    "commands": [
+      {
+        "id": "baseline-unittest",
+        "description": "Run the same real repository unittest used by the production experiment.",
+        "argv": [
+          "python",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ],
+        "timeout_seconds": 120.0
+      },
+      {
+        "id": "behavior-artifact",
+        "description": "Exercise the same add_one behavior used by the production experiment.",
+        "argv": [
+          "python",
+          "-c",
+          "import json,pathlib; from sample.simple import add_one; actual=add_one(41); result={\"input\":41,\"actual\":actual,\"expected\":42}; p=pathlib.Path(\"/tmp/blackridge-production-result.json\"); p.write_text(json.dumps(result,sort_keys=True)); print(p.read_text())"
+        ],
+        "timeout_seconds": 60.0
+      },
+      {
+        "id": "network-and-secret-boundary",
+        "description": "Apply the exact hostile assertions while inherited networking remains enabled.",
+        "argv": [
+          "python",
+          "-c",
+          "import json\nimport os\nimport socket\n\ndef connected(target):\n    try:\n        connection = socket.create_connection(target, timeout=2)\n        connection.close()\n        return True\n    except OSError:\n        return False\n\nneedles = (\"DEEPSEEK\", \"GITHUB\", \"OPENAI\", \"TOKEN\", \"SECRET\", \"API_KEY\")\nsensitive_names = sorted(\n    name for name in os.environ if any(token in name.upper() for token in needles)\n)\nresult = {\n    \"direct_egress\": connected((\"1.1.1.1\", 443)),\n    \"dns_egress\": connected((\"pypi.org\", 443)),\n    \"sensitive_environment_names\": sensitive_names,\n}\nprint(json.dumps(result, sort_keys=True), flush=True)\nassert not result[\"direct_egress\"], result\nassert not result[\"dns_egress\"], result\nassert not sensitive_names, result\n"
+        ],
+        "timeout_seconds": 30.0
+      },
+      {
+        "id": "boundary-sentinel",
+        "description": "This sentinel must not run after the deliberately unsafe control is detected.",
+        "argv": [
+          "python",
+          "-c",
+          "print('production-boundary-complete')"
+        ],
+        "timeout_seconds": 30.0
+      }
+    ]
+  },
+  "observations": {
+    "probe_completed": true,
+    "duration_seconds": 4.599,
+    "image": {
+      "requested_reference": "blackridge/swerex-runtime:1.4.0",
+      "resolved_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
+      "repo_digests": [
+        "blackridge/swerex-runtime@sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+      ],
+      "created": "2026-08-26T20:46:11.627496934Z",
+      "os": "linux",
+      "architecture": "amd64",
+      "labels": {
+        "org.opencontainers.image.base.digest": "sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17",
+        "org.opencontainers.image.base.name": "python:3.12-slim",
+        "org.opencontainers.image.licenses": "Apache-2.0 AND LicenseRef-Third-Party",
+        "org.opencontainers.image.source": "https://github.com/krapcys1-maker/blackridge-systems",
+        "org.opencontainers.image.title": "Blackridge pinned SWE-ReX runtime",
+        "systems.blackridge.debian.snapshot": "20260824T000000Z",
+        "systems.blackridge.swerex.version": "1.4.0"
+      }
+    },
+    "deployment": {
+      "started": true,
+      "error": null,
+      "container_name": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-e00fcb11-bce5-4508-8e6a-07360f628b6e",
+      "security_options": [
+        "cap-drop=ALL",
+        "no-new-privileges",
+        "pids-limit=256",
+        "memory=1g",
+        "cpus=2"
+      ]
+    },
+    "execution_boundary": {
+      "requested": "inherit",
+      "applied": true,
+      "error": null,
+      "networks_before": null,
+      "disconnect_commands": [],
+      "networks_after": null,
+      "workload_executor": "swe-rex",
+      "host_environment_forwarded": []
+    },
+    "commands": [
+      {
+        "id": "runtime-identity",
+        "description": "Record the exact SWE-ReX server version inside the image.",
+        "argv": [
+          "swerex-remote",
+          "--version"
+        ],
+        "cwd": null,
+        "timeout_seconds": 60,
+        "phase": "runtime",
+        "executor": "swe-rex",
+        "duration_seconds": 0.375,
+        "stdout": "1.4.0\n",
+        "stderr": "",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "runtime-boundary",
+        "description": "Read effective Linux process and cgroup isolation limits.",
+        "argv": [
+          "python",
+          "-c",
+          "import json,pathlib; status=dict(line.split(':',1) for line in pathlib.Path('/proc/self/status').read_text().splitlines() if ':' in line); paths=['/sys/fs/cgroup/memory.max','/sys/fs/cgroup/pids.max','/sys/fs/cgroup/cpu.max']; result={'CapEff':status.get('CapEff','').strip(),'NoNewPrivs':status.get('NoNewPrivs','').strip(),**{p:pathlib.Path(p).read_text().strip() if pathlib.Path(p).exists() else 'unavailable' for p in paths}}; print(json.dumps(result,sort_keys=True))"
+        ],
+        "cwd": null,
+        "timeout_seconds": 60,
+        "phase": "runtime",
+        "executor": "swe-rex",
+        "duration_seconds": 0.021,
+        "stdout": "{\"/sys/fs/cgroup/cpu.max\": \"200000 100000\", \"/sys/fs/cgroup/memory.max\": \"1073741824\", \"/sys/fs/cgroup/pids.max\": \"256\", \"CapEff\": \"0000000000000000\", \"NoNewPrivs\": \"1\"}\n",
+        "stderr": "",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "source-init",
+        "description": "Create an empty repository directory inside the container.",
+        "argv": [
+          "git",
+          "init",
+          "/workspace/repository"
+        ],
+        "cwd": null,
+        "timeout_seconds": 60,
+        "phase": "source",
+        "executor": "swe-rex",
+        "duration_seconds": 0.009,
+        "stdout": "Initialized empty Git repository in /workspace/repository/.git/\n",
+        "stderr": "hint: Using 'master' as the name for the initial branch. This default branch name\nhint: is subject to change. To configure the initial branch name to use in all\nhint: of your new repositories, which will suppress this warning, call:\nhint:\nhint: \tgit config --global init.defaultBranch <name>\nhint:\nhint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\nhint: 'development'. The just-created branch can be renamed via this command:\nhint:\nhint: \tgit branch -m <name>\n",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "source-remote",
+        "description": "Attach the explicitly requested public repository origin.",
+        "argv": [
+          "git",
+          "-C",
+          "/workspace/repository",
+          "remote",
+          "add",
+          "origin",
+          "https://github.com/pypa/sampleproject.git"
+        ],
+        "cwd": null,
+        "timeout_seconds": 60,
+        "phase": "source",
+        "executor": "swe-rex",
+        "duration_seconds": 0.004,
+        "stdout": "",
+        "stderr": "",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "source-fetch",
+        "description": "Fetch only the explicitly pinned commit from the public origin.",
+        "argv": [
+          "git",
+          "-C",
+          "/workspace/repository",
+          "fetch",
+          "--depth",
+          "1",
+          "origin",
+          "621e4974ca25ce531773def586ba3ed8e736b3fc"
+        ],
+        "cwd": null,
+        "timeout_seconds": 180,
+        "phase": "source",
+        "executor": "swe-rex",
+        "duration_seconds": 0.772,
+        "stdout": "",
+        "stderr": "From https://github.com/pypa/sampleproject\n * branch            621e4974ca25ce531773def586ba3ed8e736b3fc -> FETCH_HEAD\n",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "source-checkout",
+        "description": "Check out the fetched commit in detached mode without substitution.",
+        "argv": [
+          "git",
+          "-C",
+          "/workspace/repository",
+          "checkout",
+          "--detach",
+          "FETCH_HEAD"
+        ],
+        "cwd": null,
+        "timeout_seconds": 60,
+        "phase": "source",
+        "executor": "swe-rex",
+        "duration_seconds": 0.006,
+        "stdout": "",
+        "stderr": "HEAD is now at 621e497 pyproject: prep 4.0.0 (#219)\n",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "source-identity",
+        "description": "Print the exact commit that the following commands will execute.",
+        "argv": [
+          "git",
+          "-C",
+          "/workspace/repository",
+          "rev-parse",
+          "HEAD"
+        ],
+        "cwd": null,
+        "timeout_seconds": 60,
+        "phase": "source",
+        "executor": "swe-rex",
+        "duration_seconds": 0.004,
+        "stdout": "621e4974ca25ce531773def586ba3ed8e736b3fc\n",
+        "stderr": "",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "install-package",
+        "description": "Build and install the exact checked-out source before the control workload.",
+        "argv": [
+          "python",
+          "-m",
+          "pip",
+          "install",
+          "--disable-pip-version-check",
+          "."
+        ],
+        "cwd": "/workspace/repository",
+        "timeout_seconds": 300.0,
+        "phase": "preparation",
+        "executor": "swe-rex",
+        "duration_seconds": 2.149,
+        "stdout": "Processing /workspace/repository\n  Installing build dependencies: started\n  Installing build dependencies: finished with status 'done'\n  Getting requirements to build wheel: started\n  Getting requirements to build wheel: finished with status 'done'\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nCollecting peppercorn (from sampleproject==4.0.0)\n  Downloading peppercorn-0.6-py3-none-any.whl.metadata (3.4 kB)\nDownloading peppercorn-0.6-py3-none-any.whl (4.8 kB)\nBuilding wheels for collected packages: sampleproject\n  Building wheel for sampleproject (pyproject.toml): started\n  Building wheel for sampleproject (pyproject.toml): finished with status 'done'\n  Created wheel for sampleproject: filename=sampleproject-4.0.0-py3-none-any.whl size=4697 sha256=4e747fe2fdcab327d70b5dba89c8a84fe4c2ee8bb50215e8eb3f660ba84e58ae\n  Stored in directory: /tmp/pip-ephem-wheel-cache-zzr_tfnl/wheels/6b/7b/d0/4122e553583172216cdd1fced0e09004343eddd3b2b404f8e7\nSuccessfully built sampleproject\nInstalling collected packages: peppercorn, sampleproject\nSuccessfully installed peppercorn-0.6 sampleproject-4.0.0\n",
+        "stderr": "WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.\n",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "baseline-unittest",
+        "description": "Run the same real repository unittest used by the production experiment.",
+        "argv": [
+          "python",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ],
+        "cwd": "/workspace/repository",
+        "timeout_seconds": 120.0,
+        "phase": "experiment",
+        "executor": "swe-rex",
+        "duration_seconds": 0.056,
+        "stdout": "",
+        "stderr": "test_add_one (tests.test_simple.TestSimple.test_add_one) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "behavior-artifact",
+        "description": "Exercise the same add_one behavior used by the production experiment.",
+        "argv": [
+          "python",
+          "-c",
+          "import json,pathlib; from sample.simple import add_one; actual=add_one(41); result={\"input\":41,\"actual\":actual,\"expected\":42}; p=pathlib.Path(\"/tmp/blackridge-production-result.json\"); p.write_text(json.dumps(result,sort_keys=True)); print(p.read_text())"
+        ],
+        "cwd": "/workspace/repository",
+        "timeout_seconds": 60.0,
+        "phase": "experiment",
+        "executor": "swe-rex",
+        "duration_seconds": 0.02,
+        "stdout": "{\"actual\": 42, \"expected\": 42, \"input\": 41}\n",
+        "stderr": "",
+        "exit_code": 0,
+        "transport_error": null
+      },
+      {
+        "id": "network-and-secret-boundary",
+        "description": "Apply the exact hostile assertions while inherited networking remains enabled.",
+        "argv": [
+          "python",
+          "-c",
+          "import json\nimport os\nimport socket\n\ndef connected(target):\n    try:\n        connection = socket.create_connection(target, timeout=2)\n        connection.close()\n        return True\n    except OSError:\n        return False\n\nneedles = (\"DEEPSEEK\", \"GITHUB\", \"OPENAI\", \"TOKEN\", \"SECRET\", \"API_KEY\")\nsensitive_names = sorted(\n    name for name in os.environ if any(token in name.upper() for token in needles)\n)\nresult = {\n    \"direct_egress\": connected((\"1.1.1.1\", 443)),\n    \"dns_egress\": connected((\"pypi.org\", 443)),\n    \"sensitive_environment_names\": sensitive_names,\n}\nprint(json.dumps(result, sort_keys=True), flush=True)\nassert not result[\"direct_egress\"], result\nassert not result[\"dns_egress\"], result\nassert not sensitive_names, result\n"
+        ],
+        "cwd": "/workspace/repository",
+        "timeout_seconds": 30.0,
+        "phase": "experiment",
+        "executor": "swe-rex",
+        "duration_seconds": 0.059,
+        "stdout": "{\"direct_egress\": true, \"dns_egress\": true, \"sensitive_environment_names\": []}\n",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 23, in <module>\nAssertionError: {'direct_egress': True, 'dns_egress': True, 'sensitive_environment_names': []}\n",
+        "exit_code": 1,
+        "transport_error": null
+      }
+    ],
+    "not_run_command_ids": [
+      "boundary-sentinel"
+    ],
+    "host_workspace": {
+      "before_sha256": "e0b86839101742032f266bcc6e1f04b205f71d58f74fe2fea5721a84904394d2",
+      "after_sha256": "e0b86839101742032f266bcc6e1f04b205f71d58f74fe2fea5721a84904394d2",
+      "unchanged": true,
+      "changed_paths": [],
+      "file_count_before": 230,
+      "file_count_after": 230
+    },
+    "cleanup": {
+      "stop_error": null,
+      "force_remove": null,
+      "container_exists_after_stop": false
+    }
+  },
+  "sources": [
+    "https://github.com/pypa/sampleproject/commit/621e4974ca25ce531773def586ba3ed8e736b3fc",
+    "https://github.com/SWE-agent/SWE-ReX/tree/v1.4.0"
+  ],
+  "warnings": [
+    "Execution stopped at the first failed command; remaining commands were not run."
+  ]
+}

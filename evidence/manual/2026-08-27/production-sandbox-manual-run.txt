@@ -1,0 +1,127 @@
+Blackridge production sandbox boundary — manual experiment record — 2026-08-27
+
+Objective
+---------
+Reuse SWE-ReX and Docker to prepare an exact repository with network access, then run
+the behavior-bearing workload without container networking or inherited host secrets.
+Do not integrate the boundary into the production composer until paired real controls pass.
+
+Calibration 1: internal network from container start — rejected
+---------------------------------------------------------------
+An exact SWE-ReX 1.4.0 deployment was started on a newly created Docker --internal
+network. The deployment did not become ready because the same network restriction also
+blocked the SWE-ReX host-to-container control channel. No workload result was produced,
+so this attempt was not counted as a product PASS or FAIL.
+
+After interruption, read-only inspection found exactly:
+  network f29936fa4028 / blackridge-calibration-fcc8ba4b8e39
+  container 129265bc4782 attached only to that network
+Both exact objects were removed. Follow-up inspection reported:
+  CONTAINER_REMAINING=False
+  NETWORK_REMAINING=False
+
+Calibration 2: prepare, detach, docker exec — boundary passed; cleanup design failed
+-------------------------------------------------------------------------------
+SWE-ReX started normally on bridge and returned version 1.4.0. The bridge network was
+then detached and Docker inspection returned an empty network map. Shell-free docker
+exec remained available and produced:
+  workload control: exit 0, docker-exec-control
+  direct 1.1.1.1:443: OSError [Errno 101] Network is unreachable
+  pypi.org:443: gaierror [Errno -3] Temporary failure in name resolution
+  sensitive environment names: []
+
+SWE-ReX deployment.stop then returned ServerDisconnectedError because its server was
+intentionally unreachable, and container 09c609155d3a remained. The exact container was
+removed manually and follow-up inspection reported CONTAINER_REMAINING=False. This
+attempt validated the split control plane but rejected SWE-ReX stop as the isolated
+cleanup mechanism. The implementation now uses an exact recorded docker rm --force for
+networkless executions and verifies that no container remains.
+
+Frozen paired inputs
+--------------------
+Image ID:
+  sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+Repository:
+  https://github.com/pypa/sampleproject
+Commit:
+  621e4974ca25ce531773def586ba3ed8e736b3fc
+Preparation argv:
+  python -m pip install --disable-pip-version-check .
+Workload argv lists:
+  baseline-unittest
+  behavior-artifact
+  network-and-secret-boundary
+  boundary-sentinel
+
+The retained request objects were compared after both runs. Image, commit, preparation
+argv, and all four workload argv lists are identical. Only the declared execution
+profile/network and descriptive metadata differ.
+
+Positive production-boundary run
+--------------------------------
+Profile/network:
+  production / none
+Preparation:
+  SWE-ReX fetched only the pinned commit and installed the exact checkout; exit 0.
+Boundary evidence:
+  networks before: bridge
+  disconnect command exit: 0
+  networks after: {}
+  host environment forwarded by adapter: []
+  workload executor: docker-exec-shell-free
+Workload:
+  repository unittest: exit 0, one test passed
+  behavior artifact: {"actual": 42, "expected": 42, "input": 41}
+  hostile boundary: {"direct_egress": false, "dns_egress": false,
+                     "sensitive_environment_names": []}
+  boundary sentinel: exit 0, production-boundary-complete
+Host and cleanup:
+  before/after host digest matched
+  exact docker rm --force exit 0
+  container remaining: false
+  warnings: 0
+
+Deliberately unisolated paired control
+--------------------------------------
+Profile/network:
+  calibration / inherit
+Baseline repository unittest and behavior artifact matched the positive run. The exact
+hostile command then printed:
+  {"direct_egress": true, "dns_egress": true,
+   "sensitive_environment_names": []}
+and exited 1 on the expected assertion. boundary-sentinel was explicitly retained as
+not run. The host digest matched, SWE-ReX cleanup completed, and no container remained.
+
+Fail-closed policy control
+--------------------------
+The positive production request was modified in memory only to request inherited
+networking. Pydantic rejected it with the named cause:
+  production sandbox experiments require execution_network=none
+The set of matching Docker containers was identical before and after validation.
+
+Regression and remote verification
+----------------------------------
+Local checks:
+  ruff: pass
+  generated third-party notices: match
+  declared-copy provenance issues: 0
+  pytest: 57 passed
+  evidence JSON parsing: pass
+  retained checksum comparison: pass
+  local Markdown links: 0 missing
+Implementation commit:
+  48739d66679ec152ca9443c24ff657112be09cd0
+GitHub Ubuntu CI (success):
+  https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33015018237
+The GitHub job independently installed the project, linted it, verified notices and
+copy provenance, and ran the regression suite. The Docker A/B remains the retained
+manual evidence above; ordinary CI does not claim to replace that experiment.
+
+Verdict and boundary
+--------------------
+PASS for the two-phase primitive on this frozen repository and image. The paired control
+shows that the hostile check distinguishes isolated from inherited networking while
+baseline behavior stays equal. This is not yet a production composer backend or a
+hardened multi-tenant claim: preparation still has network access, the ephemeral
+container filesystem is writable, the process runs as root inside the container
+namespace, and Docker remains a trusted host boundary.

@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T21:17:48.390328Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "unisolated-boundary-control",
+  "scenario_description": "The identical hostile workload rejects a deliberately inherited network boundary.",
+  "expected": [
+    "Baseline behavior still passes, isolating the difference to the execution boundary.",
+    "At least one egress attempt succeeds and the hostile assertion exits nonzero.",
+    "The following sentinel is not run and cleanup is still confirmed."
+  ],
+  "observed": [
+    "Preparation, baseline unittest, behavior artifact, image, commit, and hostile command argv matched the production experiment.",
+    "With inherited networking, both direct IP and DNS egress were true and the exact hostile assertion exited one.",
+    "The following boundary sentinel was retained as not run; the host stayed unchanged and SWE-ReX removed the container."
+  ],
+  "probe_id": "e1a5732e29fa408aa8803bfb59b7acea",
+  "probe_file": "evidence\\manual\\2026-08-27\\production-sandbox-unisolated-control-probe.json",
+  "probe_sha256": "0aecb1f7c8a0fa1f274e28b30445ad635ddce1872adc8c267eab1fce2e9b0403",
+  "notes": "PASS means the paired unsafe control was detected; the unisolated execution itself failed the boundary contract as designed."
+}

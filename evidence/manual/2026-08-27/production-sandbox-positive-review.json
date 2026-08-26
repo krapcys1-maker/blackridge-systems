@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T21:17:47.955882Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "production-network-and-secret-boundary",
+  "scenario_description": "Preparation keeps network access, but the production workload runs without egress or host secrets.",
+  "expected": [
+    "Repository preparation succeeds before isolation and the real workload still passes after isolation.",
+    "Direct IP and DNS egress both fail during the workload.",
+    "No sensitive host environment name is forwarded, the host stays unchanged, and the container is removed."
+  ],
+  "observed": [
+    "The exact commit was fetched and installed during the SWE-ReX preparation phase while bridge networking was present.",
+    "Blackridge detached bridge, observed zero remaining container networks, and executed all four workload commands through shell-free docker exec.",
+    "The real unittest and add_one(41)=42 artifact passed after isolation; direct IP egress and DNS egress were false and sensitive environment names were empty.",
+    "The host snapshot was unchanged, exact docker rm --force cleanup exited zero, and no container remained."
+  ],
+  "probe_id": "30db876dfea84689b432d8289d7ba7c9",
+  "probe_file": "evidence\\manual\\2026-08-27\\production-sandbox-positive-probe.json",
+  "probe_sha256": "6dec94737f6cd24989a534143c20ac681366e1c7dd0575431d46b1a93d41585d",
+  "notes": "PASS is limited to the tested single-container production boundary; it is not a hardened multi-tenant claim."
+}
