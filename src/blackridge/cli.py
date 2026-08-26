@@ -54,7 +54,20 @@ from blackridge.io import (
     write_run,
 )
 from blackridge.octocode import DEFAULT_OCTOCODE_PACKAGE, OctocodeDiscovery
+from blackridge.provenance import (
+    audit_source_provenance,
+    load_provenance_manifest,
+    load_source_audit_definition,
+    provenance_gate,
+)
 from blackridge.quality import OpenSSFScorecardClient
+from blackridge.release_compliance import (
+    DEFAULT_SYFT_IMAGE,
+    load_distribution_manifest,
+    probe_image_release,
+    probe_wheel_release,
+    write_or_check_notices,
+)
 from blackridge.sandbox import SWEREX_SOURCE, SwerexDockerProbe
 from blackridge.supply_chain import SupplyChainProbe
 from blackridge.workflow import discover as run_discovery
@@ -272,8 +285,7 @@ def probe_environment(
     console.print(f"Commands executed: {len(command_results)}")
     console.print(f"Host source unchanged: {observations['host_workspace']['unchanged']}")
     console.print(
-        "Container remaining after stop: "
-        f"{observations['cleanup']['container_exists_after_stop']}"
+        f"Container remaining after stop: {observations['cleanup']['container_exists_after_stop']}"
     )
     if failed:
         console.print(
@@ -372,8 +384,7 @@ def probe_composition(
     )
     console.print(f"Working target valid: {comparison['working_target_contract_valid']}")
     console.print(
-        "Deliberate negative target valid: "
-        f"{comparison['negative_target_contract_valid']}"
+        f"Deliberate negative target valid: {comparison['negative_target_contract_valid']}"
     )
     console.print(f"Removed operations in negative: {len(difference['removed_operations'])}")
     console.print(f"Evidence written to {output}")
@@ -386,9 +397,7 @@ def probe_supply_chain(
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/evidence/supply-chain-probe.json"
     ),
-    work_root: Annotated[Path, typer.Option("--work-root")] = Path(
-        ".blackridge/supply-chain/work"
-    ),
+    work_root: Annotated[Path, typer.Option("--work-root")] = Path(".blackridge/supply-chain/work"),
     artifact_dir: Annotated[Path, typer.Option("--artifact-dir")] = Path(
         ".blackridge/supply-chain/artifacts"
     ),
@@ -414,9 +423,7 @@ def probe_supply_chain(
                     f"@{experiment.package_version}"
                 ),
                 request=experiment.model_dump(),
-                sources=[
-                    f"https://github.com/{experiment.repository}/commit/{experiment.commit}"
-                ],
+                sources=[f"https://github.com/{experiment.repository}/commit/{experiment.commit}"],
                 error=exc,
             )
             with suppress(OSError):
@@ -429,17 +436,13 @@ def probe_supply_chain(
     observations = probe.observations
     console.print(f"[bold]Raw supply-chain evidence:[/bold] {probe.subject}")
     console.print(
-        "Repository license: "
-        f"{observations['repository_license']['spdx_id'] or 'unknown'}"
+        f"Repository license: {observations['repository_license']['spdx_id'] or 'unknown'}"
     )
     console.print(
         "Direct dependency license concerns: "
         f"{observations['dependency_licenses']['concern_count']}"
     )
-    console.print(
-        "Scorecard: "
-        f"{observations['security_posture']['scorecard']['status']}"
-    )
+    console.print(f"Scorecard: {observations['security_posture']['scorecard']['status']}")
     console.print(
         "Vulnerable lock-scope package entries: "
         f"{observations['known_vulnerabilities']['vulnerable_package_entry_count']}"
@@ -455,12 +458,8 @@ def probe_supply_chain(
 
 @app.command("benchmark-evaluate")
 def benchmark_evaluate(
-    definition_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
-    run_plan_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
+    definition_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    run_plan_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/evidence/benchmark-run-probe.json"
     ),
@@ -502,15 +501,11 @@ def benchmark_evaluate(
 
 @app.command("benchmark-calibrate")
 def benchmark_calibrate(
-    definition_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
+    definition_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     reference_plan_file: Annotated[
         Path, typer.Argument(exists=True, dir_okay=False, readable=True)
     ],
-    broken_plan_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
+    broken_plan_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/evidence/benchmark-calibration-probe.json"
     ),
@@ -545,33 +540,20 @@ def benchmark_calibrate(
 
     comparison = probe.observations["comparison"]
     console.print(f"[bold]Raw benchmark calibration:[/bold] {probe.subject}")
+    console.print(f"Reference all critical matched: {comparison['reference_all_critical_matched']}")
     console.print(
-        "Reference all critical matched: "
-        f"{comparison['reference_all_critical_matched']}"
+        f"Broken processes all exited zero: {comparison['broken_all_processes_exited_zero']}"
     )
-    console.print(
-        "Broken processes all exited zero: "
-        f"{comparison['broken_all_processes_exited_zero']}"
-    )
-    console.print(
-        "Broken all critical matched: "
-        f"{comparison['broken_all_critical_matched']}"
-    )
-    console.print(
-        f"Detected broken checks: {comparison['detected_broken_check_count']}"
-    )
+    console.print(f"Broken all critical matched: {comparison['broken_all_critical_matched']}")
+    console.print(f"Detected broken checks: {comparison['detected_broken_check_count']}")
     console.print(f"Evidence written to {output}")
     console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
 
 
 @app.command("benchmark-compare")
 def benchmark_compare(
-    definition_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
-    baseline_plan_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
+    definition_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    baseline_plan_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     blackridge_plan_file: Annotated[
         Path, typer.Argument(exists=True, dir_okay=False, readable=True)
     ],
@@ -625,9 +607,7 @@ def benchmark_compare(
 
 @app.command("compose-solve")
 def compose_solve(
-    definition_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
+    definition_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/composition-plan.yaml"
     ),
@@ -652,12 +632,8 @@ def compose_solve(
 
 @app.command("compose-generate")
 def compose_generate(
-    definition_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
-    plan_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
+    definition_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    plan_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     output_directory: Annotated[Path, typer.Argument()],
 ) -> None:
     """Generate a provenance-locked system from a complete compatibility plan."""
@@ -726,9 +702,7 @@ def compose_run(
 
 @app.command("probe-composer")
 def probe_composer(
-    definition_file: Annotated[
-        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
-    ],
+    definition_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     bundle_directory: Annotated[Path, typer.Argument()],
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
@@ -771,6 +745,158 @@ def probe_composer(
     console.print(f"Raw evidence written to {output}")
     console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
     if not plan["complete"] or not runtime_complete:
+        raise typer.Exit(code=1)
+
+
+@app.command("compliance-notices")
+def compliance_notices(
+    manifest_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ] = Path("compliance/distribution-manifest.yaml"),
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path("THIRD_PARTY_NOTICES.md"),
+    check: Annotated[bool, typer.Option("--check")] = False,
+) -> None:
+    """Generate or verify notices from the active distribution manifest."""
+
+    try:
+        manifest = load_distribution_manifest(manifest_file)
+        matches, _ = write_or_check_notices(manifest, output, check=check)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        console.print(f"[red]Notice generation failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    if check and not matches:
+        console.print(f"[red]Generated notices differ from {output}[/red]")
+        raise typer.Exit(code=1)
+    action = "match" if check else "written to"
+    console.print(f"Third-party notices {action} {output}")
+
+
+@app.command("probe-wheel-release")
+def probe_wheel_compliance(
+    wheel: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    manifest_file: Annotated[
+        Path, typer.Option("--manifest", exists=True, dir_okay=False, readable=True)
+    ] = Path("compliance/distribution-manifest.yaml"),
+    output_directory: Annotated[Path, typer.Option("--output-directory", "-o")] = Path(
+        ".blackridge/release/wheel"
+    ),
+    syft_image: Annotated[str, typer.Option("--syft-image")] = DEFAULT_SYFT_IMAGE,
+) -> None:
+    """Create wheel SBOMs, component inventory, license bundle, and raw evidence."""
+
+    evidence_file = output_directory / "probe.json"
+    try:
+        manifest = load_distribution_manifest(manifest_file)
+        probe = probe_wheel_release(
+            wheel,
+            manifest,
+            output_dir=output_directory,
+            syft_image=syft_image,
+        )
+        write_probe(probe, evidence_file)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        console.print(f"[red]Wheel release probe failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    blockers = probe.observations["release_blockers"]
+    console.print(f"Wheel release blockers: {len(blockers)}")
+    console.print(f"Evidence and artifacts written to {output_directory}")
+    console.print("[yellow]The probe is not a legal approval or manual release verdict.[/yellow]")
+    if blockers:
+        raise typer.Exit(code=1)
+
+
+@app.command("probe-image-release")
+def probe_image_compliance(
+    image_ref: Annotated[str, typer.Argument()],
+    manifest_file: Annotated[
+        Path, typer.Option("--manifest", exists=True, dir_okay=False, readable=True)
+    ] = Path("compliance/distribution-manifest.yaml"),
+    output_directory: Annotated[Path, typer.Option("--output-directory", "-o")] = Path(
+        ".blackridge/release/image"
+    ),
+    syft_image: Annotated[str, typer.Option("--syft-image")] = DEFAULT_SYFT_IMAGE,
+) -> None:
+    """Inspect an exact image and block while distribution obligations remain unresolved."""
+
+    evidence_file = output_directory / "probe.json"
+    try:
+        manifest = load_distribution_manifest(manifest_file)
+        probe = probe_image_release(
+            image_ref,
+            manifest,
+            output_dir=output_directory,
+            syft_image=syft_image,
+        )
+        write_probe(probe, evidence_file)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        console.print(f"[red]Image release probe failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    blockers = probe.observations["release_blockers"]
+    console.print(f"Image release blockers: {len(blockers)}")
+    for blocker in blockers:
+        console.print(f"- {blocker}")
+    console.print(f"Evidence and artifacts written to {output_directory}")
+    console.print("[yellow]The image remains blocked pending manual obligation review.[/yellow]")
+    if blockers:
+        raise typer.Exit(code=1)
+
+
+@app.command("probe-source-provenance")
+def probe_source_provenance(
+    definition_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    repo_root: Annotated[Path, typer.Option("--repo-root")] = Path("."),
+    work_root: Annotated[Path, typer.Option("--work-root")] = Path(
+        ".blackridge/provenance/upstreams"
+    ),
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/source-provenance-probe.json"
+    ),
+) -> None:
+    """Compare tracked source history with exact, pinned upstream trees."""
+
+    try:
+        definition = load_source_audit_definition(definition_file)
+        probe = audit_source_provenance(
+            definition,
+            repo_root=repo_root,
+            work_root=work_root,
+        )
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        console.print(f"[red]Source provenance probe failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    observations = probe.observations
+    console.print(f"Tracked source files: {observations['tracked_source_file_count']}")
+    console.print(f"Exact fragment matches: {observations['exact_fragment_match_count']}")
+    console.print(f"Raw evidence written to {output}")
+    console.print(
+        "[yellow]Review the result manually; zero matches is not proof of originality.[/yellow]"
+    )
+
+
+@app.command("check-provenance")
+def check_provenance(
+    manifest_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ] = Path("provenance/derived-code.yaml"),
+    repo_root: Annotated[Path, typer.Option("--repo-root")] = Path("."),
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/provenance-gate-probe.json"
+    ),
+) -> None:
+    """Fail closed when copied/adapted code lacks immutable provenance evidence."""
+
+    try:
+        manifest = load_provenance_manifest(manifest_file)
+        probe = provenance_gate(manifest, repo_root=repo_root)
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        console.print(f"[red]Provenance gate failed to run:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    issues = probe.observations["issues"]
+    console.print(f"Provenance issues: {len(issues)}")
+    console.print(f"Raw evidence written to {output}")
+    if issues:
         raise typer.Exit(code=1)
 
 

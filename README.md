@@ -31,7 +31,10 @@ This repository contains an executable, manually reviewed vertical slice:
 10. freeze and calibrate an artifact-first A/B benchmark before either builder is run;
 11. solve a linear compatibility graph, reject blocked or unreviewed choices, and generate a
     provenance-locked runnable system bundle;
-12. emit an auditable discovery run and a **provisional** system blueprint.
+12. audit source history and exact multi-line similarity against frozen upstream commits;
+13. generate artifact-specific notices, package manifests, SBOMs, and license bundles;
+14. fail closed on incomplete copy provenance and unresolved image-distribution obligations;
+15. emit an auditable discovery run and a **provisional** system blueprint.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.
@@ -207,6 +210,29 @@ provenance hashes, an SBOM gate, and an explicit `release_ready: false`. Host ex
 restricted to Blackridge-owned calibration fixtures; production components must run through a
 sandbox in a later runtime backend.
 
+### Audit source provenance and release artifacts
+
+```powershell
+blackridge probe-source-provenance provenance/source-audit.yaml `
+  --output .blackridge/evidence/source-provenance.json
+blackridge check-provenance provenance/derived-code.yaml
+blackridge compliance-notices --check
+blackridge probe-wheel-release dist/blackridge_systems-0.1.0-py3-none-any.whl
+blackridge probe-image-release `
+  blackridge/swerex-runtime@sha256:<exact-repository-digest>
+```
+
+The source scan combines Git first-add history with an exact normalized six-line comparison against
+pinned upstream trees. It does not claim that zero exact matches proves originality. The copy gate
+requires source and destination hashes, an immutable upstream commit, license text, compatibility
+decision, attribution, modification notes, and a hash-locked named manual review.
+
+The wheel and image are separate distribution surfaces. The image probe inventories the exact
+digest, extracts Python and Debian license material, and remains blocked while corresponding-source
+or other license obligations are unresolved. See
+[`docs/release-compliance.md`](docs/release-compliance.md) and
+[`docs/source-provenance-policy.md`](docs/source-provenance-policy.md).
+
 ## Repository map
 
 ```text
@@ -216,6 +242,9 @@ tests/                    unit tests with mocked external tools
 evidence/manual/          retained real-world probes and named manual verdicts
 docs/                     architecture, research, and security decisions
 upstream-catalog.yaml     pinned upstream choices and provenance
+compliance/               active distribution manifest used to generate notices
+provenance/               source-audit scope and fail-closed derived-code registry
+docker/                   runtime Dockerfile and declared image component manifest
 ```
 
 ## Scope boundary

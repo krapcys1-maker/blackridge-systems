@@ -1,0 +1,24 @@
+schema_version: "1"
+allowed_copy_licenses:
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - ISC
+  - MIT
+legal_review_licenses:
+  - AGPL-3.0-only
+  - AGPL-3.0-or-later
+  - GPL-2.0-only
+  - GPL-2.0-or-later
+  - GPL-3.0-only
+  - GPL-3.0-or-later
+  - LGPL-2.1-only
+  - LGPL-2.1-or-later
+  - LGPL-3.0-only
+  - LGPL-3.0-or-later
+  - MPL-2.0
+
+# Empty after the 2026-08-26 source audit: Blackridge integrates upstreams through
+# dependencies, CLI/API/SDK, and OCI boundaries. A future copy/adaptation must add a
+# complete record here before it is allowed into a release branch.
+records: []

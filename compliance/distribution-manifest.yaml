@@ -1,0 +1,188 @@
+schema_version: "1"
+project: Blackridge Systems
+project_license: Apache-2.0
+repository: https://github.com/krapcys1-maker/blackridge-systems
+
+# This is the active execution and distribution surface, not the research catalog.
+# Exact transitive inventories are generated from the wheel/image bytes at release time.
+components:
+  - id: httpx
+    name: HTTPX
+    version: ">=0.27,<1"
+    license_spdx: BSD-3-Clause
+    upstream: https://github.com/encode/httpx
+    license_source: https://github.com/encode/httpx/blob/0.28.1/LICENSE.md
+    usage: HTTP clients for deps.dev, OpenSSF Scorecard, PyPI, and GitHub-facing probes.
+    boundary: declared-wheel-dependency
+    distributed_in: [wheel dependency metadata]
+
+  - id: python-json-patch
+    name: python-json-patch
+    package_name: jsonpatch
+    version: "1.33"
+    license_spdx: BSD-3-Clause
+    upstream: https://github.com/stefankoegl/python-json-patch/tree/v1.33
+    license_source: https://github.com/stefankoegl/python-json-patch/blob/v1.33/LICENSE
+    usage: RFC 6902 payload adaptation through the public Python API.
+    boundary: declared-wheel-dependency
+    distributed_in: [wheel dependency metadata]
+
+  - id: jsonschema
+    name: jsonschema
+    version: "4.26.0"
+    license_spdx: MIT
+    upstream: https://github.com/python-jsonschema/jsonschema/tree/v4.26.0
+    license_source: https://github.com/python-jsonschema/jsonschema/blob/v4.26.0/COPYING
+    usage: Draft 2020-12 component and artifact contract validation.
+    boundary: declared-wheel-dependency
+    distributed_in: [wheel dependency metadata]
+
+  - id: pydantic
+    name: Pydantic
+    version: ">=2.10,<3"
+    license_spdx: MIT
+    upstream: https://github.com/pydantic/pydantic
+    license_source: https://github.com/pydantic/pydantic/blob/v2.13.4/LICENSE
+    usage: Strict request, evidence, composition, and compliance models.
+    boundary: declared-wheel-dependency
+    distributed_in: [wheel dependency metadata]
+
+  - id: pyyaml
+    name: PyYAML
+    version: ">=6,<7"
+    license_spdx: MIT
+    upstream: https://github.com/yaml/pyyaml
+    license_source: https://github.com/yaml/pyyaml/blob/6.0.3/LICENSE
+    usage: Declarative request, benchmark, composition, and policy documents.
+    boundary: declared-wheel-dependency
+    distributed_in: [wheel dependency metadata]
+
+  - id: rich
+    name: Rich
+    version: ">=13.9,<15"
+    license_spdx: MIT
+    upstream: https://github.com/Textualize/rich
+    license_source: https://github.com/Textualize/rich/blob/v14.3.4/LICENSE
+    usage: Human-readable CLI output.
+    boundary: declared-wheel-dependency
+    distributed_in: [wheel dependency metadata]
+
+  - id: typer
+    name: Typer
+    version: ">=0.15,<1"
+    license_spdx: MIT
+    upstream: https://github.com/fastapi/typer
+    license_source: https://github.com/fastapi/typer/blob/0.27.1/LICENSE
+    usage: Blackridge command-line interface.
+    boundary: declared-wheel-dependency
+    distributed_in: [wheel dependency metadata]
+
+  - id: octocode
+    name: Octocode
+    version: npm:octocode@18.3.0
+    license_spdx: MIT
+    upstream: https://github.com/bgauryy/octocode/tree/af20f667fd2536c9502f69d99fe6bdedfcc839cb
+    license_source: https://github.com/bgauryy/octocode/blob/af20f667fd2536c9502f69d99fe6bdedfcc839cb/LICENSE
+    usage: Repository discovery invoked as a pinned npx CLI.
+    boundary: external-cli
+    distributed_in: []
+
+  - id: github-cli
+    name: GitHub CLI
+    version: environment prerequisite
+    license_spdx: MIT
+    upstream: https://github.com/cli/cli
+    license_source: https://github.com/cli/cli/blob/trunk/LICENSE
+    usage: Authenticated GitHub metadata and commit/license inspection.
+    boundary: external-cli
+    distributed_in: []
+
+  - id: deps-dev
+    name: deps.dev API
+    version: v3
+    license_spdx: Apache-2.0
+    upstream: https://github.com/google/deps.dev
+    license_source: https://github.com/google/deps.dev/blob/main/LICENSE
+    usage: Package, dependency, advisory, and license metadata over HTTPS.
+    boundary: external-api
+    distributed_in: []
+
+  - id: scorecard-api
+    name: OpenSSF Scorecard API
+    version: public API
+    license_spdx: Apache-2.0
+    upstream: https://github.com/ossf/scorecard
+    license_source: https://github.com/ossf/scorecard/blob/main/LICENSE
+    usage: Repository security-posture observations over HTTPS.
+    boundary: external-api
+    distributed_in: []
+
+  - id: syft
+    name: Syft
+    version: v1.51.0 OCI digest 678bfa565b60
+    license_spdx: Apache-2.0
+    upstream: https://github.com/anchore/syft/tree/v1.51.0
+    license_source: https://github.com/anchore/syft/blob/v1.51.0/LICENSE
+    usage: SPDX and CycloneDX generation from exact release artifacts.
+    boundary: build-or-inspection-tool
+    distributed_in: []
+
+  - id: osv-scanner
+    name: OSV-Scanner
+    version: v2.5.1 OCI digest 8108ae94eade
+    license_spdx: Apache-2.0
+    upstream: https://github.com/google/osv-scanner/tree/v2.5.1
+    license_source: https://github.com/google/osv-scanner/blob/v2.5.1/LICENSE
+    usage: Vulnerability inspection of retained CycloneDX SBOMs.
+    boundary: build-or-inspection-tool
+    distributed_in: []
+
+  - id: python-slim-base
+    name: Python slim OCI base
+    version: sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17
+    license_spdx: LicenseRef-MultiLicense-Image
+    upstream: https://github.com/docker-library/python
+    license_source: generated exact-image license-bundle.zip
+    usage: Base operating system and CPython runtime for the SWE-ReX image.
+    boundary: docker-base
+    distributed_in: [SWE-ReX runtime image]
+
+  - id: aiohttp
+    name: aiohttp
+    version: ">=3.10,<4"
+    license_spdx: Apache-2.0 AND MIT
+    upstream: https://github.com/aio-libs/aiohttp
+    license_source: generated exact-image license-bundle.zip
+    usage: Explicit SWE-ReX Docker-client dependency missing from swe-rex 1.4.0 metadata.
+    boundary: docker-installed-package
+    distributed_in: [SWE-ReX runtime image]
+
+  - id: swe-rex
+    name: SWE-ReX
+    version: "1.4.0"
+    license_spdx: MIT
+    upstream: https://github.com/SWE-agent/SWE-ReX/tree/f802b3e14d82aa4c13291d2fda5bd4fd48f36f91
+    license_source: https://github.com/SWE-agent/SWE-ReX/blob/f802b3e14d82aa4c13291d2fda5bd4fd48f36f91/LICENSE.txt
+    usage: Replaceable Python SDK and CLI execution boundary for disposable environments.
+    boundary: docker-installed-package
+    distributed_in: [SWE-ReX runtime image]
+
+  - id: debian-ca-certificates
+    name: Debian ca-certificates
+    version: resolved during image build
+    license_spdx: LicenseRef-MultiLicense-Debian-ca-certificates
+    upstream: https://packages.debian.org/ca-certificates
+    license_source: generated exact-image license-bundle.zip
+    usage: TLS trust store installed by the Dockerfile.
+    boundary: docker-installed-package
+    distributed_in: [SWE-ReX runtime image]
+
+  - id: debian-git
+    name: Debian Git
+    version: resolved during image build
+    license_spdx: LicenseRef-MultiLicense-Debian-Git
+    upstream: https://packages.debian.org/git
+    license_source: generated exact-image license-bundle.zip
+    usage: Fetch exact candidate commits inside disposable environments.
+    boundary: docker-installed-package
+    distributed_in: [SWE-ReX runtime image]
