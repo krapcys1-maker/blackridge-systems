@@ -35,6 +35,10 @@ time-stamped snapshot and may change upstream.
 | provenance gate / `incomplete-copy-control` | PASS | A deliberately unsafe copy record exited 1 with 11 concrete issues, including mutable revision, missing source paths, license, attribution, modifications, review, and destination. Copy remained disallowed. |
 | wheel release / `exact-wheel-bundle` | PASS for the wheel evidence; no legal verdict | An isolated build produced a wheel with 29 members, seven runtime and seven optional declarations, and all three Blackridge legal files. Pinned Syft generated both SBOMs; a second clean venv installed and imported the exact wheel. |
 | image release / `exact-image-block` | PASS for the blocking mechanism; IMAGE BLOCKED | The exact runnable image yielded 161 SBOM packages, 35 Python distributions, 118 Debian packages, and 161 readable bundled license files. Four unresolved obligation classes kept `release_gate_open: false` and the CLI exited 1. |
+| locked wheel rerun / `exact-wheel-bundle` | PASS for exact current bytes; no legal verdict | The current 86,056-byte wheel (`836bca...`) again contained 29 members and all three legal files. Its probe had zero technical blockers; a fresh venv passed dependency checks, import, installed CLI option parsing, and ZIP CRC inspection. |
+| locked internal image / `exact-locked-internal-image` | PASS internally; PUBLIC IMAGE BLOCKED | The final no-cache image (`b1e8e07...`) matched all 35 Python and 118 Debian lock entries, used the frozen Debian snapshot, matched six exact license-file reviews, and ran the positive sampleproject experiment. Exactly two public-distribution blockers remain. |
+| image license-review negative / `invalid-image-license-review-control` | PASS for fail-closed behavior | One deliberately false license SHA invalidated the technical review, restored four unknown-metadata records, and produced a third blocker while all runtime locks still matched. |
+| GitHub Linux release workflow / `exact-locked-internal-image` | PASS for v1 internal policy; PUBLIC IMAGE BLOCKED | On commit `541d6b2`, Ubuntu rebuilt and inspected both artifacts. The downloaded evidence had 183 nonempty files; the exact Linux image matched both locks and six reviews, and the workflow accepted only its exact two-blocker internal-only state. |
 
 ## Important findings
 
@@ -129,6 +133,31 @@ time-stamped snapshot and may change upstream.
     an arbitrary mapped UID still lacked writable Syft cache and temporary space. The final run
     used host UID/GID plus isolated `HOME=/tmp` and tmpfs, uploaded 178 nonempty files, and failed
     only at the intended policy gate. Operational exit 2+ is now distinguished from policy exit 1.
+35. The final internal image embeds a 35-distribution Python lock with one exact wheel hash per
+    entry and a 118-row Debian binary/source lock. The Docker build compares the installed OS
+    closure byte-for-byte and pip installs with `--require-hashes`; the final probe independently
+    matched both closures and the timestamped apt source configuration.
+36. A deliberately false aiohappyeyeballs wheel digest made a real fresh-base pip invocation exit
+    1 with expected and actual hashes. A separately false markdown-it-py license digest invalidated
+    the review without disturbing runtime-lock evidence, proving both controls fail closed at the
+    intended boundary.
+37. Exact license-file bytes technically identified MIT terms for markdown-it-py, mdurl, and
+    SWE-ReX, ISC for ptyprocess, GPL-3.0-or-later for bashlex, and MPL-2.0 for certifi. This reduced
+    metadata uncertainty but did not create legal approval; reciprocal-license review and complete
+    corresponding-source delivery still block public image distribution.
+38. The final exact image reran the same pinned repository in both directions: the real unittest
+    and `41 -> 42` artifact passed, while `5 -> 999` raised the retained `expected 999, got 6`
+    assertion and prevented the sentinel command. In both runs host bytes matched and no container
+    remained.
+39. The release workflow no longer accepts every policy exit 1. It now inspects the uploaded probe
+    and requires complete locks, six valid reviews, zero review issues, zero unresolved metadata,
+    a closed gate, and exactly the two expected public blockers. The paired invalid-review probe
+    failed four of those assertions.
+40. GitHub run `33013302865` independently rebuilt the current commit on Ubuntu and passed every
+    workflow step. Its exact image ID differed from the local build, as expected for separately
+    created image metadata, but the installed closures and evidence matched: 35/35 Python, 118/118
+    Debian, six reviews, zero unknowns, and the same two public blockers. The downloaded artifact
+    contained 183 nonempty files and its license ZIP passed CRC inspection.
 
 ## Retained artifacts
 
@@ -202,6 +231,18 @@ time-stamped snapshot and may change upstream.
   context, retained separately from the legal release verdict.
 - `release-workflow-manual-run.txt` — all three real workflow attempts, both corrected POSIX
   defects, final artifact identity/content inspection, and the intentional final gate failure.
+- `locked-runtime-manual-run.txt` — frozen inputs, no-cache build, paired lock and review controls,
+  runtime behavior, source-archive hashes, harness mistakes, and the explicit internal/public
+  boundary.
+- `locked-runtime-sandbox-*-probe.json` and `locked-runtime-sandbox-*-review.json` — final-image
+  positive and deliberate-failure execution evidence tied to the immutable image ID.
+- `release-wheel-locked-runtime/` and `release-wheel-locked-runtime-review.json` — exact current
+  wheel inventory, SBOMs, legal bundle, clean-install observations, and named review.
+- `release-image-locked/` and `release-image-locked-review.json` — final locked-image SBOMs,
+  inventories, embedded lock copies, technical license review, license bundle, exact two blockers,
+  and a named internal-only verdict.
+- `release-image-invalid-license-review-control-review.json` — named review tied to the raw corrupt
+  control probe hash and deliberately false review fixture.
 
 SHA-256 checksums of the canonical bytes retained in Git:
 
@@ -276,4 +317,29 @@ release-wheel/sbom.spdx.json                         cb0a19e67e208c371b94576b63f
 release-wheel/wheel-components.json                  e4f6e5e44f713e59367769f48e8f5c6891b3db6538400ccc5a577354139f637c
 source-provenance-probe.json                         add14b7794030cfc3095d61e1d38b44a79e57ec40c471e1aa2d63f6208ef7dc3
 source-provenance-review.json                        e1ef5a2ebeb178186e0939f1fa0711839c030e9d234a4028b22e0c3f49cd60ea
+locked-runtime-manual-run.txt                        615b9de300661f6306904c683d377fe33a5d9eba42682836cff19e464641d53f
+locked-runtime-sandbox-negative-probe.json           0592bd01f36e96ffb10fae94a9a5b222339708dd37eb2dbb081861bdc7c8b124
+locked-runtime-sandbox-negative-review.json          f07ac89797e2ec70182371f47d87ffa644d60e401f64196ab5721989135a2f49
+locked-runtime-sandbox-positive-probe.json           1089c978b581add9b501f46b62a0279183c12b75a2049e571a7afc7b818fe6ca
+locked-runtime-sandbox-positive-review.json          6973c937f073089c820f0243fbfd6b85ee1c977a2eada6b958eb8cb6dfa3e980
+release-image-invalid-license-review-control-review.json 70857296d37bace0e2e4fa9eb7d036e446cbaf8d79d4c6ef632c469060f10259
+release-image-locked-review.json                     9baa496db9d027f97a22a09ea3030d0f5756a47671197f9be69ae58deb03947e
+release-image-locked/image-components.json           75f0536d38eaf1e6406ac1a6ec2ae18988cf86215b429bddbc6b4d943391668a
+release-image-locked/license-bundle.zip              dbbc38870cdf2e590855055b40db19af1dd909ef3c503a14bbb0045268eca382
+release-image-locked/os-packages.lock.tsv            a9c8e6d0c370f69e85671e5944cbca98c865332c61ca83c5a1f5c1c5a3feb5b7
+release-image-locked/os-packages.tsv                 a00c8e8c765ea2771d2416f0ab54a61a49b09139de10910c081dc0f1d918e421
+release-image-locked/os-source-manifest.json         cf0684abb94683ebf992c67fae05932d375abb7e147c59daf7708fd1e6901812
+release-image-locked/probe.json                      4260e556b01354d0bc31cc8a89951226ed857697a04dd2d2375a47f350922d64
+release-image-locked/python-license-review.yaml      788e9f34c5c9af5e36eb285cb54143b47cf852119f77f8a2faabe74175d87a60
+release-image-locked/python-packages.json            978dcaa36c9de82827587e08ccb9461ecf29d27984da76362c3069648798ab83
+release-image-locked/python-requirements.lock        0a639e1d25089567275afbfb1825ca2b5ff2ab206d810e0e0b25004268999613
+release-image-locked/runtime-locks.json              cebc38c2bd688d91ac6a82980089eea6e5d3092e01afe6e721dd4815779dd300
+release-image-locked/sbom.cdx.json                   8bbfa5e8643697e484d7c729404354fd796a355e6e901dd2f4f494c3126fcd68
+release-image-locked/sbom.spdx.json                  2ebde41c009505d177714aee741829b5560e8d1c2c745d80d80a7fa5d2235f2e
+release-wheel-locked-runtime-review.json             19387e0466d20c4df662a10dcafbbe24ad40efc968c2546f9793747ed43289c2
+release-wheel-locked-runtime/license-bundle.zip      56eedd8f90bea2b68ca2321b3045c2d8765643f4aa4eb3acff7cff9770d98aa7
+release-wheel-locked-runtime/probe.json              542b5d740d1c6099778c427170457a4da46a9a3822dc2ba6ca0b8ce96414a749
+release-wheel-locked-runtime/sbom.cdx.json           20762e599d2ede8a833eeddaca1ff12086ecb19356249b357d720f6050036b1e
+release-wheel-locked-runtime/sbom.spdx.json          b4d2249410663c90fae6988003c8db481402703578c10b09fcd4da1b9cfb1e56
+release-wheel-locked-runtime/wheel-components.json   64ed07bd469bec1a1df449038cf286bf2dca137197df1e88990075311869e538
 ```

@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T20:50:18.341512Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "exact-locked-internal-image",
+  "scenario_description": "The locked v1 runtime works internally while public image release stays closed.",
+  "expected": [
+    "All 35 Python distributions and 118 Debian packages match their embedded locks.",
+    "All six exact Python license-review entries match extracted license-file hashes.",
+    "Unknown Python license metadata is reduced to zero without claiming legal approval.",
+    "GPL/MPL review and complete corresponding-source delivery still block public publication."
+  ],
+  "observed": [
+    "The exact no-cache image contains 35/35 matching Python distributions and 118/118 matching Debian packages.",
+    "APT is configured to Debian snapshot 20260824T000000Z and the snapshot evidence matches.",
+    "Six exact-version technical license reviews match extracted license-file hashes; unresolved Python metadata is zero.",
+    "The public release gate remains closed with exactly two blockers: reciprocal-license qualified review and complete corresponding-source delivery."
+  ],
+  "probe_id": "37ed69cb56f247ca88e9e6e8c87772a8",
+  "probe_file": "evidence\\manual\\2026-08-26\\release-image-locked\\probe.json",
+  "probe_sha256": "4260e556b01354d0bc31cc8a89951226ed857697a04dd2d2375a47f350922d64",
+  "notes": "PASS applies to the internal-build-only lock and fail-closed policy scenario. Public image publication remains prohibited."
+}

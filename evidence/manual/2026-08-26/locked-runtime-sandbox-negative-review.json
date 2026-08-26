@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T20:50:17.901588Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "sandbox-failure-is-evidence",
+  "scenario_description": "A real behavior mismatch remains failed evidence and stops the experiment.",
+  "expected": [
+    "The mismatch has a nonzero exit status and retains its diagnostic stderr.",
+    "The sentinel command after the failure is explicitly recorded as not run.",
+    "Host source remains unchanged and the disposable container is removed."
+  ],
+  "observed": [
+    "The deliberate contract mismatch exited 1 with AssertionError: expected 999, got 6.",
+    "The following must-not-run-after-failure sentinel is listed as not run.",
+    "The host snapshot was unchanged and the disposable container did not remain after stop."
+  ],
+  "probe_id": "cd6654ded37a499ca4403ecc86d03d4c",
+  "probe_file": "evidence\\manual\\2026-08-26\\locked-runtime-sandbox-negative-probe.json",
+  "probe_sha256": "0592bd01f36e96ffb10fae94a9a5b222339708dd37eb2dbb081861bdc7c8b124",
+  "notes": "PASS means the safety control detected and retained the intentional failure; the tested behavior itself failed as designed."
+}

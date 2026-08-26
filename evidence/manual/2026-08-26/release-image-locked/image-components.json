@@ -1,0 +1,349 @@
+{
+  "schema_version": "1",
+  "requested_image": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
+  "observed_image_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
+  "repo_digests": [
+    "blackridge/swerex-runtime@sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+  ],
+  "created": "2026-08-26T20:46:11.627496934Z",
+  "base_image": {
+    "id": "python-slim-base",
+    "name": "Python slim OCI base",
+    "package_name": null,
+    "version": "sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17",
+    "license_spdx": "LicenseRef-MultiLicense-Image",
+    "upstream": "https://github.com/docker-library/python",
+    "license_source": "generated exact-image license-bundle.zip",
+    "usage": "Base operating system and CPython runtime for the SWE-ReX image.",
+    "boundary": "docker-base",
+    "distributed_in": [
+      "SWE-ReX runtime image"
+    ]
+  },
+  "license_analysis": {
+    "sbom_package_count": 161,
+    "sbom_without_declared_license_count": 23,
+    "sbom_without_declared_license": [
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "debian-archive-keyring",
+        "version": "2025.1"
+      },
+      {
+        "name": "gcc-14-base",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libcrypt1",
+        "version": "1:4.4.38-1"
+      },
+      {
+        "name": "libgcc-s1",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libgnutls30t64",
+        "version": "3.8.9-3+deb13u4"
+      },
+      {
+        "name": "libgssapi-krb5-2",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libk5crypto3",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libkrb5-3",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libkrb5support0",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "librtmp1",
+        "version": "2.4+20151223.gitfa8646d.1-2+b5"
+      },
+      {
+        "name": "libstdc++6",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libtasn1-6",
+        "version": "4.20.0-2+deb13u1"
+      },
+      {
+        "name": "markdown-it-py",
+        "version": "4.2.0"
+      },
+      {
+        "name": "mdurl",
+        "version": "0.1.2"
+      },
+      {
+        "name": "python",
+        "version": "3.12.14"
+      },
+      {
+        "name": "swe-rex",
+        "version": "1.4.0"
+      },
+      {
+        "name": "/scan/image.tar",
+        "version": "sha256:9441a9b8e2609790a98d44d3f2b0152b8a753ecbce6f0aeaf7512f3ddbed77df"
+      }
+    ],
+    "python_package_count": 35,
+    "python_unknown_license_metadata": [
+      {
+        "name": "markdown-it-py",
+        "version": "4.2.0",
+        "license": "NOASSERTION",
+        "license_files": [
+          "markdown_it_py-4.2.0.dist-info/licenses/LICENSE",
+          "markdown_it_py-4.2.0.dist-info/licenses/LICENSE.markdown-it"
+        ]
+      },
+      {
+        "name": "mdurl",
+        "version": "0.1.2",
+        "license": "NOASSERTION",
+        "license_files": [
+          "mdurl-0.1.2.dist-info/LICENSE"
+        ]
+      },
+      {
+        "name": "ptyprocess",
+        "version": "0.7.0",
+        "license": "UNKNOWN",
+        "license_files": [
+          "ptyprocess-0.7.0.dist-info/LICENSE"
+        ]
+      },
+      {
+        "name": "swe-rex",
+        "version": "1.4.0",
+        "license": "NOASSERTION",
+        "license_files": [
+          "swe_rex-1.4.0.dist-info/licenses/LICENSE.txt"
+        ]
+      }
+    ],
+    "python_without_extracted_license_text": [],
+    "python_review_license_packages": [
+      {
+        "name": "bashlex",
+        "version": "0.18",
+        "license": "GPLv3+",
+        "license_files": [
+          "bashlex-0.18.dist-info/LICENSE"
+        ]
+      },
+      {
+        "name": "certifi",
+        "version": "2026.7.22",
+        "license": "MPL-2.0",
+        "license_files": [
+          "certifi-2026.7.22.dist-info/licenses/LICENSE"
+        ]
+      }
+    ],
+    "os_package_count": 118,
+    "os_without_extracted_copyright_file": []
+  },
+  "python_license_review": {
+    "schema_version": "1",
+    "reviewer": "Codex engineering review",
+    "review_scope": "Exact-version technical identification from license files extracted from the locked runtime wheels and primary package sources. This is not qualified legal approval for public distribution.",
+    "public_distribution_approved": false,
+    "qualified_reviewer": null,
+    "entries": [
+      {
+        "name": "markdown-it-py",
+        "version": "4.2.0",
+        "concluded_license_spdx": "MIT",
+        "requires_public_distribution_review": false,
+        "valid": true,
+        "issues": [],
+        "sources": [
+          "https://pypi.org/pypi/markdown-it-py/4.2.0/json",
+          "https://github.com/executablebooks/markdown-it-py"
+        ],
+        "source_archive": {
+          "filename": "markdown_it_py-4.2.0.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/06/ff/7841249c247aa650a76b9ee4bbaeae59370dc8bfd2f6c01f3630c35eb134/markdown_it_py-4.2.0.tar.gz",
+          "sha256": "04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49"
+        }
+      },
+      {
+        "name": "mdurl",
+        "version": "0.1.2",
+        "concluded_license_spdx": "MIT",
+        "requires_public_distribution_review": false,
+        "valid": true,
+        "issues": [],
+        "sources": [
+          "https://pypi.org/pypi/mdurl/0.1.2/json",
+          "https://github.com/executablebooks/mdurl"
+        ],
+        "source_archive": {
+          "filename": "mdurl-0.1.2.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz",
+          "sha256": "bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba"
+        }
+      },
+      {
+        "name": "ptyprocess",
+        "version": "0.7.0",
+        "concluded_license_spdx": "ISC",
+        "requires_public_distribution_review": false,
+        "valid": true,
+        "issues": [],
+        "sources": [
+          "https://pypi.org/pypi/ptyprocess/0.7.0/json",
+          "https://github.com/pexpect/ptyprocess"
+        ],
+        "source_archive": {
+          "filename": "ptyprocess-0.7.0.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz",
+          "sha256": "5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"
+        }
+      },
+      {
+        "name": "swe-rex",
+        "version": "1.4.0",
+        "concluded_license_spdx": "MIT",
+        "requires_public_distribution_review": false,
+        "valid": true,
+        "issues": [],
+        "sources": [
+          "https://pypi.org/pypi/swe-rex/1.4.0/json",
+          "https://github.com/SWE-agent/SWE-ReX/tree/f802b3e14d82aa4c13291d2fda5bd4fd48f36f91"
+        ],
+        "source_archive": {
+          "filename": "swe_rex-1.4.0.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/94/86/a069f93ec866151a4d476d546e60220e66b3788878b6e248b2df3ab2c5f1/swe_rex-1.4.0.tar.gz",
+          "sha256": "14f8a24c49a63f9e251340b1109ac75a4aacbaece410f8599209de9bfca843c0"
+        }
+      },
+      {
+        "name": "bashlex",
+        "version": "0.18",
+        "concluded_license_spdx": "GPL-3.0-or-later",
+        "requires_public_distribution_review": true,
+        "valid": true,
+        "issues": [],
+        "sources": [
+          "https://pypi.org/pypi/bashlex/0.18/json",
+          "https://github.com/idank/bashlex",
+          "https://www.gnu.org/licenses/gpl-3.0.html"
+        ],
+        "source_archive": {
+          "filename": "bashlex-0.18.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/76/60/aae0bb54f9af5e0128ba90eb83d8d0d506ee8f0475c4fdda3deeda20b1d2/bashlex-0.18.tar.gz",
+          "sha256": "5bb03a01c6d5676338c36fd1028009c8ad07e7d61d8a1ce3f513b7fff52796ee"
+        }
+      },
+      {
+        "name": "certifi",
+        "version": "2026.7.22",
+        "concluded_license_spdx": "MPL-2.0",
+        "requires_public_distribution_review": true,
+        "valid": true,
+        "issues": [],
+        "sources": [
+          "https://pypi.org/pypi/certifi/2026.7.22/json",
+          "https://github.com/certifi/python-certifi",
+          "https://www.mozilla.org/en-US/MPL/2.0/"
+        ],
+        "source_archive": {
+          "filename": "certifi-2026.7.22.tar.gz",
+          "url": "https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz",
+          "sha256": "741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55"
+        }
+      }
+    ],
+    "issues": [],
+    "valid_entry_count": 6,
+    "unresolved_unknown_metadata": [],
+    "reciprocal_license_packages": [
+      {
+        "name": "bashlex",
+        "version": "0.18",
+        "license": "GPLv3+",
+        "license_files": [
+          "bashlex-0.18.dist-info/LICENSE"
+        ]
+      },
+      {
+        "name": "certifi",
+        "version": "2026.7.22",
+        "license": "MPL-2.0",
+        "license_files": [
+          "certifi-2026.7.22.dist-info/licenses/LICENSE"
+        ]
+      }
+    ],
+    "reciprocal_without_valid_review": [],
+    "public_distribution_ready": false,
+    "review_file_sha256": "788e9f34c5c9af5e36eb285cb54143b47cf852119f77f8a2faabe74175d87a60"
+  },
+  "runtime_locks": {
+    "schema_version": "1",
+    "python": {
+      "path": "/usr/share/blackridge/locks/python-requirements.lock",
+      "sha256": "0a639e1d25089567275afbfb1825ca2b5ff2ab206d810e0e0b25004268999613",
+      "locked_count": 35,
+      "actual_count": 35,
+      "parse_errors": [],
+      "missing": [],
+      "unexpected": [],
+      "version_mismatches": [],
+      "matches": true
+    },
+    "os": {
+      "path": "/usr/share/blackridge/locks/os-packages.lock.tsv",
+      "sha256": "a9c8e6d0c370f69e85671e5944cbca98c865332c61ca83c5a1f5c1c5a3feb5b7",
+      "locked_count": 118,
+      "actual_count": 118,
+      "first_difference": null,
+      "matches": true
+    },
+    "apt_sources": {
+      "path": "/etc/apt/sources.list.d/debian.sources",
+      "sha256": "5a6fc0d7c4664ee4b8fd18e8757b6db9fda15acf2245308ad118120d902c2616",
+      "snapshot": "20260824T000000Z",
+      "matches": true
+    },
+    "complete": true
+  },
+  "release_blockers": [
+    "Reciprocal-license packages require qualified public-distribution review",
+    "Corresponding source archives or a reviewed source-offer mechanism are not bundled"
+  ],
+  "release_gate_open": false
+}

@@ -1,0 +1,161 @@
+{
+  "schema_version": "1",
+  "probe_id": "20b2c18d4c8546ee834ff15b1f3b256b",
+  "observed_at": "2026-08-26T20:55:31.763642Z",
+  "provider": "blackridge-wheel-release-compliance/1+syft/1.51.0",
+  "subject": "blackridge_systems-0.1.0-py3-none-any.whl@sha256:836bcaadd07cf7a02103d8ee3f365fb674b90434df353db40599ad1f3f8135e4",
+  "request": {
+    "wheel": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\dist-locked-runtime-final\\blackridge_systems-0.1.0-py3-none-any.whl",
+    "syft_image": "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0"
+  },
+  "observations": {
+    "probe_completed": true,
+    "component_manifest": {
+      "schema_version": "1",
+      "artifact": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\dist-locked-runtime-final\\blackridge_systems-0.1.0-py3-none-any.whl",
+      "sha256": "836bcaadd07cf7a02103d8ee3f365fb674b90434df353db40599ad1f3f8135e4",
+      "size": 86056,
+      "member_count": 29,
+      "embedded_license_files": [
+        "blackridge_systems-0.1.0.dist-info/licenses/LICENSE",
+        "blackridge_systems-0.1.0.dist-info/licenses/NOTICE",
+        "blackridge_systems-0.1.0.dist-info/licenses/THIRD_PARTY_NOTICES.md"
+      ],
+      "requires_dist": [
+        "httpx<1,>=0.27",
+        "jsonpatch==1.33",
+        "jsonschema==4.26.0",
+        "pydantic<3,>=2.10",
+        "pyyaml<7,>=6",
+        "rich<15,>=13.9",
+        "typer<1,>=0.15",
+        "pydantic-ai<3,>=1; extra == 'ai'",
+        "build<2,>=1; extra == 'dev'",
+        "pytest-cov<8,>=6; extra == 'dev'",
+        "pytest<9,>=8; extra == 'dev'",
+        "ruff<1,>=0.12; extra == 'dev'",
+        "aiohttp<4,>=3.10; extra == 'sandbox'",
+        "swe-rex==1.4.0; extra == 'sandbox'"
+      ],
+      "runtime_requires_dist": [
+        "httpx<1,>=0.27",
+        "jsonpatch==1.33",
+        "jsonschema==4.26.0",
+        "pydantic<3,>=2.10",
+        "pyyaml<7,>=6",
+        "rich<15,>=13.9",
+        "typer<1,>=0.15"
+      ],
+      "optional_requires_dist": [
+        "pydantic-ai<3,>=1; extra == 'ai'",
+        "build<2,>=1; extra == 'dev'",
+        "pytest-cov<8,>=6; extra == 'dev'",
+        "pytest<9,>=8; extra == 'dev'",
+        "ruff<1,>=0.12; extra == 'dev'",
+        "aiohttp<4,>=3.10; extra == 'sandbox'",
+        "swe-rex==1.4.0; extra == 'sandbox'"
+      ],
+      "declared_dependency_names": [
+        "httpx",
+        "jsonpatch",
+        "jsonschema",
+        "pydantic",
+        "pyyaml",
+        "rich",
+        "typer"
+      ],
+      "missing_declared_dependencies": [],
+      "unexpected_declared_dependencies": [],
+      "sbom_package_count": 2
+    },
+    "artifacts": {
+      "sbom.spdx.json": {
+        "sha256": "b4d2249410663c90fae6988003c8db481402703578c10b09fcd4da1b9cfb1e56",
+        "size": 26916
+      },
+      "sbom.cdx.json": {
+        "sha256": "20762e599d2ede8a833eeddaca1ff12086ecb19356249b357d720f6050036b1e",
+        "size": 13490
+      },
+      "license-bundle.zip": {
+        "sha256": "56eedd8f90bea2b68ca2321b3045c2d8765643f4aa4eb3acff7cff9770d98aa7",
+        "size": 9217
+      },
+      "wheel-components.json": {
+        "sha256": "64ed07bd469bec1a1df449038cf286bf2dca137197df1e88990075311869e538",
+        "size": 1723
+      }
+    },
+    "commands": [
+      {
+        "argv": [
+          "docker",
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--tmpfs",
+          "/tmp:rw,nosuid,nodev,size=512m,mode=1777",
+          "-e",
+          "HOME=/tmp",
+          "-e",
+          "SYFT_CHECK_FOR_APP_UPDATE=false",
+          "-v",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\blackridge-wheel-ohdcfmju:/scan:ro",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\release-wheel-locked-runtime:/out",
+          "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+          "dir:/scan",
+          "-o",
+          "spdx-json=/out/sbom.spdx.json"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "[0000]  WARN no explicit name and version provided for directory source, deriving artifact ID from the given path (which is not ideal)\n"
+      },
+      {
+        "argv": [
+          "docker",
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--tmpfs",
+          "/tmp:rw,nosuid,nodev,size=512m,mode=1777",
+          "-e",
+          "HOME=/tmp",
+          "-e",
+          "SYFT_CHECK_FOR_APP_UPDATE=false",
+          "-v",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\blackridge-wheel-ohdcfmju:/scan:ro",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\release-wheel-locked-runtime:/out",
+          "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+          "dir:/scan",
+          "-o",
+          "cyclonedx-json=/out/sbom.cdx.json"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "[0000]  WARN no explicit name and version provided for directory source, deriving artifact ID from the given path (which is not ideal)\n"
+      }
+    ],
+    "release_blockers": [],
+    "release_gate_open": true
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/blob/main/src/blackridge/release_compliance.py",
+    "https://www.apache.org/licenses/LICENSE-2.0"
+  ],
+  "warnings": [
+    "A wheel dependency declaration does not embed or redistribute the dependency package."
+  ]
+}

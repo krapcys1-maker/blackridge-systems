@@ -1,0 +1,107 @@
+schema_version: "1"
+reviewer: Codex engineering review
+review_scope: >-
+  Exact-version technical identification from license files extracted from the locked runtime
+  wheels and primary package sources. This is not qualified legal approval for public distribution.
+public_distribution_approved: false
+
+packages:
+  - name: markdown-it-py
+    version: "4.2.0"
+    observed_metadata: NOASSERTION
+    concluded_license_spdx: MIT
+    requires_public_distribution_review: false
+    license_files:
+      - path: markdown_it_py-4.2.0.dist-info/licenses/LICENSE
+        sha256: 4a2260d6e2cd0f5a151a1e86dbfe7d3ed552b1e2beabf9941c1ba5c49cbce484
+      - path: markdown_it_py-4.2.0.dist-info/licenses/LICENSE.markdown-it
+        sha256: 792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473
+    sources:
+      - https://pypi.org/pypi/markdown-it-py/4.2.0/json
+      - https://github.com/executablebooks/markdown-it-py
+    source_archive:
+      filename: markdown_it_py-4.2.0.tar.gz
+      url: https://files.pythonhosted.org/packages/06/ff/7841249c247aa650a76b9ee4bbaeae59370dc8bfd2f6c01f3630c35eb134/markdown_it_py-4.2.0.tar.gz
+      sha256: 04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49
+
+  - name: mdurl
+    version: "0.1.2"
+    observed_metadata: NOASSERTION
+    concluded_license_spdx: MIT
+    requires_public_distribution_review: false
+    license_files:
+      - path: mdurl-0.1.2.dist-info/LICENSE
+        sha256: 7c605df6e28667a9603118e98274f64a49ce3eed0d26fccce9534a345e0ef955
+    sources:
+      - https://pypi.org/pypi/mdurl/0.1.2/json
+      - https://github.com/executablebooks/mdurl
+    source_archive:
+      filename: mdurl-0.1.2.tar.gz
+      url: https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz
+      sha256: bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba
+
+  - name: ptyprocess
+    version: "0.7.0"
+    observed_metadata: UNKNOWN
+    concluded_license_spdx: ISC
+    requires_public_distribution_review: false
+    license_files:
+      - path: ptyprocess-0.7.0.dist-info/LICENSE
+        sha256: c822d385b1a73329846241799becf18690b5d44764c1bed69300b536a405030a
+    sources:
+      - https://pypi.org/pypi/ptyprocess/0.7.0/json
+      - https://github.com/pexpect/ptyprocess
+    source_archive:
+      filename: ptyprocess-0.7.0.tar.gz
+      url: https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz
+      sha256: 5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220
+
+  - name: swe-rex
+    version: "1.4.0"
+    observed_metadata: NOASSERTION
+    concluded_license_spdx: MIT
+    requires_public_distribution_review: false
+    license_files:
+      - path: swe_rex-1.4.0.dist-info/licenses/LICENSE.txt
+        sha256: 715151ae2995d2e1eb3c39503d13f77d0f52cafb7bbe1a7dbf6a06911230879a
+    sources:
+      - https://pypi.org/pypi/swe-rex/1.4.0/json
+      - https://github.com/SWE-agent/SWE-ReX/tree/f802b3e14d82aa4c13291d2fda5bd4fd48f36f91
+    source_archive:
+      filename: swe_rex-1.4.0.tar.gz
+      url: https://files.pythonhosted.org/packages/94/86/a069f93ec866151a4d476d546e60220e66b3788878b6e248b2df3ab2c5f1/swe_rex-1.4.0.tar.gz
+      sha256: 14f8a24c49a63f9e251340b1109ac75a4aacbaece410f8599209de9bfca843c0
+
+  - name: bashlex
+    version: "0.18"
+    observed_metadata: GPLv3+
+    concluded_license_spdx: GPL-3.0-or-later
+    requires_public_distribution_review: true
+    license_files:
+      - path: bashlex-0.18.dist-info/LICENSE
+        sha256: 8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903
+    sources:
+      - https://pypi.org/pypi/bashlex/0.18/json
+      - https://github.com/idank/bashlex
+      - https://www.gnu.org/licenses/gpl-3.0.html
+    source_archive:
+      filename: bashlex-0.18.tar.gz
+      url: https://files.pythonhosted.org/packages/76/60/aae0bb54f9af5e0128ba90eb83d8d0d506ee8f0475c4fdda3deeda20b1d2/bashlex-0.18.tar.gz
+      sha256: 5bb03a01c6d5676338c36fd1028009c8ad07e7d61d8a1ce3f513b7fff52796ee
+
+  - name: certifi
+    version: "2026.7.22"
+    observed_metadata: MPL-2.0
+    concluded_license_spdx: MPL-2.0
+    requires_public_distribution_review: true
+    license_files:
+      - path: certifi-2026.7.22.dist-info/licenses/LICENSE
+        sha256: e93716da6b9c0d5a4a1df60fe695b370f0695603d21f6f83f053e42cfc10caf7
+    sources:
+      - https://pypi.org/pypi/certifi/2026.7.22/json
+      - https://github.com/certifi/python-certifi
+      - https://www.mozilla.org/en-US/MPL/2.0/
+    source_archive:
+      filename: certifi-2026.7.22.tar.gz
+      url: https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz
+      sha256: 741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55

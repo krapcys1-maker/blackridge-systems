@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T20:57:19.816448Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "exact-wheel-bundle",
+  "scenario_description": "A cleanly built wheel yields byte-specific inventory and license artifacts.",
+  "expected": [
+    "Wheel metadata declares exactly the seven runtime dependencies in the manifest.",
+    "LICENSE, NOTICE, and THIRD_PARTY_NOTICES are physically present in the wheel.",
+    "SPDX, CycloneDX, checksums, and a readable license bundle are retained."
+  ],
+  "observed": [
+    "The exact wheel SHA-256 is 836bcaadd07cf7a02103d8ee3f365fb674b90434df353db40599ad1f3f8135e4 with 29 members.",
+    "Seven runtime declarations matched the active distribution manifest and seven optional declarations stayed separate.",
+    "LICENSE, NOTICE, and THIRD_PARTY_NOTICES.md were embedded; the wheel CRC and generated SBOM/license artifacts were inspected.",
+    "A new isolated venv installed this wheel, pip check passed, the new review model imported, and the installed CLI accepted --license-review."
+  ],
+  "probe_id": "20b2c18d4c8546ee834ff15b1f3b256b",
+  "probe_file": "evidence\\manual\\2026-08-26\\release-wheel-locked-runtime\\probe.json",
+  "probe_sha256": "542b5d740d1c6099778c427170457a4da46a9a3822dc2ba6ca0b8ce96414a749",
+  "notes": "PASS is artifact-specific technical evidence and not a general legal approval."
+}

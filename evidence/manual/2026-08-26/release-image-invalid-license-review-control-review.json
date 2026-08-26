@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T20:51:22.472662Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "invalid-image-license-review-control",
+  "scenario_description": "A wrong extracted-license hash invalidates the technical review instead of hiding uncertainty.",
+  "expected": [
+    "The mismatched license file and expected and actual hashes are retained.",
+    "The affected package is not counted as validly reviewed.",
+    "Unknown metadata returns and the public release gate remains closed."
+  ],
+  "observed": [
+    "The deliberate markdown-it-py LICENSE hash mismatch was reported with the exact embedded path.",
+    "Valid technical review entries fell to zero and four unresolved unknown-metadata packages returned.",
+    "The exact runtime locks still matched, isolating the failure to review integrity rather than package drift.",
+    "The public release gate remained closed with three blockers."
+  ],
+  "probe_id": "16c6a3dbd30d46c89b7b86dd58ece3d7",
+  "probe_file": ".blackridge\\release\\final-invalid-license-review\\probe.json",
+  "probe_sha256": "92d991d49a13fc729980239b736d7a55d369a0c939d811448eace0ecb65e0fc0",
+  "notes": "PASS means the deliberately corrupt control was rejected. The review fixture and probe SHA make the negative case reproducible."
+}

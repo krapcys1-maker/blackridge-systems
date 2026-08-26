@@ -1,0 +1,289 @@
+[
+  {
+    "name": "aiohappyeyeballs",
+    "version": "2.7.1",
+    "license": "PSF-2.0",
+    "license_files": [
+      "aiohappyeyeballs-2.7.1.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "aiohttp",
+    "version": "3.14.3",
+    "license": "Apache-2.0 AND MIT",
+    "license_files": [
+      "aiohttp-3.14.3.dist-info/licenses/LICENSE.txt",
+      "aiohttp-3.14.3.dist-info/licenses/vendor/llhttp/LICENSE"
+    ]
+  },
+  {
+    "name": "aiosignal",
+    "version": "1.4.0",
+    "license": "Apache 2.0",
+    "license_files": [
+      "aiosignal-1.4.0.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "annotated-doc",
+    "version": "0.0.5",
+    "license": "MIT",
+    "license_files": [
+      "annotated_doc-0.0.5.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "annotated-types",
+    "version": "0.8.0",
+    "license": "MIT",
+    "license_files": [
+      "annotated_types-0.8.0.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "anyio",
+    "version": "4.14.2",
+    "license": "MIT",
+    "license_files": [
+      "anyio-4.14.2.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "attrs",
+    "version": "26.1.0",
+    "license": "MIT",
+    "license_files": [
+      "attrs-26.1.0.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "bashlex",
+    "version": "0.18",
+    "license": "GPLv3+",
+    "license_files": [
+      "bashlex-0.18.dist-info/LICENSE"
+    ]
+  },
+  {
+    "name": "certifi",
+    "version": "2026.7.22",
+    "license": "MPL-2.0",
+    "license_files": [
+      "certifi-2026.7.22.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "charset-normalizer",
+    "version": "3.5.1",
+    "license": "MIT",
+    "license_files": [
+      "charset_normalizer-3.5.1.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "click",
+    "version": "8.5.0",
+    "license": "BSD-3-Clause",
+    "license_files": [
+      "click-8.5.0.dist-info/licenses/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "fastapi",
+    "version": "0.141.1",
+    "license": "MIT",
+    "license_files": [
+      "fastapi-0.141.1.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "frozenlist",
+    "version": "1.8.0",
+    "license": "Apache-2.0",
+    "license_files": [
+      "frozenlist-1.8.0.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "h11",
+    "version": "0.16.0",
+    "license": "MIT",
+    "license_files": [
+      "h11-0.16.0.dist-info/licenses/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "idna",
+    "version": "3.19",
+    "license": "BSD-3-Clause",
+    "license_files": [
+      "idna-3.19.dist-info/licenses/LICENSE.md"
+    ]
+  },
+  {
+    "name": "markdown-it-py",
+    "version": "4.2.0",
+    "license": "NOASSERTION",
+    "license_files": [
+      "markdown_it_py-4.2.0.dist-info/licenses/LICENSE",
+      "markdown_it_py-4.2.0.dist-info/licenses/LICENSE.markdown-it"
+    ]
+  },
+  {
+    "name": "mdurl",
+    "version": "0.1.2",
+    "license": "NOASSERTION",
+    "license_files": [
+      "mdurl-0.1.2.dist-info/LICENSE"
+    ]
+  },
+  {
+    "name": "multidict",
+    "version": "6.7.1",
+    "license": "Apache License 2.0",
+    "license_files": [
+      "multidict-6.7.1.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "pexpect",
+    "version": "4.9.0",
+    "license": "ISC license",
+    "license_files": [
+      "pexpect-4.9.0.dist-info/LICENSE"
+    ]
+  },
+  {
+    "name": "pip",
+    "version": "25.0.1",
+    "license": "MIT",
+    "license_files": [
+      "pip-25.0.1.dist-info/AUTHORS.txt",
+      "pip-25.0.1.dist-info/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "propcache",
+    "version": "0.5.2",
+    "license": "Apache-2.0",
+    "license_files": [
+      "propcache-0.5.2.dist-info/licenses/LICENSE",
+      "propcache-0.5.2.dist-info/licenses/NOTICE"
+    ]
+  },
+  {
+    "name": "ptyprocess",
+    "version": "0.7.0",
+    "license": "UNKNOWN",
+    "license_files": [
+      "ptyprocess-0.7.0.dist-info/LICENSE"
+    ]
+  },
+  {
+    "name": "pydantic",
+    "version": "2.13.4",
+    "license": "MIT",
+    "license_files": [
+      "pydantic-2.13.4.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "pydantic_core",
+    "version": "2.46.4",
+    "license": "MIT",
+    "license_files": [
+      "pydantic_core-2.46.4.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "Pygments",
+    "version": "2.21.0",
+    "license": "BSD-2-Clause",
+    "license_files": [
+      "pygments-2.21.0.dist-info/licenses/AUTHORS",
+      "pygments-2.21.0.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "python-multipart",
+    "version": "0.0.32",
+    "license": "Apache-2.0",
+    "license_files": [
+      "python_multipart-0.0.32.dist-info/licenses/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "requests",
+    "version": "2.34.2",
+    "license": "Apache-2.0",
+    "license_files": [
+      "requests-2.34.2.dist-info/licenses/LICENSE",
+      "requests-2.34.2.dist-info/licenses/NOTICE"
+    ]
+  },
+  {
+    "name": "rich",
+    "version": "15.0.0",
+    "license": "MIT",
+    "license_files": [
+      "rich-15.0.0.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "starlette",
+    "version": "1.6.0",
+    "license": "BSD-3-Clause",
+    "license_files": [
+      "starlette-1.6.0.dist-info/licenses/LICENSE.md"
+    ]
+  },
+  {
+    "name": "swe-rex",
+    "version": "1.4.0",
+    "license": "NOASSERTION",
+    "license_files": [
+      "swe_rex-1.4.0.dist-info/licenses/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "typing-inspection",
+    "version": "0.4.4",
+    "license": "MIT",
+    "license_files": [
+      "typing_inspection-0.4.4.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "typing_extensions",
+    "version": "4.16.0",
+    "license": "PSF-2.0",
+    "license_files": [
+      "typing_extensions-4.16.0.dist-info/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "urllib3",
+    "version": "2.7.0",
+    "license": "MIT",
+    "license_files": [
+      "urllib3-2.7.0.dist-info/licenses/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "uvicorn",
+    "version": "0.52.4",
+    "license": "BSD-3-Clause",
+    "license_files": [
+      "uvicorn-0.52.4.dist-info/licenses/LICENSE.md"
+    ]
+  },
+  {
+    "name": "yarl",
+    "version": "1.24.5",
+    "license": "Apache-2.0",
+    "license_files": [
+      "yarl-1.24.5.dist-info/licenses/LICENSE",
+      "yarl-1.24.5.dist-info/licenses/NOTICE"
+    ]
+  }
+]
