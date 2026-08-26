@@ -120,6 +120,11 @@ Exact evaluated versions and integration status live in
 [`upstream-catalog.yaml`](upstream-catalog.yaml). The landscape research and rejected options
 are documented in [`docs/research-landscape.md`](docs/research-landscape.md).
 
+The gated path from the foundry to a scientific researcher, AI-memory experiments, and an
+evidence-controlled research loop is recorded in
+[`docs/research-loop-roadmap.md`](docs/research-loop-roadmap.md). It is a roadmap, not a claim that
+Blackridge already performs autonomous scientific discovery.
+
 ### Run a real disposable repository probe
 
 Install the optional adapter, build the pinned runtime, and execute the retained public-repository
