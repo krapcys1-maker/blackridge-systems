@@ -41,11 +41,14 @@ jobs:
         run: echo "id=$(docker image inspect --format '{{.Id}}' blackridge/swerex-runtime:release-candidate)" >> "$GITHUB_OUTPUT"
       - name: Inspect exact image bytes
         id: image_probe
-        continue-on-error: true
-        run: >-
-          blackridge probe-image-release
-          "${{ steps.image.outputs.id }}"
-          --output-directory release-evidence/image
+        run: |
+          set +e
+          blackridge probe-image-release \
+            "${{ steps.image.outputs.id }}" \
+            --output-directory release-evidence/image
+          status=$?
+          set -e
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
       - name: Upload compliance artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -55,8 +58,13 @@ jobs:
           if-no-files-found: error
           retention-days: 30
       - name: Enforce image release gate
-        if: steps.image_probe.outcome != 'success'
+        if: steps.image_probe.outputs.exit_code != '0'
         run: |
-          echo "Image compliance probe reported unresolved release blockers."
-          echo "Inspect the uploaded image/probe.json before publication."
-          exit 1
+          if [ "${{ steps.image_probe.outputs.exit_code }}" = "1" ]; then
+            echo "Image compliance probe reported unresolved release blockers."
+            echo "Inspect the uploaded image/probe.json before publication."
+          else
+            echo "Image compliance probe failed operationally with exit ${{ steps.image_probe.outputs.exit_code }}."
+            echo "Partial evidence was uploaded, but no policy conclusion is valid."
+          fi
+          exit "${{ steps.image_probe.outputs.exit_code }}"
