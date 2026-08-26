@@ -57,14 +57,40 @@ jobs:
           path: release-evidence/
           if-no-files-found: error
           retention-days: 30
-      - name: Enforce image release gate
-        if: steps.image_probe.outputs.exit_code != '0'
+      - name: Enforce v1 internal-only image policy
         run: |
-          if [ "${{ steps.image_probe.outputs.exit_code }}" = "1" ]; then
-            echo "Image compliance probe reported unresolved release blockers."
-            echo "Inspect the uploaded image/probe.json before publication."
-          else
-            echo "Image compliance probe failed operationally with exit ${{ steps.image_probe.outputs.exit_code }}."
-            echo "Partial evidence was uploaded, but no policy conclusion is valid."
+          if [ "${{ steps.image_probe.outputs.exit_code }}" = "0" ]; then
+            echo "The image gate opened unexpectedly while v1 publication policy is prohibited."
+            exit 1
           fi
-          exit "${{ steps.image_probe.outputs.exit_code }}"
+          if [ "${{ steps.image_probe.outputs.exit_code }}" != "1" ]; then
+            echo "Image compliance failed operationally with exit ${{ steps.image_probe.outputs.exit_code }}."
+            echo "Partial evidence was uploaded, but no policy conclusion is valid."
+            exit "${{ steps.image_probe.outputs.exit_code }}"
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          probe = json.loads(Path("release-evidence/image/probe.json").read_text())
+          observed = probe["observations"]
+          manifest = observed["image_manifest"]
+          review = manifest["python_license_review"]
+          expected_blockers = [
+              "Reciprocal-license packages require qualified public-distribution review",
+              "Corresponding source archives or a reviewed source-offer mechanism are not bundled",
+          ]
+          assertions = {
+              "probe completed": observed["probe_completed"] is True,
+              "runtime locks complete": manifest["runtime_locks"]["complete"] is True,
+              "six license reviews valid": review["valid_entry_count"] == 6,
+              "license review has no issues": review["issues"] == [],
+              "unknown metadata resolved": review["unresolved_unknown_metadata"] == [],
+              "public gate remains closed": observed["release_gate_open"] is False,
+              "only expected public blockers remain": observed["release_blockers"] == expected_blockers,
+          }
+          failed = [name for name, passed in assertions.items() if not passed]
+          if failed:
+              raise SystemExit("Unexpected internal image evidence: " + ", ".join(failed))
+          print("Internal runtime evidence is complete; public publication remains blocked as required.")
+          PY

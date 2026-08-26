@@ -1,18 +1,23 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from pydantic import ValidationError
 
 from blackridge.errors import BlackridgeError
 from blackridge.release_compliance import (
     _docker_user_args,
     _license_analysis,
+    _runtime_lock_blockers,
     _safe_extract_wheel,
+    _verify_python_license_review,
     load_distribution_manifest,
+    load_python_license_review,
     probe_image_release,
     probe_wheel_release,
     render_third_party_notices,
@@ -99,6 +104,36 @@ def test_image_probe_refuses_mutable_tag_before_invoking_docker(tmp_path: Path) 
         )
 
 
+def test_image_probe_refuses_stale_output_before_invoking_docker(tmp_path: Path) -> None:
+    (tmp_path / "stale.json").write_text("old evidence", encoding="utf-8")
+
+    with pytest.raises(BlackridgeError, match="output directory must be empty"):
+        probe_image_release(
+            "sha256:" + "a" * 64,
+            project_manifest(),
+            output_dir=tmp_path,
+        )
+
+
+def test_image_probe_validates_license_review_before_invoking_docker(tmp_path: Path) -> None:
+    invalid_review = tmp_path / "invalid-review.yaml"
+    invalid_review.write_text(
+        "schema_version: '1'\nreviewer: test\nreview_scope: too short\npackages: []\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "new-output"
+
+    with pytest.raises(ValidationError):
+        probe_image_release(
+            "sha256:" + "a" * 64,
+            project_manifest(),
+            output_dir=output,
+            license_review_file=invalid_review,
+        )
+
+    assert not output.exists()
+
+
 def test_license_analysis_keeps_unknown_and_review_licenses_separate() -> None:
     analysis = _license_analysis(
         {"packages": [{"name": "unknown", "licenseDeclared": "NOASSERTION"}]},
@@ -113,3 +148,69 @@ def test_license_analysis_keeps_unknown_and_review_licenses_separate() -> None:
     assert [item["name"] for item in analysis["python_review_license_packages"]] == ["copy-left"]
     assert len(analysis["python_without_extracted_license_text"]) == 1
     assert len(analysis["os_without_extracted_copyright_file"]) == 1
+
+
+def test_runtime_lock_blocker_requires_complete_exact_closure() -> None:
+    assert _runtime_lock_blockers({"complete": True}) == []
+    assert _runtime_lock_blockers({"complete": False}) == [
+        "Dockerfile apt or Python dependency closure does not match its embedded locks"
+    ]
+
+
+def test_exact_license_review_resolves_unknown_metadata_but_not_public_approval(
+    tmp_path: Path,
+) -> None:
+    license_file = tmp_path / "python" / "demo-1.0" / "demo-1.0.dist-info" / "LICENSE"
+    license_file.parent.mkdir(parents=True)
+    license_file.write_text("MIT test license", encoding="utf-8")
+    digest = hashlib.sha256(license_file.read_bytes()).hexdigest()
+    base_review = load_python_license_review(Path("docker/python-license-review.yaml"))
+    review_data = base_review.model_dump()
+    review_data["packages"] = [
+        {
+            "name": "demo",
+            "version": "1.0",
+            "observed_metadata": "NOASSERTION",
+            "concluded_license_spdx": "MIT",
+            "requires_public_distribution_review": False,
+            "license_files": [{"path": "demo-1.0.dist-info/LICENSE", "sha256": digest}],
+            "sources": ["https://example.invalid/demo"],
+            "source_archive": {
+                "filename": "demo-1.0.tar.gz",
+                "url": "https://example.invalid/demo-1.0.tar.gz",
+                "sha256": "a" * 64,
+            },
+        }
+    ]
+    review = type(base_review).model_validate(review_data)
+    result = _verify_python_license_review(
+        review,
+        [
+            {
+                "name": "demo",
+                "version": "1.0",
+                "license": "NOASSERTION",
+                "license_files": ["demo-1.0.dist-info/LICENSE"],
+            }
+        ],
+        tmp_path,
+    )
+
+    assert result["issues"] == []
+    assert result["valid_entry_count"] == 1
+    assert result["unresolved_unknown_metadata"] == []
+    assert result["public_distribution_ready"] is False
+
+
+def test_v1_workflow_cannot_publish_internal_runtime_image() -> None:
+    policy = Path("docker/distribution-manifest.yaml").read_text(encoding="utf-8")
+    workflow = Path(".github/workflows/release-evidence.yml").read_text(encoding="utf-8")
+
+    assert "distribution_mode: internal-build-only" in policy
+    assert "public_image_publication: prohibited" in policy
+    assert "permissions:\n  contents: read" in workflow
+    assert "docker push" not in workflow.casefold()
+    assert "docker/login-action" not in workflow.casefold()
+    assert 'manifest["runtime_locks"]["complete"] is True' in workflow
+    assert 'review["valid_entry_count"] == 6' in workflow
+    assert 'observed["release_blockers"] == expected_blockers' in workflow

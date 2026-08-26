@@ -17,7 +17,7 @@ from typing import Literal
 from uuid import uuid4
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
@@ -97,8 +97,57 @@ class DistributionManifest(BaseModel):
     components: list[NoticeComponent]
 
 
+class ReviewedLicenseFile(BaseModel):
+    """One license file identified in an exact installed distribution."""
+
+    path: str = Field(min_length=1)
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class ReviewedSourceArchive(BaseModel):
+    """Primary source archive metadata retained for an exact package release."""
+
+    filename: str = Field(min_length=1)
+    url: str = Field(pattern=r"^https://")
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class PythonPackageLicenseReview(BaseModel):
+    """Technical license identification tied to exact package and license bytes."""
+
+    name: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    observed_metadata: str = Field(min_length=1)
+    concluded_license_spdx: str = Field(min_length=1)
+    requires_public_distribution_review: bool
+    license_files: list[ReviewedLicenseFile] = Field(min_length=1)
+    sources: list[str] = Field(min_length=1)
+    source_archive: ReviewedSourceArchive
+
+
+class PythonLicenseReview(BaseModel):
+    """Engineering review; public approval requires a separately named qualified reviewer."""
+
+    schema_version: Literal["1"] = "1"
+    reviewer: str = Field(min_length=3)
+    review_scope: str = Field(min_length=20)
+    public_distribution_approved: bool = False
+    qualified_reviewer: str | None = None
+    packages: list[PythonPackageLicenseReview] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def approval_requires_qualified_reviewer(self) -> PythonLicenseReview:
+        if self.public_distribution_approved and not self.qualified_reviewer:
+            raise ValueError("public approval requires qualified_reviewer")
+        return self
+
+
 def load_distribution_manifest(path: Path) -> DistributionManifest:
     return DistributionManifest.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
+
+
+def load_python_license_review(path: Path) -> PythonLicenseReview:
+    return PythonLicenseReview.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
 def render_third_party_notices(manifest: DistributionManifest) -> str:
@@ -348,9 +397,11 @@ def probe_wheel_release(
 
 
 _IMAGE_COLLECTOR = r"""
+import hashlib
 import importlib.metadata as md
 import json
 import pathlib
+import re
 import shutil
 import subprocess
 
@@ -419,6 +470,118 @@ for row in rows.splitlines():
         "copyright_file": copied,
     })
 (out / "os-source-manifest.json").write_text(json.dumps(os_records, indent=2) + "\n")
+
+lock_root = pathlib.Path("/usr/share/blackridge/locks")
+python_lock = lock_root / "python-requirements.lock"
+os_lock = lock_root / "os-packages.lock.tsv"
+for source in (python_lock, os_lock):
+    if source.is_file():
+        shutil.copy2(source, out / source.name)
+
+canonical = lambda value: re.sub(r"[-_.]+", "-", value).casefold()
+requirement_pattern = re.compile(
+    r"^([A-Za-z0-9_.-]+)==([^\s]+)\s+--hash=sha256:([a-f0-9]{64})$"
+)
+locked_python = {}
+python_parse_errors = []
+if python_lock.is_file():
+    for number, line in enumerate(python_lock.read_text().splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        match = requirement_pattern.fullmatch(stripped)
+        if not match:
+            python_parse_errors.append({"line": number, "value": stripped})
+            continue
+        name, version, digest = match.groups()
+        key = canonical(name)
+        if key in locked_python:
+            python_parse_errors.append({"line": number, "value": "duplicate:" + key})
+            continue
+        locked_python[key] = {"name": name, "version": version, "sha256": digest}
+
+actual_python = {canonical(item["name"]): item for item in records}
+python_missing = sorted(set(locked_python) - set(actual_python))
+python_unexpected = sorted(set(actual_python) - set(locked_python))
+python_version_mismatches = [
+    {
+        "name": key,
+        "locked": locked_python[key]["version"],
+        "actual": actual_python[key]["version"],
+    }
+    for key in sorted(set(locked_python) & set(actual_python))
+    if locked_python[key]["version"] != actual_python[key]["version"]
+]
+python_matches = bool(python_lock.is_file()) and not (
+    python_parse_errors or python_missing or python_unexpected or python_version_mismatches
+)
+
+os_lock_lines = os_lock.read_text().splitlines() if os_lock.is_file() else []
+snapshot_match = re.search(
+    r"snapshot\s+([0-9]{8}T[0-9]{6}Z)", os_lock_lines[0] if os_lock_lines else ""
+)
+snapshot = snapshot_match.group(1) if snapshot_match else None
+locked_os_rows = os_lock_lines[2:] if len(os_lock_lines) >= 2 else []
+actual_os_rows = rows.splitlines()
+os_matches = bool(os_lock.is_file()) and locked_os_rows == actual_os_rows
+os_first_difference = None
+for number in range(max(len(locked_os_rows), len(actual_os_rows))):
+    expected = locked_os_rows[number] if number < len(locked_os_rows) else None
+    actual = actual_os_rows[number] if number < len(actual_os_rows) else None
+    if expected != actual:
+        os_first_difference = {"row": number + 1, "locked": expected, "actual": actual}
+        break
+
+apt_sources_path = pathlib.Path("/etc/apt/sources.list.d/debian.sources")
+apt_sources = apt_sources_path.read_text() if apt_sources_path.is_file() else ""
+apt_snapshot_matches = bool(snapshot) and all(
+    value in apt_sources
+    for value in (
+        f"https://snapshot.debian.org/archive/debian/{snapshot}",
+        f"https://snapshot.debian.org/archive/debian-security/{snapshot}",
+    )
+) and "URIs: http://deb.debian.org" not in apt_sources
+
+runtime_locks = {
+    "schema_version": "1",
+    "python": {
+        "path": str(python_lock),
+        "sha256": hashlib.sha256(python_lock.read_bytes()).hexdigest()
+        if python_lock.is_file()
+        else None,
+        "locked_count": len(locked_python),
+        "actual_count": len(actual_python),
+        "parse_errors": python_parse_errors,
+        "missing": python_missing,
+        "unexpected": python_unexpected,
+        "version_mismatches": python_version_mismatches,
+        "matches": python_matches,
+    },
+    "os": {
+        "path": str(os_lock),
+        "sha256": hashlib.sha256(os_lock.read_bytes()).hexdigest()
+        if os_lock.is_file()
+        else None,
+        "locked_count": len(locked_os_rows),
+        "actual_count": len(actual_os_rows),
+        "first_difference": os_first_difference,
+        "matches": os_matches,
+    },
+    "apt_sources": {
+        "path": str(apt_sources_path),
+        "sha256": hashlib.sha256(apt_sources.encode()).hexdigest() if apt_sources else None,
+        "snapshot": snapshot,
+        "matches": apt_snapshot_matches,
+    },
+}
+runtime_locks["complete"] = all(
+    (
+        runtime_locks["python"]["matches"],
+        runtime_locks["os"]["matches"],
+        runtime_locks["apt_sources"]["matches"],
+    )
+)
+(out / "runtime-locks.json").write_text(json.dumps(runtime_locks, indent=2) + "\n")
 """
 
 
@@ -456,12 +619,130 @@ def _license_analysis(
     }
 
 
+def _canonical_package_name(value: object) -> str:
+    return re.sub(r"[-_.]+", "-", str(value)).casefold()
+
+
+def _verify_python_license_review(
+    review: PythonLicenseReview,
+    python_packages: list[dict[str, object]],
+    license_root: Path,
+) -> dict[str, object]:
+    actual = {_canonical_package_name(item.get("name")): item for item in python_packages}
+    valid: dict[str, PythonPackageLicenseReview] = {}
+    entries: list[dict[str, object]] = []
+    issues: list[str] = []
+    seen: set[str] = set()
+    python_root = (license_root / "python").resolve()
+
+    for item in review.packages:
+        key = _canonical_package_name(item.name)
+        entry_issues: list[str] = []
+        if key in seen:
+            entry_issues.append("duplicate review entry")
+        seen.add(key)
+        observed = actual.get(key)
+        if observed is None:
+            entry_issues.append("package is absent from the exact image")
+        else:
+            if observed.get("version") != item.version:
+                entry_issues.append(
+                    f"version mismatch: review={item.version} image={observed.get('version')}"
+                )
+            if observed.get("license") != item.observed_metadata:
+                entry_issues.append(
+                    "metadata mismatch: "
+                    f"review={item.observed_metadata} image={observed.get('license')}"
+                )
+            observed_files = set(observed.get("license_files") or [])
+            package_root = (
+                python_root / f"{observed.get('name')}-{observed.get('version')}"
+            ).resolve()
+            for reviewed_file in item.license_files:
+                relative = Path(reviewed_file.path)
+                target = (package_root / relative).resolve()
+                if relative.is_absolute() or not target.is_relative_to(package_root):
+                    entry_issues.append(f"unsafe license path: {reviewed_file.path}")
+                elif reviewed_file.path not in observed_files:
+                    entry_issues.append(f"license path not reported by image: {reviewed_file.path}")
+                elif not target.is_file():
+                    entry_issues.append(f"license file is absent: {reviewed_file.path}")
+                elif _sha256(target) != reviewed_file.sha256:
+                    entry_issues.append(f"license hash mismatch: {reviewed_file.path}")
+            if _REVIEW_LICENSE.search(str(observed.get("license") or "")) and not (
+                item.requires_public_distribution_review
+            ):
+                entry_issues.append("reciprocal license was not marked for public review")
+        if entry_issues:
+            issues.extend(f"{item.name}=={item.version}: {issue}" for issue in entry_issues)
+        else:
+            valid[key] = item
+        entries.append(
+            {
+                "name": item.name,
+                "version": item.version,
+                "concluded_license_spdx": item.concluded_license_spdx,
+                "requires_public_distribution_review": (
+                    item.requires_public_distribution_review
+                ),
+                "valid": not entry_issues,
+                "issues": entry_issues,
+                "sources": item.sources,
+                "source_archive": item.source_archive.model_dump(),
+            }
+        )
+
+    unknown = [
+        item
+        for item in python_packages
+        if item.get("license") in {None, "", "UNKNOWN", "NOASSERTION"}
+    ]
+    unresolved_unknown = [
+        item for item in unknown if _canonical_package_name(item.get("name")) not in valid
+    ]
+    reciprocal = [
+        item
+        for item in python_packages
+        if _REVIEW_LICENSE.search(str(item.get("license") or ""))
+    ]
+    reciprocal_without_valid_review = [
+        item for item in reciprocal if _canonical_package_name(item.get("name")) not in valid
+    ]
+    public_distribution_ready = bool(
+        reciprocal
+        and review.public_distribution_approved
+        and review.qualified_reviewer
+        and not reciprocal_without_valid_review
+    )
+    return {
+        "schema_version": "1",
+        "reviewer": review.reviewer,
+        "review_scope": review.review_scope,
+        "public_distribution_approved": review.public_distribution_approved,
+        "qualified_reviewer": review.qualified_reviewer,
+        "entries": entries,
+        "issues": issues,
+        "valid_entry_count": len(valid),
+        "unresolved_unknown_metadata": unresolved_unknown,
+        "reciprocal_license_packages": reciprocal,
+        "reciprocal_without_valid_review": reciprocal_without_valid_review,
+        "public_distribution_ready": public_distribution_ready,
+    }
+
+
+def _runtime_lock_blockers(runtime_locks: dict[str, object]) -> list[str]:
+    if runtime_locks.get("complete") is True:
+        return []
+    return ["Dockerfile apt or Python dependency closure does not match its embedded locks"]
+
+
 def probe_image_release(
     image_ref: str,
     manifest: DistributionManifest,
     *,
     output_dir: Path,
     syft_image: str = DEFAULT_SYFT_IMAGE,
+    license_review_file: Path | None = None,
 ) -> ProbeEvidence:
     """Inventory one exact image, extract license texts, and expose unresolved obligations."""
 
@@ -470,6 +751,12 @@ def probe_image_release(
             "image release inspection requires an immutable image ID or repo digest"
         )
     output_dir = output_dir.resolve()
+    if output_dir.exists() and any(output_dir.iterdir()):
+        raise BlackridgeError("image release output directory must be empty")
+    review = None
+    if license_review_file is not None:
+        license_review_file = license_review_file.resolve()
+        review = load_python_license_review(license_review_file)
     output_dir.mkdir(parents=True, exist_ok=True)
     inspect = json.loads(str(_run(["docker", "image", "inspect", image_ref])["stdout"]))[0]
     observed_id = str(inspect.get("Id") or "")
@@ -517,23 +804,45 @@ def probe_image_release(
     spdx = json.loads((output_dir / "sbom.spdx.json").read_text(encoding="utf-8"))
     python_packages = json.loads((output_dir / "python-packages.json").read_text(encoding="utf-8"))
     os_packages = json.loads((output_dir / "os-source-manifest.json").read_text(encoding="utf-8"))
+    runtime_locks = json.loads((output_dir / "runtime-locks.json").read_text(encoding="utf-8"))
     analysis = _license_analysis(spdx, python_packages, os_packages)
+    if license_review_file is not None and review is not None:
+        review_analysis = _verify_python_license_review(review, python_packages, license_root)
+        review_copy = output_dir / "python-license-review.yaml"
+        shutil.copy2(license_review_file, review_copy)
+        bundled_review = license_root / "blackridge" / "python-license-review.yaml"
+        bundled_review.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(license_review_file, bundled_review)
+        review_analysis["review_file_sha256"] = _sha256(review_copy)
+    else:
+        review_analysis = {
+            "schema_version": "1",
+            "issues": ["no exact Python license review was supplied"],
+            "valid_entry_count": 0,
+            "unresolved_unknown_metadata": analysis["python_unknown_license_metadata"],
+            "reciprocal_license_packages": analysis["python_review_license_packages"],
+            "reciprocal_without_valid_review": analysis["python_review_license_packages"],
+            "public_distribution_ready": False,
+            "review_file_sha256": None,
+        }
     _zip_directory(license_root, output_dir / "license-bundle.zip")
     blockers: list[str] = []
-    if analysis["python_unknown_license_metadata"]:
+    if review_analysis["unresolved_unknown_metadata"]:
         blockers.append("Python packages have unknown license metadata")
     if analysis["python_without_extracted_license_text"]:
         blockers.append("Python packages are missing extracted license/notice text")
-    if analysis["python_review_license_packages"]:
-        blockers.append("Python packages use licenses that require an explicit distribution review")
+    if review_analysis["reciprocal_license_packages"] and not review_analysis[
+        "public_distribution_ready"
+    ]:
+        blockers.append(
+            "Reciprocal-license packages require qualified public-distribution review"
+        )
     if analysis["os_without_extracted_copyright_file"]:
         blockers.append("Debian packages are missing extracted copyright files")
     blockers.append(
         "Corresponding source archives or a reviewed source-offer mechanism are not bundled"
     )
-    blockers.append(
-        "Dockerfile apt and transitive Python package resolution are not completely locked"
-    )
+    blockers.extend(_runtime_lock_blockers(runtime_locks))
     manifest_data = {
         "schema_version": "1",
         "requested_image": image_ref,
@@ -545,6 +854,8 @@ def probe_image_release(
             None,
         ),
         "license_analysis": analysis,
+        "python_license_review": review_analysis,
+        "runtime_locks": runtime_locks,
         "release_blockers": blockers,
         "release_gate_open": False,
     }
@@ -553,15 +864,21 @@ def probe_image_release(
         json.dumps(manifest_data, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
     artifacts = {}
-    for name in [
+    artifact_names = [
         "sbom.spdx.json",
         "sbom.cdx.json",
         "python-packages.json",
         "os-packages.tsv",
         "os-source-manifest.json",
+        "runtime-locks.json",
+        "python-requirements.lock",
+        "os-packages.lock.tsv",
         "image-components.json",
         "license-bundle.zip",
-    ]:
+    ]
+    if license_review_file is not None:
+        artifact_names.append("python-license-review.yaml")
+    for name in artifact_names:
         path = output_dir / name
         artifacts[name] = {"sha256": _sha256(path), "size": path.stat().st_size}
     return ProbeEvidence(

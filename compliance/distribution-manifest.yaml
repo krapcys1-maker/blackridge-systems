@@ -149,7 +149,7 @@ components:
 
   - id: aiohttp
     name: aiohttp
-    version: ">=3.10,<4"
+    version: "3.14.3"
     license_spdx: Apache-2.0 AND MIT
     upstream: https://github.com/aio-libs/aiohttp
     license_source: generated exact-image license-bundle.zip
@@ -169,7 +169,7 @@ components:
 
   - id: debian-ca-certificates
     name: Debian ca-certificates
-    version: resolved during image build
+    version: "20250419 from Debian snapshot 20260824T000000Z"
     license_spdx: LicenseRef-MultiLicense-Debian-ca-certificates
     upstream: https://packages.debian.org/ca-certificates
     license_source: generated exact-image license-bundle.zip
@@ -179,7 +179,7 @@ components:
 
   - id: debian-git
     name: Debian Git
-    version: resolved during image build
+    version: "1:2.47.3-0+deb13u1 from Debian snapshot 20260824T000000Z"
     license_spdx: LicenseRef-MultiLicense-Debian-Git
     upstream: https://packages.debian.org/git
     license_source: generated exact-image license-bundle.zip

@@ -55,3 +55,20 @@ capabilities:
           - The image runs SWE-ReX and contains Blackridge license and notice files.
           - Unknown metadata and review-required licenses remain explicit.
           - Missing corresponding-source handling and incomplete dependency locks block publication.
+      - id: exact-locked-internal-image
+        description: The locked v1 runtime works internally while public image release stays closed.
+        given: The no-cache runtime build uses the pinned base, Debian snapshot, and embedded locks.
+        when: The exact image is inventoried and its technical license review is hash-verified.
+        then:
+          - All 35 Python distributions and 118 Debian packages match their embedded locks.
+          - All six exact Python license-review entries match extracted license-file hashes.
+          - Unknown Python license metadata is reduced to zero without claiming legal approval.
+          - GPL/MPL review and complete corresponding-source delivery still block public publication.
+      - id: invalid-image-license-review-control
+        description: A wrong extracted-license hash invalidates the technical review instead of hiding uncertainty.
+        given: The same exact runtime image and a review fixture with one deliberately false SHA-256 value.
+        when: The image evidence is evaluated against the invalid review fixture.
+        then:
+          - The mismatched license file and expected and actual hashes are retained.
+          - The affected package is not counted as validly reviewed.
+          - Unknown metadata returns and the public release gate remains closed.

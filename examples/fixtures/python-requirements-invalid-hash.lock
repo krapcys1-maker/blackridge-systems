@@ -1,0 +1,2 @@
+# Deliberately invalid control: the digest is not the aiohappyeyeballs 2.7.1 wheel digest.
+aiohappyeyeballs==2.7.1 --hash=sha256:0000000000000000000000000000000000000000000000000000000000000000

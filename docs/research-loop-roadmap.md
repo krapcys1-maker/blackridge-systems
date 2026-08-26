@@ -103,7 +103,8 @@ Initially out of scope:
 
 Before starting the research loop:
 
-- resolve the recorded Docker distribution blockers;
+- keep the v1 runtime image internal-only; resolve its reciprocal-license and complete-source
+  blockers before any future public image publication;
 - execute production components in a hardened sandbox with explicit egress and secret policies;
 - replace the calibration-only linear runtime with sandbox-backed production execution;
 - support multi-input capability graphs and retain every solver decision;
@@ -247,7 +248,8 @@ roadmap does not require universal software composition to be valuable.
 
 ## Immediate order after the current compliance work
 
-1. Remove the four Docker release blockers and rerun the exact artifact inspection.
+1. Preserve the locked v1 runtime as internal-only; do not publish it while the two recorded public
+   distribution blockers remain.
 2. Implement the production sandbox boundary and manually exercise positive and hostile controls.
 3. Run the already frozen scientific-researcher smoke A/B without changing its hidden evaluator.
 4. Define Registry v1 from the existing evidence formats; do not create a parallel truth store.

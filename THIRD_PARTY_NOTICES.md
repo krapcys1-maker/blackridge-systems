@@ -137,7 +137,7 @@ and license bundle must be generated from the exact image digest for every relea
 
 ## Packages explicitly installed in the Docker runtime
 
-### aiohttp (>=3.10,<4)
+### aiohttp (3.14.3)
 
 - License: `Apache-2.0 AND MIT`
 - Upstream: https://github.com/aio-libs/aiohttp
@@ -145,7 +145,7 @@ and license bundle must be generated from the exact image digest for every relea
 - Usage: Explicit SWE-ReX Docker-client dependency missing from swe-rex 1.4.0 metadata.
 - Distributed in: SWE-ReX runtime image
 
-### Debian ca-certificates (resolved during image build)
+### Debian ca-certificates (20250419 from Debian snapshot 20260824T000000Z)
 
 - License: `LicenseRef-MultiLicense-Debian-ca-certificates`
 - Upstream: https://packages.debian.org/ca-certificates
@@ -153,7 +153,7 @@ and license bundle must be generated from the exact image digest for every relea
 - Usage: TLS trust store installed by the Dockerfile.
 - Distributed in: SWE-ReX runtime image
 
-### Debian Git (resolved during image build)
+### Debian Git (1:2.47.3-0+deb13u1 from Debian snapshot 20260824T000000Z)
 
 - License: `LicenseRef-MultiLicense-Debian-Git`
 - Upstream: https://packages.debian.org/git

@@ -25,11 +25,18 @@ the Dockerfile declares; it is intentionally not presented as the complete inven
 4. creates SPDX, CycloneDX, JSON/TSV manifests, and `license-bundle.zip`;
 5. retains unresolved distribution obligations as release blockers.
 
-The current image is deliberately blocked. Its package set includes copyleft software, while a
-reviewed corresponding-source bundle or source-offer mechanism has not been attached. Several
-dependencies also have incomplete machine-readable license metadata, and the Dockerfile does not
-fully lock apt or transitive Python resolution. A license text or SBOM alone resolves neither
-issue.
+The v1 image is an internal build-and-test runtime and public image publication is prohibited.
+Its base digest and Debian snapshot are fixed; the Dockerfile checks an exact 118-package dpkg
+lock and installs the complete 35-distribution Python closure through exact versions and wheel
+hashes. The exact-image probe independently compares the installed closure with both embedded
+locks.
+
+An exact technical review identifies four packages whose wheel metadata says `NOASSERTION` or
+`UNKNOWN` by matching their extracted license-file hashes. That resolves metadata uncertainty but
+is not public-distribution approval. The image still includes GPLv3+ `bashlex` and MPL-2.0
+`certifi`, and a reviewed corresponding-source delivery mechanism for the complete relevant image
+surface has not been attached. Those two facts keep the public image gate closed. A license text,
+SBOM, upstream URL, or AI review alone does not resolve them.
 
 ## Apache-2.0 rule applied by Blackridge
 
@@ -52,6 +59,8 @@ qualified review before public distribution.
 ## Release workflow
 
 `.github/workflows/release-evidence.yml` runs for version tags and manual dispatch. It builds the
-wheel and image, generates artifact-specific evidence, uploads that evidence even if the image
-gate blocks, and then fails the job while blockers remain. It does not publish an image or create
-a release.
+wheel and internal image, generates artifact-specific evidence, and uploads that evidence before
+policy enforcement. The v1 workflow succeeds only when the wheel gate is open, the internal image
+probe completes with policy exit 1, and the public image gate remains closed as required. An
+operational image-probe failure or an unexpectedly open image gate fails the workflow. The
+workflow has read-only repository permissions and contains no image login, push, or release step.
