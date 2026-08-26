@@ -1,0 +1,52 @@
+Manual GitHub release-workflow verification — 2026-08-26
+
+Repository:
+https://github.com/krapcys1-maker/blackridge-systems
+
+Run 33008405421 (first real workflow attempt):
+https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33008405421
+- wheel build succeeded
+- wheel Syft container could not write /out/sbom.spdx.json on the Linux bind mount
+- workflow stopped before building the image
+- upload correctly reported that no evidence directory existed
+- defect retained and fixed by mapping the host UID/GID into inspection containers
+
+Run 33008683655 (second real workflow attempt):
+https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33008683655
+- wheel inspection succeeded
+- image build and immutable-ID resolution succeeded
+- image Syft process could write output, but arbitrary UID lacked writable HOME/cache and /tmp
+- only partial evidence was uploaded (artifact ID 9621625100, 26,367 bytes)
+- downloaded control contained a zero-byte image/sbom.spdx.json, so no policy conclusion was accepted
+- defect retained and fixed with HOME=/tmp and an isolated 512 MiB mode-1777 tmpfs
+- workflow output handling was also split into policy exit 1 versus operational exit 2+
+
+Run 33008998197 (final manual workflow control):
+https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33008998197
+Head: 6d8477744c64d503a04a10818b6c9030d0b135c1
+- notice check succeeded
+- isolated package build succeeded
+- exact wheel inspection succeeded
+- runtime image build and immutable image-ID resolution succeeded
+- exact image inspection completed and returned policy exit 1
+- artifact upload succeeded before enforcement
+- artifact ID: 9621748612
+- GitHub-reported compressed size: 2,135,552 bytes
+- downloaded artifact contained 178 files and zero zero-byte files
+- wheel SPDX: 26,916 bytes; wheel CycloneDX: 13,490 bytes
+- image SPDX: 4,016,774 bytes; image CycloneDX: 1,697,627 bytes
+- image license-bundle.zip: 651,411 bytes
+- downloaded wheel probe: release_gate_open=true, blocker count 0
+- downloaded image probe: release_gate_open=false, blocker count 4
+- only the final Enforce image release gate step failed, deliberately, with exit 1
+
+Related final CI run:
+https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33008944480
+- lint succeeded
+- generated notices check succeeded
+- provenance gate succeeded
+- full automated regression succeeded
+
+Manual verdict:
+PASS for workflow behavior and artifact retention.
+BLOCKED for public image release until the four recorded image blockers are resolved.

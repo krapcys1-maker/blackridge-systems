@@ -125,6 +125,10 @@ time-stamped snapshot and may change upstream.
     A fail-closed allowlist now sends only `LICENSE`, `NOTICE`, and `THIRD_PARTY_NOTICES.md`;
     BuildKit reported a 97-byte context. The final scanned image was rebuilt through that boundary,
     so `.env`, Git history, source, and retained evidence were outside the build context.
+34. The first GitHub workflow run found a Linux bind-mount ownership defect; the second found that
+    an arbitrary mapped UID still lacked writable Syft cache and temporary space. The final run
+    used host UID/GID plus isolated `HOME=/tmp` and tmpfs, uploaded 178 nonempty files, and failed
+    only at the intended policy gate. Operational exit 2+ is now distinguished from policy exit 1.
 
 ## Retained artifacts
 
@@ -196,6 +200,8 @@ time-stamped snapshot and may change upstream.
   that passes the blocking behavior while explicitly leaving the image unapproved.
 - `docker-context-control.txt` — exact build/runtime commands and observed 97-byte allowlisted
   context, retained separately from the legal release verdict.
+- `release-workflow-manual-run.txt` — all three real workflow attempts, both corrected POSIX
+  defects, final artifact identity/content inspection, and the intentional final gate failure.
 
 SHA-256 checksums of the canonical bytes retained in Git:
 
@@ -226,9 +232,9 @@ composition-working-vs-broken-review.json           0ea98401eb4c10774ac4d36e7a0d
 composition-mismatched-workload-failure.json        a04804393c0bd9f604efdb33b782d1e59565d6617baafd44c354fcf3af293f77
 paperqa-supply-chain-probe.json                     9d4a7d38221e423a050a66fe5ed3b4d340ade3d5e931547ef6df74b251a3b5de
 paperqa-supply-chain-review.json                    daf0a12fbe1b9e7aae058a21200e53f074920446dbfeb1f1b418a7cfa2744a5f
-paperqa-2026-08-12-supply-chain.spdx.json           f7dc8d67b98c121554e169ac37d9184e9a8cd5ac1227402950ba2a18b31a8265
-paperqa-2026-08-12-supply-chain.cdx.json            56fc40d40fd0e8789f30237863e46f6ae79d2f1d2a604ba68973a47b10624cd4
-paperqa-2026-08-12-supply-chain.osv.json            8d7582f0cb39e6c4def0cbcecda5ad13a9a2457a1a3e707948de6045017ab1ac
+paperqa-supply-chain-artifacts/paperqa-2026-08-12-supply-chain.spdx.json f7dc8d67b98c121554e169ac37d9184e9a8cd5ac1227402950ba2a18b31a8265
+paperqa-supply-chain-artifacts/paperqa-2026-08-12-supply-chain.cdx.json 56fc40d40fd0e8789f30237863e46f6ae79d2f1d2a604ba68973a47b10624cd4
+paperqa-supply-chain-artifacts/paperqa-2026-08-12-supply-chain.osv.json 8d7582f0cb39e6c4def0cbcecda5ad13a9a2457a1a3e707948de6045017ab1ac
 packaging-build-missing-tool.txt                    d7fd652eb917ecc0c55ba45b7a0fc7e15085e6aa0359556973b701bda7c82bfa
 benchmark-broken-probe.json                         1ab99a2ff8d99d40c3c3bdd3e506342d4c5335b4c157a647b23473515fcb9248
 benchmark-calibration-probe.json                    3d7068b555df1f832fdf1b9820ae079dde04d1380d31f5ecfb81fb6c3f3fa5a6
@@ -248,6 +254,7 @@ composer-positive-review.json                       67e129dba7830e5779586af25b95
 composer-unreviewed-production-probe.json           0a22c4d5c488d253828e0b5a6d997c7580f04af96d80c7a2f5227ad68a6c68d9
 composer-unreviewed-production-review.json          37d70e6b426a03c05886ec575048db862283bb8606cdbf855b40d7fd0d4d3f1d
 docker-context-control.txt                          a9fee655e92cb91ea90f8e58a3ba0d02e0605c17fb7050f2942bb75c4c33f3ee
+release-workflow-manual-run.txt                     260add867aa661511b2d096a0aafe52ee9789bbf6fd767dedd11a9499acdd9f0
 provenance-gate-incomplete-copy-probe.json           234b21eb02b14e50f9ea4bc9fa9bb13544f0d679b7c3628a94e9a960f9af9289
 provenance-gate-incomplete-copy-review.json          d045b9b45347ef5046efa569ae0b6af74fbc9ff5786e6a82a7ca876e52171f4d
 provenance-gate-positive-probe.json                  471174a2853b6b934ef2e8d6fc6b33e1ad5d3e61b9ac2d563bca54f29d0d85bf
