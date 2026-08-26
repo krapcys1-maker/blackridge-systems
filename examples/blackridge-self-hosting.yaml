@@ -169,3 +169,19 @@ capabilities:
           - The working fixture produces the expected output and retained evidence.
           - The broken fixture fails at the expected contract boundary.
           - A green exit code alone is not accepted without inspecting the produced artifact.
+      - id: generated-system-sandbox-parity
+        description: A locked generated calibration bundle keeps its host result inside the networkless sandbox.
+        given: The existing generated research composition, exact input, locked component hashes, and internal runtime image.
+        when: Component files are copied without a host mount and executed after all container networks are detached.
+        then:
+          - Copied component bytes match both locked SHA-256 values inside the container.
+          - Every input and output contract passes and the final artifact equals the reviewed host calibration result.
+          - Egress and sensitive-name preflight passes, adapter evidence stays immutable, and cleanup is confirmed.
+      - id: sandbox-green-invalid-output
+        description: The sandboxed runtime still rejects a component that exits zero with invalid JSON shape.
+        given: The paired generated bundle whose sink omits required report and trace fields.
+        when: The same sandbox backend executes and validates every pipeline boundary.
+        then:
+          - The source and adapter pass before the deliberately broken sink runs.
+          - The sink exits zero but both exact schema errors are retained and the runtime remains incomplete.
+          - Network preflight and exact container cleanup still pass on the failed workload.

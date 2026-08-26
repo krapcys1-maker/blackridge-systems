@@ -38,11 +38,30 @@ sensitive host environment name is visible, and the sentinel runs. In the delibe
 arm, both connections succeed, the identical hostile assertion exits 1, and the sentinel is not
 run. Both containers are removed and both host snapshots remain unchanged.
 
+## Generated-system calibration backend
+
+`blackridge compose-run-sandbox` applies the same primitive to an already generated calibration
+bundle. Before Docker starts, it verifies the complete generated provenance map, runtime mode,
+component launch hashes, and the absence of requested environment forwarding. It copies each
+locked component artifact into the disposable container with `docker cp`, verifies the SHA-256
+again inside the container, removes every network, and runs an egress/secret-name preflight.
+
+Component argv then execute through `docker exec -i` with JSON on stdin. JSON Schema validation and
+reviewed RFC 6902 adapters remain in the trusted Blackridge orchestrator. The calibration backend
+maps only a recognized Python interpreter in argv position zero and the locked artifact path; any
+other absolute argv path fails closed. It forwards only a fixed `PYTHONIOENCODING=utf-8`, never a
+host environment value.
+
+The retained positive experiment produced the same final artifact as the prior host calibration.
+The paired broken sink still exited zero, but schema inspection retained missing `/report/title`
+and `/trace/source`, kept the system incomplete, and cleaned the sandbox. Production runtime mode
+and nonempty environment allowlists are rejected before container creation.
+
 ## What this does not prove
 
-This is a production-boundary primitive, not yet the production composer backend and not a
-hardened multi-tenant sandbox claim. Preparation code still has network access, the container runs
-as root inside its namespace, the filesystem is writable and ephemeral, and the Docker daemon is a
-trusted host boundary. The next integration step is to route generated production component
-commands through this primitive, add explicit preparation-source policy, and test filesystem,
-resource-exhaustion, timeout, and signal controls before enabling production execution.
+This is a production-boundary primitive with a calibration composer backend, not an enabled
+production composer and not a hardened multi-tenant sandbox claim. Repository preparation can
+still have network access, the container runs as root inside its namespace, the filesystem is
+writable and ephemeral, and the Docker daemon is a trusted host boundary. The next step is to test
+filesystem, resource-exhaustion, timeout, and signal controls before allowing any production
+runtime mode.

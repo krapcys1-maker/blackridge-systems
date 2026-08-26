@@ -31,6 +31,7 @@ from blackridge.composition import (
     CompositionSystemProbe,
     generate_system,
     run_generated_system,
+    run_generated_system_sandboxed,
     solve_composition,
 )
 from blackridge.depsdev import DepsDevClient, PackageSystem
@@ -697,6 +698,67 @@ def compose_run(
     console.print(f"Output artifact written to {output}")
     console.print(f"Raw evidence written to {evidence}")
     console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
+    if not complete:
+        raise typer.Exit(code=1)
+
+
+@app.command("compose-run-sandbox")
+def compose_run_sandbox(
+    bundle_directory: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
+    input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    image: Annotated[str, typer.Option("--image")] = "blackridge/swerex-runtime:1.4.0",
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/composition-sandbox-output.json"
+    ),
+    evidence: Annotated[Path, typer.Option("--evidence")] = Path(
+        ".blackridge/evidence/composition-sandbox-probe.json"
+    ),
+) -> None:
+    """Execute a generated calibration bundle through the networkless sandbox primitive."""
+
+    try:
+        input_artifact = json.loads(input_file.read_text(encoding="utf-8"))
+        probe = run_generated_system_sandboxed(
+            bundle_directory,
+            input_artifact,
+            image_ref=image,
+        )
+        write_probe(probe, evidence)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
+            json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+    except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-generated-sandbox-runtime/1",
+            subject=str(bundle_directory),
+            request={
+                "bundle_directory": str(bundle_directory),
+                "input_file": str(input_file),
+                "image": image,
+            },
+            sources=[COMPOSITION_SOURCE, SWEREX_SOURCE],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, evidence)
+        console.print(f"[red]Sandboxed generated-system execution failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    complete = probe.observations["all_steps_completed"]
+    sandbox = probe.observations["sandbox"]
+    console.print(f"All generated steps completed: {complete}")
+    console.print(f"Resolved image: {sandbox['image']['resolved_id']}")
+    console.print(
+        "Container remaining after cleanup: "
+        f"{sandbox['cleanup']['container_exists_after']}"
+    )
+    console.print(f"Output artifact written to {output}")
+    console.print(f"Raw evidence written to {evidence}")
+    console.print(
+        "[yellow]Calibration only; no production or release verdict was assigned.[/yellow]"
+    )
     if not complete:
         raise typer.Exit(code=1)
 

@@ -1,17 +1,21 @@
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
 
 import pytest
+import yaml
 
 from blackridge.composition import (
     EvidenceReference,
+    _sandbox_component_argv,
     _verify_evidence,
     generate_system,
     run_generated_system,
+    run_generated_system_sandboxed,
     solve_composition,
 )
 from blackridge.errors import BlackridgeError
@@ -98,6 +102,10 @@ def test_generator_writes_locked_layout_and_runtime_completes(tmp_path: Path) ->
     assert all(
         step.get("output_contract_valid") is True for step in probe.observations["steps"]
     )
+    adapter = next(
+        step for step in probe.observations["steps"] if step["step_type"] == "adapter"
+    )
+    assert adapter["operations"][0] == {"op": "add", "path": "/document", "value": {}}
     assert "verdict" not in probe.model_dump()
 
 
@@ -140,6 +148,76 @@ def test_runtime_rejects_tampered_generated_artifact(tmp_path: Path) -> None:
 
     with pytest.raises(BlackridgeError, match=r"integrity failed: runtime\.yaml"):
         run_generated_system(bundle, INPUT)
+
+
+def _rewrite_runtime_and_relock(bundle: Path, mutate) -> None:
+    runtime_file = bundle / "runtime.yaml"
+    runtime = yaml.safe_load(runtime_file.read_text(encoding="utf-8"))
+    mutate(runtime)
+    runtime_file.write_text(yaml.safe_dump(runtime, sort_keys=False), encoding="utf-8")
+    provenance_file = bundle / "provenance.json"
+    provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
+    provenance["artifact_sha256"]["runtime.yaml"] = sha256(
+        runtime_file.read_bytes()
+    ).hexdigest()
+    provenance_file.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
+
+
+def test_sandboxed_generated_runner_keeps_production_disabled(tmp_path: Path) -> None:
+    definition = load_composition_definition(POSITIVE)
+    plan = solve_composition(definition, definition_file=POSITIVE)
+    bundle = tmp_path / "production"
+    generate_system(
+        definition,
+        plan,
+        definition_file=POSITIVE,
+        output_directory=bundle,
+    )
+    _rewrite_runtime_and_relock(bundle, lambda runtime: runtime.update({"mode": "production"}))
+
+    with pytest.raises(BlackridgeError, match="remains calibration-only"):
+        run_generated_system_sandboxed(bundle, INPUT)
+
+
+def test_sandboxed_generated_runner_refuses_environment_forwarding(tmp_path: Path) -> None:
+    definition = load_composition_definition(POSITIVE)
+    plan = solve_composition(definition, definition_file=POSITIVE)
+    bundle = tmp_path / "environment"
+    generate_system(
+        definition,
+        plan,
+        definition_file=POSITIVE,
+        output_directory=bundle,
+    )
+
+    def add_environment(runtime) -> None:
+        component = next(step for step in runtime["steps"] if step["step_type"] == "component")
+        component["launch"]["environment_allowlist"] = ["DEEPSEEK_API_KEY"]
+
+    _rewrite_runtime_and_relock(bundle, add_environment)
+
+    with pytest.raises(BlackridgeError, match="forwards no component environment"):
+        run_generated_system_sandboxed(bundle, INPUT)
+
+
+def test_sandboxed_component_maps_a_different_python_venv_safely(tmp_path: Path) -> None:
+    component = tmp_path / "component.py"
+    previous_venv_python = tmp_path / "old-venv" / "Scripts" / "python.exe"
+
+    assert _sandbox_component_argv(
+        [str(previous_venv_python), str(component)],
+        artifact_file=str(component.resolve()),
+        container_artifact="/workspace/components/component-1.py",
+        subject_id="portable-python-component",
+    ) == ["python", "/workspace/components/component-1.py"]
+
+    with pytest.raises(BlackridgeError, match="unmapped absolute argv path"):
+        _sandbox_component_argv(
+            [str(previous_venv_python), str(component), str(tmp_path / "unlocked.txt")],
+            artifact_file=str(component.resolve()),
+            container_artifact="/workspace/components/component-1.py",
+            subject_id="portable-python-component",
+        )
 
 
 def test_evidence_review_is_bound_to_exact_probe_subject(tmp_path: Path) -> None:

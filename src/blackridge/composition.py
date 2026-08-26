@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import heapq
 import json
 import os
@@ -9,6 +10,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
+from copy import deepcopy
 from datetime import UTC, datetime
 from hashlib import sha256
 from itertools import product
@@ -962,7 +965,71 @@ def _normalized_process_text(value: str | bytes | None) -> str:
     return value or ""
 
 
-def run_generated_system(bundle_directory: Path, input_artifact: object) -> ProbeEvidence:
+def _host_component_process(
+    _subject_id: str,
+    launch: dict[str, object],
+    artifact: object,
+) -> dict[str, object]:
+    argv = launch["argv"]
+    cwd = launch["working_directory"]
+    allowlist = launch.get("environment_allowlist", [])
+    timeout = launch["timeout_seconds"]
+    environment = {
+        key: os.environ[key]
+        for key in allowlist
+        if isinstance(key, str) and key in os.environ
+    }
+    environment["PYTHONIOENCODING"] = "utf-8"
+    started = datetime.now(UTC)
+    try:
+        completed = subprocess.run(
+            argv,
+            input=json.dumps(artifact),
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            cwd=cwd,
+            env=environment,
+            timeout=float(timeout),
+            check=False,
+            shell=False,
+        )
+        return {
+            "executor": "host-shell-free",
+            "argv": argv,
+            "working_directory": cwd,
+            "environment_names": sorted(environment),
+            "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
+            "timed_out": False,
+            "exit_code": completed.returncode,
+            "stdout": completed.stdout,
+            "stderr": completed.stderr,
+        }
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "executor": "host-shell-free",
+            "argv": argv,
+            "working_directory": cwd,
+            "environment_names": sorted(environment),
+            "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
+            "timed_out": True,
+            "exit_code": None,
+            "stdout": _normalized_process_text(exc.stdout),
+            "stderr": _normalized_process_text(exc.stderr),
+        }
+
+
+def run_generated_system(
+    bundle_directory: Path,
+    input_artifact: object,
+    *,
+    _component_process: Callable[
+        [str, dict[str, object], object], dict[str, object]
+    ] = _host_component_process,
+    _provider: str = "blackridge-generated-linear-runtime/1",
+    _runtime_mode: Literal["calibration"] = "calibration",
+) -> ProbeEvidence:
     """Execute a generated calibration bundle and retain every boundary observation."""
 
     bundle = bundle_directory.resolve()
@@ -993,9 +1060,9 @@ def run_generated_system(bundle_directory: Path, input_artifact: object) -> Prob
         )
     runtime_file = _resolve_bundle_file(bundle, "runtime.yaml")
     runtime = _load_yaml_mapping(runtime_file)
-    if runtime.get("mode") != "calibration":
+    if runtime.get("mode") != _runtime_mode:
         raise BlackridgeError(
-            "v1 host runner only executes explicit calibration bundles; production uses a sandbox"
+            "generated runtime mode is not enabled by this execution backend"
         )
     contract_files = runtime.get("contract_files")
     steps = runtime.get("steps")
@@ -1084,9 +1151,11 @@ def run_generated_system(bundle_directory: Path, input_artifact: object) -> Prob
         artifact_integrity_failed = False
         if step_type == "adapter":
             operations = raw_step.get("operations")
-            observation["operations"] = operations
+            observation["operations"] = deepcopy(operations)
             try:
-                produced = jsonpatch.JsonPatch(operations).apply(artifact, in_place=False)
+                produced = jsonpatch.JsonPatch(deepcopy(operations)).apply(
+                    artifact, in_place=False
+                )
                 observation["patch_error"] = None
             except (jsonpatch.JsonPatchException, TypeError) as exc:
                 observation["patch_error"] = f"{type(exc).__name__}: {exc}"
@@ -1129,59 +1198,32 @@ def run_generated_system(bundle_directory: Path, input_artifact: object) -> Prob
                 failed = True
                 step_observations.append(observation)
                 continue
-            environment = {
-                key: os.environ[key]
-                for key in allowlist
-                if isinstance(key, str) and key in os.environ
+            process = _component_process(subject_id, launch, artifact)
+            required_process_fields = {
+                "argv",
+                "working_directory",
+                "environment_names",
+                "duration_seconds",
+                "timed_out",
+                "exit_code",
+                "stdout",
+                "stderr",
             }
-            environment["PYTHONIOENCODING"] = "utf-8"
-            started = datetime.now(UTC)
-            try:
-                completed = subprocess.run(
-                    argv,
-                    input=json.dumps(artifact),
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                    capture_output=True,
-                    cwd=cwd,
-                    env=environment,
-                    timeout=float(timeout),
-                    check=False,
-                    shell=False,
+            if not required_process_fields <= process.keys():
+                raise BlackridgeError(
+                    f"component executor returned incomplete evidence: {subject_id}"
                 )
-                duration = (datetime.now(UTC) - started).total_seconds()
-                observation["process"] = {
-                    "argv": argv,
-                    "working_directory": cwd,
-                    "environment_names": sorted(environment),
-                    "duration_seconds": duration,
-                    "timed_out": False,
-                    "exit_code": completed.returncode,
-                    "stdout": completed.stdout,
-                    "stderr": completed.stderr,
-                }
-                if completed.returncode == 0:
-                    try:
-                        produced = json.loads(completed.stdout)
-                    except json.JSONDecodeError as exc:
-                        observation["parse_error"] = f"JSONDecodeError: {exc}"
-                        failure_reason = f"component {subject_id} emitted invalid JSON"
-                else:
-                    failure_reason = f"component {subject_id} exited nonzero"
-            except subprocess.TimeoutExpired as exc:
-                duration = (datetime.now(UTC) - started).total_seconds()
-                observation["process"] = {
-                    "argv": argv,
-                    "working_directory": cwd,
-                    "environment_names": sorted(environment),
-                    "duration_seconds": duration,
-                    "timed_out": True,
-                    "exit_code": None,
-                    "stdout": _normalized_process_text(exc.stdout),
-                    "stderr": _normalized_process_text(exc.stderr),
-                }
+            observation["process"] = process
+            if process["timed_out"]:
                 failure_reason = f"component {subject_id} timed out"
+            elif process["exit_code"] == 0:
+                try:
+                    produced = json.loads(str(process["stdout"]))
+                except json.JSONDecodeError as exc:
+                    observation["parse_error"] = f"JSONDecodeError: {exc}"
+                    failure_reason = f"component {subject_id} emitted invalid JSON"
+            else:
+                failure_reason = f"component {subject_id} exited nonzero"
             after_artifact_hash = (
                 _sha256_file(launch_artifact) if launch_artifact.is_file() else None
             )
@@ -1223,7 +1265,7 @@ def run_generated_system(bundle_directory: Path, input_artifact: object) -> Prob
     return ProbeEvidence(
         probe_id=uuid4().hex,
         observed_at=datetime.now(UTC),
-        provider="blackridge-generated-linear-runtime/1",
+        provider=_provider,
         subject=str(runtime.get("system_name")),
         request={
             "bundle_directory": str(bundle),
@@ -1248,6 +1290,335 @@ def run_generated_system(bundle_directory: Path, input_artifact: object) -> Prob
         },
         sources=[COMPOSITION_SOURCE, JSON_PATCH_SOURCE, JSON_SCHEMA_SOURCE],
         warnings=warnings,
+    )
+
+
+def _sandbox_component_argv(
+    declared_argv: list[object],
+    *,
+    artifact_file: str,
+    container_artifact: str,
+    subject_id: str,
+) -> list[str]:
+    """Map one locked Python component launch without trusting host absolute paths."""
+
+    effective_argv: list[str] = []
+    python_names = {"python", "python.exe", "python3", "python3.exe"}
+    for index, value in enumerate(declared_argv):
+        argument = str(value)
+        if index == 0 and Path(argument).name.lower() in python_names:
+            effective_argv.append("python")
+        elif str(Path(argument).resolve()) == artifact_file:
+            effective_argv.append(container_artifact)
+        elif Path(argument).is_absolute():
+            raise BlackridgeError(
+                f"sandboxed component has an unmapped absolute argv path: {subject_id}"
+            )
+        else:
+            effective_argv.append(argument)
+    if container_artifact not in effective_argv:
+        raise BlackridgeError(
+            f"sandboxed component argv does not reference its locked artifact: {subject_id}"
+        )
+    return effective_argv
+
+
+def run_generated_system_sandboxed(
+    bundle_directory: Path,
+    input_artifact: object,
+    *,
+    image_ref: str = "blackridge/swerex-runtime:1.4.0",
+) -> ProbeEvidence:
+    """Run a calibration bundle with copied components and a networkless Docker workload."""
+
+    from blackridge.sandbox import (
+        SWEREX_SOURCE,
+        SwerexDockerProbe,
+        _container_exists,
+        inspect_local_image,
+    )
+
+    bundle = bundle_directory.resolve()
+    provenance_file = _resolve_bundle_file(bundle, "provenance.json")
+    provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
+    if not isinstance(provenance, dict) or not isinstance(
+        provenance.get("artifact_sha256"), dict
+    ):
+        raise BlackridgeError("generated provenance manifest is invalid")
+    for relative, expected_hash in provenance["artifact_sha256"].items():
+        if not isinstance(relative, str) or not isinstance(expected_hash, str):
+            raise BlackridgeError("generated provenance artifact mapping is invalid")
+        if _sha256_file(_resolve_bundle_file(bundle, relative)) != expected_hash:
+            raise BlackridgeError(f"generated bundle integrity failed: {relative}")
+
+    runtime_file = _resolve_bundle_file(bundle, "runtime.yaml")
+    runtime = _load_yaml_mapping(runtime_file)
+    if runtime.get("mode") != "calibration":
+        raise BlackridgeError(
+            "sandboxed generated-system v1 remains calibration-only pending hostile controls"
+        )
+    steps = runtime.get("steps")
+    if not isinstance(steps, list):
+        raise BlackridgeError("generated runtime is missing steps")
+    component_controls: list[tuple[str, dict[str, object]]] = []
+    for raw_step in steps:
+        if not isinstance(raw_step, dict) or raw_step.get("step_type") != "component":
+            continue
+        subject_id = raw_step.get("subject_id")
+        launch = raw_step.get("launch")
+        if not isinstance(subject_id, str) or not isinstance(launch, dict):
+            raise BlackridgeError("generated component launch control is invalid")
+        artifact_file = launch.get("artifact_file")
+        artifact_hash = launch.get("artifact_sha256")
+        allowlist = launch.get("environment_allowlist", [])
+        if not isinstance(artifact_file, str) or not isinstance(artifact_hash, str):
+            raise BlackridgeError(f"component launch artifact is invalid: {subject_id}")
+        if allowlist != []:
+            raise BlackridgeError(
+                f"sandboxed generated-system v1 forwards no component environment: {subject_id}"
+            )
+        artifact_path = Path(artifact_file).resolve()
+        if not artifact_path.is_file() or _sha256_file(artifact_path) != artifact_hash:
+            raise BlackridgeError(f"component launch artifact failed integrity: {subject_id}")
+        component_controls.append((subject_id, launch))
+
+    adapter = SwerexDockerProbe()
+    DockerDeployment, Command = adapter._runtime_types()
+    image = inspect_local_image(image_ref)
+    deployment = DockerDeployment(
+        image=image["resolved_id"],
+        pull="never",
+        remove_container=True,
+        startup_timeout=180,
+        docker_args=[
+            "--cap-drop=ALL",
+            "--security-opt=no-new-privileges",
+            "--pids-limit=256",
+            "--memory=1g",
+            "--cpus=2",
+        ],
+        logger=adapter._logger(),
+    )
+    container_name: str | None = None
+    copied: list[dict[str, object]] = []
+    container_artifacts: dict[str, str] = {}
+    boundary: dict[str, object] | None = None
+    preflight: dict[str, object] | None = None
+    force_remove: dict[str, object] | None = None
+    container_exists_after: bool | None = None
+    runtime_probe: ProbeEvidence | None = None
+
+    async def start_and_prepare() -> None:
+        nonlocal container_name
+        await deployment.start()
+        container_name = deployment.container_name
+        response = await deployment.runtime.execute(
+            Command(
+                command=["mkdir", "-p", "/workspace/components"],
+                timeout=30,
+                shell=False,
+                check=False,
+            )
+        )
+        if response.exit_code != 0:
+            raise BlackridgeError("sandbox component directory preparation failed")
+
+    def sandbox_component_process(
+        subject_id: str,
+        launch: dict[str, object],
+        artifact: object,
+    ) -> dict[str, object]:
+        if container_name is None:
+            raise BlackridgeError("sandbox container is unavailable")
+        declared_argv = launch["argv"]
+        artifact_file = str(Path(str(launch["artifact_file"])).resolve())
+        effective_argv = _sandbox_component_argv(
+            declared_argv,
+            artifact_file=artifact_file,
+            container_artifact=container_artifacts[subject_id],
+            subject_id=subject_id,
+        )
+        argv = [
+            "docker",
+            "exec",
+            "-i",
+            "--workdir",
+            "/workspace/components",
+            "--env",
+            "PYTHONIOENCODING=utf-8",
+            container_name,
+            *effective_argv,
+        ]
+        started = datetime.now(UTC)
+        try:
+            completed = subprocess.run(
+                argv,
+                input=json.dumps(artifact),
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                capture_output=True,
+                timeout=float(launch["timeout_seconds"]),
+                check=False,
+                shell=False,
+            )
+            return {
+                "executor": "docker-exec-shell-free",
+                "declared_argv": declared_argv,
+                "argv": effective_argv,
+                "working_directory": "/workspace/components",
+                "environment_names": ["PYTHONIOENCODING"],
+                "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
+                "timed_out": False,
+                "exit_code": completed.returncode,
+                "stdout": completed.stdout,
+                "stderr": completed.stderr,
+            }
+        except subprocess.TimeoutExpired as exc:
+            return {
+                "executor": "docker-exec-shell-free",
+                "declared_argv": declared_argv,
+                "argv": effective_argv,
+                "working_directory": "/workspace/components",
+                "environment_names": ["PYTHONIOENCODING"],
+                "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
+                "timed_out": True,
+                "exit_code": None,
+                "stdout": _normalized_process_text(exc.stdout),
+                "stderr": _normalized_process_text(exc.stderr),
+            }
+
+    try:
+        asyncio.run(start_and_prepare())
+        if container_name is None:
+            raise BlackridgeError("SWE-ReX did not provide a container name")
+        for index, (subject_id, launch) in enumerate(component_controls, start=1):
+            source = Path(str(launch["artifact_file"])).resolve()
+            suffix = source.suffix if source.suffix.isascii() else ""
+            target = f"/workspace/components/component-{index}{suffix}"
+            copy_argv = ["docker", "cp", str(source), f"{container_name}:{target}"]
+            copied_process = subprocess.run(copy_argv, capture_output=True, text=True)
+            record: dict[str, object] = {
+                "subject_id": subject_id,
+                "argv": copy_argv,
+                "exit_code": copied_process.returncode,
+                "stderr": copied_process.stderr,
+                "target": target,
+            }
+            copied.append(record)
+            if copied_process.returncode != 0:
+                raise BlackridgeError(f"component copy failed: {subject_id}")
+            hash_process = subprocess.run(
+                ["docker", "exec", container_name, "sha256sum", target],
+                capture_output=True,
+                text=True,
+            )
+            actual_hash = hash_process.stdout.split()[0] if hash_process.returncode == 0 else None
+            record["expected_sha256"] = launch["artifact_sha256"]
+            record["container_sha256"] = actual_hash
+            record["hash_matches"] = actual_hash == launch["artifact_sha256"]
+            if not record["hash_matches"]:
+                raise BlackridgeError(f"copied component hash mismatch: {subject_id}")
+            container_artifacts[subject_id] = target
+
+        boundary = adapter._isolate_execution_network(container_name)
+        if not boundary["applied"]:
+            raise BlackridgeError(str(boundary["error"]))
+        preflight_argv = [
+            "docker",
+            "exec",
+            container_name,
+            "python",
+            "-c",
+            (
+                "import json,os,socket;out={};socket.setdefaulttimeout(2);"
+                "\nfor label,target in [('direct',('1.1.1.1',443)),"
+                "('dns',('pypi.org',443))]:"
+                "\n try:s=socket.create_connection(target,2);s.close();out[label]=True"
+                "\n except OSError:out[label]=False"
+                "\nneedles=('DEEPSEEK','GITHUB','OPENAI','TOKEN','SECRET','API_KEY');"
+                "out['sensitive_environment_names']=sorted(k for k in os.environ "
+                "if any(n in k.upper() for n in needles));print(json.dumps(out,sort_keys=True))"
+            ),
+        ]
+        preflight_process = subprocess.run(
+            preflight_argv,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        preflight = {
+            "argv": preflight_argv,
+            "exit_code": preflight_process.returncode,
+            "stdout": preflight_process.stdout,
+            "stderr": preflight_process.stderr,
+            "result": (
+                json.loads(preflight_process.stdout)
+                if preflight_process.returncode == 0
+                else None
+            ),
+        }
+        expected_preflight = {
+            "direct": False,
+            "dns": False,
+            "sensitive_environment_names": [],
+        }
+        if preflight["result"] != expected_preflight:
+            raise BlackridgeError("sandbox preflight did not prove egress and secret isolation")
+        runtime_probe = run_generated_system(
+            bundle,
+            input_artifact,
+            _component_process=sandbox_component_process,
+            _provider="blackridge-generated-sandbox-runtime/1",
+        )
+    finally:
+        if container_name:
+            remove_argv = ["docker", "rm", "--force", container_name]
+            removed = subprocess.run(remove_argv, capture_output=True, text=True)
+            force_remove = {
+                "argv": remove_argv,
+                "exit_code": removed.returncode,
+                "stdout": removed.stdout,
+                "stderr": removed.stderr,
+            }
+            container_exists_after = _container_exists(container_name)
+
+    if runtime_probe is None:
+        raise BlackridgeError("sandboxed generated runtime did not produce evidence")
+    sandbox_observation = {
+        "image": image,
+        "container_name": container_name,
+        "security_options": [
+            "cap-drop=ALL",
+            "no-new-privileges",
+            "pids-limit=256",
+            "memory=1g",
+            "cpus=2",
+        ],
+        "copied_components": copied,
+        "execution_boundary": boundary,
+        "preflight": preflight,
+        "cleanup": {
+            "force_remove": force_remove,
+            "container_exists_after": container_exists_after,
+        },
+    }
+    if (
+        force_remove is None
+        or force_remove["exit_code"] != 0
+        or container_exists_after is not False
+    ):
+        raise BlackridgeError("sandboxed generated runtime cleanup could not be confirmed")
+    observations = dict(runtime_probe.observations)
+    observations["sandbox"] = sandbox_observation
+    request = dict(runtime_probe.request)
+    request["image_ref"] = image_ref
+    request["resolved_image_id"] = image["resolved_id"]
+    sources = list(runtime_probe.sources)
+    if SWEREX_SOURCE not in sources:
+        sources.append(SWEREX_SOURCE)
+    return runtime_probe.model_copy(
+        update={"request": request, "observations": observations, "sources": sources}
     )
 
 

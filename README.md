@@ -43,6 +43,8 @@ This repository contains an executable, manually reviewed vertical slice:
     hash-locked 35-distribution Python closure while prohibiting public image publication.
 17. split sandbox preparation from production workload execution, detach every Docker network
     before workload argv runs, forward no host environment, and verify exact container cleanup.
+18. copy hash-locked generated-system components into that boundary without host mounts and run
+    contract validation and trusted adapters while production mode remains disabled.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.
