@@ -24,8 +24,12 @@ def _enrich_one(
         metadata = github.enrich(metadata)
     except BlackridgeError as exc:
         warnings.append(f"GitHub enrichment failed for {metadata.full_name}: {exc}")
-    security_score = scorecard.score(metadata.full_name)
-    metadata = metadata.model_copy(update={"security_score": security_score})
+    security = scorecard.inspect(metadata.full_name)
+    metadata = metadata.model_copy(update={"security_score": security.score})
+    if security.status != "available":
+        warnings.append(
+            f"OpenSSF Scorecard {security.status} for {metadata.full_name}: {security.detail}"
+        )
     return hit, metadata, warnings
 
 
@@ -49,9 +53,7 @@ def discover(
         hits = discovery.search(capability, limit=limit)
         enriched: list[tuple[DiscoveryHit, RepositoryMetadata]] = []
         with ThreadPoolExecutor(max_workers=max(1, min(workers, len(hits) or 1))) as pool:
-            futures = {
-                pool.submit(_enrich_one, hit, github, scorecard): hit for hit in hits
-            }
+            futures = {pool.submit(_enrich_one, hit, github, scorecard): hit for hit in hits}
             for future in as_completed(futures):
                 hit, metadata, warnings = future.result()
                 enriched.append((hit, metadata))

@@ -1,0 +1,147 @@
+schema_version: "1"
+name: blackridge-self-hosting
+goal: >-
+  Assemble and verify Blackridge itself from proven upstream discovery, inspection,
+  execution, adaptation, and evaluation components.
+constraints:
+  execution: sandbox-only
+  provenance: required
+  approval: manual-evidence-review
+  write_new_code: only-when-no-upstream-component-or-small-adapter-exists
+capabilities:
+  - id: repository-discovery
+    description: Find source repositories that implement a requested software capability.
+    accepts: [capability-query/v1]
+    produces: [repository-candidate-set/v1]
+    seeds:
+      - bgauryy/octocode
+      - github/github-mcp-server
+    searches:
+      - keywords: [sandboxed, code, execution, agent]
+        stars: ">100"
+        updated: ">2025-01-01"
+    acceptance:
+      - id: known-sandbox-query
+        description: A concrete sandbox query returns relevant and auditable repositories.
+        given: The query "sandboxed code execution for AI agents" with a limit of five results.
+        when: Repository discovery and GitHub metadata enrichment are executed.
+        then:
+          - At least one result explicitly implements isolated or sandboxed code execution.
+          - Every result records its exact repository identity and source query.
+          - The leading result is inspected manually rather than approved from its score alone.
+
+  - id: ecosystem-intelligence
+    description: Inspect package versions, licenses, advisories, provenance, and dependencies.
+    accepts: [package-coordinate/v1]
+    produces: [package-evidence/v1]
+    seeds:
+      - google/deps.dev
+    searches:
+      - keywords: [open, source, package, dependencies]
+        stars: ">100"
+        updated: ">2025-01-01"
+    acceptance:
+      - id: paper-qa-package-evidence
+        description: A real PaperQA package probe exposes facts needed for candidate inspection.
+        given: The public PyPI package paper-qa, without assuming its current default version.
+        when: The package, selected version, and resolved dependency graph are queried from deps.dev.
+        then:
+          - The canonical package name and selected version are present.
+          - License and advisory fields are present even when their values are empty or unknown.
+          - The response contains a resolved graph summary or an explicit unavailability warning.
+          - No automatic approval verdict is created from metadata alone.
+      - id: exact-version-not-substituted
+        description: A missing exact package version is retained as failure, never replaced silently.
+        given: The Maven coordinate org.grobid:grobid-core with explicitly requested version 0.9.1.
+        when: deps.dev does not contain that exact package version.
+        then:
+          - The probe exits unsuccessfully and retains the requested coordinate and error.
+          - An older default version is not substituted for the requested version.
+          - No package approval or functional verdict is created from the failed lookup.
+
+  - id: supply-chain-evaluation
+    description: Inspect licenses, vulnerabilities, project posture, and software provenance.
+    accepts: [repository-candidate/v1, package-evidence/v1]
+    produces: [supply-chain-evidence/v1]
+    seeds:
+      - ossf/scorecard
+      - google/osv-scalibr
+      - oss-review-toolkit/ort
+      - anchore/syft
+    searches:
+      - keywords: [software, supply, chain, security]
+        stars: ">500"
+        updated: ">2025-01-01"
+    acceptance:
+      - id: known-repository-review
+        description: A known repository receives separate legal and security observations.
+        given: The exact commit of Future-House/paper-qa selected for inspection.
+        when: License, Scorecard, vulnerability, SBOM, and provenance probes run independently.
+        then:
+          - Missing evidence remains unknown and is never silently converted to a passing result.
+          - License evidence identifies both repository and dependency licensing concerns.
+          - Security posture and known vulnerability evidence remain separate observations.
+
+  - id: environment-construction
+    description: Build a disposable executable environment for an untrusted candidate repository.
+    accepts: [pinned-repository/v1]
+    produces: [boot-evidence/v1]
+    seeds:
+      - bytedance/Repo2Run
+      - opensandbox-group/OpenSandbox
+      - SWE-agent/SWE-ReX
+    searches:
+      - keywords: [repository, dockerfile, environment, agent]
+        stars: ">100"
+        updated: ">2025-01-01"
+    acceptance:
+      - id: python-repository-clean-boot
+        description: A pinned Python repository builds and runs without touching the host workspace.
+        given: A small public Python repository with a known test command and pinned commit.
+        when: Its environment is built and baseline tests run in a disposable sandbox.
+        then:
+          - Build commands, image identity, duration, exit status, stdout, and stderr are retained.
+          - The host source tree is unchanged after execution.
+          - A failed setup is retained as failed evidence rather than repaired invisibly.
+
+  - id: component-adaptation
+    description: Bridge incompatible component contracts with the smallest reviewable change.
+    accepts: [source-contract/v1, target-contract/v1]
+    produces: [tested-adapter/v1]
+    seeds:
+      - ast-grep/ast-grep
+      - openrewrite/rewrite
+    searches:
+      - keywords: [structural, code, rewrite]
+        stars: ">500"
+        updated: ">2025-01-01"
+    acceptance:
+      - id: schema-mismatch-adapter
+        description: A concrete schema mismatch is fixed without rewriting either component.
+        given: One fixture emits paper.title while its consumer requires document.name.
+        when: Blackridge selects or creates an adapter and executes both components through it.
+        then:
+          - The adapter maps the required field and preserves all unrelated input fields.
+          - Contract tests fail before the adapter and pass after it.
+          - The adapter source, rationale, and exact tests are reviewable.
+
+  - id: system-verification
+    description: Verify the composed system against representative end-to-end workloads.
+    accepts: [composed-system/v1, acceptance-suite/v1]
+    produces: [system-verification-evidence/v1]
+    seeds:
+      - UKGovernmentBEIS/inspect_ai
+      - dagger/dagger
+    searches:
+      - keywords: [agent, evaluation, framework]
+        stars: ">500"
+        updated: ">2025-01-01"
+    acceptance:
+      - id: deliberate-negative-case
+        description: Verification detects a deliberately broken component connection.
+        given: A working composed fixture and a second fixture with one adapter field removed.
+        when: The same end-to-end workload is executed against both fixtures.
+        then:
+          - The working fixture produces the expected output and retained evidence.
+          - The broken fixture fails at the expected contract boundary.
+          - A green exit code alone is not accepted without inspecting the produced artifact.

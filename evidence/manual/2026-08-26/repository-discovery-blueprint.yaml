@@ -1,0 +1,26 @@
+schema_version: '1'
+generated_at: '2026-08-26T17:17:40.540212Z'
+system_name: blackridge-self-hosting
+goal: Assemble and verify Blackridge itself from proven upstream discovery, inspection,
+  execution, adaptation, and evaluation components.
+release_ready: false
+components:
+- capability_id: repository-discovery
+  repository: vstorm-co/pydantic-deepagents
+  alternatives:
+  - SWE-agent/SWE-ReX
+  - bgauryy/octocode
+  - standardagents/arrow-js
+  - LibreChat-AI/code-interpreter
+  status: provisional
+  current_evidence_level: 0
+  required_evidence_level: 2
+  accepts:
+  - capability-query/v1
+  produces:
+  - repository-candidate-set/v1
+  warnings:
+  - L0 metadata choice only; inspect source, license, API, and dependencies
+  - must boot in a sandbox before selection
+  - OpenSSF Scorecard is unavailable; security posture is unverified
+next_gate: inspect-license-security-and-boot-in-sandbox

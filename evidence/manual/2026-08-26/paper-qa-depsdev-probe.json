@@ -1,0 +1,127 @@
+{
+  "schema_version": "1",
+  "probe_id": "222f0ab1f76f41fdacb18d0e2d80863b",
+  "observed_at": "2026-08-26T17:13:32.050624Z",
+  "provider": "deps.dev-v3",
+  "subject": "pypi:paper-qa@2026.8.12",
+  "request": {
+    "system": "pypi",
+    "name": "paper-qa",
+    "version": null
+  },
+  "observations": {
+    "package": {
+      "system": "pypi",
+      "requested_name": "paper-qa",
+      "canonical_name": "paper-qa",
+      "available_version_count": 169,
+      "default_version": "2026.8.12"
+    },
+    "selected_version": {
+      "version": "2026.8.12",
+      "published_at": "2026-08-12T15:34:16Z",
+      "deprecated": false,
+      "deprecated_reason": "",
+      "licenses": [
+        "non-standard"
+      ],
+      "advisories": [],
+      "related_projects": [
+        {
+          "id": "github.com/future-house/paper-qa",
+          "relation_type": "ISSUE_TRACKER",
+          "provenance": "UNVERIFIED_METADATA"
+        },
+        {
+          "id": "github.com/future-house/paper-qa",
+          "relation_type": "SOURCE_REPO",
+          "provenance": "UNVERIFIED_METADATA"
+        }
+      ],
+      "registries": [
+        "https://pypi.org/simple"
+      ]
+    },
+    "dependency_graph": {
+      "available": true,
+      "node_count": 75,
+      "edge_count": 131,
+      "direct_count": 16,
+      "indirect_count": 58,
+      "direct_packages": [
+        {
+          "name": "anyio",
+          "version": "4.14.2"
+        },
+        {
+          "name": "fhaviary",
+          "version": "0.35.0"
+        },
+        {
+          "name": "fhlmi",
+          "version": "1.0.5"
+        },
+        {
+          "name": "html2text",
+          "version": "2025.4.15"
+        },
+        {
+          "name": "httpx",
+          "version": "0.28.1"
+        },
+        {
+          "name": "httpx-aiohttp",
+          "version": "0.2.0"
+        },
+        {
+          "name": "numpy",
+          "version": "2.5.2"
+        },
+        {
+          "name": "paper-qa-pypdf",
+          "version": "2026.8.12"
+        },
+        {
+          "name": "pybtex",
+          "version": "0.26.1"
+        },
+        {
+          "name": "pydantic",
+          "version": "2.13.4"
+        },
+        {
+          "name": "pydantic-settings",
+          "version": "2.15.0"
+        },
+        {
+          "name": "rich",
+          "version": "15.0.0"
+        },
+        {
+          "name": "setuptools",
+          "version": "84.0.0"
+        },
+        {
+          "name": "tantivy",
+          "version": "0.26.0"
+        },
+        {
+          "name": "tenacity",
+          "version": "9.1.4"
+        },
+        {
+          "name": "tiktoken",
+          "version": "0.14.0"
+        }
+      ],
+      "graph_error": "",
+      "node_errors": []
+    }
+  },
+  "sources": [
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa",
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa/versions/2026.8.12",
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa/versions/2026.8.12:dependencies"
+  ],
+  "warnings": []
+}

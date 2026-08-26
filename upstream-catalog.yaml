@@ -23,6 +23,16 @@ components:
     status: selected-next
     rationale: Official GitHub surface with explicit read-only mode and tool allowlists.
 
+  - repository: google/deps.dev
+    role: package-ecosystem-intelligence
+    version: api-v3
+    license: Apache-2.0
+    integration: public-http-api
+    status: active-in-mvp
+    rationale: >-
+      Package versions, licenses, advisories, provenance links, and resolved dependency graphs
+      across PyPI, npm, Maven, Cargo, NuGet, Go, and RubyGems. Coverage gaps remain explicit.
+
   - repository: yamadashy/repomix
     role: bounded-source-snapshot
     version: v1.18.0

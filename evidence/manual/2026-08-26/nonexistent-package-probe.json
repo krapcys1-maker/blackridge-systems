@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "probe_id": "fafac14dd9884a6ab84c472c57f6c5ff",
+  "observed_at": "2026-08-26T17:21:06.485733Z",
+  "provider": "deps.dev-v3",
+  "subject": "pypi:blackridge-package-that-does-not-exist-260826@default",
+  "request": {
+    "system": "pypi",
+    "name": "blackridge-package-that-does-not-exist-260826",
+    "version": null
+  },
+  "observations": {
+    "probe_completed": false,
+    "error_type": "ExternalToolError",
+    "error": "deps.dev returned HTTP 404 for https://api.deps.dev/v3/systems/pypi/packages/blackridge-package-that-does-not-exist-260826"
+  },
+  "sources": [
+    "https://api.deps.dev/v3/systems/pypi/packages/blackridge-package-that-does-not-exist-260826"
+  ],
+  "warnings": [
+    "The probe failed; no package facts were collected."
+  ]
+}

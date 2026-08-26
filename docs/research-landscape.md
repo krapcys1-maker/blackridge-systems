@@ -23,6 +23,7 @@ those components and own the evidence model, compatibility solver, and feedback 
 | --- | --- | --- |
 | bgauryy/octocode | 920 stars, MIT, pushed 2026-08-25; GitHub/local search, AST and LSP | primary discovery engine |
 | github/github-mcp-server | 32.5k stars, MIT, active; official tool allowlists and read-only mode | official GitHub boundary |
+| google/deps.dev | public API v3; seven package ecosystems, resolved graphs, licenses, advisories, and provenance | active package-intelligence provider; never assume complete registry coverage |
 | yamadashy/repomix | 28k stars, MIT, active; remote commit packing and safe remote-config default | reproducible source snapshot |
 | ossf/scorecard | 5.6k stars, Apache-2.0, v5.5.0, Scorecard 9.0 | repository security posture |
 | google/osv-scalibr | Apache-2.0, plugin-oriented SCA library | package and vulnerability inventory |
@@ -92,6 +93,11 @@ finds vulnerabilities; ORT enforces license/policy; Syft emits SBOMs.
 
 ast-grep and OpenRewrite make adapter work reviewable and repeatable. The system should generate a
 structural rewrite recipe where possible instead of a one-off text patch.
+
+deps.dev materially expands discovery beyond GitHub, but real probes exposed two important limits:
+package license metadata can disagree with repository metadata, and registry coverage may lag an
+upstream release. It is an evidence source, not an authority that may silently override conflicting
+facts or substitute an older version.
 
 ## Rejected architecture shortcuts
 

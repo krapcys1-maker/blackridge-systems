@@ -1,0 +1,551 @@
+{
+  "schema_version": "1",
+  "created_at": "2026-08-26T17:16:55.196352Z",
+  "provider": "octocode-cli:octocode@18.3.0",
+  "request": {
+    "schema_version": "1",
+    "name": "blackridge-self-hosting",
+    "goal": "Assemble and verify Blackridge itself from proven upstream discovery, inspection, execution, adaptation, and evaluation components.",
+    "constraints": {
+      "execution": "sandbox-only",
+      "provenance": "required",
+      "approval": "manual-evidence-review",
+      "write_new_code": "only-when-no-upstream-component-or-small-adapter-exists"
+    },
+    "capabilities": [
+      {
+        "id": "repository-discovery",
+        "description": "Find source repositories that implement a requested software capability.",
+        "accepts": [
+          "capability-query/v1"
+        ],
+        "produces": [
+          "repository-candidate-set/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          }
+        ],
+        "seeds": [
+          "bgauryy/octocode",
+          "github/github-mcp-server"
+        ],
+        "acceptance": [
+          {
+            "id": "known-sandbox-query",
+            "description": "A concrete sandbox query returns relevant and auditable repositories.",
+            "given": "The query \"sandboxed code execution for AI agents\" with a limit of five results.",
+            "when": "Repository discovery and GitHub metadata enrichment are executed.",
+            "then": [
+              "At least one result explicitly implements isolated or sandboxed code execution.",
+              "Every result records its exact repository identity and source query.",
+              "The leading result is inspected manually rather than approved from its score alone."
+            ]
+          }
+        ],
+        "required": true
+      }
+    ]
+  },
+  "results": [
+    {
+      "capability": {
+        "id": "repository-discovery",
+        "description": "Find source repositories that implement a requested software capability.",
+        "accepts": [
+          "capability-query/v1"
+        ],
+        "produces": [
+          "repository-candidate-set/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          }
+        ],
+        "seeds": [
+          "bgauryy/octocode",
+          "github/github-mcp-server"
+        ],
+        "acceptance": [
+          {
+            "id": "known-sandbox-query",
+            "description": "A concrete sandbox query returns relevant and auditable repositories.",
+            "given": "The query \"sandboxed code execution for AI agents\" with a limit of five results.",
+            "when": "Repository discovery and GitHub metadata enrichment are executed.",
+            "then": [
+              "At least one result explicitly implements isolated or sandboxed code execution.",
+              "Every result records its exact repository identity and source query.",
+              "The leading result is inspected manually rather than approved from its score alone."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": [
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "vstorm-co/pydantic-deepagents",
+            "url": "https://github.com/vstorm-co/pydantic-deepagents",
+            "description": "Open-source, self-hosted Claude Code - a terminal AI assistant and the Python framework behind it. Tool-calling, sandboxed execution, multi-agent teams, skills, checkpoints, unlimited context - on Pydantic AI, any model.",
+            "stars": 1044,
+            "forks": 127,
+            "open_issues": 15,
+            "pushed_at": "2026-08-22T14:57:43Z",
+            "updated_at": "2026-08-26T14:51:59Z",
+            "created_at": "2025-11-29T14:36:36Z",
+            "language": "Python",
+            "topics": [
+              "agent-framework",
+              "ai-agents",
+              "anthropic",
+              "claude-code",
+              "cli",
+              "coding-agent",
+              "deep-research",
+              "docker-sandbox",
+              "llms",
+              "mcp",
+              "playwright",
+              "pydantic",
+              "pydantic-ai",
+              "python",
+              "subagents",
+              "tui",
+              "vstorm"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 19.85,
+            "adoption": 7.55,
+            "community": 3.51,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 79.41
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "SWE-agent/SWE-ReX",
+            "url": "https://github.com/SWE-agent/SWE-ReX",
+            "description": "Sandboxed code execution for AI agents, locally or on the cloud. Massively parallel, easy to extend. Powering SWE-agent and more. ",
+            "stars": 579,
+            "forks": 119,
+            "open_issues": 55,
+            "pushed_at": "2026-08-24T22:03:10Z",
+            "updated_at": "2026-08-26T07:59:57Z",
+            "created_at": "2024-10-14T21:22:22Z",
+            "language": "Python",
+            "topics": [
+              "agent",
+              "agents",
+              "ai",
+              "aws",
+              "cloud",
+              "coding-agents",
+              "docker",
+              "fargate",
+              "modal",
+              "swe-agent"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 19.96,
+            "adoption": 6.91,
+            "community": 3.47,
+            "issue_health": 2.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 76.07
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "bgauryy/octocode",
+            "url": "https://github.com/bgauryy/octocode",
+            "description": "Code research platform for AI agents; find, understand, and prove context across your code and all of GitHub, in a fraction of the tokens. One toolset, MCP or CLI  ",
+            "stars": 920,
+            "forks": 75,
+            "open_issues": 3,
+            "pushed_at": "2026-08-25T19:36:22Z",
+            "updated_at": "2026-08-25T19:36:25Z",
+            "created_at": "2025-06-05T13:56:40Z",
+            "language": "TypeScript",
+            "topics": [
+              "agent",
+              "ai",
+              "ai-agents",
+              "ai-tools",
+              "claude-ai",
+              "code-intelligence",
+              "code-search",
+              "context",
+              "cursor",
+              "cursor-ai",
+              "development",
+              "github",
+              "github-api",
+              "llm",
+              "mcp",
+              "model-context-protocol",
+              "modelcontextprotocol",
+              "octocode",
+              "semantic-search",
+              "vibe-coding"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 18.13,
+            "maintenance": 20.0,
+            "adoption": 7.41,
+            "community": 3.13,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 73.67
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "standardagents/arrow-js",
+            "url": "https://github.com/standardagents/arrow-js",
+            "description": "The first UI framework for the agentic era — tiny, performant, with WASM sandboxes for safe code execution.",
+            "stars": 3728,
+            "forks": 89,
+            "open_issues": 6,
+            "pushed_at": "2026-07-01T16:52:04Z",
+            "updated_at": "2026-08-26T13:06:23Z",
+            "created_at": "2022-11-08T22:29:40Z",
+            "language": "TypeScript",
+            "topics": [
+              "declarative",
+              "reactive",
+              "rendering",
+              "ui",
+              "ux",
+              "web",
+              "webcomponents"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 4,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 18.16,
+            "maintenance": 18.03,
+            "adoption": 8.93,
+            "community": 3.26,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 73.38
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "LibreChat-AI/code-interpreter",
+            "url": "https://github.com/LibreChat-AI/code-interpreter",
+            "description": "Sandboxed code execution API for AI agents: powers LibreChat's Code Interpreter",
+            "stars": 107,
+            "forks": 51,
+            "open_issues": 25,
+            "pushed_at": "2026-08-26T00:05:52Z",
+            "updated_at": "2026-08-26T09:56:21Z",
+            "created_at": "2026-06-11T21:18:09Z",
+            "language": "TypeScript",
+            "topics": [],
+            "license_spdx": "Apache-2.0",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 3,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 22.6,
+            "maintenance": 20.0,
+            "adoption": 5.08,
+            "community": 2.86,
+            "issue_health": 0.5,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 71.04
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "github/github-mcp-server",
+            "url": "https://github.com/github/github-mcp-server",
+            "description": "GitHub's official MCP Server",
+            "stars": 32522,
+            "forks": 4856,
+            "open_issues": 327,
+            "pushed_at": "2026-08-26T15:12:17Z",
+            "updated_at": "2026-08-26T16:30:35Z",
+            "created_at": "2025-03-04T16:42:04Z",
+            "language": "Go",
+            "topics": [
+              "github",
+              "mcp",
+              "mcp-server"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 11.25,
+            "maintenance": 20.0,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 69.75
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "portofcontext/pctx",
+            "url": "https://github.com/portofcontext/pctx",
+            "description": "pctx is the execution layer for agentic tool calls. It auto-converts agent tools and MCP servers into code that runs in secure sandboxes for token-efficient workflows.",
+            "stars": 273,
+            "forks": 34,
+            "open_issues": 15,
+            "pushed_at": "2026-08-17T16:54:59Z",
+            "updated_at": "2026-08-04T20:05:31Z",
+            "created_at": "2025-11-04T16:54:23Z",
+            "language": "Rust",
+            "topics": [
+              "ai-agents",
+              "api",
+              "infrastructure",
+              "local-development",
+              "mcp",
+              "mcp-server",
+              "open-source"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "sandboxed",
+              "code",
+              "execution",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 5,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 17.27,
+            "maintenance": 19.67,
+            "adoption": 6.09,
+            "community": 2.57,
+            "issue_health": 2.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 67.6
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "OpenSSF Scorecard not-found for LibreChat-AI/code-interpreter: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for standardagents/arrow-js: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for SWE-agent/SWE-ReX: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for vstorm-co/pydantic-deepagents: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for bgauryy/octocode: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for portofcontext/pctx: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for github/github-mcp-server: OpenSSF has no Scorecard for this repository"
+  ]
+}

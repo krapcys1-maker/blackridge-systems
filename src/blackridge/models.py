@@ -37,6 +37,24 @@ class SearchQuery(BaseModel):
         return cleaned
 
 
+class AcceptanceScenario(BaseModel):
+    """Observable behavior that must be checked against concrete evidence."""
+
+    id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+    description: str = Field(min_length=10)
+    given: str = Field(min_length=3)
+    when: str = Field(min_length=3)
+    then: list[str] = Field(min_length=1)
+
+    @field_validator("then")
+    @classmethod
+    def non_empty_expectations(cls, value: list[str]) -> list[str]:
+        cleaned = [item.strip() for item in value if item.strip()]
+        if not cleaned:
+            raise ValueError("at least one non-empty expected observation is required")
+        return cleaned
+
+
 class Capability(BaseModel):
     """A replaceable unit of functionality with explicit data contracts."""
 
@@ -46,6 +64,7 @@ class Capability(BaseModel):
     produces: list[str] = Field(default_factory=list)
     searches: list[SearchQuery] = Field(min_length=1)
     seeds: list[str] = Field(default_factory=list)
+    acceptance: list[AcceptanceScenario] = Field(default_factory=list)
     required: bool = True
 
     @field_validator("seeds")
@@ -57,6 +76,14 @@ class Capability(BaseModel):
         invalid = [repository for repository in value if not pattern.fullmatch(repository)]
         if invalid:
             raise ValueError(f"invalid seed repository names: {', '.join(invalid)}")
+        return value
+
+    @field_validator("acceptance")
+    @classmethod
+    def unique_acceptance_ids(cls, value: list[AcceptanceScenario]) -> list[AcceptanceScenario]:
+        ids = [scenario.id for scenario in value]
+        if len(ids) != len(set(ids)):
+            raise ValueError("acceptance scenario ids must be unique within a capability")
         return value
 
 

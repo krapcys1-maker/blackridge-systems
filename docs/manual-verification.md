@@ -1,0 +1,27 @@
+# Manual verification policy
+
+Blackridge does not treat a successful command, green CI run, metadata score, or LLM judgment as
+proof that a component performs a capability.
+
+The verification loop is:
+
+1. define an observable scenario with concrete input and expected behavior;
+2. run a real probe against a pinned or otherwise identified subject;
+3. retain raw inputs, outputs, warnings, source URLs, and failures;
+4. inspect the artifact and independently cross-check important claims;
+5. record a named `pass`, `fail`, or `blocked` verdict with observations and caveats;
+6. keep failed and superseded evidence instead of rewriting history.
+
+`ProbeEvidence` deliberately has no verdict field. `ManualReview` cannot be created without a
+reviewer, expected behavior, concrete observations, explanatory notes, and the SHA-256 digest of
+the exact probe file that was inspected.
+
+## Status vocabulary
+
+- **PASS** — the retained evidence satisfies this exact scenario, not the whole component.
+- **FAIL** — the evidence contradicts at least one required observation.
+- **BLOCKED** — the evidence is insufficient or contradictory.
+- **NOT RUN** — the segment has not been implemented or exercised; it is never shown as green.
+
+The first retained run is documented in
+[`evidence/manual/2026-08-26/README.md`](../evidence/manual/2026-08-26/README.md).

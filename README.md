@@ -18,11 +18,13 @@ system.
 
 This repository contains the first executable vertical slice:
 
-1. describe a system as a capability specification;
+1. describe a system as capabilities with concrete acceptance scenarios;
 2. search GitHub through the existing Octocode research engine;
 3. enrich candidates with official GitHub metadata and OpenSSF Scorecard data;
 4. apply license, maintenance, security, and adoption gates;
-5. emit an auditable discovery run and a **provisional** system blueprint.
+5. inspect real package versions and resolved dependency graphs through deps.dev;
+6. separate raw probe evidence from named, explicit manual review;
+7. emit an auditable discovery run and a **provisional** system blueprint.
 
 The current release deliberately stops before executing untrusted code. A candidate cannot be
 marked production-ready until it boots in a sandbox and passes contract and end-to-end tests.
@@ -56,6 +58,17 @@ blackridge doctor
 blackridge discover examples/scientific-researcher.yaml --output .blackridge/research.json
 blackridge report .blackridge/research.json
 blackridge blueprint .blackridge/research.json --output .blackridge/blueprint.yaml
+
+# A real package probe does not assign its own PASS/FAIL verdict.
+blackridge probe-package pypi paper-qa --output .blackridge/evidence/paper-qa.json
+blackridge review-probe examples/blackridge-self-hosting.yaml \
+  .blackridge/evidence/paper-qa.json \
+  --capability ecosystem-intelligence \
+  --scenario paper-qa-package-evidence \
+  --verdict pass \
+  --reviewer "your-name" \
+  --observed "Describe exactly what you inspected" \
+  --notes "Explain why the evidence satisfies or fails the contract"
 ```
 
 The discovery command invokes pinned upstream tooling as a subprocess with an argument vector,
@@ -83,6 +96,7 @@ Blackridge integrates tools at stable boundaries instead of copying their code:
 | Stage | Selected upstream building block | Role |
 | --- | --- | --- |
 | discovery | Octocode + GitHub CLI/MCP | repository and code research |
+| ecosystem intelligence | deps.dev | package versions, licenses, advisories, provenance, and resolved graphs |
 | context | Repomix | bounded, reproducible repository snapshots |
 | quality | OpenSSF Scorecard + OSV-SCALIBR | security posture and vulnerabilities |
 | compliance | OSS Review Toolkit + Syft | licenses, dependencies, and SBOMs |
@@ -101,6 +115,7 @@ are documented in [`docs/research-landscape.md`](docs/research-landscape.md).
 src/blackridge/           deterministic control plane and CLI
 examples/                 capability specifications
 tests/                    unit tests with mocked external tools
+evidence/manual/          retained real-world probes and named manual verdicts
 docs/                     architecture, research, and security decisions
 upstream-catalog.yaml     pinned upstream choices and provenance
 ```

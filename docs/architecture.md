@@ -30,6 +30,10 @@ The solver may replace any failing candidate and rerun only affected graph branc
 code only when no candidate satisfies the contract or when a small adapter is cheaper and safer
 than a replacement.
 
+Automated probes collect observations but never promote an evidence level by themselves. A named
+manual reviewer must compare the retained artifact with a concrete acceptance scenario. Exit code
+zero, a green CI job, an LLM judgment, or the presence of metadata is not functional proof.
+
 An L0 blueprint keeps a primary inspection target plus four alternatives for each capability. It
 must not collapse the search space to one repository before sandbox and contract evidence exists.
 
@@ -42,6 +46,10 @@ must not collapse the search space to one repository before sandbox and contract
 | L2 | booted | pinned revision installs and starts in a bounded sandbox |
 | L3 | contract-tested | component passes its capability contract and neighbor compatibility tests |
 | L4 | system-verified | complete system passes the user's representative end-to-end workload |
+
+Every promotion record retains the exact scenario, expected observations, actual observations,
+reviewer, timestamp, evidence artifact, and caveats. Missing evidence remains unknown. Conflicting
+sources remain a blocker until reconciled; one source is not silently preferred.
 
 An L0 ranking is a queue for inspection, not a selection. Stars are a weak adoption prior. A
 candidate becomes selectable at L2 and releasable only at L4.

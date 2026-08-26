@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "probe_id": "f898c8f45d1c46bcab88d6dfc49253d5",
+  "observed_at": "2026-08-26T17:21:07.123354Z",
+  "provider": "deps.dev-v3",
+  "subject": "pypi:paper-qa@0.0.0-not-real",
+  "request": {
+    "system": "pypi",
+    "name": "paper-qa",
+    "version": "0.0.0-not-real"
+  },
+  "observations": {
+    "probe_completed": false,
+    "error_type": "ConfigurationError",
+    "error": "requested package version is not available: 0.0.0-not-real"
+  },
+  "sources": [
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa",
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa/versions/0.0.0-not-real"
+  ],
+  "warnings": [
+    "The probe failed; no package facts were collected."
+  ]
+}
