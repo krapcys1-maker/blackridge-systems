@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from contextlib import suppress
 from hashlib import sha256
 from pathlib import Path
@@ -25,6 +26,13 @@ from blackridge.benchmark import (
     BenchmarkEvaluator,
 )
 from blackridge.blueprint import build_blueprint
+from blackridge.composition import (
+    COMPOSITION_SOURCE,
+    CompositionSystemProbe,
+    generate_system,
+    run_generated_system,
+    solve_composition,
+)
 from blackridge.depsdev import DepsDevClient, PackageSystem
 from blackridge.doctor import check_tools
 from blackridge.errors import BlackridgeError
@@ -32,12 +40,15 @@ from blackridge.evidence import ManualReview, ManualVerdict, ProbeEvidence
 from blackridge.github import GitHubCli
 from blackridge.io import (
     load_adapter_experiment,
+    load_composition_definition,
+    load_composition_plan,
     load_probe,
     load_request,
     load_run,
     load_sandbox_experiment,
     load_supply_chain_experiment,
     write_blueprint,
+    write_composition_plan,
     write_manual_review,
     write_probe,
     write_run,
@@ -610,6 +621,157 @@ def benchmark_compare(
     console.print("Automatic winner: none")
     console.print(f"Evidence written to {output}")
     console.print("[yellow]A named manual comparison is still required.[/yellow]")
+
+
+@app.command("compose-solve")
+def compose_solve(
+    definition_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/composition-plan.yaml"
+    ),
+) -> None:
+    """Solve a frozen component-and-contract compatibility problem."""
+
+    try:
+        definition = load_composition_definition(definition_file)
+        plan = solve_composition(definition, definition_file=definition_file)
+        write_composition_plan(plan, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        console.print(f"[red]Compatibility solving failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"Compatibility plan complete: {plan.complete}")
+    console.print(f"Selected components: {', '.join(plan.selected_component_ids) or 'none'}")
+    console.print(f"Selected adapters: {', '.join(plan.selected_adapter_ids) or 'none'}")
+    console.print(f"Plan written to {output}")
+    console.print("[yellow]No L4 or release verdict was assigned.[/yellow]")
+    if not plan.complete:
+        raise typer.Exit(code=1)
+
+
+@app.command("compose-generate")
+def compose_generate(
+    definition_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    plan_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    output_directory: Annotated[Path, typer.Argument()],
+) -> None:
+    """Generate a provenance-locked system from a complete compatibility plan."""
+
+    try:
+        definition = load_composition_definition(definition_file)
+        plan = load_composition_plan(plan_file)
+        generated = generate_system(
+            definition,
+            plan,
+            definition_file=definition_file,
+            output_directory=output_directory,
+        )
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        console.print(f"[red]System generation failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"Generated system written to {generated.output_directory}")
+    console.print(f"Execution ready: {generated.execution_ready}")
+    console.print(f"Release ready: {generated.release_ready}")
+    console.print("[yellow]Generation completeness is not an L4 verdict.[/yellow]")
+
+
+@app.command("compose-run")
+def compose_run(
+    bundle_directory: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
+    input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/composition-output.json"
+    ),
+    evidence: Annotated[Path, typer.Option("--evidence")] = Path(
+        ".blackridge/evidence/composition-run-probe.json"
+    ),
+) -> None:
+    """Execute a generated calibration system and retain every contract boundary."""
+
+    try:
+        input_artifact = json.loads(input_file.read_text(encoding="utf-8"))
+        probe = run_generated_system(bundle_directory, input_artifact)
+        write_probe(probe, evidence)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
+            json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+    except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-generated-linear-runtime/1",
+            subject=str(bundle_directory),
+            request={"bundle_directory": str(bundle_directory), "input_file": str(input_file)},
+            sources=[COMPOSITION_SOURCE],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, evidence)
+        console.print(f"[red]Generated system execution failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    complete = probe.observations["all_steps_completed"]
+    console.print(f"All generated steps completed: {complete}")
+    console.print(f"Output artifact written to {output}")
+    console.print(f"Raw evidence written to {evidence}")
+    console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
+    if not complete:
+        raise typer.Exit(code=1)
+
+
+@app.command("probe-composer")
+def probe_composer(
+    definition_file: Annotated[
+        Path, typer.Argument(exists=True, dir_okay=False, readable=True)
+    ],
+    input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    bundle_directory: Annotated[Path, typer.Argument()],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/composer-probe.json"
+    ),
+) -> None:
+    """Solve, generate, execute, and retain one complete composer experiment."""
+
+    try:
+        definition = load_composition_definition(definition_file)
+        input_artifact = json.loads(input_file.read_text(encoding="utf-8"))
+        probe = CompositionSystemProbe().probe(
+            definition,
+            definition_file=definition_file,
+            output_directory=bundle_directory,
+            input_artifact=input_artifact,
+        )
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-composition-system-probe/1",
+            subject=str(definition_file),
+            request={
+                "definition_file": str(definition_file),
+                "input_file": str(input_file),
+                "bundle_directory": str(bundle_directory),
+            },
+            sources=[COMPOSITION_SOURCE],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, output)
+        console.print(f"[red]Composer probe failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    plan = probe.observations["plan"]
+    runtime = probe.observations["runtime"]
+    runtime_complete = runtime is not None and runtime["observations"]["all_steps_completed"]
+    console.print(f"Compatibility plan complete: {plan['complete']}")
+    console.print(f"Generated runtime complete: {runtime_complete}")
+    console.print(f"Raw evidence written to {output}")
+    console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
+    if not plan["complete"] or not runtime_complete:
+        raise typer.Exit(code=1)
 
 
 @app.command("review-probe")

@@ -1,0 +1,59 @@
+schema_version: '1'
+system_name: linear-research-broken-output
+components:
+- component_id: broken-green-exit-report-sink
+  capability_id: report-sink
+  source_uri: blackridge://calibration/broken-report-sink
+  revision: sha256:a6b447ca4013e0d7e23f3d2a9b789558a3c6f4a21a0074717e6b66d64aebe03c
+  license_spdx: Apache-2.0
+  integration: command-json
+  accepts:
+  - document-record/v1
+  produces:
+  - research-report/v1
+  launch:
+    argv:
+    - '{python}'
+    - '{definition_dir}/fixtures/report_sink_broken.py'
+    artifact_file: '{definition_dir}/fixtures/report_sink_broken.py'
+    artifact_sha256: a6b447ca4013e0d7e23f3d2a9b789558a3c6f4a21a0074717e6b66d64aebe03c
+    working_directory: '{definition_dir}'
+    timeout_seconds: 30.0
+    environment_allowlist: []
+  evidence:
+    level: 0
+    review_file: null
+    review_sha256: null
+    capability_id: null
+    scenario_id: null
+    probe_subject: null
+  selection_priority: 100
+  blocked_reasons: []
+- component_id: fixture-research-source
+  capability_id: research-source
+  source_uri: blackridge://calibration/research-source
+  revision: sha256:8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c
+  license_spdx: Apache-2.0
+  integration: command-json
+  accepts:
+  - research-query/v1
+  produces:
+  - paper-record/v1
+  launch:
+    argv:
+    - '{python}'
+    - '{definition_dir}/fixtures/research_source.py'
+    artifact_file: '{definition_dir}/fixtures/research_source.py'
+    artifact_sha256: 8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c
+    working_directory: '{definition_dir}'
+    timeout_seconds: 30.0
+    environment_allowlist: []
+  evidence:
+    level: 0
+    review_file: null
+    review_sha256: null
+    capability_id: null
+    scenario_id: null
+    probe_subject: null
+  selection_priority: 100
+  blocked_reasons: []

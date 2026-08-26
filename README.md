@@ -29,7 +29,9 @@ This repository contains an executable, manually reviewed vertical slice:
 9. inspect an exact release independently with Syft, OSV-Scanner, Scorecard, deps.dev, GitHub,
    and PyPI Integrity;
 10. freeze and calibrate an artifact-first A/B benchmark before either builder is run;
-11. emit an auditable discovery run and a **provisional** system blueprint.
+11. solve a linear compatibility graph, reject blocked or unreviewed choices, and generate a
+    provenance-locked runnable system bundle;
+12. emit an auditable discovery run and a **provisional** system blueprint.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.
@@ -185,6 +187,26 @@ The adapter is a reviewable RFC 6902 document, not generated Python. The pair co
 compare different fixtures or schemas and retains both complete artifacts. In the supplied example,
 both patches apply without an exception; JSON Schema validation is what detects the broken edge.
 
+### Solve, generate, and execute a compatible system
+
+```powershell
+blackridge compose-solve examples/composition-linear-calibration.yaml `
+  --output .blackridge/composition-plan.yaml
+blackridge compose-generate examples/composition-linear-calibration.yaml `
+  .blackridge/composition-plan.yaml .blackridge/generated-research
+blackridge compose-run .blackridge/generated-research examples/composition-input.json `
+  --output .blackridge/composition-output.json `
+  --evidence .blackridge/evidence/composition-run.json
+```
+
+The v1 solver uses hard gates, not a hidden weighted score. It checks allowed licenses and
+integration modes, exact command and adapter hashes, evidence levels, named review hashes in
+production mode, and a complete contract route. The generator writes component and evidence
+locks, the exact definition and full plan, schemas, adapter definitions, a shell-free runtime,
+provenance hashes, an SBOM gate, and an explicit `release_ready: false`. Host execution is
+restricted to Blackridge-owned calibration fixtures; production components must run through a
+sandbox in a later runtime backend.
+
 ## Repository map
 
 ```text
@@ -200,10 +222,11 @@ upstream-catalog.yaml     pinned upstream choices and provenance
 
 Blackridge is not yet a one-command autonomous software factory. Discovery, package and
 exact-release supply-chain inspection, commit-pinned Docker experiments, declarative payload
-adapters, paired negative contract verification, and frozen benchmark calibration now produce raw
+adapters, paired negative contract verification, frozen benchmark calibration, linear
+compatibility solving, locked generation, and calibration runtime execution now produce raw
 evidence. The first isolated A/B attempts, production-scope dependency classification,
-compatibility solving, adapter synthesis beyond JSON Patch, hardened remote isolation through
-OpenSandbox, and full generated-system delivery are next.
+multi-input/DAG solving, production sandbox execution, adapter synthesis beyond JSON Patch,
+hardened remote isolation through OpenSandbox, and L4 delivery are next.
 
 ## License
 

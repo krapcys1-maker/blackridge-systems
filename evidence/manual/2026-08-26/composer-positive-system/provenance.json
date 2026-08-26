@@ -1,0 +1,34 @@
+{
+  "schema_version": "1",
+  "generated_at": "2026-08-26T19:24:28.031577+00:00",
+  "generator": "blackridge-composer/1",
+  "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\composition-linear-calibration.yaml",
+  "definition_sha256": "cd442466de2cca1c35bba18c51c26b3c9e898ec08e51f9071ecb98e0c28fbbb3",
+  "solver_module_sha256": "880ada300801d58c2ec829d52caaa92f1dd4e88f843b7a38a888cebc23fd0736",
+  "plan_sha256": "c6e68b2f2e77372f6db107fc4769c7d666499059ec7d097dd93673ad96b98e09",
+  "selected_components": [
+    "fixture-report-sink",
+    "fixture-research-source"
+  ],
+  "selected_adapters": [
+    "paper-title-to-document-name"
+  ],
+  "artifact_sha256": {
+    "adapters/paper-title-to-document-name.yaml": "298d4bdc7a9830ba46de56bd0281d72d83ac4087ab3ae1d839f8e13cc1abf37a",
+    "blackridge.blueprint.yaml": "9bd72924050d0441829b0d197954840946b1ed1ef717e2bf2c8508768226b15f",
+    "components.lock.yaml": "f6b6496f3a19a4c6913aa82de3cfd8f4b8d3bcdba4bd0b9dd89527eb3a5e47ca",
+    "compose.yaml": "3a598461525ddfdcfacd45ec3e7d976c9adc2814ab1e24315b8b4a1b79129c6b",
+    "composition.definition.yaml": "cd442466de2cca1c35bba18c51c26b3c9e898ec08e51f9071ecb98e0c28fbbb3",
+    "composition.plan.json": "c6e68b2f2e77372f6db107fc4769c7d666499059ec7d097dd93673ad96b98e09",
+    "contracts/document-record--v1.schema.json": "910e5c84fc5d36070a27f55d4af092eb94a3f709a2b7ff8efec80ab1dd4e09ae",
+    "contracts/paper-record--v1.schema.json": "a5e1e57f2c1fba0a3be9d57226be53d372028d13460c329fd70e7ae3056d7367",
+    "contracts/research-query--v1.schema.json": "39605cc8f0d5a4fc46d213bbeef93269019ec9dc5ff9376e945ee95dbddacf7b",
+    "contracts/research-report--v1.schema.json": "9a7d9ea3d633ef6de9399dd39092d94a67efc89eee9cfe1efa9da10f7c202b83",
+    "evidence/evidence.lock.yaml": "97ab04fcf4d8f2e2afe7daeb36b3d8e4ca45fd9cbe705070e3f54afdb3842123",
+    "README.md": "54044ee73756079122d860c41367b61f9398399f445a74e58225b79b31cc198a",
+    "runtime.yaml": "2e90ca9ec2a37b61791a7062673765329bf03183e8a2f6432c44fca0a8c655dc",
+    "sbom/README.md": "19c740118931f2f23192e45c378fe4a4a7c90f6b94b9a7fe65dddbfb5751084a",
+    "tests/README.md": "3a7545576e626a7cd28efd50e65266a0ec9c69e872a2b1c3ed2bcddc31b89b9b"
+  },
+  "release_ready": false
+}

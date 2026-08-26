@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:24:54.036009Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "compatibility-composition",
+  "scenario_id": "unreviewed-production-evidence-refused",
+  "scenario_description": "A production component cannot self-declare L3 without a named matching review.",
+  "expected": [
+    "The component artifact hash may match while its evidence qualification still fails.",
+    "The reason explicitly states that the claimed level has no named manual review.",
+    "Generation and host execution are not attempted."
+  ],
+  "observed": [
+    "The final solver module hash and command artifact were retained; the command was the file referenced by argv and independently matched its separate immutable SHA-256 artifact lock.",
+    "The component's self-declared L3 evidence had no review file, review hash, reviewer capability, scenario, or expected probe subject; qualification retained the exact reason claimed evidence level has no named manual review.",
+    "The production plan remained incomplete with research-source unresolved, generation and runtime stayed null, the CLI exited nonzero, and no output system directory was created."
+  ],
+  "probe_id": "15ac3949e01345bda1c8724e1b10ac69",
+  "probe_file": "evidence\\manual\\2026-08-26\\composer-unreviewed-production-probe.json",
+  "probe_sha256": "0a22c4d5c488d253828e0b5a6d997c7580f04af96d80c7a2f5227ad68a6c68d9",
+  "notes": "PASS applies to the production evidence gate. It does not promote the fixture, and it confirms that immutable code identity alone is insufficient functional evidence."
+}

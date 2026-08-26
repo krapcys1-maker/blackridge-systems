@@ -26,6 +26,10 @@ time-stamped snapshot and may change upstream.
 | benchmark calibration / `green-broken-artifact-detected` | PASS for harness calibration; A/B NOT RUN | The reference matched 19/19 critical checks and excluded all distractors. Both broken processes exited zero and emitted schema-valid JSON, but the artifact matched only 9/19; ten concrete grounding, source, relevance, coverage, concept, and abstention boundaries were detected. |
 | benchmark comparison guard / `mismatched-comparison-controls-refused` | PASS | Changing only `model_identifier` stopped comparison before either candidate was evaluated, retained the named mismatch, and created no task result or winner. A matching plumbing control ran both arms and still assigned no automatic winner. |
 | public benchmark schema / `public-output-contract-enforced` | PASS | Both schema-negative processes exited zero, but the exact published Draft 2020-12 schema rejected `unchecked_payload`. No deeper correctness checks were fabricated after contract failure. |
+| composer / `compatible-route-generates-and-runs` | PASS for calibration; release NOT READY | The solver rejected a policy-blocked sink, selected two eligible fixtures and exactly one adapter, independently rehashed all 15 files named by provenance, and executed three contract-valid steps to the expected report. |
+| composer / `missing-edge-stops-generation` | PASS | Removing the only adapter left `report-sink` unresolved. The CLI exited nonzero, generation and runtime stayed null, and no system directory was created. |
+| composer / `green-exit-invalid-artifact-stops-runtime` | PASS | The source and adapter passed. The deliberately broken sink exited zero, but its retained JSON lacked `report.title` and `trace.source`; two schema errors stopped the runtime. |
+| composer / `unreviewed-production-evidence-refused` | PASS | An immutable command file matched its hash, but its self-declared L3 had no named review. Production solving exited nonzero without generation or execution. |
 
 ## Important findings
 
@@ -73,6 +77,21 @@ time-stamped snapshot and may change upstream.
 19. The evaluator now hashes and executes the same input/output JSON Schemas published to builders,
     and hashes its own module bytes. A schema-negative green process was rejected in both cases;
     evaluation stopped at the contract boundary instead of inferring deeper correctness.
+20. The compatibility solver uses hard gates and selected one three-step path: research source,
+    exact RFC 6902 adapter, and report sink. The lower-priority number on a deliberately blocked
+    alternative could not override its policy blocker.
+21. Both command files and the canonical adapter operations matched their locked SHA-256 values.
+    The runner independently matched every file named by each generated provenance manifest before
+    executing either component.
+22. Removing the sole contract edge left eligible components but no route from `paper-record/v1`
+    to `document-record/v1`; generation and execution were not attempted and no directory appeared.
+23. The negative sink exited zero and emitted parseable JSON. Draft 2020-12 validation still
+    rejected missing `report.title` and `trace.source`, proving the runner inspects the artifact.
+24. Composer v1 is deliberately single-stream and host execution is calibration-only. Production
+    mode requires L3 named reviews whose raw probe hashes still match, and production execution
+    remains behind the sandbox boundary. Both generated fixtures stay `release_ready: false`.
+25. An explicit production control proved that immutable provenance is necessary but insufficient:
+    the command hash matched while its self-declared L3 was rejected for lacking a named review.
 
 ## Retained artifacts
 
@@ -122,6 +141,17 @@ time-stamped snapshot and may change upstream.
   refusal when only the model identity differs.
 - `benchmark-schema-invalid-probe.json` and its review — green-exit unexpected-field control proving
   that the exact public Draft 2020-12 output contract is executed before deeper artifact checks.
+- `composer-positive-probe.json` and its review — complete qualifications, selected route,
+  generated hashes, command observations, intermediate artifacts, and final report inspection.
+- `composer-no-adapter-probe.json` and its review — retained incomplete route with no generated
+  directory or component execution.
+- `composer-broken-output-probe.json` and its review — green-exit invalid final JSON plus both exact
+  Draft 2020-12 errors.
+- `composer-unreviewed-production-probe.json` and its review — matching immutable command bytes but
+  rejected self-declared L3, with no generated directory or host execution.
+- `composer-positive-system/` and `composer-broken-output-system/` — complete generated bundles.
+  Each `provenance.json` retains hashes for the other 15 files, including exact definition and plan
+  copies; both manifests were independently recomputed with zero mismatches.
 
 SHA-256 checksums of the canonical bytes retained in Git:
 
@@ -165,4 +195,12 @@ benchmark-comparator-mismatched-controls-review.json cdad80c87f789931bd4b4c6d7a3
 benchmark-reference-probe.json                      6ada3794550931671ca7af9726d77ed0782a6363303c5ac8eee6f0af8ff67244
 benchmark-schema-invalid-probe.json                 adb0957abfb15f67345d6b6843d1323566625ffc2dce83ae5c0502efda6f5173
 benchmark-schema-invalid-review.json                806357dab86180b7a7fe5c48b1da0ee5106cfe8fa036e012be7a0ece92e3541e
+composer-broken-output-probe.json                   b5a3d2ef487e05d834c827d5d3304a71b0300e817b5a8a8bfc3f9c75bea02c11
+composer-broken-output-review.json                  875d22de9f0ba4287f712bb76d5e838a69d0ceb8e2d4304cbd68244447714023
+composer-no-adapter-probe.json                      6e24777e39a6b7ffc5b438283e8efba798c0c2a89028964c22218e688e1caa32
+composer-no-adapter-review.json                     e6b2e129b71657d63e987e7db48f233a6e4710b46060b4b98e13bab45fee5672
+composer-positive-probe.json                        5ab51701feef1a142c661086a9bf9ecbb60ae95004a419ca70198bec20305bd3
+composer-positive-review.json                       67e129dba7830e5779586af25b951c44f94069c763f4db3cbf44530a9a001bf4
+composer-unreviewed-production-probe.json           0a22c4d5c488d253828e0b5a6d997c7580f04af96d80c7a2f5227ad68a6c68d9
+composer-unreviewed-production-review.json          37d70e6b426a03c05886ec575048db862283bb8606cdbf855b40d7fd0d4d3f1d
 ```

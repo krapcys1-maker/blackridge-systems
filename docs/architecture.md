@@ -88,12 +88,22 @@ non_functional:
 Edges represent tested transformations, not architectural guesses. A generated adapter records
 its upstream inputs, prompt/model if AI-generated, tests, license decision, and exact revision.
 
+The active composer v1 deliberately solves a single-artifact linear path. Each required capability
+has replaceable component options with one accepted and one produced contract. Options are removed
+by hard license, integration, immutable-revision, evidence-level, review-hash, and policy gates.
+The remaining Cartesian choices are routed deterministically through the fewest eligible adapters;
+selection priority only breaks otherwise compatible choices and is retained in the definition.
+Production mode requires at least L3 plus a valid named review and its still-matching raw probe.
+Calibration mode may exercise explicitly marked L0 fixtures but can never become release-ready.
+
 ## Generated system layout
 
 ```text
 generated-system/
   compose.yaml
   blackridge.blueprint.yaml
+  composition.definition.yaml
+  composition.plan.json
   components.lock.yaml
   adapters/
   contracts/
@@ -104,6 +114,9 @@ generated-system/
   README.md
 ```
 
+The definition and complete solver plan are copied into the bundle so their provenance hashes can
+be independently recomputed after the original workspace path disappears.
+
 ## Milestones
 
 1. **Scout** — executable discovery, metadata enrichment, ranking, blueprint, and provenance.
@@ -112,7 +125,9 @@ generated-system/
 3. **Experimenter** — disposable sandbox boot is active for pinned public GitHub repositories;
    generalized boot recipes, contract suites, and resource measurements remain next.
 4. **Composer** — declarative JSON Patch adaptation and paired contract verification are active;
-   compatibility solving, structural/AI adapter generation, and replacement loops remain next.
+   linear compatibility solving, locked generation, provenance validation, and a shell-free
+   calibration runtime are active; multi-input DAGs, sandbox-backed production execution,
+   structural/AI adapter generation, and replacement loops remain next.
 5. **Foundry** — reusable integration memory and delivery of verified systems from natural-language goals.
 
 ## Comparative benchmark boundary

@@ -1,0 +1,5 @@
+services: {}
+x-blackridge:
+  runtime: runtime.yaml
+  status: no-oci-services
+  reason: v1 executes locked command-json components without a shell

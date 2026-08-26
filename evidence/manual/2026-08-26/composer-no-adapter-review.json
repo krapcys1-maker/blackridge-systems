@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:24:53.166347Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "compatibility-composition",
+  "scenario_id": "missing-edge-stops-generation",
+  "scenario_description": "Eligible components cannot be generated when their contracts have no connecting edge.",
+  "expected": [
+    "The plan remains incomplete with report-sink unresolved.",
+    "Generation and component execution are not attempted.",
+    "No output directory or release verdict is fabricated."
+  ],
+  "observed": [
+    "The solver module hash matched the final source and both command artifacts were hash-matched argv inputs, but after fixture-research-source the contract was paper-record/v1 while fixture-report-sink required document-record/v1.",
+    "With the only adapter removed, the plan retained complete false, report-sink unresolved, no selected adapter, and the exact completed partial source step.",
+    "The probe retained generation and runtime as null, returned a nonzero CLI status, created no composer-no-adapter-system directory, and assigned no release or manual verdict in raw evidence."
+  ],
+  "probe_id": "8911d89af2a84354b29d419a66768d7c",
+  "probe_file": "evidence\\manual\\2026-08-26\\composer-no-adapter-probe.json",
+  "probe_sha256": "6e24777e39a6b7ffc5b438283e8efba798c0c2a89028964c22218e688e1caa32",
+  "notes": "PASS applies to fail-closed compatibility solving. It does not approve either fixture component and it does not claim that every possible adapter was searched outside this frozen definition."
+}

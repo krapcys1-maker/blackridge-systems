@@ -1,0 +1,135 @@
+schema_version: "1"
+name: linear-research-composition
+goal: >-
+  Assemble and execute a provenance-locked research source, a contract adapter, and a report sink.
+mode: calibration
+external_input: research-query/v1
+required_output: research-report/v1
+required_capabilities: [research-source, report-sink]
+allowed_licenses: [Apache-2.0]
+allowed_integrations: [command-json]
+minimum_evidence_level: 0
+contracts:
+  - contract_id: research-query/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [topic]
+      properties:
+        topic: {type: string, minLength: 3}
+  - contract_id: paper-record/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [query, paper, trace]
+      properties:
+        query: {type: object}
+        paper:
+          type: object
+          additionalProperties: false
+          required: [title, identifier]
+          properties:
+            title: {type: string, minLength: 1}
+            identifier: {type: string, minLength: 1}
+        trace: {type: object}
+  - contract_id: document-record/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [query, paper, trace, document]
+      properties:
+        query: {type: object}
+        paper: {type: object}
+        trace: {type: object}
+        document:
+          type: object
+          additionalProperties: false
+          required: [name]
+          properties:
+            name: {type: string, minLength: 1}
+  - contract_id: research-report/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [report, trace]
+      properties:
+        report:
+          type: object
+          additionalProperties: false
+          required: [title, based_on]
+          properties:
+            title: {type: string, minLength: 1}
+            based_on: {type: string, minLength: 1}
+        trace:
+          type: object
+          additionalProperties: false
+          required: [source, sink]
+          properties:
+            source: {type: string, minLength: 1}
+            sink: {type: string, minLength: 1}
+components:
+  - component_id: fixture-research-source
+    capability_id: research-source
+    source_uri: blackridge://calibration/research-source
+    revision: sha256:8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [research-query/v1]
+    produces: [paper-record/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/research_source.py"]
+      artifact_file: "{definition_dir}/fixtures/research_source.py"
+      artifact_sha256: 8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c
+      working_directory: "{definition_dir}"
+      timeout_seconds: 10
+      environment_allowlist: []
+    evidence: {level: 0}
+    selection_priority: 10
+  - component_id: blocked-report-sink
+    capability_id: report-sink
+    source_uri: blackridge://calibration/blocked-report-sink
+    revision: sha256:6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [document-record/v1]
+    produces: [research-report/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/report_sink.py"]
+      artifact_file: "{definition_dir}/fixtures/report_sink.py"
+      artifact_sha256: 6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493
+    evidence: {level: 0}
+    selection_priority: 0
+    blocked_reasons: [deliberate policy-blocked alternative]
+  - component_id: fixture-report-sink
+    capability_id: report-sink
+    source_uri: blackridge://calibration/report-sink
+    revision: sha256:6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [document-record/v1]
+    produces: [research-report/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/report_sink.py"]
+      artifact_file: "{definition_dir}/fixtures/report_sink.py"
+      artifact_sha256: 6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493
+      working_directory: "{definition_dir}"
+      timeout_seconds: 10
+      environment_allowlist: []
+    evidence: {level: 0}
+    selection_priority: 10
+adapters:
+  - adapter_id: paper-title-to-document-name
+    source_contract: paper-record/v1
+    target_contract: document-record/v1
+    source_uri: blackridge://adapter/rfc6902/paper-title-to-document-name
+    revision: sha256:a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9
+    license_spdx: Apache-2.0
+    operations:
+      - {op: add, path: /document, value: {}}
+      - {op: copy, from: /paper/title, path: /document/name}
+    operations_sha256: a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9
+    evidence: {level: 0}

@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml
 
 from blackridge.adaptation import AdapterExperiment
+from blackridge.composition import CompositionDefinition, CompositionPlan
 from blackridge.evidence import ManualReview, ProbeEvidence
 from blackridge.models import DiscoveryRun, SystemBlueprint, SystemRequest
 from blackridge.sandbox import SandboxExperiment
@@ -34,6 +35,16 @@ def load_supply_chain_experiment(path: Path) -> SupplyChainExperiment:
     return SupplyChainExperiment.model_validate(data)
 
 
+def load_composition_definition(path: Path) -> CompositionDefinition:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return CompositionDefinition.model_validate(data)
+
+
+def load_composition_plan(path: Path) -> CompositionPlan:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return CompositionPlan.model_validate(data)
+
+
 def load_run(path: Path) -> DiscoveryRun:
     return DiscoveryRun.model_validate_json(path.read_text(encoding="utf-8"))
 
@@ -46,6 +57,14 @@ def write_run(run: DiscoveryRun, path: Path) -> None:
 def write_blueprint(blueprint: SystemBlueprint, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     primitive = json.loads(blueprint.model_dump_json())
+    path.write_text(
+        yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8", newline="\n"
+    )
+
+
+def write_composition_plan(plan: CompositionPlan, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    primitive = json.loads(plan.model_dump_json())
     path.write_text(
         yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8", newline="\n"
     )

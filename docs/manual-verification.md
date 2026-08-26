@@ -50,3 +50,11 @@ candidate exit code and complete stdout artifact, independently cross-check sour
 quotes against the case corpus, and confirm that a green broken control fails concrete boundaries.
 A harness-calibration pass is not an A/B method result. A real comparison must retain raw arms,
 leave weighted score and automatic winner empty, and refuse mismatched controls before execution.
+
+For composer probes, inspect every qualification reason, selected and rejected component, contract
+transition, adapter-operation hash, command-artifact hash, generated file, provenance digest, and
+Draft 2020-12 boundary result. Recompute the generated artifact hashes independently. A complete
+route is only generation readiness; `release_ready` stays false until representative L4 workloads
+receive named review. Missing edges must stop generation. A component that exits zero with an
+invalid artifact must fail at its output contract. The v1 host runner is calibration-only;
+production execution remains behind the sandbox boundary.

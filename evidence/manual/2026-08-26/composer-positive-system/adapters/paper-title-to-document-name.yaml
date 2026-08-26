@@ -1,0 +1,22 @@
+adapter_id: paper-title-to-document-name
+source_contract: paper-record/v1
+target_contract: document-record/v1
+source_uri: blackridge://adapter/rfc6902/paper-title-to-document-name
+revision: sha256:a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9
+license_spdx: Apache-2.0
+operations:
+- op: add
+  path: /document
+  value: {}
+- op: copy
+  from: /paper/title
+  path: /document/name
+operations_sha256: a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9
+evidence:
+  level: 0
+  review_file: null
+  review_sha256: null
+  capability_id: null
+  scenario_id: null
+  probe_subject: null
+blocked_reasons: []

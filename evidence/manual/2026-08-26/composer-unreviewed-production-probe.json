@@ -1,0 +1,70 @@
+{
+  "schema_version": "1",
+  "probe_id": "15ac3949e01345bda1c8724e1b10ac69",
+  "observed_at": "2026-08-26T19:24:29.774173Z",
+  "provider": "blackridge-composition-system-probe/1",
+  "subject": "production-unreviewed-control",
+  "request": {
+    "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\composition-production-unreviewed.yaml",
+    "definition_sha256": "d9e1fe091bab759d137894befa98634e3f332a3eadc5fc486833fdc72e8bcec1",
+    "output_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\composer-unreviewed-production-system",
+    "input_artifact": {
+      "topic": "evidence-driven composition"
+    }
+  },
+  "observations": {
+    "probe_completed": true,
+    "plan": {
+      "schema_version": "1",
+      "generated_at": "2026-08-26T19:24:29.774173Z",
+      "definition_sha256": "d9e1fe091bab759d137894befa98634e3f332a3eadc5fc486833fdc72e8bcec1",
+      "solver_module_sha256": "880ada300801d58c2ec829d52caaa92f1dd4e88f843b7a38a888cebc23fd0736",
+      "system_name": "production-unreviewed-control",
+      "mode": "production",
+      "complete": false,
+      "release_ready": false,
+      "selected_component_ids": [],
+      "selected_adapter_ids": [],
+      "steps": [],
+      "unresolved_capabilities": [
+        "research-source"
+      ],
+      "qualifications": [
+        {
+          "subject_type": "component",
+          "subject_id": "falsely-promoted-research-source",
+          "eligible": false,
+          "reasons": [
+            "claimed evidence level has no named manual review"
+          ],
+          "evidence_observations": {
+            "claimed_level": 3,
+            "review_supplied": false,
+            "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+            "launch_artifact_exists": true,
+            "launch_artifact_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+            "launch_artifact_hash_matches": true,
+            "launch_artifact_referenced_by_argv": true
+          }
+        }
+      ],
+      "evaluated_combinations": [],
+      "warnings": [
+        "A complete solver plan is generation evidence, not an L4 system-verification verdict.",
+        "No eligible implementation exists for at least one required capability."
+      ]
+    },
+    "generation": null,
+    "runtime": null
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py",
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0"
+  ],
+  "warnings": [
+    "A complete solver plan is generation evidence, not an L4 system-verification verdict.",
+    "No eligible implementation exists for at least one required capability.",
+    "Generation and execution were not attempted for an incomplete plan."
+  ]
+}
