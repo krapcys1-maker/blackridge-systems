@@ -1,9 +1,9 @@
 {
   "schema_version": "1",
-  "probe_id": "bf18cc9d66f54b37bf07f67ba6766de3",
-  "observed_at": "2026-08-26T22:59:34.011986Z",
+  "probe_id": "80dff3f225f64bf088e32b4a7ce970c6",
+  "observed_at": "2026-08-26T23:01:02.779305Z",
   "provider": "blackridge-source-provenance-audit/1",
-  "subject": "D:\\Skladacz aplikacji\\blackridge-systems@6877cc005a9acde2ecf15461d0e71a7fca63b7e5",
+  "subject": "D:\\Skladacz aplikacji\\blackridge-systems@dfccfcaf34aafb659d8a41701ea20a5068e348b2",
   "request": {
     "schema_version": "1",
     "source_glob": "src/blackridge/*.py",
@@ -159,10 +159,10 @@
         "sha256": "bc4a55435e730c098a8fcefdcde3941a355400912a3ff42bb541930116f8cecc",
         "line_count": 18,
         "first_add": {
-          "commit": null,
-          "authored_at": null,
-          "author": null,
-          "subject": null
+          "commit": "dfccfcaf34aafb659d8a41701ea20a5068e348b2",
+          "authored_at": "2026-08-27T02:00:48+03:00",
+          "author": "krapcys1-maker",
+          "subject": "Harden audit boundaries and retain hostile evidence"
         }
       },
       {

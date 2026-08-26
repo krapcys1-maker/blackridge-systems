@@ -24,6 +24,6 @@
   ],
   "probe_id": "dedb8a4335044f84ab4bda68d4c99fec",
   "probe_file": "evidence/manual/2026-08-27/audit-remediation-probe.json",
-  "probe_sha256": "9a6d984a8dbab87897d0b809cd9bb7899d3c6aa73004d657910d5fee950fd135",
+  "probe_sha256": "00bd45be8ba0260466d76c0a4f1ac25fca0a97a6db6c25ae6246831cab9f2503",
   "notes": "PASS covers the audited commit candidate and exact local image only. It does not open the intentionally closed public image release gate or claim that an unauthenticated Docker Scout scan ran."
 }
