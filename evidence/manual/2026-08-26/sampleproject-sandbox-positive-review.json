@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T17:36:52.894425Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "python-repository-clean-boot",
+  "scenario_description": "A pinned Python repository builds and runs without touching the host workspace.",
+  "expected": [
+    "Build commands, image identity, duration, exit status, stdout, and stderr are retained.",
+    "The host source tree is unchanged after execution.",
+    "The checked-out commit and behavior-bearing artifact match the requested experiment."
+  ],
+  "observed": [
+    "SWE-ReX server reported 1.4.0 and Docker resolved the runtime to sha256:a75280f048abf533285cef78502df34118195fa678fc7a3ee2272356b7ddf4a6.",
+    "The source-identity command printed the requested commit 621e4974ca25ce531773def586ba3ed8e736b3fc exactly.",
+    "The package installation exited 0, the repository test named tests.test_simple.TestSimple.test_add_one passed, and the independent JSON artifact was input 41, expected 42, actual 42.",
+    "The host snapshot SHA-256 was identical before and after with no changed paths; Docker reported no remaining container after stop."
+  ],
+  "probe_id": "ee98826ea22e4472ad13b0224653a6da",
+  "probe_file": "evidence\\manual\\2026-08-26\\sampleproject-sandbox-positive-probe.json",
+  "probe_sha256": "1bb68ace709d368286c55f9b28e8ce6ed33e76328775e5d82d5763a614a71392",
+  "notes": "Manually inspected command identities, exit statuses, stdout, stderr, behavior artifact, host hashes, runtime limits, and cleanup fields in the retained probe."
+}

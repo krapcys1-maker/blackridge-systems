@@ -102,7 +102,15 @@ capabilities:
         then:
           - Build commands, image identity, duration, exit status, stdout, and stderr are retained.
           - The host source tree is unchanged after execution.
-          - A failed setup is retained as failed evidence rather than repaired invisibly.
+          - The checked-out commit and behavior-bearing artifact match the requested experiment.
+      - id: sandbox-failure-is-evidence
+        description: A real behavior mismatch remains failed evidence and stops the experiment.
+        given: The same pinned public repository with an intentionally wrong expected result.
+        when: The mismatch command and a following sentinel command run in a disposable sandbox.
+        then:
+          - The mismatch has a nonzero exit status and retains its diagnostic stderr.
+          - The sentinel command after the failure is explicitly recorded as not run.
+          - Host source remains unchanged and the disposable container is removed.
 
   - id: component-adaptation
     description: Bridge incompatible component contracts with the smallest reviewable change.

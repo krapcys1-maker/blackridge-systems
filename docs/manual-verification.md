@@ -25,3 +25,9 @@ the exact probe file that was inspected.
 
 The first retained run is documented in
 [`evidence/manual/2026-08-26/README.md`](../evidence/manual/2026-08-26/README.md).
+
+For environment probes, manual inspection must include the requested and observed commit, resolved
+image ID, runtime identity and limits, every command's argv/exit/stdout/stderr, produced artifact,
+before/after host hashes, commands skipped after a failure, and container cleanup. Docker isolation
+without a host mount is adequate for the current disposable boot experiment, but not evidence of a
+hardened adversarial or multi-tenant security boundary.

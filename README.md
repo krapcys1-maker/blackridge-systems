@@ -100,7 +100,7 @@ Blackridge integrates tools at stable boundaries instead of copying their code:
 | context | Repomix | bounded, reproducible repository snapshots |
 | quality | OpenSSF Scorecard + OSV-SCALIBR | security posture and vulnerabilities |
 | compliance | OSS Review Toolkit + Syft | licenses, dependencies, and SBOMs |
-| execution | OpenSandbox / SWE-ReX | isolated, replaceable execution backends |
+| execution | SWE-ReX / Docker; OpenSandbox next | pinned disposable execution backend |
 | experiments | Dagger | reproducible build and test DAGs |
 | adaptation | ast-grep / OpenRewrite | structural transforms instead of regex patches |
 | missing code | OpenHands software-agent-sdk | write only adapters or genuinely missing modules |
@@ -108,6 +108,28 @@ Blackridge integrates tools at stable boundaries instead of copying their code:
 Exact evaluated versions and integration status live in
 [`upstream-catalog.yaml`](upstream-catalog.yaml). The landscape research and rejected options
 are documented in [`docs/research-landscape.md`](docs/research-landscape.md).
+
+### Run a real disposable repository probe
+
+Install the optional adapter, build the pinned runtime, and execute the retained public-repository
+scenario:
+
+```powershell
+python -m pip install --editable ".[sandbox]"
+docker build --tag blackridge/swerex-runtime:1.4.0 --file docker/swerex-runtime.Dockerfile .
+blackridge probe-environment examples/sandbox-pypa-sampleproject.yaml `
+  --output .blackridge/evidence/sampleproject.json
+```
+
+This uses SWE-ReX and Docker, resolves the built image to its immutable local ID, applies resource
+and process restrictions, fetches one 40-character Git commit, retains every command result, hashes
+the host source tree before and after, and verifies container removal. It deliberately emits no
+approval verdict. The paired negative scenario is
+[`examples/sandbox-pypa-sampleproject-negative.yaml`](examples/sandbox-pypa-sampleproject-negative.yaml).
+
+The Docker backend has outbound network access and is not presented as a hardened multi-tenant
+sandbox. No host path is mounted during this probe. OpenSandbox with a stronger isolation backend
+and egress policy remains the production boundary.
 
 ## Repository map
 
@@ -122,10 +144,10 @@ upstream-catalog.yaml     pinned upstream choices and provenance
 
 ## Scope boundary
 
-Blackridge is not yet a one-command autonomous software factory. The first milestone is an
-honest, testable selection engine. Automatic sandbox experiments, compatibility matrices,
-adapter synthesis, and full generated-system delivery are the next milestones described in the
-architecture document.
+Blackridge is not yet a one-command autonomous software factory. Discovery, package inspection,
+and commit-pinned Docker experiments now produce raw evidence. Compatibility matrices, adapter
+synthesis, hardened remote isolation through OpenSandbox, and full generated-system delivery are
+the next milestones described in the architecture document.
 
 ## License
 

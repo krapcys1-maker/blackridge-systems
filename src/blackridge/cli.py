@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import suppress
 from hashlib import sha256
 from pathlib import Path
 from typing import Annotated
@@ -21,6 +22,7 @@ from blackridge.io import (
     load_probe,
     load_request,
     load_run,
+    load_sandbox_experiment,
     write_blueprint,
     write_manual_review,
     write_probe,
@@ -28,6 +30,7 @@ from blackridge.io import (
 )
 from blackridge.octocode import DEFAULT_OCTOCODE_PACKAGE, OctocodeDiscovery
 from blackridge.quality import OpenSSFScorecardClient
+from blackridge.sandbox import SWEREX_SOURCE, SwerexDockerProbe
 from blackridge.workflow import discover as run_discovery
 
 app = typer.Typer(
@@ -192,6 +195,65 @@ def probe_package(
         f"available={graph.get('available')}, nodes={graph.get('node_count', 'unknown')}, "
         f"direct={graph.get('direct_count', 'unknown')}"
     )
+    console.print(f"Evidence written to {output}")
+    console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
+
+
+@app.command("probe-environment")
+def probe_environment(
+    experiment_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/environment-probe.json"
+    ),
+    host_root: Annotated[Path, typer.Option("--host-root")] = Path("."),
+) -> None:
+    """Run a pinned repository experiment in Docker through SWE-ReX and retain raw evidence."""
+
+    experiment = None
+    try:
+        experiment = load_sandbox_experiment(experiment_file)
+        probe = SwerexDockerProbe().probe(experiment, host_root)
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        if experiment is not None:
+            repository = experiment.repository_url.removesuffix(".git")
+            failure = ProbeEvidence.failure(
+                provider="swe-rex-docker/1.4.0",
+                subject=f"{repository}@{experiment.commit}",
+                request=experiment.model_dump(),
+                sources=[f"{repository}/commit/{experiment.commit}", SWEREX_SOURCE],
+                error=exc,
+            )
+            with suppress(OSError):
+                write_probe(failure, output)
+        console.print(f"[red]Environment probe failed:[/red] {exc}")
+        if output.exists():
+            console.print(f"Failure evidence written to {output}")
+        raise typer.Exit(code=2) from exc
+
+    observations = probe.observations
+    command_results = observations["commands"]
+    failed = next(
+        (
+            item
+            for item in command_results
+            if item["transport_error"] is not None or item["exit_code"] != 0
+        ),
+        None,
+    )
+    console.print(f"[bold]Raw environment evidence:[/bold] {probe.subject}")
+    console.print(f"Resolved image: {observations['image']['resolved_id']}")
+    console.print(f"Commands executed: {len(command_results)}")
+    console.print(f"Host source unchanged: {observations['host_workspace']['unchanged']}")
+    console.print(
+        "Container remaining after stop: "
+        f"{observations['cleanup']['container_exists_after_stop']}"
+    )
+    if failed:
+        console.print(
+            f"[yellow]Captured failure:[/yellow] {failed['id']} exit={failed['exit_code']} "
+            f"transport_error={failed['transport_error'] or 'none'}"
+        )
     console.print(f"Evidence written to {output}")
     console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
 

@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T17:36:53.314988Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "sandbox-failure-is-evidence",
+  "scenario_description": "A real behavior mismatch remains failed evidence and stops the experiment.",
+  "expected": [
+    "The mismatch has a nonzero exit status and retains its diagnostic stderr.",
+    "The sentinel command after the failure is explicitly recorded as not run.",
+    "Host source remains unchanged and the disposable container is removed."
+  ],
+  "observed": [
+    "The deliberately wrong expectation exited 1 and retained AssertionError: expected 999, got 6 in stderr.",
+    "The following sentinel command appears in not_run_command_ids and has no fabricated execution result.",
+    "The host snapshot SHA-256 remained identical with no changed paths and no container existed after stop."
+  ],
+  "probe_id": "87525c7db774405aa4c17809ee5b90e3",
+  "probe_file": "evidence\\manual\\2026-08-26\\sampleproject-sandbox-negative-probe.json",
+  "probe_sha256": "5bc6629c81cddd05063fe491e7ffbb25a1ba39ac397f5ccfd61f457d19aa4a34",
+  "notes": "Manually inspected the negative command boundary, diagnostic output, stop-on-failure behavior, host hashes, and container cleanup in the retained probe."
+}

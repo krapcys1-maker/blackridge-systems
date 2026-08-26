@@ -1,0 +1,28 @@
+schema_version: "1"
+name: pypa-sampleproject-clean-boot
+description: >-
+  Install and exercise a public Python package from one exact commit, then inspect a
+  behavior-bearing JSON artifact rather than trusting the test command alone.
+repository_url: https://github.com/pypa/sampleproject
+commit: 621e4974ca25ce531773def586ba3ed8e736b3fc
+image: blackridge/swerex-runtime:1.4.0
+commands:
+  - id: install-package
+    description: Build and install the exact checked-out sampleproject source tree.
+    argv: [python, -m, pip, install, --disable-pip-version-check, .]
+    timeout_seconds: 300
+  - id: baseline-unittest
+    description: Execute the repository's real unittest suite with verbose test identity.
+    argv: [python, -m, unittest, discover, -v]
+    timeout_seconds: 120
+  - id: behavior-artifact
+    description: Exercise add_one and retain a structured result for human inspection.
+    argv:
+      - python
+      - -c
+      - >-
+        import json,pathlib; from sample.simple import add_one;
+        actual=add_one(41); result={"input":41,"actual":actual,"expected":42};
+        p=pathlib.Path("/tmp/blackridge-result.json");
+        p.write_text(json.dumps(result,sort_keys=True)); print(p.read_text())
+    timeout_seconds: 60

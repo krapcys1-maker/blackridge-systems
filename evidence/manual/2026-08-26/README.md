@@ -17,7 +17,8 @@ time-stamped snapshot and may change upstream.
 | OpenSSF Scorecard observation | PASS after defect correction | The first run silently stored seven missing scores. The corrected run retains seven explicit `not-found` warnings. A positive control against `ossf/scorecard` returned status `available` and score 9.0. |
 | manual review gate negative cases | PASS | Missing `--observed` and an unknown scenario both exited 2 and wrote no review file. |
 | provisional blueprint gate | PASS | The artifact stays `release_ready: false`, evidence L0, requires L2, and warns that the leading candidate still needs inspection and sandbox boot. |
-| environment construction and sandbox boot | NOT RUN | Adapter not implemented yet. |
+| environment construction / `python-repository-clean-boot` | PASS | SWE-ReX 1.4.0 ran `pypa/sampleproject` at exact commit `621e497...`. The real unittest and independent `41 -> 42` JSON artifact matched; host hashes matched and the container was removed. |
+| sandbox negative boundary / `sandbox-failure-is-evidence` | PASS | The wrong expectation retained exit 1 and `expected 999, got 6`; the following sentinel was explicitly not run, the host stayed unchanged, and the container was removed. |
 | deterministic component adaptation | NOT RUN | Adapter execution and before/after contract fixture not implemented yet. |
 | composed-system end-to-end verification | NOT RUN | Requires the two preceding segments. |
 
@@ -28,6 +29,10 @@ time-stamped snapshot and may change upstream.
 3. Search relevance plus popularity can rank a broad framework above a more precise component.
 4. A missing Scorecard is not a score of zero and not an API success; it needs an explicit state.
 5. An exit code proves only that a command completed, not that the produced artifact is correct.
+6. SWE-ReX 1.4.0 omits its Docker client's `aiohttp` dependency and otherwise falls back to an
+   unpinned `pipx run swe-rex`; Blackridge must supply both the dependency and pinned server image.
+7. The effective container boundary was observed as zero Linux capabilities, `NoNewPrivs=1`,
+   1 GiB memory, 256 processes, and two CPUs. This is not a hardened multi-tenant sandbox claim.
 
 ## Retained artifacts
 
@@ -41,6 +46,13 @@ time-stamped snapshot and may change upstream.
 - `repository-discovery-scorecard-silent.json` — run that exposed missing warnings.
 - `repository-discovery-run.json` — corrected discovery and explicit warnings.
 - `repository-discovery-blueprint.yaml` — provisional L0 blueprint.
+- `sampleproject-sandbox-positive-probe.json` — raw pinned-repository build, test, artifact,
+  host-integrity, runtime-boundary, and cleanup observations.
+- `sampleproject-sandbox-positive-review.json` — named review of the clean-boot scenario.
+- `sampleproject-sandbox-negative-probe.json` — retained assertion failure and skipped sentinel.
+- `sampleproject-sandbox-negative-review.json` — named review of failure retention.
+- `swerex-1.4.0-integration-defects.txt` — fresh-environment reproduction of the missing
+  `aiohttp` declaration and source-inspected unpinned fallback.
 
 SHA-256 checksums at creation time:
 
@@ -56,4 +68,9 @@ repository-discovery-blueprint.yaml         89165e8062034263bc081a518177724024dd
 repository-discovery-invalid-query.json     2137552dab764366966bf92749ced2e28b9dfc2aa56847b99882d6a71cd21b37
 repository-discovery-run.json               09afe65bb371a8bc71cb5f9e816acfb006dcfb10a03126716cab1a31c9e597ef
 repository-discovery-scorecard-silent.json  443c25b2b027882d973274b7b6bca30a8d2e2653c3b3771a4b6dd5da419b3cdd
+sampleproject-sandbox-negative-probe.json    5bc6629c81cddd05063fe491e7ffbb25a1ba39ac397f5ccfd61f457d19aa4a34
+sampleproject-sandbox-negative-review.json   3c40fee33a4d28e5153c401b552e97a2aa6cdd43d50fca588f230e473bc83637
+sampleproject-sandbox-positive-probe.json    1bb68ace709d368286c55f9b28e8ce6ed33e76328775e5d82d5763a614a71392
+sampleproject-sandbox-positive-review.json   fc80f1edb9b4a3ae8dbfa6b5716309c78bab2405ed4cca3b535bdfab7ea79205
+swerex-1.4.0-integration-defects.txt          73b791a1d107d6e99e437c08f6efa5899908b32dbf7b2fc6cee4aca3cd5a9567
 ```

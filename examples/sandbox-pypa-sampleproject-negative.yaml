@@ -1,0 +1,26 @@
+schema_version: "1"
+name: pypa-sampleproject-deliberate-failure
+description: >-
+  Prove that the environment probe retains a real behavior mismatch and stops instead
+  of converting a nonzero command into successful evidence.
+repository_url: https://github.com/pypa/sampleproject
+commit: 621e4974ca25ce531773def586ba3ed8e736b3fc
+image: blackridge/swerex-runtime:1.4.0
+commands:
+  - id: install-package
+    description: Build and install the exact checked-out sampleproject source tree.
+    argv: [python, -m, pip, install, --disable-pip-version-check, .]
+    timeout_seconds: 300
+  - id: deliberate-wrong-expectation
+    description: Demand the wrong add_one result so the process must fail observably.
+    argv:
+      - python
+      - -c
+      - >-
+        from sample.simple import add_one; actual=add_one(5);
+        assert actual == 999, f"expected 999, got {actual}"
+    timeout_seconds: 60
+  - id: must-not-run-after-failure
+    description: This command proves that execution stops at the failed contract boundary.
+    argv: [python, -c, "print('ERROR: failure was ignored')"]
+    timeout_seconds: 60

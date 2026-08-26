@@ -87,6 +87,12 @@ SWE-ReX separates agent logic from execution infrastructure and already supports
 environments. It is useful when the experiment layer needs to move between local Docker and cloud
 providers.
 
+The v1.4.0 wheel passed installation but its Docker client import failed until `aiohttp` was added;
+the wheel does not declare that import. Its default Docker startup also falls back to
+`pipx run swe-rex` without a version constraint when the image lacks `swerex-remote`. Blackridge
+therefore pins both client dependencies and builds `swerex-remote==1.4.0` into a base-digest-pinned
+runtime image before resolving that built image to its immutable local ID.
+
 OSV-SCALIBR, ORT, Scorecard, and Syft cover complementary slices. One tool should not be forced to
 answer every supply-chain question: Scorecard evaluates project practice; SCALIBR inventories and
 finds vulnerabilities; ORT enforces license/policy; Syft emits SBOMs.

@@ -83,11 +83,14 @@ components:
 
   - repository: SWE-agent/SWE-ReX
     role: agent-execution-interface
-    version: main-snapshot-2026-08-26
+    version: v1.4.0
     license: MIT
     integration: python-sdk
-    status: evaluated-alternative
-    rationale: Useful replaceable interface for local, Docker, and cloud shell environments and parallel runs.
+    status: active-in-mvp
+    rationale: >-
+      Replaceable Docker execution interface, wrapped by a small Blackridge policy adapter.
+      Version 1.4.0 needs an explicit aiohttp client dependency and a prebuilt image to avoid
+      its unpinned pipx fallback.
 
   - repository: dagger/dagger
     role: reproducible-experiment-dag

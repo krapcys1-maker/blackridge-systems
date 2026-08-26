@@ -9,11 +9,17 @@ import yaml
 
 from blackridge.evidence import ManualReview, ProbeEvidence
 from blackridge.models import DiscoveryRun, SystemBlueprint, SystemRequest
+from blackridge.sandbox import SandboxExperiment
 
 
 def load_request(path: Path) -> SystemRequest:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     return SystemRequest.model_validate(data)
+
+
+def load_sandbox_experiment(path: Path) -> SandboxExperiment:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return SandboxExperiment.model_validate(data)
 
 
 def load_run(path: Path) -> DiscoveryRun:
