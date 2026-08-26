@@ -5,6 +5,7 @@ from __future__ import annotations
 import email
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -54,6 +55,14 @@ def _run(
             f"command failed with exit {completed.returncode}: {argv[0]} {completed.stderr.strip()}"
         )
     return result
+
+
+def _docker_user_args() -> list[str]:
+    """Make bind-mounted outputs writable without running as container root on POSIX."""
+
+    if os.name == "posix" and hasattr(os, "getuid") and hasattr(os, "getgid"):
+        return ["--user", f"{os.getuid()}:{os.getgid()}"]
+    return []
 
 
 class NoticeComponent(BaseModel):
@@ -198,6 +207,7 @@ def _syft_scan(
                     "ALL",
                     "--security-opt",
                     "no-new-privileges",
+                    *_docker_user_args(),
                     "-e",
                     "SYFT_CHECK_FOR_APP_UPDATE=false",
                     "-v",
@@ -486,6 +496,7 @@ def probe_image_release(
                 "ALL",
                 "--security-opt",
                 "no-new-privileges",
+                *_docker_user_args(),
                 "-v",
                 f"{collection_dir}:/out",
                 observed_id,

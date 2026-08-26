@@ -3,11 +3,13 @@ from __future__ import annotations
 import json
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from blackridge.errors import BlackridgeError
 from blackridge.release_compliance import (
+    _docker_user_args,
     _license_analysis,
     _safe_extract_wheel,
     load_distribution_manifest,
@@ -29,6 +31,13 @@ def test_notices_include_active_boundaries_but_not_research_candidates() -> None
     assert "SWE-ReX runtime image" in notices
     assert "paper-qa" not in notices.casefold()
     assert "does not embed their packages" in notices
+
+
+def test_docker_user_mapping_is_explicit_on_posix(monkeypatch) -> None:
+    fake_os = SimpleNamespace(name="posix", getuid=lambda: 123, getgid=lambda: 456)
+    monkeypatch.setattr("blackridge.release_compliance.os", fake_os)
+
+    assert _docker_user_args() == ["--user", "123:456"]
 
 
 def test_wheel_extraction_rejects_parent_traversal(tmp_path: Path) -> None:
