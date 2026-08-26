@@ -1,0 +1,103 @@
+schema_version: "1"
+name: scientific-researcher
+goal: >-
+  Find scientific literature, extract structured evidence, map citations, propose hypotheses,
+  execute bounded experiments, evaluate results, and produce a provenance-rich report.
+constraints:
+  preferred_licenses:
+    - Apache-2.0
+    - MIT
+    - BSD-3-Clause
+  execution: sandbox-only
+  provenance: required
+capabilities:
+  - id: literature-search
+    description: Search scholarly literature and return normalized paper records.
+    accepts: [scholarly-query/v1]
+    produces: [paper-record/v1]
+    seeds:
+      - Future-House/paper-qa
+      - danielnsilva/semanticscholar
+      - allenai/asta-paper-finder
+    searches:
+      - keywords: [scientific, literature, search]
+        language: Python
+        stars: ">50"
+        updated: ">2024-01-01"
+      - keywords: [semantic, scholar]
+        language: Python
+        stars: ">50"
+        updated: ">2024-01-01"
+
+  - id: document-parsing
+    description: Convert scientific PDFs into structured text, tables, figures, and references.
+    accepts: [document/pdf]
+    produces: [evidence-document/v1]
+    seeds:
+      - grobidOrg/grobid
+    searches:
+      - keywords: [scientific, PDF, parser]
+        stars: ">100"
+        updated: ">2024-01-01"
+      - keywords: [PDF, parser]
+        stars: ">1000"
+        updated: ">2024-01-01"
+
+  - id: citation-graph
+    description: Build and query a graph of papers, authors, references, and claims.
+    accepts: [paper-record/v1, evidence-document/v1]
+    produces: [citation-graph/v1]
+    seeds:
+      - zongmin-yu/semantic-scholar-fastmcp-mcp-server
+    searches:
+      - keywords: [academic, citation, network]
+        language: Python
+        stars: ">10"
+        updated: ">2024-01-01"
+      - keywords: [semantic, scholar, graph]
+        language: Python
+        stars: ">10"
+        updated: ">2024-01-01"
+
+  - id: hypothesis-generation
+    description: Generate literature-grounded, falsifiable hypotheses with explicit supporting evidence.
+    accepts: [evidence-document/v1, citation-graph/v1]
+    produces: [hypothesis-set/v1]
+    seeds:
+      - allenai/asta-theorizer
+    searches:
+      - keywords: [scientific, hypothesis, generation]
+        stars: ">10"
+        updated: ">2024-01-01"
+      - keywords: [literature, theory, generation]
+        stars: ">10"
+        updated: ">2024-01-01"
+
+  - id: experiment-runner
+    description: Execute reproducible scientific code and retain artifacts and measurements.
+    accepts: [experiment-plan/v1]
+    produces: [experiment-result/v1]
+    seeds:
+      - opensandbox-group/OpenSandbox
+      - SWE-agent/SWE-ReX
+    searches:
+      - keywords: [experiment, runner, reproducible]
+        language: Python
+        stars: ">50"
+        updated: ">2024-01-01"
+      - keywords: [sandbox, agent]
+        stars: ">100"
+        updated: ">2025-01-01"
+
+  - id: evaluation
+    description: Evaluate claims, citations, experiment results, and complete research reports.
+    accepts: [claim-set/v1, experiment-result/v1]
+    produces: [evaluation-report/v1]
+    seeds:
+      - UKGovernmentBEIS/inspect_ai
+      - UKGovernmentBEIS/inspect_evals
+    searches:
+      - keywords: [LLM, evaluation, framework]
+        language: Python
+        stars: ">100"
+        updated: ">2024-01-01"
