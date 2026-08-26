@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "reviewed_at": "2026-08-26T20:05:24.775523Z",
+  "reviewed_at": "2026-08-26T20:08:58.274979Z",
   "reviewer": "Codex manual reviewer",
   "verdict": "pass",
   "capability_id": "release-compliance",
@@ -16,8 +16,8 @@
     "Verified four observed checkout commits equal the frozen requested commits and together cover 1133 upstream source files.",
     "The normalized six-line scan reported zero matches and its evidence explicitly retains three limitations instead of asserting originality."
   ],
-  "probe_id": "3124bd73a3784bd294375b90b02762b6",
+  "probe_id": "95eaa57abf8e40d09ed249e268471beb",
   "probe_file": "evidence\\manual\\2026-08-26\\source-provenance-probe.json",
-  "probe_sha256": "c2219115dd544caeeaf36be51fc15385bb9d5030d03e619206df39aaf05416f3",
-  "notes": "Manual file-by-file and upstream-scope inspection satisfied the evidence contract after the POSIX ownership fix; this is not a legal originality opinion."
+  "probe_sha256": "add14b7794030cfc3095d61e1d38b44a79e57ec40c471e1aa2d63f6208ef7dc3",
+  "notes": "Manual file-by-file and upstream-scope inspection satisfied the evidence contract after the isolated scanner temp-space fix; this is not a legal originality opinion."
 }
