@@ -215,6 +215,7 @@ blackridge compose-solve examples/composition-linear-calibration.yaml `
 blackridge compose-generate examples/composition-linear-calibration.yaml `
   .blackridge/composition-plan.yaml .blackridge/generated-research
 blackridge compose-run .blackridge/generated-research examples/composition-input.json `
+  --provenance-sha256 <hash-printed-by-compose-generate> `
   --output .blackridge/composition-output.json `
   --evidence .blackridge/evidence/composition-run.json
 ```
@@ -226,6 +227,10 @@ locks, the exact definition and full plan, schemas, adapter definitions, a shell
 provenance hashes, an SBOM gate, and an explicit `release_ready: false`. Host execution is
 restricted to Blackridge-owned calibration fixtures; production components must run through a
 sandbox in a later runtime backend.
+
+The SHA-256 printed by `compose-generate` is an external trust root. Saved bundles cannot execute
+by merely rewriting `runtime.yaml` and updating the hashes inside their own `provenance.json`;
+`compose-run` and `compose-run-sandbox` require that independently retained digest.
 
 ### Audit source provenance and release artifacts
 

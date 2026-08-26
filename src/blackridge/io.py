@@ -10,38 +10,39 @@ import yaml
 from blackridge.adaptation import AdapterExperiment
 from blackridge.composition import CompositionDefinition, CompositionPlan
 from blackridge.evidence import ManualReview, ProbeEvidence
+from blackridge.formats import load_yaml
 from blackridge.models import DiscoveryRun, SystemBlueprint, SystemRequest
 from blackridge.sandbox import SandboxExperiment
 from blackridge.supply_chain import SupplyChainExperiment
 
 
 def load_request(path: Path) -> SystemRequest:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = load_yaml(path)
     return SystemRequest.model_validate(data)
 
 
 def load_sandbox_experiment(path: Path) -> SandboxExperiment:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = load_yaml(path)
     return SandboxExperiment.model_validate(data)
 
 
 def load_adapter_experiment(path: Path) -> AdapterExperiment:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = load_yaml(path)
     return AdapterExperiment.model_validate(data)
 
 
 def load_supply_chain_experiment(path: Path) -> SupplyChainExperiment:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = load_yaml(path)
     return SupplyChainExperiment.model_validate(data)
 
 
 def load_composition_definition(path: Path) -> CompositionDefinition:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = load_yaml(path)
     return CompositionDefinition.model_validate(data)
 
 
 def load_composition_plan(path: Path) -> CompositionPlan:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    data = load_yaml(path)
     return CompositionPlan.model_validate(data)
 
 

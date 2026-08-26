@@ -11,7 +11,7 @@ from uuid import uuid4
 import jsonpatch
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
@@ -22,6 +22,8 @@ JSON_SCHEMA_SOURCE = "https://github.com/python-jsonschema/jsonschema/tree/v4.26
 
 class AdapterExperiment(BaseModel):
     """A concrete source fixture, target contract, and reviewable JSON Patch adapter."""
+
+    model_config = ConfigDict(extra="forbid")
 
     schema_version: Literal["1"] = "1"
     name: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")

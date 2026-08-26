@@ -14,12 +14,12 @@ from time import perf_counter
 from typing import Literal
 from uuid import uuid4
 
-import yaml
 from jsonschema import Draft202012Validator
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
+from blackridge.formats import load_yaml
 
 BENCHMARK_SOURCE = (
     "https://github.com/krapcys1-maker/blackridge-systems/"
@@ -226,15 +226,11 @@ def _sha256(path: Path) -> str:
 
 
 def load_benchmark_definition(path: Path) -> BenchmarkDefinition:
-    return BenchmarkDefinition.model_validate(
-        yaml.safe_load(path.read_text(encoding="utf-8"))
-    )
+    return BenchmarkDefinition.model_validate(load_yaml(path))
 
 
 def load_benchmark_run_plan(path: Path) -> BenchmarkRunPlan:
-    return BenchmarkRunPlan.model_validate(
-        yaml.safe_load(path.read_text(encoding="utf-8"))
-    )
+    return BenchmarkRunPlan.model_validate(load_yaml(path))
 
 
 def _text(value: str | bytes | None) -> str:

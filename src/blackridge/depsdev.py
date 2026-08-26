@@ -32,6 +32,20 @@ RESOLVED_GRAPH_SYSTEMS = {
 }
 
 
+def _object(value: object, context: str) -> dict[str, object]:
+    if not isinstance(value, dict):
+        raise ExternalToolError(f"deps.dev returned a non-object {context}")
+    return value
+
+
+def _list(value: object, context: str) -> list[object]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise ExternalToolError(f"deps.dev returned a non-list {context}")
+    return value
+
+
 class DepsDevClient:
     """Collect raw package facts without converting them into an approval verdict."""
 
@@ -83,14 +97,15 @@ class DepsDevClient:
         package = self._get(package_url)
         if package is None:
             raise ExternalToolError(f"deps.dev returned no package object for {package_url}")
-        versions = package.get("versions") or []
+        package_key = _object(package.get("packageKey"), "packageKey")
+        versions = _list(package.get("versions"), "versions")
         if not isinstance(versions, list) or not versions:
             raise ExternalToolError(
                 f"deps.dev returned no versions for {system.value}:{normalized_name}"
             )
 
         selected = self._select_version(versions, requested=version)
-        selected_key = selected.get("versionKey") or {}
+        selected_key = _object(selected.get("versionKey"), "selected versionKey")
         selected_version = selected_key.get("version")
         if not isinstance(selected_version, str) or not selected_version:
             raise ExternalToolError("deps.dev selected version has no usable version identifier")
@@ -100,6 +115,9 @@ class DepsDevClient:
         version_data = self._get(version_url)
         if version_data is None:
             raise ExternalToolError(f"deps.dev returned no version object for {version_url}")
+        licenses = _list(version_data.get("licenses"), "licenses")
+        advisory_keys = _list(version_data.get("advisoryKeys"), "advisoryKeys")
+        registries = _list(version_data.get("registries"), "registries")
 
         warnings: list[str] = []
         dependency_summary: dict[str, object]
@@ -123,7 +141,7 @@ class DepsDevClient:
             "package": {
                 "system": system.value,
                 "requested_name": normalized_name,
-                "canonical_name": (package.get("packageKey") or {}).get("name"),
+                "canonical_name": package_key.get("name"),
                 "available_version_count": len(versions),
                 "default_version": self._default_version(versions),
             },
@@ -132,14 +150,14 @@ class DepsDevClient:
                 "published_at": version_data.get("publishedAt") or selected.get("publishedAt"),
                 "deprecated": bool(version_data.get("isDeprecated", False)),
                 "deprecated_reason": version_data.get("deprecatedReason"),
-                "licenses": version_data.get("licenses") or [],
+                "licenses": licenses,
                 "advisories": [
                     advisory.get("id")
-                    for advisory in version_data.get("advisoryKeys") or []
+                    for advisory in advisory_keys
                     if isinstance(advisory, dict)
                 ],
                 "related_projects": self._related_projects(version_data),
-                "registries": version_data.get("registries") or [],
+                "registries": registries,
             },
             "dependency_graph": dependency_summary,
         }
@@ -169,7 +187,8 @@ class DepsDevClient:
         typed = [item for item in versions if isinstance(item, dict)]
         if requested:
             for item in typed:
-                if (item.get("versionKey") or {}).get("version") == requested:
+                key = item.get("versionKey")
+                if isinstance(key, dict) and key.get("version") == requested:
                     return item
             raise ConfigurationError(f"requested package version is not available: {requested}")
         for item in typed:
@@ -181,18 +200,20 @@ class DepsDevClient:
     def _default_version(versions: list[object]) -> str | None:
         for item in versions:
             if isinstance(item, dict) and item.get("isDefault"):
-                return (item.get("versionKey") or {}).get("version")
+                key = item.get("versionKey")
+                return str(key.get("version")) if isinstance(key, dict) else None
         return None
 
     @staticmethod
     def _related_projects(version_data: dict[str, object]) -> list[dict[str, object]]:
         projects: list[dict[str, object]] = []
-        for relation in version_data.get("relatedProjects") or []:
+        for relation in _list(version_data.get("relatedProjects"), "relatedProjects"):
             if not isinstance(relation, dict):
                 continue
+            project_key = relation.get("projectKey")
             projects.append(
                 {
-                    "id": (relation.get("projectKey") or {}).get("id"),
+                    "id": project_key.get("id") if isinstance(project_key, dict) else None,
                     "relation_type": relation.get("relationType"),
                     "provenance": relation.get("relationProvenance"),
                 }
@@ -201,21 +222,32 @@ class DepsDevClient:
 
     @staticmethod
     def _summarize_dependencies(data: dict[str, object]) -> dict[str, object]:
-        nodes = [node for node in data.get("nodes") or [] if isinstance(node, dict)]
-        edges = [edge for edge in data.get("edges") or [] if isinstance(edge, dict)]
+        nodes = [
+            node for node in _list(data.get("nodes"), "dependency nodes") if isinstance(node, dict)
+        ]
+        edges = [
+            edge for edge in _list(data.get("edges"), "dependency edges") if isinstance(edge, dict)
+        ]
         direct = [node for node in nodes if node.get("relation") == "DIRECT"]
         indirect = [node for node in nodes if node.get("relation") == "INDIRECT"]
-        node_errors = [
-            {"package": (node.get("versionKey") or {}).get("name"), "errors": node.get("errors")}
-            for node in nodes
-            if node.get("errors")
-        ]
+        node_errors = []
+        for node in nodes:
+            if not node.get("errors"):
+                continue
+            version_key = node.get("versionKey")
+            node_errors.append(
+                {
+                    "package": version_key.get("name") if isinstance(version_key, dict) else None,
+                    "errors": node.get("errors"),
+                }
+            )
         direct_packages = [
             {
-                "name": (node.get("versionKey") or {}).get("name"),
-                "version": (node.get("versionKey") or {}).get("version"),
+                "name": node["versionKey"].get("name"),
+                "version": node["versionKey"].get("version"),
             }
             for node in direct
+            if isinstance(node.get("versionKey"), dict)
         ]
         return {
             "available": True,

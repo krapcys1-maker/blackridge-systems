@@ -43,7 +43,8 @@ removed and both host snapshots remain unchanged.
 ## Generated-system calibration backend
 
 `blackridge compose-run-sandbox` applies the same primitive to an already generated calibration
-bundle. Before Docker starts, it verifies the complete generated provenance map, runtime mode,
+bundle. It first compares `provenance.json` with the independently retained SHA-256 supplied via
+`--provenance-sha256`. Before Docker starts, it then verifies the complete generated map, runtime mode,
 component launch hashes, and the absence of requested environment forwarding. It copies each
 locked component artifact into the disposable container with `docker cp`, verifies the SHA-256
 again inside the container, removes every network, and runs a thirteen-check hostile preflight.

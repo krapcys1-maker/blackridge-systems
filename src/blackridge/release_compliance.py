@@ -16,11 +16,11 @@ from pathlib import Path
 from typing import Literal
 from uuid import uuid4
 
-import yaml
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
+from blackridge.formats import load_yaml
 
 RELEASE_COMPLIANCE_SOURCE = (
     "https://github.com/krapcys1-maker/blackridge-systems/"
@@ -35,6 +35,19 @@ _REVIEW_LICENSE = re.compile(r"(?i)(?:^|[^A-Z])(A?GPL|LGPL|MPL|EPL|CDDL|SSPL)")
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _object_list(value: object, context: str) -> list[dict[str, object]]:
+    if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
+        raise BlackridgeError(f"{context} must be a list of JSON objects")
+    return value
+
+
+def _requirement_name(requirement: str) -> str:
+    match = re.match(r"^[A-Za-z0-9_.-]+", requirement)
+    if match is None:
+        raise BlackridgeError(f"wheel contains an invalid Requires-Dist value: {requirement!r}")
+    return match.group(0).casefold().replace("_", "-")
 
 
 def _run(
@@ -60,12 +73,20 @@ def _run(
 def _docker_user_args() -> list[str]:
     """Make bind-mounted outputs writable without running as container root on POSIX."""
 
-    if os.name == "posix" and hasattr(os, "getuid") and hasattr(os, "getgid"):
-        return ["--user", f"{os.getuid()}:{os.getgid()}"]
+    getuid = getattr(os, "getuid", None)
+    getgid = getattr(os, "getgid", None)
+    if os.name == "posix" and callable(getuid) and callable(getgid):
+        return ["--user", f"{getuid()}:{getgid()}"]
     return []
 
 
-class NoticeComponent(BaseModel):
+class StrictModel(BaseModel):
+    """Reject misspelled compliance controls instead of silently ignoring them."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class NoticeComponent(StrictModel):
     """A component actually used by Blackridge, with its distribution boundary."""
 
     id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -87,7 +108,7 @@ class NoticeComponent(BaseModel):
     distributed_in: list[str] = Field(default_factory=list)
 
 
-class DistributionManifest(BaseModel):
+class DistributionManifest(StrictModel):
     """Declared release surface; inventories still come from built artifacts."""
 
     schema_version: Literal["1"] = "1"
@@ -97,14 +118,14 @@ class DistributionManifest(BaseModel):
     components: list[NoticeComponent]
 
 
-class ReviewedLicenseFile(BaseModel):
+class ReviewedLicenseFile(StrictModel):
     """One license file identified in an exact installed distribution."""
 
     path: str = Field(min_length=1)
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
-class ReviewedSourceArchive(BaseModel):
+class ReviewedSourceArchive(StrictModel):
     """Primary source archive metadata retained for an exact package release."""
 
     filename: str = Field(min_length=1)
@@ -112,7 +133,7 @@ class ReviewedSourceArchive(BaseModel):
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
-class PythonPackageLicenseReview(BaseModel):
+class PythonPackageLicenseReview(StrictModel):
     """Technical license identification tied to exact package and license bytes."""
 
     name: str = Field(min_length=1)
@@ -125,7 +146,7 @@ class PythonPackageLicenseReview(BaseModel):
     source_archive: ReviewedSourceArchive
 
 
-class PythonLicenseReview(BaseModel):
+class PythonLicenseReview(StrictModel):
     """Engineering review; public approval requires a separately named qualified reviewer."""
 
     schema_version: Literal["1"] = "1"
@@ -143,11 +164,11 @@ class PythonLicenseReview(BaseModel):
 
 
 def load_distribution_manifest(path: Path) -> DistributionManifest:
-    return DistributionManifest.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
+    return DistributionManifest.model_validate(load_yaml(path))
 
 
 def load_python_license_review(path: Path) -> PythonLicenseReview:
-    return PythonLicenseReview.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
+    return PythonLicenseReview.model_validate(load_yaml(path))
 
 
 def render_third_party_notices(manifest: DistributionManifest) -> str:
@@ -258,7 +279,8 @@ def _syft_scan(
                     "no-new-privileges",
                     *_docker_user_args(),
                     "--tmpfs",
-                    "/tmp:rw,nosuid,nodev,size=512m,mode=1777",
+                    # Container-private tmpfs; no host temporary path is used.
+                    "/tmp:rw,nosuid,nodev,size=512m,mode=1777",  # nosec B108
                     "-e",
                     "HOME=/tmp",
                     "-e",
@@ -335,10 +357,7 @@ def probe_wheel_release(
     )
     runtime_requirements = [item for item in requirements if "extra ==" not in item]
     optional_requirements = [item for item in requirements if "extra ==" in item]
-    observed_names = sorted(
-        re.match(r"^[A-Za-z0-9_.-]+", requirement).group(0).casefold().replace("_", "-")
-        for requirement in runtime_requirements
-    )
+    observed_names = sorted(_requirement_name(requirement) for requirement in runtime_requirements)
     missing = sorted(set(declared) - set(observed_names))
     undeclared = sorted(set(observed_names) - set(declared))
     spdx = json.loads((output_dir / "sbom.spdx.json").read_text(encoding="utf-8"))
@@ -590,7 +609,7 @@ def _license_analysis(
     python_packages: list[dict[str, object]],
     os_packages: list[dict[str, object]],
 ) -> dict[str, object]:
-    packages = [item for item in spdx.get("packages") or [] if isinstance(item, dict)]
+    packages = _object_list(spdx.get("packages"), "SPDX packages")
     spdx_unknown = [
         {"name": item.get("name"), "version": item.get("versionInfo")}
         for item in packages
@@ -654,7 +673,14 @@ def _verify_python_license_review(
                     "metadata mismatch: "
                     f"review={item.observed_metadata} image={observed.get('license')}"
                 )
-            observed_files = set(observed.get("license_files") or [])
+            observed_license_files = observed.get("license_files")
+            if not isinstance(observed_license_files, list) or not all(
+                isinstance(value, str) for value in observed_license_files
+            ):
+                entry_issues.append("image license_files is not a list of paths")
+                observed_files: set[str] = set()
+            else:
+                observed_files = set(observed_license_files)
             package_root = (
                 python_root / f"{observed.get('name')}-{observed.get('version')}"
             ).resolve()

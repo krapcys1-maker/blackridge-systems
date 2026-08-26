@@ -12,11 +12,11 @@ from pathlib import Path
 from typing import Literal
 from uuid import uuid4
 
-import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
+from blackridge.formats import load_yaml
 
 PROVENANCE_SOURCE = (
     "https://github.com/krapcys1-maker/blackridge-systems/blob/main/src/blackridge/provenance.py"
@@ -39,7 +39,11 @@ def _run(argv: list[str], *, cwd: Path | None = None) -> str:
     return completed.stdout
 
 
-class UpstreamReference(BaseModel):
+class StrictModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class UpstreamReference(StrictModel):
     """One immutable upstream tree used as a similarity reference."""
 
     id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -49,7 +53,7 @@ class UpstreamReference(BaseModel):
     license_spdx: str = Field(min_length=2)
 
 
-class SourceAuditDefinition(BaseModel):
+class SourceAuditDefinition(StrictModel):
     """Frozen scope for a source-history and exact-fragment audit."""
 
     schema_version: Literal["1"] = "1"
@@ -58,7 +62,7 @@ class SourceAuditDefinition(BaseModel):
     upstreams: list[UpstreamReference] = Field(min_length=1)
 
 
-class DerivedCodeRecord(BaseModel):
+class DerivedCodeRecord(StrictModel):
     """Evidence required before upstream source may enter this repository."""
 
     id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -80,7 +84,7 @@ class DerivedCodeRecord(BaseModel):
     manual_review_sha256: str | None = None
 
 
-class ProvenanceManifest(BaseModel):
+class ProvenanceManifest(StrictModel):
     """Copy policy and the complete registry of derived Blackridge files."""
 
     schema_version: Literal["1"] = "1"
@@ -90,11 +94,11 @@ class ProvenanceManifest(BaseModel):
 
 
 def load_source_audit_definition(path: Path) -> SourceAuditDefinition:
-    return SourceAuditDefinition.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
+    return SourceAuditDefinition.model_validate(load_yaml(path))
 
 
 def load_provenance_manifest(path: Path) -> ProvenanceManifest:
-    return ProvenanceManifest.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
+    return ProvenanceManifest.model_validate(load_yaml(path))
 
 
 def _exact_checkout(reference: UpstreamReference, root: Path) -> Path:
@@ -189,9 +193,10 @@ def audit_source_provenance(
     work_root = work_root.resolve()
     if not (repo_root / ".git").is_dir():
         raise BlackridgeError(f"not a Git repository: {repo_root}")
-    relative_files = sorted(
-        path.relative_to(repo_root).as_posix() for path in repo_root.glob(definition.source_glob)
-    )
+    matched_paths = [path.resolve() for path in repo_root.glob(definition.source_glob)]
+    if any(not path.is_relative_to(repo_root) for path in matched_paths):
+        raise BlackridgeError("source provenance glob resolves outside the repository root")
+    relative_files = sorted(path.relative_to(repo_root).as_posix() for path in matched_paths)
     tracked = set(_run(["git", "ls-files"], cwd=repo_root).splitlines())
     untracked = [path for path in relative_files if path not in tracked]
     file_rows: list[dict[str, object]] = []
@@ -385,9 +390,11 @@ def provenance_gate(manifest: ProvenanceManifest, *, repo_root: Path) -> ProbeEv
         issues.extend({"record": record.id, "issue": value} for value in record_issues)
 
     marker_rows: list[dict[str, object]] = []
-    for path in sorted((repo_root / "src" / "blackridge").glob("*.py")):
-        relative = path.relative_to(repo_root).as_posix()
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+    for marker_path in sorted((repo_root / "src" / "blackridge").glob("*.py")):
+        relative = marker_path.relative_to(repo_root).as_posix()
+        for line_number, line in enumerate(
+            marker_path.read_text(encoding="utf-8").splitlines(), 1
+        ):
             if _DERIVED_MARKER.search(line):
                 marker = {
                     "file": relative,

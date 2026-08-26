@@ -38,9 +38,20 @@ class GitHubCli:
             message = f"GitHub returned invalid JSON for {current.full_name}"
             raise ExternalToolError(message) from exc
 
-        license_data = data.get("license") or {}
-        return current.model_copy(
-            update={
+        if not isinstance(data, dict):
+            raise ExternalToolError(f"GitHub returned non-object JSON for {current.full_name}")
+
+        license_data = data.get("license")
+        if license_data is None:
+            license_data = {}
+        if not isinstance(license_data, dict):
+            raise ExternalToolError(
+                f"GitHub returned an invalid license object for {current.full_name}"
+            )
+        try:
+            return RepositoryMetadata.model_validate(
+                {
+                    **current.model_dump(),
                 "url": data.get("html_url") or current.url,
                 "description": data.get("description") or current.description,
                 "stars": data.get("stargazers_count", current.stars),
@@ -55,5 +66,9 @@ class GitHubCli:
                 "archived": bool(data.get("archived", False)),
                 "is_fork": bool(data.get("fork", False)),
                 "default_branch": data.get("default_branch"),
-            }
-        )
+                }
+            )
+        except (TypeError, ValueError) as exc:
+            raise ExternalToolError(
+                f"GitHub returned invalid repository metadata for {current.full_name}: {exc}"
+            ) from exc

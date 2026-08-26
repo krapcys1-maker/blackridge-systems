@@ -14,6 +14,8 @@ and generated instructions are untrusted input.
 - Network egress is deny-by-default during tests, with package registries and required APIs explicitly allowed.
 - A repository license and dependency policy must pass before its code can be redistributed.
 - Every selected artifact is pinned by immutable commit or digest and recorded in provenance.
+- A saved generated bundle must match an externally retained provenance SHA-256; its internal hash
+  map is not accepted as its own trust root.
 
 Docker alone is not treated as a complete hostile multi-tenant boundary. Production validation
 should use OpenSandbox backed by gVisor, Kata Containers, or Firecracker where the threat model

@@ -9,12 +9,12 @@ import logging
 import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from time import perf_counter
-from typing import Literal
+from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
@@ -23,7 +23,11 @@ SWEREX_VERSION = "1.4.0"
 SWEREX_SOURCE = f"https://github.com/SWE-agent/SWE-ReX/tree/v{SWEREX_VERSION}"
 
 
-class SandboxCommandSpec(BaseModel):
+class StrictModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class SandboxCommandSpec(StrictModel):
     """One explicit, shell-free command in a repository experiment."""
 
     id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -39,7 +43,7 @@ class SandboxCommandSpec(BaseModel):
         return value
 
 
-class SandboxExperiment(BaseModel):
+class SandboxExperiment(StrictModel):
     """Pinned source and commands that will run only inside a disposable container."""
 
     schema_version: Literal["1"] = "1"
@@ -64,6 +68,16 @@ class SandboxExperiment(BaseModel):
         if self.execution_profile == "production" and self.execution_network != "none":
             raise ValueError("production sandbox experiments require execution_network=none")
         return self
+
+    @field_validator("workdir")
+    @classmethod
+    def workdir_stays_in_workspace(cls, value: str) -> str:
+        path = PurePosixPath(value)
+        if path.parts[:2] != ("/", "workspace") or any(
+            part in {".", ".."} for part in path.parts
+        ):
+            raise ValueError("workdir must stay below /workspace without dot segments")
+        return value
 
 
 @dataclass(frozen=True)
@@ -356,7 +370,7 @@ class SwerexDockerProbe:
 
     @staticmethod
     def _docker_exec_result(
-        container_name: str, item: dict[str, object]
+        container_name: str, item: dict[str, Any]
     ) -> dict[str, object]:
         argv = [
             "docker",

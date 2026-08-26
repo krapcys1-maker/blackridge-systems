@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
+from blackridge.errors import ExternalToolError
 from blackridge.models import Capability, SearchQuery
 from blackridge.octocode import OctocodeDiscovery
 
@@ -88,3 +91,8 @@ def test_octocode_handles_an_empty_search() -> None:
     )
 
     assert provider.search(capability) == []
+
+
+def test_octocode_rejects_a_non_object_result() -> None:
+    with pytest.raises(ExternalToolError, match="invalid JSON envelope"):
+        OctocodeDiscovery._parse_response(json.dumps({"results": ["wrong-type"]}))

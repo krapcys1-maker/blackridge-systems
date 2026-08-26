@@ -25,7 +25,9 @@ def _enrich_one(
     except BlackridgeError as exc:
         warnings.append(f"GitHub enrichment failed for {metadata.full_name}: {exc}")
     security = scorecard.inspect(metadata.full_name)
-    metadata = metadata.model_copy(update={"security_score": security.score})
+    metadata = RepositoryMetadata.model_validate(
+        {**metadata.model_dump(), "security_score": security.score}
+    )
     if security.status != "available":
         warnings.append(
             f"OpenSSF Scorecard {security.status} for {metadata.full_name}: {security.detail}"

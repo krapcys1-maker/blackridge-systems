@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T22:55:00Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "audit-remediation",
+  "scenario_id": "cross-boundary-audit-and-hostile-rerun",
+  "scenario_description": "The repaired source, distributions, generated-system trust boundary, and exact runtime image behave as claimed under positive and hostile manual scenarios.",
+  "expected": [
+    "Clean Python 3.11 and 3.12 environments pass dependency, type, lint, source-security, provenance, notices, build, metadata, and regression gates.",
+    "An external provenance digest admits the unchanged generated bundle and rejects both a wrong digest and a modified bundle whose internal locks were all recomputed.",
+    "The exact repaired Docker image admits the positive system and detects invalid output, timeout, memory pressure, and PID pressure while preserving hashes and cleanup.",
+    "Exact-image vulnerability scans contain zero known findings after the runtime pip correction and public image distribution remains closed for the named legal obligations.",
+    "The final wheel passes metadata inspection and installs as a non-editable package outside the repository without tests, environment files, or missing license notices.",
+    "All production source files are tracked and the exact-fragment comparison against pinned upstream trees reports any matches without treating absence as proof."
+  ],
+  "observed": [
+    "Both clean interpreters passed 73 tests, mypy reported zero issues in 23 production files, Ruff and pip check passed, Bandit reported zero medium/high findings, and dependency audits were clean after bootstrap repair.",
+    "The unchanged host and sandbox systems completed against provenance 7a9ff4b1..., while the wrong digest and fully relocked modified bundle both failed before execution against the original external root.",
+    "The exact image sha256:38de6ac1... passed thirteen hostile preflight checks; invalid schema output, TERM-ignoring timeout, 1.2 GiB memory pressure, and a 400-process attempt produced the expected distinct evidence.",
+    "The old image environment exposed seven pip advisory entries; the rebuilt image with pip 26.2.1 had zero in pip-audit and zero vulnerable entries across 160 OSV package entries.",
+    "Wheel 9c3039d1... passed Twine, contained all three notice/license files and no tests or .env, then exposed Blackridge 0.1.0 from site-packages with clean CLI, pip check, and dependency audit results.",
+    "The final source-provenance run inspected all 23 tracked production files, found no untracked source and no exact fragments matching the pinned upstream trees; the raw probe explicitly avoids claiming this proves originality."
+  ],
+  "probe_id": "dedb8a4335044f84ab4bda68d4c99fec",
+  "probe_file": "evidence/manual/2026-08-27/audit-remediation-probe.json",
+  "probe_sha256": "9a6d984a8dbab87897d0b809cd9bb7899d3c6aa73004d657910d5fee950fd135",
+  "notes": "PASS covers the audited commit candidate and exact local image only. It does not open the intentionally closed public image release gate or claim that an unauthenticated Docker Scout scan ran."
+}

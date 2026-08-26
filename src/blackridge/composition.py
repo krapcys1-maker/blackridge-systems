@@ -6,17 +6,18 @@ import asyncio
 import heapq
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from copy import deepcopy
 from datetime import UTC, datetime
 from hashlib import sha256
 from itertools import product
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 from uuid import uuid4
 
 import jsonpatch
@@ -27,6 +28,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ManualReview, ManualVerdict, ProbeEvidence
+from blackridge.formats import load_yaml
 from blackridge.models import EvidenceLevel
 
 COMPOSITION_SOURCE = (
@@ -43,7 +45,10 @@ class StrictModel(BaseModel):
 
 
 class ContractDefinition(StrictModel):
-    contract_id: str = Field(min_length=3)
+    contract_id: str = Field(
+        min_length=3,
+        pattern=r"^[a-z0-9]+(?:[./-][a-z0-9]+)*$",
+    )
     schema_definition: dict[str, object] = Field(alias="schema")
 
 
@@ -469,7 +474,11 @@ def _route_combination(
         tuple[int, int, tuple[str, ...], str, frozenset[str], tuple[PlanStep, ...]]
     ] = [(0, 0, (), definition.external_input, frozenset(), ())]
     visited: dict[tuple[str, frozenset[str]], tuple[int, int, tuple[str, ...]]] = {}
-    furthest = (definition.external_input, frozenset(), ())
+    furthest: tuple[str, frozenset[str], tuple[PlanStep, ...]] = (
+        definition.external_input,
+        frozenset(),
+        (),
+    )
 
     while queue:
         adapter_count, step_count, path_key, current, executed, steps = heapq.heappop(queue)
@@ -492,7 +501,9 @@ def _route_combination(
                 terminal_contract=current,
             )
 
-        actions: list[tuple[str, str, str, str]] = []
+        actions: list[
+            tuple[Literal["component", "adapter"], str, str, str]
+        ] = []
         for component in components:
             if component.component_id not in executed and component.accepts[0] == current:
                 actions.append(
@@ -888,7 +899,8 @@ def generate_system(
             "This bundle has a complete compatibility route, but it is not release-ready until "
             "representative L4 workloads receive named manual review.\n\n"
             "Run: `blackridge compose-run . INPUT.json --output OUTPUT.json "
-            "--evidence evidence/run-probe.json`",
+            "--evidence evidence/run-probe.json --provenance-sha256 "
+            "<trusted hash printed by compose-generate>`",
         )
 
         plan_hash = _sha256_file(temporary / "composition.plan.json")
@@ -941,8 +953,8 @@ def _validation_errors(schema: dict[str, object], value: object) -> list[dict[st
     ]
 
 
-def _load_yaml_mapping(path: Path) -> dict[str, object]:
-    value = yaml.safe_load(path.read_text(encoding="utf-8"))
+def _load_yaml_mapping(path: Path) -> dict[str, Any]:
+    value = load_yaml(path)
     if not isinstance(value, dict):
         raise BlackridgeError(f"expected a mapping in {path}")
     return value
@@ -959,6 +971,17 @@ def _resolve_bundle_file(bundle: Path, relative: str) -> Path:
     return resolved
 
 
+def _verify_provenance_root(provenance_file: Path, expected_sha256: str) -> str:
+    if not re.fullmatch(r"[a-f0-9]{64}", expected_sha256):
+        raise BlackridgeError("expected provenance SHA-256 must be 64 lowercase hex characters")
+    actual = _sha256_file(provenance_file)
+    if actual != expected_sha256:
+        raise BlackridgeError(
+            "generated provenance root hash does not match the externally supplied SHA-256"
+        )
+    return actual
+
+
 def _normalized_process_text(value: str | bytes | None) -> str:
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="replace")
@@ -967,7 +990,7 @@ def _normalized_process_text(value: str | bytes | None) -> str:
 
 def _host_component_process(
     _subject_id: str,
-    launch: dict[str, object],
+    launch: dict[str, Any],
     artifact: object,
 ) -> dict[str, object]:
     argv = launch["argv"]
@@ -1024,8 +1047,9 @@ def run_generated_system(
     bundle_directory: Path,
     input_artifact: object,
     *,
+    expected_provenance_sha256: str,
     _component_process: Callable[
-        [str, dict[str, object], object], dict[str, object]
+        [str, dict[str, Any], object], dict[str, object]
     ] = _host_component_process,
     _provider: str = "blackridge-generated-linear-runtime/1",
     _runtime_mode: Literal["calibration"] = "calibration",
@@ -1034,12 +1058,15 @@ def run_generated_system(
 
     bundle = bundle_directory.resolve()
     provenance_file = _resolve_bundle_file(bundle, "provenance.json")
+    verified_provenance_sha256 = _verify_provenance_root(
+        provenance_file, expected_provenance_sha256
+    )
     provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
     if not isinstance(provenance, dict) or not isinstance(
         provenance.get("artifact_sha256"), dict
     ):
         raise BlackridgeError("generated provenance manifest is invalid")
-    integrity_mismatches: list[dict[str, object]] = []
+    integrity_mismatches: list[dict[str, Any]] = []
     for relative, expected_hash in provenance["artifact_sha256"].items():
         if not isinstance(relative, str) or not isinstance(expected_hash, str):
             raise BlackridgeError("generated provenance artifact mapping is invalid")
@@ -1068,7 +1095,7 @@ def run_generated_system(
     steps = runtime.get("steps")
     if not isinstance(contract_files, dict) or not isinstance(steps, list):
         raise BlackridgeError("generated runtime is missing contract files or steps")
-    schemas: dict[str, dict[str, object]] = {}
+    schemas: dict[str, dict[str, Any]] = {}
     for contract_id, relative in contract_files.items():
         if not isinstance(contract_id, str) or not isinstance(relative, str):
             raise BlackridgeError("generated runtime contract mapping is invalid")
@@ -1095,9 +1122,11 @@ def run_generated_system(
         step_type = raw_step.get("step_type")
         input_contract = raw_step.get("input_contract")
         output_contract = raw_step.get("output_contract")
-        if not all(
-            isinstance(value, str)
-            for value in [subject_id, step_type, input_contract, output_contract]
+        if not (
+            isinstance(subject_id, str)
+            and isinstance(step_type, str)
+            and isinstance(input_contract, str)
+            and isinstance(output_contract, str)
         ):
             raise BlackridgeError("generated runtime step fields are invalid")
         if failed:
@@ -1139,7 +1168,7 @@ def run_generated_system(
             )
             continue
 
-        observation: dict[str, object] = {
+        observation: dict[str, Any] = {
             "subject_id": subject_id,
             "step_type": step_type,
             "status": "failed",
@@ -1271,7 +1300,8 @@ def run_generated_system(
             "bundle_directory": str(bundle),
             "runtime_sha256": _sha256_file(runtime_file),
             "runtime_module_sha256": _sha256_file(Path(__file__)),
-            "provenance_sha256": _sha256_file(provenance_file),
+            "provenance_sha256": verified_provenance_sha256,
+            "expected_provenance_sha256": expected_provenance_sha256,
             "bundle_integrity_mismatches": integrity_mismatches,
             "input_artifact": input_artifact,
         },
@@ -1294,7 +1324,7 @@ def run_generated_system(
 
 
 def _sandbox_component_argv(
-    declared_argv: list[object],
+    declared_argv: Sequence[object],
     *,
     artifact_file: str,
     container_artifact: str,
@@ -1400,6 +1430,7 @@ def run_generated_system_sandboxed(
     bundle_directory: Path,
     input_artifact: object,
     *,
+    expected_provenance_sha256: str,
     image_ref: str = "blackridge/swerex-runtime:1.4.0",
 ) -> ProbeEvidence:
     """Run a calibration bundle with copied components and a networkless Docker workload."""
@@ -1413,6 +1444,7 @@ def run_generated_system_sandboxed(
 
     bundle = bundle_directory.resolve()
     provenance_file = _resolve_bundle_file(bundle, "provenance.json")
+    _verify_provenance_root(provenance_file, expected_provenance_sha256)
     provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
     if not isinstance(provenance, dict) or not isinstance(
         provenance.get("artifact_sha256"), dict
@@ -1501,7 +1533,7 @@ def run_generated_system_sandboxed(
 
     def sandbox_component_process(
         subject_id: str,
-        launch: dict[str, object],
+        launch: dict[str, Any],
         artifact: object,
     ) -> dict[str, object]:
         if container_name is None:
@@ -1691,6 +1723,7 @@ def run_generated_system_sandboxed(
         runtime_probe = run_generated_system(
             bundle,
             input_artifact,
+            expected_provenance_sha256=expected_provenance_sha256,
             _component_process=sandbox_component_process,
             _provider="blackridge-generated-sandbox-runtime/1",
         )
@@ -1793,7 +1826,13 @@ class CompositionSystemProbe:
                 output_directory=output_directory,
             )
             if definition.mode == "calibration":
-                runtime_probe = run_generated_system(output_directory, input_artifact)
+                runtime_probe = run_generated_system(
+                    output_directory,
+                    input_artifact,
+                    expected_provenance_sha256=generation.artifact_sha256[
+                        "provenance.json"
+                    ],
+                )
                 warnings.extend(runtime_probe.warnings)
             else:
                 warnings.append(

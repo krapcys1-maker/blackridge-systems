@@ -41,6 +41,12 @@ class OpenSSFScorecardClient:
                     status="not-found",
                     detail="injected provider returned no Scorecard",
                 )
+            if not 0 <= score <= 10:
+                return ScorecardObservation(
+                    score=None,
+                    status="invalid-response",
+                    detail="injected provider returned a score outside 0..10",
+                )
             return ScorecardObservation(score=score, status="available", detail="score returned")
         url = f"https://api.securityscorecards.dev/projects/github.com/{full_name}"
         try:
@@ -52,16 +58,24 @@ class OpenSSFScorecardClient:
                     detail="OpenSSF has no Scorecard for this repository",
                 )
             response.raise_for_status()
-            value = response.json().get("score")
+            payload = response.json()
+            if not isinstance(payload, dict):
+                raise TypeError("Scorecard response is not an object")
+            value = payload.get("score")
             if value is None:
                 return ScorecardObservation(
                     score=None,
                     status="invalid-response",
                     detail="OpenSSF response did not contain a score",
                 )
-            return ScorecardObservation(
-                score=float(value), status="available", detail="score returned"
-            )
+            score = float(value)
+            if not 0 <= score <= 10:
+                return ScorecardObservation(
+                    score=None,
+                    status="invalid-response",
+                    detail="OpenSSF response score is outside 0..10",
+                )
+            return ScorecardObservation(score=score, status="available", detail="score returned")
         except (httpx.HTTPError, ValueError, TypeError) as exc:
             return ScorecardObservation(
                 score=None,

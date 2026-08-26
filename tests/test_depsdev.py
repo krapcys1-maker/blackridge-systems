@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import pytest
+
 from blackridge.depsdev import DepsDevClient, PackageSystem
+from blackridge.errors import ExternalToolError
 
 
 def test_probe_preserves_raw_package_and_graph_facts_without_verdict() -> None:
@@ -79,3 +82,20 @@ def test_probe_records_explicit_graph_unavailability() -> None:
 
     assert probe.observations["dependency_graph"] == {"available": False}
     assert "does not publish resolved graphs" in probe.warnings[0]
+
+
+def test_probe_rejects_malformed_upstream_objects_with_a_domain_error() -> None:
+    responses = iter(
+        [
+            {
+                "packageKey": "wrong-type",
+                "versions": [{"versionKey": {"version": "1"}, "isDefault": True}],
+            },
+            {"licenses": []},
+        ]
+    )
+
+    with pytest.raises(ExternalToolError, match="non-object packageKey"):
+        DepsDevClient(fetch=lambda _url: next(responses)).probe_package(
+            PackageSystem.GO, "demo"
+        )

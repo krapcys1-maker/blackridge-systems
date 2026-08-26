@@ -61,6 +61,18 @@ def test_preparation_and_workload_ids_are_unique() -> None:
         SandboxExperiment.model_validate(data)
 
 
+def test_sandbox_rejects_unknown_controls_and_workdir_escape() -> None:
+    misspelled = experiment_data()
+    misspelled["commands"][0]["timeout_secodns"] = 1
+    with pytest.raises(ValidationError, match="timeout_secodns"):
+        SandboxExperiment.model_validate(misspelled)
+
+    escaped = experiment_data()
+    escaped["workdir"] = "/workspace/../../etc"
+    with pytest.raises(ValidationError, match="workdir must stay below"):
+        SandboxExperiment.model_validate(escaped)
+
+
 def test_preparation_commands_have_a_separate_phase() -> None:
     data = experiment_data()
     data["preparation_commands"] = [

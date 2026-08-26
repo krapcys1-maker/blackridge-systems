@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Literal
+from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ManualVerdict(StrEnum):
@@ -21,13 +21,15 @@ class ManualVerdict(StrEnum):
 class ProbeEvidence(BaseModel):
     """Facts collected by a probe; intentionally contains no pass/fail field."""
 
+    model_config = ConfigDict(extra="forbid")
+
     schema_version: Literal["1"] = "1"
     probe_id: str = Field(pattern=r"^[a-f0-9]{32}$")
     observed_at: datetime
     provider: str
     subject: str
-    request: dict[str, object]
-    observations: dict[str, object]
+    request: dict[str, Any]
+    observations: dict[str, Any]
     sources: list[str] = Field(min_length=1)
     warnings: list[str] = Field(default_factory=list)
 
@@ -37,7 +39,7 @@ class ProbeEvidence(BaseModel):
         *,
         provider: str,
         subject: str,
-        request: dict[str, object],
+        request: dict[str, Any],
         sources: list[str],
         error: Exception,
     ) -> ProbeEvidence:
@@ -60,6 +62,8 @@ class ProbeEvidence(BaseModel):
 class ManualReview(BaseModel):
     """A manual comparison of raw evidence with one acceptance scenario."""
 
+    model_config = ConfigDict(extra="forbid")
+
     schema_version: Literal["1"] = "1"
     reviewed_at: datetime
     reviewer: str = Field(min_length=2)
@@ -76,4 +80,5 @@ class ManualReview(BaseModel):
 
     @classmethod
     def create(cls, **values: object) -> ManualReview:
-        return cls(reviewed_at=datetime.now(UTC), **values)
+        payload = {"reviewed_at": datetime.now(UTC), **values}
+        return cls.model_validate(payload)

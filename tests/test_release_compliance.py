@@ -13,6 +13,7 @@ from blackridge.errors import BlackridgeError
 from blackridge.release_compliance import (
     _docker_user_args,
     _license_analysis,
+    _requirement_name,
     _runtime_lock_blockers,
     _safe_extract_wheel,
     _verify_python_license_review,
@@ -52,6 +53,11 @@ def test_wheel_extraction_rejects_parent_traversal(tmp_path: Path) -> None:
 
     with pytest.raises(BlackridgeError, match="unsafe path"):
         _safe_extract_wheel(wheel, tmp_path / "extract")
+
+
+def test_invalid_wheel_requirement_is_a_controlled_compliance_error() -> None:
+    with pytest.raises(BlackridgeError, match="invalid Requires-Dist"):
+        _requirement_name("; extra == 'broken'")
 
 
 def test_wheel_probe_compares_real_metadata_and_packages_license(

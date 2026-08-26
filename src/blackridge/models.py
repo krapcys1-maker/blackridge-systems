@@ -6,7 +6,11 @@ from datetime import datetime
 from enum import IntEnum
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+class StrictModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
 class EvidenceLevel(IntEnum):
@@ -19,7 +23,7 @@ class EvidenceLevel(IntEnum):
     SYSTEM_VERIFIED = 4
 
 
-class SearchQuery(BaseModel):
+class SearchQuery(StrictModel):
     """One repository search. Keywords are ANDed by the upstream provider."""
 
     keywords: list[str] = Field(min_length=1)
@@ -37,7 +41,7 @@ class SearchQuery(BaseModel):
         return cleaned
 
 
-class AcceptanceScenario(BaseModel):
+class AcceptanceScenario(StrictModel):
     """Observable behavior that must be checked against concrete evidence."""
 
     id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -55,7 +59,7 @@ class AcceptanceScenario(BaseModel):
         return cleaned
 
 
-class Capability(BaseModel):
+class Capability(StrictModel):
     """A replaceable unit of functionality with explicit data contracts."""
 
     id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -87,7 +91,7 @@ class Capability(BaseModel):
         return value
 
 
-class SystemRequest(BaseModel):
+class SystemRequest(StrictModel):
     """Desired outcome already decomposed into capabilities."""
 
     schema_version: Literal["1"] = "1"
@@ -105,7 +109,7 @@ class SystemRequest(BaseModel):
         return value
 
 
-class RepositoryMetadata(BaseModel):
+class RepositoryMetadata(StrictModel):
     """Normalized repository facts collected from upstream providers."""
 
     full_name: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
@@ -127,7 +131,7 @@ class RepositoryMetadata(BaseModel):
     security_score: float | None = Field(default=None, ge=0, le=10)
 
 
-class ScoreBreakdown(BaseModel):
+class ScoreBreakdown(StrictModel):
     """Transparent L0 ranking. It is not a functional verification score."""
 
     search_fit: float = Field(ge=0, le=25)
@@ -143,7 +147,7 @@ class ScoreBreakdown(BaseModel):
 CandidateDecision = Literal["eligible-for-inspection", "manual-review", "rejected"]
 
 
-class Candidate(BaseModel):
+class Candidate(StrictModel):
     """A repository candidate and the current evidence supporting it."""
 
     capability_id: str
@@ -158,12 +162,12 @@ class Candidate(BaseModel):
     blockers: list[str] = Field(default_factory=list)
 
 
-class CapabilityResult(BaseModel):
+class CapabilityResult(StrictModel):
     capability: Capability
     candidates: list[Candidate] = Field(default_factory=list)
 
 
-class DiscoveryRun(BaseModel):
+class DiscoveryRun(StrictModel):
     schema_version: Literal["1"] = "1"
     created_at: datetime
     provider: str
@@ -172,7 +176,7 @@ class DiscoveryRun(BaseModel):
     warnings: list[str] = Field(default_factory=list)
 
 
-class BlueprintComponent(BaseModel):
+class BlueprintComponent(StrictModel):
     capability_id: str
     repository: str | None
     alternatives: list[str] = Field(default_factory=list)
@@ -184,7 +188,7 @@ class BlueprintComponent(BaseModel):
     warnings: list[str] = Field(default_factory=list)
 
 
-class SystemBlueprint(BaseModel):
+class SystemBlueprint(StrictModel):
     schema_version: Literal["1"] = "1"
     generated_at: datetime
     system_name: str

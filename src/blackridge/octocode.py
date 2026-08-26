@@ -107,9 +107,13 @@ class OctocodeDiscovery:
     def _parse_response(raw: str) -> list[RepositoryMetadata]:
         try:
             envelope = json.loads(raw)
-            result = envelope["results"][0]
+            results = envelope["results"]
+            result = results[0]
         except (json.JSONDecodeError, KeyError, IndexError, TypeError) as exc:
             raise ExternalToolError("Octocode returned an invalid JSON envelope") from exc
+
+        if not isinstance(results, list) or not isinstance(result, dict):
+            raise ExternalToolError("Octocode returned an invalid JSON envelope")
 
         if result.get("status") == "empty":
             return []
@@ -117,14 +121,16 @@ class OctocodeDiscovery:
             repositories = result["data"]["repositories"]
         except (KeyError, TypeError) as exc:
             raise ExternalToolError("Octocode response did not contain repositories") from exc
+        if not isinstance(repositories, list):
+            raise ExternalToolError("Octocode response repositories are not a list")
 
         normalized: list[RepositoryMetadata] = []
         for repository in repositories:
             if not isinstance(repository, dict):
                 raise ExternalToolError("Octocode concise output cannot be used for scoring")
-            full_name = f"{repository['owner']}/{repository['repo']}"
-            normalized.append(
-                RepositoryMetadata(
+            try:
+                full_name = f"{repository['owner']}/{repository['repo']}"
+                metadata = RepositoryMetadata(
                     full_name=full_name,
                     url=f"https://github.com/{full_name}",
                     description=repository.get("description"),
@@ -136,5 +142,9 @@ class OctocodeDiscovery:
                     created_at=_parse_datetime(repository.get("createdAt")),
                     topics=repository.get("topics") or [],
                 )
-            )
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ExternalToolError(
+                    "Octocode returned malformed repository metadata"
+                ) from exc
+            normalized.append(metadata)
         return normalized

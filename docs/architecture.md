@@ -115,7 +115,10 @@ generated-system/
 ```
 
 The definition and complete solver plan are copied into the bundle so their provenance hashes can
-be independently recomputed after the original workspace path disappears.
+be independently recomputed after the original workspace path disappears. The generator also
+returns and prints the SHA-256 of `provenance.json`. Runners require this digest as an external
+trust root; hashes stored only inside the bundle are not treated as proof against deliberate
+relocking.
 
 ## Milestones
 

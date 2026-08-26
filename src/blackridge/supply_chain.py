@@ -10,12 +10,12 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
-from typing import Literal
+from typing import Any, Literal
 from urllib.parse import quote
 from uuid import uuid4
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from blackridge.depsdev import DepsDevClient, PackageSystem
 from blackridge.errors import BlackridgeError
@@ -30,6 +30,8 @@ OSV_SCANNER_SOURCE = "https://github.com/google/osv-scanner/tree/v2.5.1"
 
 class SupplyChainExperiment(BaseModel):
     """One exact repository/package release and pinned inspection tool images."""
+
+    model_config = ConfigDict(extra="forbid")
 
     schema_version: Literal["1"] = "1"
     name: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -47,6 +49,24 @@ class SupplyChainExperiment(BaseModel):
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _object_list(
+    value: object, context: str, *, required: bool = True
+) -> list[dict[str, Any]]:
+    if value is None and not required:
+        return []
+    if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
+        raise BlackridgeError(f"{context} must be a list of JSON objects")
+    return value
+
+
+def _optional_object(value: object, context: str) -> dict[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise BlackridgeError(f"{context} must be a JSON object")
+    return value
 
 
 def _run(
@@ -163,7 +183,7 @@ def _ensure_exact_checkout(
 
 
 def _license_summary(spdx: dict[str, object]) -> dict[str, object]:
-    packages = [item for item in spdx.get("packages") or [] if isinstance(item, dict)]
+    packages = _object_list(spdx.get("packages"), "SPDX packages")
     no_assertion = [
         {
             "name": package.get("name"),
@@ -181,28 +201,32 @@ def _license_summary(spdx: dict[str, object]) -> dict[str, object]:
 
 
 def _vulnerability_summary(osv: dict[str, object]) -> dict[str, object]:
-    results = [item for item in osv.get("results") or [] if isinstance(item, dict)]
+    results = _object_list(osv.get("results"), "OSV results")
     packages: list[dict[str, object]] = []
     for result in results:
-        packages.extend(
-            item for item in result.get("packages") or [] if isinstance(item, dict)
-        )
+        packages.extend(_object_list(result.get("packages"), "OSV result packages"))
     vulnerable: list[dict[str, object]] = []
     primary_ids: set[str] = set()
     severities: list[float] = []
     for item in packages:
-        vulnerabilities = [
-            value for value in item.get("vulnerabilities") or [] if isinstance(value, dict)
-        ]
+        vulnerabilities = _object_list(
+            item.get("vulnerabilities"), "OSV package vulnerabilities", required=False
+        )
         if not vulnerabilities:
             continue
-        groups = [value for value in item.get("groups") or [] if isinstance(value, dict)]
+        groups = _object_list(item.get("groups"), "OSV package groups", required=False)
         group_ids: list[str] = []
         group_severities: list[float] = []
         for group in groups:
-            group_ids.extend(str(value) for value in group.get("ids") or [])
+            ids = group.get("ids")
+            if not isinstance(ids, list):
+                raise BlackridgeError("OSV group ids must be a list")
+            group_ids.extend(str(value) for value in ids)
+            severity_value = group.get("max_severity")
+            if not isinstance(severity_value, (str, int, float)):
+                continue
             try:
-                severity = float(group.get("max_severity"))
+                severity = float(severity_value)
             except (TypeError, ValueError):
                 continue
             group_severities.append(severity)
@@ -246,15 +270,21 @@ class SupplyChainProbe:
                 f"{quote(name, safe='')}/versions/{quote(package_version, safe='')}"
             )
             response = _http_observation(url)
-            data = response.get("data") if isinstance(response.get("data"), dict) else {}
+            data = _optional_object(response.get("data"), "deps.dev dependency response")
+            licenses = data.get("licenses")
+            if licenses is not None and not isinstance(licenses, list):
+                raise BlackridgeError("deps.dev dependency licenses must be a list")
+            advisories = data.get("advisoryKeys")
+            if advisories is not None and not isinstance(advisories, list):
+                raise BlackridgeError("deps.dev dependency advisoryKeys must be a list")
             return {
                 "name": name,
                 "version": package_version,
                 "status_code": response["status_code"],
-                "licenses": data.get("licenses") if data else None,
+                "licenses": licenses,
                 "advisories": [
                     item.get("id")
-                    for item in data.get("advisoryKeys") or []
+                    for item in advisories or []
                     if isinstance(item, dict)
                 ],
                 "source": url,
@@ -343,6 +373,8 @@ class SupplyChainProbe:
             osv = json.loads(osv_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise BlackridgeError(f"cannot parse generated supply-chain artifact: {exc}") from exc
+        if not all(isinstance(value, dict) for value in (spdx, cdx, osv)):
+            raise BlackridgeError("generated supply-chain artifacts must contain JSON objects")
 
         repo_license, license_command = _json_command(
             [
@@ -360,11 +392,13 @@ class SupplyChainProbe:
             experiment.package_name,
             version=experiment.package_version,
         )
-        graph = package_probe.observations["dependency_graph"]
-        direct_packages = (
-            graph.get("direct_packages")
-            if isinstance(graph, dict) and isinstance(graph.get("direct_packages"), list)
-            else []
+        graph = _optional_object(
+            package_probe.observations.get("dependency_graph"),
+            "deps.dev dependency graph",
+        )
+        direct_packages = _object_list(
+            graph.get("direct_packages"),
+            "deps.dev direct packages",
         )
         dependency_licenses = self._direct_dependency_licenses(
             experiment.package_system, direct_packages
@@ -375,19 +409,23 @@ class SupplyChainProbe:
             f"{quote(experiment.package_version, safe='')}/json"
         )
         pypi = _http_observation(pypi_url)
-        pypi_data = pypi["data"] if isinstance(pypi.get("data"), dict) else {}
+        pypi_data = _optional_object(pypi.get("data"), "PyPI release response")
         distribution_files: list[dict[str, object]] = []
         provenance: list[dict[str, object]] = []
-        for item in pypi_data.get("urls") or []:
+        pypi_urls = pypi_data.get("urls")
+        if pypi_urls is not None and not isinstance(pypi_urls, list):
+            raise BlackridgeError("PyPI release urls must be a list")
+        for item in pypi_urls or []:
             if not isinstance(item, dict):
-                continue
+                raise BlackridgeError("PyPI release url entries must be objects")
             filename = str(item.get("filename") or "")
+            digests = _optional_object(item.get("digests"), "PyPI distribution digests")
             distribution_files.append(
                 {
                     "filename": filename,
                     "packagetype": item.get("packagetype"),
                     "size": item.get("size"),
-                    "sha256": (item.get("digests") or {}).get("sha256"),
+                    "sha256": digests.get("sha256"),
                     "upload_time": item.get("upload_time_iso_8601"),
                 }
             )
@@ -400,14 +438,19 @@ class SupplyChainProbe:
                 provenance_url,
                 headers={"Accept": "application/vnd.pypi.integrity.v1+json"},
             )
-            data = observation["data"] if isinstance(observation.get("data"), dict) else {}
+            data = _optional_object(
+                observation.get("data"), "PyPI provenance response"
+            )
+            bundles = data.get("attestation_bundles")
+            if bundles is not None and not isinstance(bundles, list):
+                raise BlackridgeError("PyPI provenance attestation_bundles must be a list")
             provenance.append(
                 {
                     "filename": filename,
                     "status_code": observation["status_code"],
                     "available": observation["status_code"] == 200,
                     "message": data.get("message"),
-                    "attestation_bundle_count": len(data.get("attestation_bundles") or []),
+                    "attestation_bundle_count": len(bundles or []),
                     "source": provenance_url,
                     "error": observation["error"],
                 }
@@ -424,15 +467,25 @@ class SupplyChainProbe:
         local_license_path = (source_dir / repo_license_path).resolve()
         if not local_license_path.is_relative_to(source_dir):
             raise BlackridgeError("GitHub license path resolves outside the source checkout")
+        repository_license = _optional_object(
+            repo_license.get("license"), "GitHub repository license"
+        )
+        commit = _optional_object(commit_data.get("commit"), "GitHub commit")
+        verification = _optional_object(
+            commit.get("verification"), "GitHub commit verification"
+        )
         license_summary = _license_summary(spdx)
         vulnerability_summary = _vulnerability_summary(osv)
-        nonstandard_dependencies = [
-            item
-            for item in dependency_licenses
-            if not item.get("licenses")
-            or "non-standard" in (item.get("licenses") or [])
-            or any("GPL" in value for value in (item.get("licenses") or []))
-        ]
+        nonstandard_dependencies: list[dict[str, object]] = []
+        for item in dependency_licenses:
+            licenses = item.get("licenses")
+            if not isinstance(licenses, list):
+                nonstandard_dependencies.append(item)
+                continue
+            if not licenses or "non-standard" in licenses or any(
+                "GPL" in str(value) for value in licenses
+            ):
+                nonstandard_dependencies.append(item)
         missing_provenance = [item["filename"] for item in provenance if not item["available"]]
         pypi_metadata_available = pypi["status_code"] == 200
         if not pypi_metadata_available:
@@ -490,8 +543,8 @@ class SupplyChainProbe:
                     "checkout_commands": checkout_commands,
                 },
                 "repository_license": {
-                    "spdx_id": (repo_license.get("license") or {}).get("spdx_id"),
-                    "name": (repo_license.get("license") or {}).get("name"),
+                    "spdx_id": repository_license.get("spdx_id"),
+                    "name": repository_license.get("name"),
                     "path": repo_license.get("path"),
                     "git_blob_sha": repo_license.get("sha"),
                     "html_url": repo_license.get("html_url"),
@@ -525,16 +578,22 @@ class SupplyChainProbe:
                         "filename": spdx_path.name,
                         "sha256": _sha256(spdx_path),
                         "size": spdx_path.stat().st_size,
-                        "package_count": len(spdx.get("packages") or []),
-                        "relationship_count": len(spdx.get("relationships") or []),
+                        "package_count": len(_object_list(spdx.get("packages"), "SPDX packages")),
+                        "relationship_count": len(
+                            _object_list(spdx.get("relationships"), "SPDX relationships")
+                        ),
                         "document_name": spdx.get("name"),
                     },
                     "cyclonedx": {
                         "filename": cdx_path.name,
                         "sha256": _sha256(cdx_path),
                         "size": cdx_path.stat().st_size,
-                        "component_count": len(cdx.get("components") or []),
-                        "dependency_count": len(cdx.get("dependencies") or []),
+                        "component_count": len(
+                            _object_list(cdx.get("components"), "CycloneDX components")
+                        ),
+                        "dependency_count": len(
+                            _object_list(cdx.get("dependencies"), "CycloneDX dependencies")
+                        ),
                     },
                 },
                 "vulnerability_artifact": {
@@ -555,12 +614,8 @@ class SupplyChainProbe:
                     "pypi_integrity": provenance,
                     "missing_files": missing_provenance,
                     "commit_verification": {
-                        "verified": (commit_data.get("commit") or {})
-                        .get("verification", {})
-                        .get("verified"),
-                        "reason": (commit_data.get("commit") or {})
-                        .get("verification", {})
-                        .get("reason"),
+                        "verified": verification.get("verified"),
+                        "reason": verification.get("reason"),
                         "html_url": commit_data.get("html_url"),
                     },
                     "github_commit_command": commit_command,

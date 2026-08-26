@@ -96,3 +96,53 @@ production-sandbox-unisolated-control-probe.json     6e152b73831dec7906c7a20e0bb
 production-sandbox-unisolated-control-review.json    93617d5317b90d0f9563684d938d0ed3a30c23117b1daf7332d8d0420bb208fb
 sandbox-hostile-controls-calibration.json            93fcaaecff1dca724c92d48eaa86676a3faad25853833e38b8d7fbe5810f599e
 ```
+
+## Cross-boundary audit and remediation rerun
+
+The later audit reran the generated system against the rebuilt runtime image
+`sha256:38de6ac1db8d82217f6d3d7268bde4a742afcee431e6dc17b66b5fb279b6d904`.
+It retained an unchanged positive host run, an unchanged sandbox run, and four distinct
+negative controls. It also added an external provenance root: the original bundle completed,
+but a wrong root and a modified bundle with every internal hash recomputed were both rejected
+before component execution.
+
+The exact old image environment contained seven vulnerability entries for `pip 25.0.1`.
+The rebuilt image contains `pip 26.2.1`; pip-audit reported zero findings and OSV-Scanner
+reported zero vulnerable entries across 160 package entries. The release probe completed with
+all runtime locks and license reviews intact. Its public gate remains deliberately closed for
+qualified reciprocal-license review and corresponding-source obligations; this is a policy
+result, not a failed internal build.
+
+`audit-remediation-probe.json` is the compact index over the raw artifacts and
+`audit-remediation-review.json` is the hash-bound manual verdict. Docker Scout was not counted
+as evidence because its local CLI required an authenticated Docker session; the exact image was
+scanned independently with pip-audit and the pinned OSV-Scanner image.
+
+The final wheel `blackridge_systems-0.1.0-py3-none-any.whl` has SHA-256
+`9c3039d15c2a5bcd760369f4fd8f60c59a2844da87850cd69f3cf7f35cfc88eb`.
+Twine accepted it; an independent archive inspection found 30 files, the three required
+license/notice files, and no tests or environment files. A non-editable installation outside
+the repository imported version 0.1.0 from `site-packages`, built the real CLI, passed
+`pip check`, and had no known dependency vulnerabilities.
+
+The final source-provenance probe covered all 23 tracked production files, reported no
+untracked source and no exact fragments matching the pinned upstream trees. As the raw probe
+states, zero exact matches supports the provenance review but does not prove originality.
+
+```text
+audit-host-positive-probe.json                             3b18a000af169f41b6bce18f43bc3197db7c177c24db1875446fb858cdfd9ed8
+audit-host-relocked-attack-probe.json                      60d3da5f9dd04ff4837c752f4b1205f616dd6037c61ac5fcc8fc103e354b607c
+audit-host-wrong-trust-root-probe.json                     e5a2e4be4e7f265569a0014f25c4ad80c63179f23b9244b6599d8a8f2903ede0
+audit-image-osv-fixed.json                                 d15a0d9c92cc59f586105b7581a34a254eb7a6732ef6640c29b3067f1904d3f4
+audit-image-release-fixed-probe.json                       5a425a78e8e229ede90d3b2ec53f57e44047c105838054e5fddd0823b5d21058
+audit-remediation-probe.json                               9a6d984a8dbab87897d0b809cd9bb7899d3c6aa73004d657910d5fee950fd135
+audit-remediation-review.json                              717a2e428ec30827eba9c982efca747d46b7760eb6f2d9ed9de63a5838c9c511
+audit-runtime-pip-after.json                               bc85e105be2b3780ef0e6d8fd4b19eea620ecdc7414a161dbcf85f5b50749d71
+audit-runtime-pip-before.json                              e680ec0378a28fc3ec78c83c8e00a8829b6f29666272cfa984ac8154676625af
+audit-sandbox-broken-output-fixed-image-probe.json         ec8a27d2632ab3c6e7943259e713bcbd9e5c6c38e24942ba2c105078c8a6ff0f
+audit-sandbox-memory-fixed-image-probe.json                40cd15094cf72ff970e1b86571f980234f9004f7bdd9927d8f138ecc7d04fe20
+audit-sandbox-pids-fixed-image-probe.json                  fad1596f4493a817398d28c832562c8490544b43e0134d9aba5c3d290cd2fd82
+audit-sandbox-positive-fixed-image-probe.json              50973c988f551ba04b1ac002b84613e729cf6f0c5c0d56c0b02b1284674b7654
+audit-sandbox-timeout-fixed-image-probe.json               a866db19bdfb36d7eeb6646b947a3667dbd050ef77fae4e246224a0e12635a10
+audit-source-provenance-final.json                         6836c37c3914a5c0b7e787e255f36026b4d7f255af017f4efa8b305278bc7891
+```

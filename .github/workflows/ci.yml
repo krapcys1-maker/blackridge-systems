@@ -11,21 +11,41 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - name: Check out repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
           cache: pip
       - name: Install
-        run: python -m pip install -e ".[dev]"
+        run: |
+          python -m pip install --upgrade "pip==26.2.1" "setuptools==84.0.0"
+          python -m pip install -e ".[dev]"
+      - name: Verify installed dependency consistency
+        run: python -m pip check
       - name: Lint
         run: ruff check .
+      - name: Type-check production source
+        run: mypy src/blackridge
+      - name: Compile source and tests
+        run: python -m compileall -q src tests
+      - name: Scan Python source for medium and high severity issues
+        run: bandit -r src -ll -ii
+      - name: Audit the exact resolved Python environment
+        run: pip-audit --local --skip-editable
       - name: Verify generated third-party notices
         run: blackridge compliance-notices --check
       - name: Enforce declared copy provenance
         run: blackridge check-provenance provenance/derived-code.yaml
       - name: Test
         run: pytest --cov=blackridge --cov-report=term-missing
+      - name: Build exact distribution artifacts
+        run: python -m build --outdir ci-dist
+      - name: Validate distribution metadata and README rendering
+        run: twine check ci-dist/*

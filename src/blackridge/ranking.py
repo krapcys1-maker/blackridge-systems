@@ -5,7 +5,13 @@ from __future__ import annotations
 import math
 from datetime import UTC, datetime
 
-from blackridge.models import Candidate, RepositoryMetadata, ScoreBreakdown, SearchQuery
+from blackridge.models import (
+    Candidate,
+    CandidateDecision,
+    RepositoryMetadata,
+    ScoreBreakdown,
+    SearchQuery,
+)
 
 PERMISSIVE_LICENSES = {
     "Apache-2.0",
@@ -105,7 +111,7 @@ def rank_candidate(
 
     warnings: list[str] = []
     blockers: list[str] = []
-    decision = "eligible-for-inspection"
+    decision: CandidateDecision = "eligible-for-inspection"
 
     if metadata.security_score is None:
         warnings.append("OpenSSF Scorecard is unavailable; security posture is unverified")

@@ -75,4 +75,6 @@ Draft 2020-12 boundary result. Recompute the generated artifact hashes independe
 route is only generation readiness; `release_ready` stays false until representative L4 workloads
 receive named review. Missing edges must stop generation. A component that exits zero with an
 invalid artifact must fail at its output contract. The v1 host runner is calibration-only;
-production execution remains behind the sandbox boundary.
+production execution remains behind the sandbox boundary. For a saved bundle, retain the
+generator's provenance SHA-256 outside the bundle and prove that a bundle with internally rewritten
+hashes is rejected against the original digest.

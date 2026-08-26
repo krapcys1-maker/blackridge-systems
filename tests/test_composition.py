@@ -10,6 +10,7 @@ import pytest
 import yaml
 
 from blackridge.composition import (
+    ContractDefinition,
     EvidenceReference,
     _sandbox_component_argv,
     _verify_evidence,
@@ -30,6 +31,13 @@ PRODUCTION_UNREVIEWED = ROOT / "examples" / "composition-production-unreviewed.y
 TIMEOUT_HOSTILE = ROOT / "examples" / "composition-timeout-calibration.yaml"
 RESOURCE_HOSTILE = ROOT / "examples" / "composition-resource-calibration.yaml"
 INPUT = {"topic": "evidence-driven composition"}
+
+
+def test_contract_identifier_cannot_escape_generated_contract_directory() -> None:
+    with pytest.raises(ValueError, match="contract_id"):
+        ContractDefinition.model_validate(
+            {"contract_id": r"..\..\escaped", "schema": {"type": "object"}}
+        )
 
 
 def test_solver_rejects_blocked_option_and_selects_one_adapter() -> None:
@@ -104,7 +112,11 @@ def test_generator_writes_locked_layout_and_runtime_completes(tmp_path: Path) ->
         definition_file=POSITIVE,
         output_directory=bundle,
     )
-    probe = run_generated_system(bundle, INPUT)
+    probe = run_generated_system(
+        bundle,
+        INPUT,
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
 
     expected = {
         "README.md",
@@ -160,7 +172,7 @@ def test_runtime_rejects_tampered_generated_artifact(tmp_path: Path) -> None:
     definition = load_composition_definition(POSITIVE)
     plan = solve_composition(definition, definition_file=POSITIVE)
     bundle = tmp_path / "generated"
-    generate_system(
+    generated = generate_system(
         definition,
         plan,
         definition_file=POSITIVE,
@@ -170,10 +182,14 @@ def test_runtime_rejects_tampered_generated_artifact(tmp_path: Path) -> None:
     runtime.write_text(runtime.read_text(encoding="utf-8") + "# tampered\n", encoding="utf-8")
 
     with pytest.raises(BlackridgeError, match=r"integrity failed: runtime\.yaml"):
-        run_generated_system(bundle, INPUT)
+        run_generated_system(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        )
 
 
-def _rewrite_runtime_and_relock(bundle: Path, mutate) -> None:
+def _rewrite_runtime_and_relock(bundle: Path, mutate) -> str:
     runtime_file = bundle / "runtime.yaml"
     runtime = yaml.safe_load(runtime_file.read_text(encoding="utf-8"))
     mutate(runtime)
@@ -184,6 +200,29 @@ def _rewrite_runtime_and_relock(bundle: Path, mutate) -> None:
         runtime_file.read_bytes()
     ).hexdigest()
     provenance_file.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
+    return sha256(provenance_file.read_bytes()).hexdigest()
+
+
+def test_runtime_rejects_a_relocked_bundle_without_a_new_external_trust_root(
+    tmp_path: Path,
+) -> None:
+    definition = load_composition_definition(POSITIVE)
+    plan = solve_composition(definition, definition_file=POSITIVE)
+    bundle = tmp_path / "relocked"
+    generated = generate_system(
+        definition,
+        plan,
+        definition_file=POSITIVE,
+        output_directory=bundle,
+    )
+    _rewrite_runtime_and_relock(bundle, lambda runtime: runtime.update({"mode": "production"}))
+
+    with pytest.raises(BlackridgeError, match="externally supplied SHA-256"):
+        run_generated_system(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        )
 
 
 def test_sandboxed_generated_runner_keeps_production_disabled(tmp_path: Path) -> None:
@@ -196,10 +235,16 @@ def test_sandboxed_generated_runner_keeps_production_disabled(tmp_path: Path) ->
         definition_file=POSITIVE,
         output_directory=bundle,
     )
-    _rewrite_runtime_and_relock(bundle, lambda runtime: runtime.update({"mode": "production"}))
+    provenance_sha256 = _rewrite_runtime_and_relock(
+        bundle, lambda runtime: runtime.update({"mode": "production"})
+    )
 
     with pytest.raises(BlackridgeError, match="remains calibration-only"):
-        run_generated_system_sandboxed(bundle, INPUT)
+        run_generated_system_sandboxed(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=provenance_sha256,
+        )
 
 
 def test_sandboxed_generated_runner_refuses_environment_forwarding(tmp_path: Path) -> None:
@@ -217,10 +262,14 @@ def test_sandboxed_generated_runner_refuses_environment_forwarding(tmp_path: Pat
         component = next(step for step in runtime["steps"] if step["step_type"] == "component")
         component["launch"]["environment_allowlist"] = ["DEEPSEEK_API_KEY"]
 
-    _rewrite_runtime_and_relock(bundle, add_environment)
+    provenance_sha256 = _rewrite_runtime_and_relock(bundle, add_environment)
 
     with pytest.raises(BlackridgeError, match="forwards no component environment"):
-        run_generated_system_sandboxed(bundle, INPUT)
+        run_generated_system_sandboxed(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=provenance_sha256,
+        )
 
 
 def test_sandboxed_component_maps_a_different_python_venv_safely(tmp_path: Path) -> None:
@@ -294,14 +343,18 @@ def test_green_exit_broken_output_fails_contract(tmp_path: Path) -> None:
     definition = load_composition_definition(BROKEN_OUTPUT)
     plan = solve_composition(definition, definition_file=BROKEN_OUTPUT)
     bundle = tmp_path / "broken"
-    generate_system(
+    generated = generate_system(
         definition,
         plan,
         definition_file=BROKEN_OUTPUT,
         output_directory=bundle,
     )
 
-    probe = run_generated_system(bundle, deepcopy(INPUT))
+    probe = run_generated_system(
+        bundle,
+        deepcopy(INPUT),
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
     steps = probe.observations["steps"]
     broken = steps[-1]
 

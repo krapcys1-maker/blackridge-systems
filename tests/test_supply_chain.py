@@ -3,7 +3,12 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from blackridge.supply_chain import SupplyChainExperiment, _license_summary, _vulnerability_summary
+from blackridge.errors import BlackridgeError
+from blackridge.supply_chain import (
+    SupplyChainExperiment,
+    _license_summary,
+    _vulnerability_summary,
+)
 
 
 def experiment_data() -> dict[str, object]:
@@ -71,3 +76,10 @@ def test_vulnerability_summary_keeps_scope_and_severity_separate() -> None:
     assert summary["unique_primary_advisory_count"] == 1
     assert summary["maximum_reported_severity"] == 9.1
     assert "production reachability" in summary["scope_warning"]
+
+
+def test_scanner_summaries_reject_wrong_json_shapes() -> None:
+    with pytest.raises(BlackridgeError, match="SPDX packages"):
+        _license_summary({"packages": "wrong-type"})
+    with pytest.raises(BlackridgeError, match="OSV results"):
+        _vulnerability_summary({"results": {}})

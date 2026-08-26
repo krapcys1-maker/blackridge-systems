@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling==1.32.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -37,10 +37,16 @@ sandbox = [
   "swe-rex==1.4.0",
 ]
 dev = [
+  "bandit==1.9.4",
   "build>=1,<2",
-  "pytest>=8,<9",
+  "mypy==2.3.1",
+  "pip-audit==2.10.0",
+  "pytest>=9.0.3,<10",
   "pytest-cov>=6,<8",
   "ruff>=0.12,<1",
+  "twine==7.0.0",
+  "types-jsonschema==4.26.0.20260518",
+  "types-PyYAML==6.0.12.20260815",
 ]
 
 [project.scripts]
@@ -62,3 +68,11 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["jsonpatch", "swerex.*"]
+ignore_missing_imports = true

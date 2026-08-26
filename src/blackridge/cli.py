@@ -655,6 +655,10 @@ def compose_generate(
     console.print(f"Generated system written to {generated.output_directory}")
     console.print(f"Execution ready: {generated.execution_ready}")
     console.print(f"Release ready: {generated.release_ready}")
+    console.print(
+        "Trusted provenance SHA-256: "
+        f"{generated.artifact_sha256['provenance.json']}"
+    )
     console.print("[yellow]Generation completeness is not an L4 verdict.[/yellow]")
 
 
@@ -662,6 +666,7 @@ def compose_generate(
 def compose_run(
     bundle_directory: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
     input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    provenance_sha256: Annotated[str, typer.Option("--provenance-sha256")],
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/composition-output.json"
     ),
@@ -673,7 +678,11 @@ def compose_run(
 
     try:
         input_artifact = json.loads(input_file.read_text(encoding="utf-8"))
-        probe = run_generated_system(bundle_directory, input_artifact)
+        probe = run_generated_system(
+            bundle_directory,
+            input_artifact,
+            expected_provenance_sha256=provenance_sha256,
+        )
         write_probe(probe, evidence)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
@@ -685,7 +694,11 @@ def compose_run(
         failure = ProbeEvidence.failure(
             provider="blackridge-generated-linear-runtime/1",
             subject=str(bundle_directory),
-            request={"bundle_directory": str(bundle_directory), "input_file": str(input_file)},
+            request={
+                "bundle_directory": str(bundle_directory),
+                "input_file": str(input_file),
+                "expected_provenance_sha256": provenance_sha256,
+            },
             sources=[COMPOSITION_SOURCE],
             error=exc,
         )
@@ -706,6 +719,7 @@ def compose_run(
 def compose_run_sandbox(
     bundle_directory: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
     input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    provenance_sha256: Annotated[str, typer.Option("--provenance-sha256")],
     image: Annotated[str, typer.Option("--image")] = "blackridge/swerex-runtime:1.4.0",
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/composition-sandbox-output.json"
@@ -721,6 +735,7 @@ def compose_run_sandbox(
         probe = run_generated_system_sandboxed(
             bundle_directory,
             input_artifact,
+            expected_provenance_sha256=provenance_sha256,
             image_ref=image,
         )
         write_probe(probe, evidence)
@@ -738,6 +753,7 @@ def compose_run_sandbox(
                 "bundle_directory": str(bundle_directory),
                 "input_file": str(input_file),
                 "image": image,
+                "expected_provenance_sha256": provenance_sha256,
             },
             sources=[COMPOSITION_SOURCE, SWEREX_SOURCE],
             error=exc,
