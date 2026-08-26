@@ -1,9 +1,9 @@
 {
   "schema_version": "1",
-  "probe_id": "1d387b1018af48f48eff9ca527964dbd",
-  "observed_at": "2026-08-26T19:55:43.190064Z",
+  "probe_id": "3124bd73a3784bd294375b90b02762b6",
+  "observed_at": "2026-08-26T20:05:24.300921Z",
   "provider": "blackridge-source-provenance-audit/1",
-  "subject": "D:\\Skladacz aplikacji\\blackridge-systems@15319595de4363e70c45b575447d2a78efae6df8",
+  "subject": "D:\\Skladacz aplikacji\\blackridge-systems@7bff7205d726617ee517b2a8e3fe6367e0620cd2",
   "request": {
     "schema_version": "1",
     "source_glob": "src/blackridge/*.py",
@@ -233,8 +233,8 @@
       },
       {
         "path": "src/blackridge/release_compliance.py",
-        "sha256": "93a2de949a2beb92bc42ad19d8f04e2aad330554a4762911dc542420f9fce8d8",
-        "line_count": 574,
+        "sha256": "0e98c2a6f72dead0459cb36c7a439675ca617302843b242cd03b6edc4fe0e905",
+        "line_count": 585,
         "first_add": {
           "commit": "15319595de4363e70c45b575447d2a78efae6df8",
           "authored_at": "2026-08-26T22:45:25+03:00",

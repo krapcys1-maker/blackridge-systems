@@ -267,6 +267,6 @@ release-wheel/probe.json                             713bd9009ee9e08b7c9ca651733
 release-wheel/sbom.cdx.json                          d289520f1f8e649dc8fc1074f39c89600d3ea5b6f0dd35a74ab67a490f8a0a6c
 release-wheel/sbom.spdx.json                         cb0a19e67e208c371b94576b63f0f2b174c6846fa7be945028423689f56cbd60
 release-wheel/wheel-components.json                  e4f6e5e44f713e59367769f48e8f5c6891b3db6538400ccc5a577354139f637c
-source-provenance-probe.json                         4bf6e276fb2bc5f9f753d44115238cd2fca91c9f987ed82453ff13b1aeaef7a7
-source-provenance-review.json                        ead2b7872d125d46f218c3e70bf7d48d7d3e54629c85b7eafa74991207c82eb0
+source-provenance-probe.json                         c2219115dd544caeeaf36be51fc15385bb9d5030d03e619206df39aaf05416f3
+source-provenance-review.json                        0decc1ecaa702d2d68719acb660b20638e7b9b1f5de0c829a37c79a7b5b3b0d0
 ```
