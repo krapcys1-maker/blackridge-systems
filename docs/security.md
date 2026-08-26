@@ -25,4 +25,3 @@ Repository text may contain instructions aimed at the planner or coding agent. B
 repository content as evidence, never as authority. Tool permissions and policy gates are enforced
 outside prompts. A candidate cannot request additional secrets, network access, or GitHub write
 permissions through repository content.
-

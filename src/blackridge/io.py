@@ -28,4 +28,3 @@ def write_blueprint(blueprint: SystemBlueprint, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     primitive = json.loads(blueprint.model_dump_json())
     path.write_text(yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8")
-

@@ -77,4 +77,3 @@ def discover(
         results=results,
         warnings=run_warnings,
     )
-

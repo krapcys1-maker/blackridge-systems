@@ -11,4 +11,3 @@ class ExternalToolError(BlackridgeError):
 
 class ConfigurationError(BlackridgeError):
     """A system request or local tool configuration is invalid."""
-

@@ -21,4 +21,3 @@ pytest
 Never execute code from an untrusted candidate repository on the host. Discovery and source
 inspection are read-only; execution belongs in a disposable sandbox with bounded credentials,
 network, CPU, memory, and time.
-

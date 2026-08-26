@@ -116,4 +116,3 @@ architecture document.
 
 Apache-2.0. Upstream components retain their own licenses and are not vendored into this
 repository.
-

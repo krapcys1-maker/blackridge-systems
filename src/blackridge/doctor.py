@@ -37,4 +37,3 @@ def check_tools() -> list[ToolCheck]:
         )
         for name, required, purpose in TOOLS
     ]
-

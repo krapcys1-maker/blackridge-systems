@@ -59,4 +59,3 @@ def test_unknown_license_requires_manual_review() -> None:
 
     assert candidate.decision == "manual-review"
     assert candidate.score.license_confidence == 0
-

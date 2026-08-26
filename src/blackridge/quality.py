@@ -32,4 +32,3 @@ class OpenSSFScorecardClient:
             return float(value) if value is not None else None
         except (httpx.HTTPError, ValueError, TypeError):
             return None
-
