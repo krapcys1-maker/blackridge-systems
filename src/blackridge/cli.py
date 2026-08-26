@@ -30,6 +30,7 @@ from blackridge.io import (
     load_request,
     load_run,
     load_sandbox_experiment,
+    load_supply_chain_experiment,
     write_blueprint,
     write_manual_review,
     write_probe,
@@ -38,6 +39,7 @@ from blackridge.io import (
 from blackridge.octocode import DEFAULT_OCTOCODE_PACKAGE, OctocodeDiscovery
 from blackridge.quality import OpenSSFScorecardClient
 from blackridge.sandbox import SWEREX_SOURCE, SwerexDockerProbe
+from blackridge.supply_chain import SupplyChainProbe
 from blackridge.workflow import discover as run_discovery
 
 app = typer.Typer(
@@ -357,6 +359,79 @@ def probe_composition(
         f"{comparison['negative_target_contract_valid']}"
     )
     console.print(f"Removed operations in negative: {len(difference['removed_operations'])}")
+    console.print(f"Evidence written to {output}")
+    console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
+
+
+@app.command("probe-supply-chain")
+def probe_supply_chain(
+    experiment_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/supply-chain-probe.json"
+    ),
+    work_root: Annotated[Path, typer.Option("--work-root")] = Path(
+        ".blackridge/supply-chain/work"
+    ),
+    artifact_dir: Annotated[Path, typer.Option("--artifact-dir")] = Path(
+        ".blackridge/supply-chain/artifacts"
+    ),
+) -> None:
+    """Run independent license, SBOM, vulnerability, posture, and provenance probes."""
+
+    experiment = None
+    try:
+        experiment = load_supply_chain_experiment(experiment_file)
+        probe = SupplyChainProbe().probe(
+            experiment,
+            work_root=work_root,
+            artifact_dir=artifact_dir,
+        )
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        if experiment is not None:
+            failure = ProbeEvidence.failure(
+                provider="github+deps.dev+scorecard+syft+osv-scanner+pypi-integrity",
+                subject=(
+                    f"{experiment.repository}@{experiment.commit}::"
+                    f"{experiment.package_system.value}:{experiment.package_name}"
+                    f"@{experiment.package_version}"
+                ),
+                request=experiment.model_dump(),
+                sources=[
+                    f"https://github.com/{experiment.repository}/commit/{experiment.commit}"
+                ],
+                error=exc,
+            )
+            with suppress(OSError):
+                write_probe(failure, output)
+        console.print(f"[red]Supply-chain probe failed:[/red] {exc}")
+        if output.exists():
+            console.print(f"Failure evidence written to {output}")
+        raise typer.Exit(code=2) from exc
+
+    observations = probe.observations
+    console.print(f"[bold]Raw supply-chain evidence:[/bold] {probe.subject}")
+    console.print(
+        "Repository license: "
+        f"{observations['repository_license']['spdx_id'] or 'unknown'}"
+    )
+    console.print(
+        "Direct dependency license concerns: "
+        f"{observations['dependency_licenses']['concern_count']}"
+    )
+    console.print(
+        "Scorecard: "
+        f"{observations['security_posture']['scorecard']['status']}"
+    )
+    console.print(
+        "Vulnerable lock-scope package entries: "
+        f"{observations['known_vulnerabilities']['vulnerable_package_entry_count']}"
+    )
+    console.print(
+        "PyPI provenance: "
+        f"{observations['release_provenance']['status']}; "
+        f"missing files={len(observations['release_provenance']['missing_files'])}"
+    )
     console.print(f"Evidence written to {output}")
     console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
 

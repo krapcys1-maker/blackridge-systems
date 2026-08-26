@@ -36,6 +36,7 @@ sandbox = [
   "swe-rex==1.4.0",
 ]
 dev = [
+  "build>=1,<2",
   "pytest>=8,<9",
   "pytest-cov>=6,<8",
   "ruff>=0.12,<1",

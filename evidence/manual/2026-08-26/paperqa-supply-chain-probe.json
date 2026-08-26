@@ -1,0 +1,2401 @@
+{
+  "schema_version": "1",
+  "probe_id": "1df722a797a44aa0a472b5fad1a56052",
+  "observed_at": "2026-08-26T18:11:08.731730Z",
+  "provider": "github+deps.dev+scorecard+syft+osv-scanner+pypi-integrity",
+  "subject": "Future-House/paper-qa@57e89f7223b0960d5ee5ea048c69e3c47e088572::pypi:paper-qa@2026.8.12",
+  "request": {
+    "schema_version": "1",
+    "name": "paperqa-2026-08-12-supply-chain",
+    "description": "Inspect the exact PaperQA release commit with separate repository/license, dependency-license, Scorecard, SBOM, OSV, and provenance observations.",
+    "repository": "Future-House/paper-qa",
+    "commit": "57e89f7223b0960d5ee5ea048c69e3c47e088572",
+    "package_system": "pypi",
+    "package_name": "paper-qa",
+    "package_version": "2026.8.12",
+    "syft_image": "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+    "osv_scanner_image": "ghcr.io/google/osv-scanner@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734"
+  },
+  "observations": {
+    "probe_completed": true,
+    "duration_seconds": 14.743,
+    "source": {
+      "requested_commit": "57e89f7223b0960d5ee5ea048c69e3c47e088572",
+      "observed_commit": "57e89f7223b0960d5ee5ea048c69e3c47e088572",
+      "checkout_commands": [
+        {
+          "argv": [
+            "git",
+            "-C",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\supply-chain\\paperqa-integrated\\source",
+            "remote",
+            "get-url",
+            "origin"
+          ],
+          "duration_seconds": 0.021,
+          "exit_code": 0,
+          "stdout": "https://github.com/Future-House/paper-qa.git\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\supply-chain\\paperqa-integrated\\source",
+            "fetch",
+            "--depth",
+            "1",
+            "origin",
+            "57e89f7223b0960d5ee5ea048c69e3c47e088572"
+          ],
+          "duration_seconds": 3.569,
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "From https://github.com/Future-House/paper-qa\n * branch            57e89f7223b0960d5ee5ea048c69e3c47e088572 -> FETCH_HEAD\n"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\supply-chain\\paperqa-integrated\\source",
+            "checkout",
+            "--detach",
+            "FETCH_HEAD"
+          ],
+          "duration_seconds": 0.029,
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "HEAD is now at 57e89f7 Remove duplicated \"words\" in evidence-summary JSON system prompts (#1337)\n"
+        },
+        {
+          "argv": [
+            "git",
+            "-C",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\supply-chain\\paperqa-integrated\\source",
+            "rev-parse",
+            "HEAD"
+          ],
+          "duration_seconds": 0.025,
+          "exit_code": 0,
+          "stdout": "57e89f7223b0960d5ee5ea048c69e3c47e088572\n",
+          "stderr": ""
+        }
+      ]
+    },
+    "repository_license": {
+      "spdx_id": "Apache-2.0",
+      "name": "Apache License 2.0",
+      "path": "LICENSE",
+      "git_blob_sha": "7d89c6e2d7dea1388df7efe33222068cdd784f8b",
+      "html_url": "https://github.com/Future-House/paper-qa/blob/57e89f7223b0960d5ee5ea048c69e3c47e088572/LICENSE",
+      "local_sha256": "1bda56753d95ce9c4391a53c73b33a9da0487fcfdecec0563fca3d4694c22a23",
+      "pyproject_license": {
+        "file": "LICENSE"
+      },
+      "github_command": {
+        "argv": [
+          "gh",
+          "api",
+          "repos/Future-House/paper-qa/license?ref=57e89f7223b0960d5ee5ea048c69e3c47e088572"
+        ],
+        "duration_seconds": 0.735,
+        "exit_code": 0,
+        "stdout": "{\"name\":\"LICENSE\",\"path\":\"LICENSE\",\"sha\":\"7d89c6e2d7dea1388df7efe33222068cdd784f8b\",\"size\":11341,\"url\":\"https://api.github.com/repos/Future-House/paper-qa/contents/LICENSE?ref=57e89f7223b0960d5ee5ea048c69e3c47e088572\",\"html_url\":\"https://github.com/Future-House/paper-qa/blob/57e89f7223b0960d5ee5ea048c69e3c47e088572/LICENSE\",\"git_url\":\"https://api.github.com/repos/Future-House/paper-qa/git/blobs/7d89c6e2d7dea1388df7efe33222068cdd784f8b\",\"download_url\":\"https://raw.githubusercontent.com/Future-House/paper-qa/57e89f7223b0960d5ee5ea048c69e3c47e088572/LICENSE\",\"type\":\"file\",\"content\":\"ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgQXBhY2hlIExpY2Vu\\nc2UKICAgICAgICAgICAgICAgICAgICAgICAgICAgVmVyc2lvbiAyLjAsIEph\\nbnVhcnkgMjAwNAogICAgICAgICAgICAgICAgICAgICAgICBodHRwOi8vd3d3\\nLmFwYWNoZS5vcmcvbGljZW5zZXMvCgogICBURVJNUyBBTkQgQ09ORElUSU9O\\nUyBGT1IgVVNFLCBSRVBST0RVQ1RJT04sIEFORCBESVNUUklCVVRJT04KCiAg\\nIDEuIERlZmluaXRpb25zLgoKICAgICAgIkxpY2Vuc2UiIHNoYWxsIG1lYW4g\\ndGhlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlv\\nbiwKICAgICAgYW5kIGRpc3RyaWJ1dGlvbiBhcyBkZWZpbmVkIGJ5IFNlY3Rp\\nb25zIDEgdGhyb3VnaCA5IG9mIHRoaXMgZG9jdW1lbnQuCgogICAgICAiTGlj\\nZW5zb3IiIHNoYWxsIG1lYW4gdGhlIGNvcHlyaWdodCBvd25lciBvciBlbnRp\\ndHkgYXV0aG9yaXplZCBieQogICAgICB0aGUgY29weXJpZ2h0IG93bmVyIHRo\\nYXQgaXMgZ3JhbnRpbmcgdGhlIExpY2Vuc2UuCgogICAgICAiTGVnYWwgRW50\\naXR5IiBzaGFsbCBtZWFuIHRoZSB1bmlvbiBvZiB0aGUgYWN0aW5nIGVudGl0\\neSBhbmQgYWxsCiAgICAgIG90aGVyIGVudGl0aWVzIHRoYXQgY29udHJvbCwg\\nYXJlIGNvbnRyb2xsZWQgYnksIG9yIGFyZSB1bmRlciBjb21tb24KICAgICAg\\nY29udHJvbCB3aXRoIHRoYXQgZW50aXR5LiBGb3IgdGhlIHB1cnBvc2VzIG9m\\nIHRoaXMgZGVmaW5pdGlvbiwKICAgICAgImNvbnRyb2wiIG1lYW5zIChpKSB0\\naGUgcG93ZXIsIGRpcmVjdCBvciBpbmRpcmVjdCwgdG8gY2F1c2UgdGhlCiAg\\nICAgIGRpcmVjdGlvbiBvciBtYW5hZ2VtZW50IG9mIHN1Y2ggZW50aXR5LCB3\\naGV0aGVyIGJ5IGNvbnRyYWN0IG9yCiAgICAgIG90aGVyd2lzZSwgb3IgKGlp\\nKSBvd25lcnNoaXAgb2YgZmlmdHkgcGVyY2VudCAoNTAlKSBvciBtb3JlIG9m\\nIHRoZQogICAgICBvdXRzdGFuZGluZyBzaGFyZXMsIG9yIChpaWkpIGJlbmVm\\naWNpYWwgb3duZXJzaGlwIG9mIHN1Y2ggZW50aXR5LgoKICAgICAgIllvdSIg\\nKG9yICJZb3VyIikgc2hhbGwgbWVhbiBhbiBpbmRpdmlkdWFsIG9yIExlZ2Fs\\nIEVudGl0eQogICAgICBleGVyY2lzaW5nIHBlcm1pc3Npb25zIGdyYW50ZWQg\\nYnkgdGhpcyBMaWNlbnNlLgoKICAgICAgIlNvdXJjZSIgZm9ybSBzaGFsbCBt\\nZWFuIHRoZSBwcmVmZXJyZWQgZm9ybSBmb3IgbWFraW5nIG1vZGlmaWNhdGlv\\nbnMsCiAgICAgIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdh\\ncmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24KICAgICAgc291cmNlLCBh\\nbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCiAgICAgICJPYmplY3QiIGZvcm0g\\nc2hhbGwgbWVhbiBhbnkgZm9ybSByZXN1bHRpbmcgZnJvbSBtZWNoYW5pY2Fs\\nCiAgICAgIHRyYW5zZm9ybWF0aW9uIG9yIHRyYW5zbGF0aW9uIG9mIGEgU291\\ncmNlIGZvcm0sIGluY2x1ZGluZyBidXQKICAgICAgbm90IGxpbWl0ZWQgdG8g\\nY29tcGlsZWQgb2JqZWN0IGNvZGUsIGdlbmVyYXRlZCBkb2N1bWVudGF0aW9u\\nLAogICAgICBhbmQgY29udmVyc2lvbnMgdG8gb3RoZXIgbWVkaWEgdHlwZXMu\\nCgogICAgICAiV29yayIgc2hhbGwgbWVhbiB0aGUgd29yayBvZiBhdXRob3Jz\\naGlwLCB3aGV0aGVyIGluIFNvdXJjZSBvcgogICAgICBPYmplY3QgZm9ybSwg\\nbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIExpY2Vuc2UsIGFzIGluZGljYXRl\\nZCBieSBhCiAgICAgIGNvcHlyaWdodCBub3RpY2UgdGhhdCBpcyBpbmNsdWRl\\nZCBpbiBvciBhdHRhY2hlZCB0byB0aGUgd29yawogICAgICAoYW4gZXhhbXBs\\nZSBpcyBwcm92aWRlZCBpbiB0aGUgQXBwZW5kaXggYmVsb3cpLgoKICAgICAg\\nIkRlcml2YXRpdmUgV29ya3MiIHNoYWxsIG1lYW4gYW55IHdvcmssIHdoZXRo\\nZXIgaW4gU291cmNlIG9yIE9iamVjdAogICAgICBmb3JtLCB0aGF0IGlzIGJh\\nc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBXb3JrIGFuZCBmb3Igd2hp\\nY2ggdGhlCiAgICAgIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25z\\nLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMKICAgICAg\\ncmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1\\ndGhvcnNoaXAuIEZvciB0aGUgcHVycG9zZXMKICAgICAgb2YgdGhpcyBMaWNl\\nbnNlLCBEZXJpdmF0aXZlIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtz\\nIHRoYXQgcmVtYWluCiAgICAgIHNlcGFyYWJsZSBmcm9tLCBvciBtZXJlbHkg\\nbGluayAob3IgYmluZCBieSBuYW1lKSB0byB0aGUgaW50ZXJmYWNlcyBvZiwK\\nICAgICAgdGhlIFdvcmsgYW5kIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZi4K\\nCiAgICAgICJDb250cmlidXRpb24iIHNoYWxsIG1lYW4gYW55IHdvcmsgb2Yg\\nYXV0aG9yc2hpcCwgaW5jbHVkaW5nCiAgICAgIHRoZSBvcmlnaW5hbCB2ZXJz\\naW9uIG9mIHRoZSBXb3JrIGFuZCBhbnkgbW9kaWZpY2F0aW9ucyBvciBhZGRp\\ndGlvbnMKICAgICAgdG8gdGhhdCBXb3JrIG9yIERlcml2YXRpdmUgV29ya3Mg\\ndGhlcmVvZiwgdGhhdCBpcyBpbnRlbnRpb25hbGx5CiAgICAgIHN1Ym1pdHRl\\nZCB0byBMaWNlbnNvciBmb3IgaW5jbHVzaW9uIGluIHRoZSBXb3JrIGJ5IHRo\\nZSBjb3B5cmlnaHQgb3duZXIKICAgICAgb3IgYnkgYW4gaW5kaXZpZHVhbCBv\\nciBMZWdhbCBFbnRpdHkgYXV0aG9yaXplZCB0byBzdWJtaXQgb24gYmVoYWxm\\nIG9mCiAgICAgIHRoZSBjb3B5cmlnaHQgb3duZXIuIEZvciB0aGUgcHVycG9z\\nZXMgb2YgdGhpcyBkZWZpbml0aW9uLCAic3VibWl0dGVkIgogICAgICBtZWFu\\ncyBhbnkgZm9ybSBvZiBlbGVjdHJvbmljLCB2ZXJiYWwsIG9yIHdyaXR0ZW4g\\nY29tbXVuaWNhdGlvbiBzZW50CiAgICAgIHRvIHRoZSBMaWNlbnNvciBvciBp\\ndHMgcmVwcmVzZW50YXRpdmVzLCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVk\\nIHRvCiAgICAgIGNvbW11bmljYXRpb24gb24gZWxlY3Ryb25pYyBtYWlsaW5n\\nIGxpc3RzLCBzb3VyY2UgY29kZSBjb250cm9sIHN5c3RlbXMsCiAgICAgIGFu\\nZCBpc3N1ZSB0cmFja2luZyBzeXN0ZW1zIHRoYXQgYXJlIG1hbmFnZWQgYnks\\nIG9yIG9uIGJlaGFsZiBvZiwgdGhlCiAgICAgIExpY2Vuc29yIGZvciB0aGUg\\ncHVycG9zZSBvZiBkaXNjdXNzaW5nIGFuZCBpbXByb3ZpbmcgdGhlIFdvcmss\\nIGJ1dAogICAgICBleGNsdWRpbmcgY29tbXVuaWNhdGlvbiB0aGF0IGlzIGNv\\nbnNwaWN1b3VzbHkgbWFya2VkIG9yIG90aGVyd2lzZQogICAgICBkZXNpZ25h\\ndGVkIGluIHdyaXRpbmcgYnkgdGhlIGNvcHlyaWdodCBvd25lciBhcyAiTm90\\nIGEgQ29udHJpYnV0aW9uLiIKCiAgICAgICJDb250cmlidXRvciIgc2hhbGwg\\nbWVhbiBMaWNlbnNvciBhbmQgYW55IGluZGl2aWR1YWwgb3IgTGVnYWwgRW50\\naXR5CiAgICAgIG9uIGJlaGFsZiBvZiB3aG9tIGEgQ29udHJpYnV0aW9uIGhh\\ncyBiZWVuIHJlY2VpdmVkIGJ5IExpY2Vuc29yIGFuZAogICAgICBzdWJzZXF1\\nZW50bHkgaW5jb3Jwb3JhdGVkIHdpdGhpbiB0aGUgV29yay4KCiAgIDIuIEdy\\nYW50IG9mIENvcHlyaWdodCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJt\\ncyBhbmQgY29uZGl0aW9ucyBvZgogICAgICB0aGlzIExpY2Vuc2UsIGVhY2gg\\nQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWws\\nCiAgICAgIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCBy\\nb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlCiAgICAgIGNvcHlyaWdodCBsaWNl\\nbnNlIHRvIHJlcHJvZHVjZSwgcHJlcGFyZSBEZXJpdmF0aXZlIFdvcmtzIG9m\\nLAogICAgICBwdWJsaWNseSBkaXNwbGF5LCBwdWJsaWNseSBwZXJmb3JtLCBz\\ndWJsaWNlbnNlLCBhbmQgZGlzdHJpYnV0ZSB0aGUKICAgICAgV29yayBhbmQg\\nc3VjaCBEZXJpdmF0aXZlIFdvcmtzIGluIFNvdXJjZSBvciBPYmplY3QgZm9y\\nbS4KCiAgIDMuIEdyYW50IG9mIFBhdGVudCBMaWNlbnNlLiBTdWJqZWN0IHRv\\nIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZgogICAgICB0aGlzIExpY2Vu\\nc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBw\\nZXJwZXR1YWwsCiAgICAgIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8t\\nY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlCiAgICAgIChleGNl\\ncHQgYXMgc3RhdGVkIGluIHRoaXMgc2VjdGlvbikgcGF0ZW50IGxpY2Vuc2Ug\\ndG8gbWFrZSwgaGF2ZSBtYWRlLAogICAgICB1c2UsIG9mZmVyIHRvIHNlbGws\\nIHNlbGwsIGltcG9ydCwgYW5kIG90aGVyd2lzZSB0cmFuc2ZlciB0aGUgV29y\\naywKICAgICAgd2hlcmUgc3VjaCBsaWNlbnNlIGFwcGxpZXMgb25seSB0byB0\\naG9zZSBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUKICAgICAgYnkgc3VjaCBD\\nb250cmlidXRvciB0aGF0IGFyZSBuZWNlc3NhcmlseSBpbmZyaW5nZWQgYnkg\\ndGhlaXIKICAgICAgQ29udHJpYnV0aW9uKHMpIGFsb25lIG9yIGJ5IGNvbWJp\\nbmF0aW9uIG9mIHRoZWlyIENvbnRyaWJ1dGlvbihzKQogICAgICB3aXRoIHRo\\nZSBXb3JrIHRvIHdoaWNoIHN1Y2ggQ29udHJpYnV0aW9uKHMpIHdhcyBzdWJt\\naXR0ZWQuIElmIFlvdQogICAgICBpbnN0aXR1dGUgcGF0ZW50IGxpdGlnYXRp\\nb24gYWdhaW5zdCBhbnkgZW50aXR5IChpbmNsdWRpbmcgYQogICAgICBjcm9z\\ncy1jbGFpbSBvciBjb3VudGVyY2xhaW0gaW4gYSBsYXdzdWl0KSBhbGxlZ2lu\\nZyB0aGF0IHRoZSBXb3JrCiAgICAgIG9yIGEgQ29udHJpYnV0aW9uIGluY29y\\ncG9yYXRlZCB3aXRoaW4gdGhlIFdvcmsgY29uc3RpdHV0ZXMgZGlyZWN0CiAg\\nICAgIG9yIGNvbnRyaWJ1dG9yeSBwYXRlbnQgaW5mcmluZ2VtZW50LCB0aGVu\\nIGFueSBwYXRlbnQgbGljZW5zZXMKICAgICAgZ3JhbnRlZCB0byBZb3UgdW5k\\nZXIgdGhpcyBMaWNlbnNlIGZvciB0aGF0IFdvcmsgc2hhbGwgdGVybWluYXRl\\nCiAgICAgIGFzIG9mIHRoZSBkYXRlIHN1Y2ggbGl0aWdhdGlvbiBpcyBmaWxl\\nZC4KCiAgIDQuIFJlZGlzdHJpYnV0aW9uLiBZb3UgbWF5IHJlcHJvZHVjZSBh\\nbmQgZGlzdHJpYnV0ZSBjb3BpZXMgb2YgdGhlCiAgICAgIFdvcmsgb3IgRGVy\\naXZhdGl2ZSBXb3JrcyB0aGVyZW9mIGluIGFueSBtZWRpdW0sIHdpdGggb3Ig\\nd2l0aG91dAogICAgICBtb2RpZmljYXRpb25zLCBhbmQgaW4gU291cmNlIG9y\\nIE9iamVjdCBmb3JtLCBwcm92aWRlZCB0aGF0IFlvdQogICAgICBtZWV0IHRo\\nZSBmb2xsb3dpbmcgY29uZGl0aW9uczoKCiAgICAgIChhKSBZb3UgbXVzdCBn\\naXZlIGFueSBvdGhlciByZWNpcGllbnRzIG9mIHRoZSBXb3JrIG9yCiAgICAg\\nICAgICBEZXJpdmF0aXZlIFdvcmtzIGEgY29weSBvZiB0aGlzIExpY2Vuc2U7\\nIGFuZAoKICAgICAgKGIpIFlvdSBtdXN0IGNhdXNlIGFueSBtb2RpZmllZCBm\\naWxlcyB0byBjYXJyeSBwcm9taW5lbnQgbm90aWNlcwogICAgICAgICAgc3Rh\\ndGluZyB0aGF0IFlvdSBjaGFuZ2VkIHRoZSBmaWxlczsgYW5kCgogICAgICAo\\nYykgWW91IG11c3QgcmV0YWluLCBpbiB0aGUgU291cmNlIGZvcm0gb2YgYW55\\nIERlcml2YXRpdmUgV29ya3MKICAgICAgICAgIHRoYXQgWW91IGRpc3RyaWJ1\\ndGUsIGFsbCBjb3B5cmlnaHQsIHBhdGVudCwgdHJhZGVtYXJrLCBhbmQKICAg\\nICAgICAgIGF0dHJpYnV0aW9uIG5vdGljZXMgZnJvbSB0aGUgU291cmNlIGZv\\ncm0gb2YgdGhlIFdvcmssCiAgICAgICAgICBleGNsdWRpbmcgdGhvc2Ugbm90\\naWNlcyB0aGF0IGRvIG5vdCBwZXJ0YWluIHRvIGFueSBwYXJ0IG9mCiAgICAg\\nICAgICB0aGUgRGVyaXZhdGl2ZSBXb3JrczsgYW5kCgogICAgICAoZCkgSWYg\\ndGhlIFdvcmsgaW5jbHVkZXMgYSAiTk9USUNFIiB0ZXh0IGZpbGUgYXMgcGFy\\ndCBvZiBpdHMKICAgICAgICAgIGRpc3RyaWJ1dGlvbiwgdGhlbiBhbnkgRGVy\\naXZhdGl2ZSBXb3JrcyB0aGF0IFlvdSBkaXN0cmlidXRlIG11c3QKICAgICAg\\nICAgIGluY2x1ZGUgYSByZWFkYWJsZSBjb3B5IG9mIHRoZSBhdHRyaWJ1dGlv\\nbiBub3RpY2VzIGNvbnRhaW5lZAogICAgICAgICAgd2l0aGluIHN1Y2ggTk9U\\nSUNFIGZpbGUsIGV4Y2x1ZGluZyB0aG9zZSBub3RpY2VzIHRoYXQgZG8gbm90\\nCiAgICAgICAgICBwZXJ0YWluIHRvIGFueSBwYXJ0IG9mIHRoZSBEZXJpdmF0\\naXZlIFdvcmtzLCBpbiBhdCBsZWFzdCBvbmUKICAgICAgICAgIG9mIHRoZSBm\\nb2xsb3dpbmcgcGxhY2VzOiB3aXRoaW4gYSBOT1RJQ0UgdGV4dCBmaWxlIGRp\\nc3RyaWJ1dGVkCiAgICAgICAgICBhcyBwYXJ0IG9mIHRoZSBEZXJpdmF0aXZl\\nIFdvcmtzOyB3aXRoaW4gdGhlIFNvdXJjZSBmb3JtIG9yCiAgICAgICAgICBk\\nb2N1bWVudGF0aW9uLCBpZiBwcm92aWRlZCBhbG9uZyB3aXRoIHRoZSBEZXJp\\ndmF0aXZlIFdvcmtzOyBvciwKICAgICAgICAgIHdpdGhpbiBhIGRpc3BsYXkg\\nZ2VuZXJhdGVkIGJ5IHRoZSBEZXJpdmF0aXZlIFdvcmtzLCBpZiBhbmQKICAg\\nICAgICAgIHdoZXJldmVyIHN1Y2ggdGhpcmQtcGFydHkgbm90aWNlcyBub3Jt\\nYWxseSBhcHBlYXIuIFRoZSBjb250ZW50cwogICAgICAgICAgb2YgdGhlIE5P\\nVElDRSBmaWxlIGFyZSBmb3IgaW5mb3JtYXRpb25hbCBwdXJwb3NlcyBvbmx5\\nIGFuZAogICAgICAgICAgZG8gbm90IG1vZGlmeSB0aGUgTGljZW5zZS4gWW91\\nIG1heSBhZGQgWW91ciBvd24gYXR0cmlidXRpb24KICAgICAgICAgIG5vdGlj\\nZXMgd2l0aGluIERlcml2YXRpdmUgV29ya3MgdGhhdCBZb3UgZGlzdHJpYnV0\\nZSwgYWxvbmdzaWRlCiAgICAgICAgICBvciBhcyBhbiBhZGRlbmR1bSB0byB0\\naGUgTk9USUNFIHRleHQgZnJvbSB0aGUgV29yaywgcHJvdmlkZWQKICAgICAg\\nICAgIHRoYXQgc3VjaCBhZGRpdGlvbmFsIGF0dHJpYnV0aW9uIG5vdGljZXMg\\nY2Fubm90IGJlIGNvbnN0cnVlZAogICAgICAgICAgYXMgbW9kaWZ5aW5nIHRo\\nZSBMaWNlbnNlLgoKICAgICAgWW91IG1heSBhZGQgWW91ciBvd24gY29weXJp\\nZ2h0IHN0YXRlbWVudCB0byBZb3VyIG1vZGlmaWNhdGlvbnMgYW5kCiAgICAg\\nIG1heSBwcm92aWRlIGFkZGl0aW9uYWwgb3IgZGlmZmVyZW50IGxpY2Vuc2Ug\\ndGVybXMgYW5kIGNvbmRpdGlvbnMKICAgICAgZm9yIHVzZSwgcmVwcm9kdWN0\\naW9uLCBvciBkaXN0cmlidXRpb24gb2YgWW91ciBtb2RpZmljYXRpb25zLCBv\\ncgogICAgICBmb3IgYW55IHN1Y2ggRGVyaXZhdGl2ZSBXb3JrcyBhcyBhIHdo\\nb2xlLCBwcm92aWRlZCBZb3VyIHVzZSwKICAgICAgcmVwcm9kdWN0aW9uLCBh\\nbmQgZGlzdHJpYnV0aW9uIG9mIHRoZSBXb3JrIG90aGVyd2lzZSBjb21wbGll\\ncyB3aXRoCiAgICAgIHRoZSBjb25kaXRpb25zIHN0YXRlZCBpbiB0aGlzIExp\\nY2Vuc2UuCgogICA1LiBTdWJtaXNzaW9uIG9mIENvbnRyaWJ1dGlvbnMuIFVu\\nbGVzcyBZb3UgZXhwbGljaXRseSBzdGF0ZSBvdGhlcndpc2UsCiAgICAgIGFu\\neSBDb250cmlidXRpb24gaW50ZW50aW9uYWxseSBzdWJtaXR0ZWQgZm9yIGlu\\nY2x1c2lvbiBpbiB0aGUgV29yawogICAgICBieSBZb3UgdG8gdGhlIExpY2Vu\\nc29yIHNoYWxsIGJlIHVuZGVyIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBv\\nZgogICAgICB0aGlzIExpY2Vuc2UsIHdpdGhvdXQgYW55IGFkZGl0aW9uYWwg\\ndGVybXMgb3IgY29uZGl0aW9ucy4KICAgICAgTm90d2l0aHN0YW5kaW5nIHRo\\nZSBhYm92ZSwgbm90aGluZyBoZXJlaW4gc2hhbGwgc3VwZXJzZWRlIG9yIG1v\\nZGlmeQogICAgICB0aGUgdGVybXMgb2YgYW55IHNlcGFyYXRlIGxpY2Vuc2Ug\\nYWdyZWVtZW50IHlvdSBtYXkgaGF2ZSBleGVjdXRlZAogICAgICB3aXRoIExp\\nY2Vuc29yIHJlZ2FyZGluZyBzdWNoIENvbnRyaWJ1dGlvbnMuCgogICA2LiBU\\ncmFkZW1hcmtzLiBUaGlzIExpY2Vuc2UgZG9lcyBub3QgZ3JhbnQgcGVybWlz\\nc2lvbiB0byB1c2UgdGhlIHRyYWRlCiAgICAgIG5hbWVzLCB0cmFkZW1hcmtz\\nLCBzZXJ2aWNlIG1hcmtzLCBvciBwcm9kdWN0IG5hbWVzIG9mIHRoZSBMaWNl\\nbnNvciwKICAgICAgZXhjZXB0IGFzIHJlcXVpcmVkIGZvciByZWFzb25hYmxl\\nIGFuZCBjdXN0b21hcnkgdXNlIGluIGRlc2NyaWJpbmcgdGhlCiAgICAgIG9y\\naWdpbiBvZiB0aGUgV29yayBhbmQgcmVwcm9kdWNpbmcgdGhlIGNvbnRlbnQg\\nb2YgdGhlIE5PVElDRSBmaWxlLgoKICAgNy4gRGlzY2xhaW1lciBvZiBXYXJy\\nYW50eS4gVW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IG9yCiAg\\nICAgIGFncmVlZCB0byBpbiB3cml0aW5nLCBMaWNlbnNvciBwcm92aWRlcyB0\\naGUgV29yayAoYW5kIGVhY2gKICAgICAgQ29udHJpYnV0b3IgcHJvdmlkZXMg\\naXRzIENvbnRyaWJ1dGlvbnMpIG9uIGFuICJBUyBJUyIgQkFTSVMsCiAgICAg\\nIFdJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5E\\nLCBlaXRoZXIgZXhwcmVzcyBvcgogICAgICBpbXBsaWVkLCBpbmNsdWRpbmcs\\nIHdpdGhvdXQgbGltaXRhdGlvbiwgYW55IHdhcnJhbnRpZXMgb3IgY29uZGl0\\naW9ucwogICAgICBvZiBUSVRMRSwgTk9OLUlORlJJTkdFTUVOVCwgTUVSQ0hB\\nTlRBQklMSVRZLCBvciBGSVRORVNTIEZPUiBBCiAgICAgIFBBUlRJQ1VMQVIg\\nUFVSUE9TRS4gWW91IGFyZSBzb2xlbHkgcmVzcG9uc2libGUgZm9yIGRldGVy\\nbWluaW5nIHRoZQogICAgICBhcHByb3ByaWF0ZW5lc3Mgb2YgdXNpbmcgb3Ig\\ncmVkaXN0cmlidXRpbmcgdGhlIFdvcmsgYW5kIGFzc3VtZSBhbnkKICAgICAg\\ncmlza3MgYXNzb2NpYXRlZCB3aXRoIFlvdXIgZXhlcmNpc2Ugb2YgcGVybWlz\\nc2lvbnMgdW5kZXIgdGhpcyBMaWNlbnNlLgoKICAgOC4gTGltaXRhdGlvbiBv\\nZiBMaWFiaWxpdHkuIEluIG5vIGV2ZW50IGFuZCB1bmRlciBubyBsZWdhbCB0\\naGVvcnksCiAgICAgIHdoZXRoZXIgaW4gdG9ydCAoaW5jbHVkaW5nIG5lZ2xp\\nZ2VuY2UpLCBjb250cmFjdCwgb3Igb3RoZXJ3aXNlLAogICAgICB1bmxlc3Mg\\ncmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgKHN1Y2ggYXMgZGVsaWJlcmF0\\nZSBhbmQgZ3Jvc3NseQogICAgICBuZWdsaWdlbnQgYWN0cykgb3IgYWdyZWVk\\nIHRvIGluIHdyaXRpbmcsIHNoYWxsIGFueSBDb250cmlidXRvciBiZQogICAg\\nICBsaWFibGUgdG8gWW91IGZvciBkYW1hZ2VzLCBpbmNsdWRpbmcgYW55IGRp\\ncmVjdCwgaW5kaXJlY3QsIHNwZWNpYWwsCiAgICAgIGluY2lkZW50YWwsIG9y\\nIGNvbnNlcXVlbnRpYWwgZGFtYWdlcyBvZiBhbnkgY2hhcmFjdGVyIGFyaXNp\\nbmcgYXMgYQogICAgICByZXN1bHQgb2YgdGhpcyBMaWNlbnNlIG9yIG91dCBv\\nZiB0aGUgdXNlIG9yIGluYWJpbGl0eSB0byB1c2UgdGhlCiAgICAgIFdvcmsg\\nKGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gZGFtYWdlcyBmb3IgbG9z\\ncyBvZiBnb29kd2lsbCwKICAgICAgd29yayBzdG9wcGFnZSwgY29tcHV0ZXIg\\nZmFpbHVyZSBvciBtYWxmdW5jdGlvbiwgb3IgYW55IGFuZCBhbGwKICAgICAg\\nb3RoZXIgY29tbWVyY2lhbCBkYW1hZ2VzIG9yIGxvc3NlcyksIGV2ZW4gaWYg\\nc3VjaCBDb250cmlidXRvcgogICAgICBoYXMgYmVlbiBhZHZpc2VkIG9mIHRo\\nZSBwb3NzaWJpbGl0eSBvZiBzdWNoIGRhbWFnZXMuCgogICA5LiBBY2NlcHRp\\nbmcgV2FycmFudHkgb3IgQWRkaXRpb25hbCBMaWFiaWxpdHkuIFdoaWxlIHJl\\nZGlzdHJpYnV0aW5nCiAgICAgIHRoZSBXb3JrIG9yIERlcml2YXRpdmUgV29y\\na3MgdGhlcmVvZiwgWW91IG1heSBjaG9vc2UgdG8gb2ZmZXIsCiAgICAgIGFu\\nZCBjaGFyZ2UgYSBmZWUgZm9yLCBhY2NlcHRhbmNlIG9mIHN1cHBvcnQsIHdh\\ncnJhbnR5LCBpbmRlbW5pdHksCiAgICAgIG9yIG90aGVyIGxpYWJpbGl0eSBv\\nYmxpZ2F0aW9ucyBhbmQvb3IgcmlnaHRzIGNvbnNpc3RlbnQgd2l0aCB0aGlz\\nCiAgICAgIExpY2Vuc2UuIEhvd2V2ZXIsIGluIGFjY2VwdGluZyBzdWNoIG9i\\nbGlnYXRpb25zLCBZb3UgbWF5IGFjdCBvbmx5CiAgICAgIG9uIFlvdXIgb3du\\nIGJlaGFsZiBhbmQgb24gWW91ciBzb2xlIHJlc3BvbnNpYmlsaXR5LCBub3Qg\\nb24gYmVoYWxmCiAgICAgIG9mIGFueSBvdGhlciBDb250cmlidXRvciwgYW5k\\nIG9ubHkgaWYgWW91IGFncmVlIHRvIGluZGVtbmlmeSwKICAgICAgZGVmZW5k\\nLCBhbmQgaG9sZCBlYWNoIENvbnRyaWJ1dG9yIGhhcm1sZXNzIGZvciBhbnkg\\nbGlhYmlsaXR5CiAgICAgIGluY3VycmVkIGJ5LCBvciBjbGFpbXMgYXNzZXJ0\\nZWQgYWdhaW5zdCwgc3VjaCBDb250cmlidXRvciBieSByZWFzb24KICAgICAg\\nb2YgeW91ciBhY2NlcHRpbmcgYW55IHN1Y2ggd2FycmFudHkgb3IgYWRkaXRp\\nb25hbCBsaWFiaWxpdHkuCgogICBFTkQgT0YgVEVSTVMgQU5EIENPTkRJVElP\\nTlMKCiAgIEFQUEVORElYOiBIb3cgdG8gYXBwbHkgdGhlIEFwYWNoZSBMaWNl\\nbnNlIHRvIHlvdXIgd29yay4KCiAgICAgIFRvIGFwcGx5IHRoZSBBcGFjaGUg\\nTGljZW5zZSB0byB5b3VyIHdvcmssIGF0dGFjaCB0aGUgZm9sbG93aW5nCiAg\\nICAgIGJvaWxlcnBsYXRlIG5vdGljZSwgd2l0aCB0aGUgZmllbGRzIGVuY2xv\\nc2VkIGJ5IGJyYWNrZXRzICJbXSIKICAgICAgcmVwbGFjZWQgd2l0aCB5b3Vy\\nIG93biBpZGVudGlmeWluZyBpbmZvcm1hdGlvbi4gKERvbid0IGluY2x1ZGUK\\nICAgICAgdGhlIGJyYWNrZXRzISkgIFRoZSB0ZXh0IHNob3VsZCBiZSBlbmNs\\nb3NlZCBpbiB0aGUgYXBwcm9wcmlhdGUKICAgICAgY29tbWVudCBzeW50YXgg\\nZm9yIHRoZSBmaWxlIGZvcm1hdC4gV2UgYWxzbyByZWNvbW1lbmQgdGhhdCBh\\nCiAgICAgIGZpbGUgb3IgY2xhc3MgbmFtZSBhbmQgZGVzY3JpcHRpb24gb2Yg\\ncHVycG9zZSBiZSBpbmNsdWRlZCBvbiB0aGUKICAgICAgc2FtZSAicHJpbnRl\\nZCBwYWdlIiBhcyB0aGUgY29weXJpZ2h0IG5vdGljZSBmb3IgZWFzaWVyCiAg\\nICAgIGlkZW50aWZpY2F0aW9uIHdpdGhpbiB0aGlyZC1wYXJ0eSBhcmNoaXZl\\ncy4KCiAgIENvcHlyaWdodCAyMDI0IEZ1dHVyZUhvdXNlCgogICBMaWNlbnNl\\nZCB1bmRlciB0aGUgQXBhY2hlIExpY2Vuc2UsIFZlcnNpb24gMi4wICh0aGUg\\nIkxpY2Vuc2UiKTsKICAgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNl\\ncHQgaW4gY29tcGxpYW5jZSB3aXRoIHRoZSBMaWNlbnNlLgogICBZb3UgbWF5\\nIG9idGFpbiBhIGNvcHkgb2YgdGhlIExpY2Vuc2UgYXQKCiAgICAgICBodHRw\\nOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvTElDRU5TRS0yLjAKCiAgIFVu\\nbGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8g\\naW4gd3JpdGluZywgc29mdHdhcmUKICAgZGlzdHJpYnV0ZWQgdW5kZXIgdGhl\\nIExpY2Vuc2UgaXMgZGlzdHJpYnV0ZWQgb24gYW4gIkFTIElTIiBCQVNJUywK\\nICAgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJ\\nTkQsIGVpdGhlciBleHByZXNzIG9yIGltcGxpZWQuCiAgIFNlZSB0aGUgTGlj\\nZW5zZSBmb3IgdGhlIHNwZWNpZmljIGxhbmd1YWdlIGdvdmVybmluZyBwZXJt\\naXNzaW9ucyBhbmQKICAgbGltaXRhdGlvbnMgdW5kZXIgdGhlIExpY2Vuc2Uu\\nCg==\\n\",\"encoding\":\"base64\",\"_links\":{\"self\":\"https://api.github.com/repos/Future-House/paper-qa/contents/LICENSE?ref=57e89f7223b0960d5ee5ea048c69e3c47e088572\",\"git\":\"https://api.github.com/repos/Future-House/paper-qa/git/blobs/7d89c6e2d7dea1388df7efe33222068cdd784f8b\",\"html\":\"https://github.com/Future-House/paper-qa/blob/57e89f7223b0960d5ee5ea048c69e3c47e088572/LICENSE\"},\"license\":{\"key\":\"apache-2.0\",\"name\":\"Apache License 2.0\",\"spdx_id\":\"Apache-2.0\",\"url\":\"https://api.github.com/licenses/apache-2.0\",\"node_id\":\"MDc6TGljZW5zZTI=\"}}",
+        "stderr": ""
+      }
+    },
+    "dependency_licenses": {
+      "direct_dependency_count": 16,
+      "packages": [
+        {
+          "name": "anyio",
+          "version": "4.14.2",
+          "status_code": 200,
+          "licenses": [
+            "MIT"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/anyio/versions/4.14.2",
+          "error": null
+        },
+        {
+          "name": "fhaviary",
+          "version": "0.35.0",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/fhaviary/versions/0.35.0",
+          "error": null
+        },
+        {
+          "name": "fhlmi",
+          "version": "1.0.5",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/fhlmi/versions/1.0.5",
+          "error": null
+        },
+        {
+          "name": "html2text",
+          "version": "2025.4.15",
+          "status_code": 200,
+          "licenses": [
+            "GPL-3.0-or-later"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/html2text/versions/2025.4.15",
+          "error": null
+        },
+        {
+          "name": "httpx",
+          "version": "0.28.1",
+          "status_code": 200,
+          "licenses": [
+            "BSD-3-Clause"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/httpx/versions/0.28.1",
+          "error": null
+        },
+        {
+          "name": "httpx-aiohttp",
+          "version": "0.2.0",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/httpx-aiohttp/versions/0.2.0",
+          "error": null
+        },
+        {
+          "name": "numpy",
+          "version": "2.5.2",
+          "status_code": 200,
+          "licenses": [
+            "0BSD AND BSD-3-Clause AND CC0-1.0 AND MIT AND Zlib"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/numpy/versions/2.5.2",
+          "error": null
+        },
+        {
+          "name": "paper-qa-pypdf",
+          "version": "2026.8.12",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/paper-qa-pypdf/versions/2026.8.12",
+          "error": null
+        },
+        {
+          "name": "pybtex",
+          "version": "0.26.1",
+          "status_code": 200,
+          "licenses": [
+            "MIT"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/pybtex/versions/0.26.1",
+          "error": null
+        },
+        {
+          "name": "pydantic",
+          "version": "2.13.4",
+          "status_code": 200,
+          "licenses": [
+            "MIT"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/pydantic/versions/2.13.4",
+          "error": null
+        },
+        {
+          "name": "pydantic-settings",
+          "version": "2.15.0",
+          "status_code": 200,
+          "licenses": [
+            "MIT"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/pydantic-settings/versions/2.15.0",
+          "error": null
+        },
+        {
+          "name": "rich",
+          "version": "15.0.0",
+          "status_code": 200,
+          "licenses": [
+            "MIT"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/rich/versions/15.0.0",
+          "error": null
+        },
+        {
+          "name": "setuptools",
+          "version": "84.0.0",
+          "status_code": 200,
+          "licenses": [
+            "MIT"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/setuptools/versions/84.0.0",
+          "error": null
+        },
+        {
+          "name": "tantivy",
+          "version": "0.26.0",
+          "status_code": 200,
+          "licenses": [],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/tantivy/versions/0.26.0",
+          "error": null
+        },
+        {
+          "name": "tenacity",
+          "version": "9.1.4",
+          "status_code": 200,
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/tenacity/versions/9.1.4",
+          "error": null
+        },
+        {
+          "name": "tiktoken",
+          "version": "0.14.0",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/tiktoken/versions/0.14.0",
+          "error": null
+        }
+      ],
+      "concern_count": 7,
+      "concerns": [
+        {
+          "name": "fhaviary",
+          "version": "0.35.0",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/fhaviary/versions/0.35.0",
+          "error": null
+        },
+        {
+          "name": "fhlmi",
+          "version": "1.0.5",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/fhlmi/versions/1.0.5",
+          "error": null
+        },
+        {
+          "name": "html2text",
+          "version": "2025.4.15",
+          "status_code": 200,
+          "licenses": [
+            "GPL-3.0-or-later"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/html2text/versions/2025.4.15",
+          "error": null
+        },
+        {
+          "name": "httpx-aiohttp",
+          "version": "0.2.0",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/httpx-aiohttp/versions/0.2.0",
+          "error": null
+        },
+        {
+          "name": "paper-qa-pypdf",
+          "version": "2026.8.12",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/paper-qa-pypdf/versions/2026.8.12",
+          "error": null
+        },
+        {
+          "name": "tantivy",
+          "version": "0.26.0",
+          "status_code": 200,
+          "licenses": [],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/tantivy/versions/0.26.0",
+          "error": null
+        },
+        {
+          "name": "tiktoken",
+          "version": "0.14.0",
+          "status_code": 200,
+          "licenses": [
+            "non-standard"
+          ],
+          "advisories": [],
+          "source": "https://api.deps.dev/v3/systems/pypi/packages/tiktoken/versions/0.14.0",
+          "error": null
+        }
+      ],
+      "sbom_license_coverage": {
+        "package_count": 305,
+        "without_declared_license_count": 305,
+        "all_license_fields_unknown": true,
+        "without_declared_license": [
+          {
+            "name": "accelerate",
+            "version": "1.13.0"
+          },
+          {
+            "name": "actions/cache",
+            "version": "v5"
+          },
+          {
+            "name": "actions/checkout",
+            "version": "v6"
+          },
+          {
+            "name": "actions/checkout",
+            "version": "v6"
+          },
+          {
+            "name": "actions/download-artifact",
+            "version": "v8"
+          },
+          {
+            "name": "aiobotocore",
+            "version": "3.3.0"
+          },
+          {
+            "name": "aiofiles",
+            "version": "25.1.0"
+          },
+          {
+            "name": "aiohappyeyeballs",
+            "version": "2.6.1"
+          },
+          {
+            "name": "aiohttp",
+            "version": "3.13.3"
+          },
+          {
+            "name": "aioitertools",
+            "version": "0.13.0"
+          },
+          {
+            "name": "aiosignal",
+            "version": "1.4.0"
+          },
+          {
+            "name": "annotated-doc",
+            "version": "0.0.4"
+          },
+          {
+            "name": "annotated-types",
+            "version": "0.7.0"
+          },
+          {
+            "name": "antlr4-python3-runtime",
+            "version": "4.9.3"
+          },
+          {
+            "name": "anyio",
+            "version": "4.12.1"
+          },
+          {
+            "name": "appnope",
+            "version": "0.1.4"
+          },
+          {
+            "name": "astral-sh/setup-uv",
+            "version": "v8.1.0"
+          },
+          {
+            "name": "astroid",
+            "version": "4.0.4"
+          },
+          {
+            "name": "asttokens",
+            "version": "3.0.1"
+          },
+          {
+            "name": "async-timeout",
+            "version": "5.0.1"
+          },
+          {
+            "name": "attrs",
+            "version": "25.4.0"
+          },
+          {
+            "name": "beartype",
+            "version": "0.22.9"
+          },
+          {
+            "name": "beautifulsoup4",
+            "version": "4.14.3"
+          },
+          {
+            "name": "bibtexparser",
+            "version": "1.4.4"
+          },
+          {
+            "name": "blis",
+            "version": "1.3.3"
+          },
+          {
+            "name": "botocore",
+            "version": "1.42.70"
+          },
+          {
+            "name": "botocore-stubs",
+            "version": "1.42.41"
+          },
+          {
+            "name": "catalogue",
+            "version": "2.0.10"
+          },
+          {
+            "name": "certifi",
+            "version": "2026.2.25"
+          },
+          {
+            "name": "cffi",
+            "version": "2.0.0"
+          },
+          {
+            "name": "charset-normalizer",
+            "version": "3.4.6"
+          },
+          {
+            "name": "click",
+            "version": "8.3.1"
+          },
+          {
+            "name": "cloudpathlib",
+            "version": "0.23.0"
+          },
+          {
+            "name": "colorama",
+            "version": "0.4.6"
+          },
+          {
+            "name": "colorlog",
+            "version": "6.10.1"
+          },
+          {
+            "name": "comm",
+            "version": "0.2.3"
+          },
+          {
+            "name": "confection",
+            "version": "0.1.5"
+          },
+          {
+            "name": "coredis",
+            "version": "5.7.0"
+          },
+          {
+            "name": "cryptography",
+            "version": "46.0.5"
+          },
+          {
+            "name": "cuda-bindings",
+            "version": "12.9.4"
+          },
+          {
+            "name": "cuda-pathfinder",
+            "version": "1.4.3"
+          },
+          {
+            "name": "cymem",
+            "version": "2.0.13"
+          },
+          {
+            "name": "debugpy",
+            "version": "1.8.20"
+          },
+          {
+            "name": "decorator",
+            "version": "5.2.1"
+          },
+          {
+            "name": "defusedxml",
+            "version": "0.7.1"
+          },
+          {
+            "name": "deprecated",
+            "version": "1.3.1"
+          },
+          {
+            "name": "dill",
+            "version": "0.4.1"
+          },
+          {
+            "name": "distro",
+            "version": "1.9.0"
+          },
+          {
+            "name": "docling",
+            "version": "2.80.0"
+          },
+          {
+            "name": "docling-core",
+            "version": "2.70.1"
+          },
+          {
+            "name": "docling-ibm-models",
+            "version": "3.12.0"
+          },
+          {
+            "name": "docling-parse",
+            "version": "5.5.0"
+          },
+          {
+            "name": "docstring-parser",
+            "version": "0.17.0"
+          },
+          {
+            "name": "emoji",
+            "version": "2.15.0"
+          },
+          {
+            "name": "et-xmlfile",
+            "version": "2.0.0"
+          },
+          {
+            "name": "execnet",
+            "version": "2.1.2"
+          },
+          {
+            "name": "executing",
+            "version": "2.2.1"
+          },
+          {
+            "name": "faker",
+            "version": "40.11.0"
+          },
+          {
+            "name": "fastuuid",
+            "version": "0.14.0"
+          },
+          {
+            "name": "feedparser",
+            "version": "6.0.12"
+          },
+          {
+            "name": "fhaviary",
+            "version": "0.34.0"
+          },
+          {
+            "name": "fhlmi",
+            "version": "0.45.0"
+          },
+          {
+            "name": "filelock",
+            "version": "3.25.2"
+          },
+          {
+            "name": "filetype",
+            "version": "1.2.0"
+          },
+          {
+            "name": "frozenlist",
+            "version": "1.8.0"
+          },
+          {
+            "name": "fsspec",
+            "version": "2026.2.0"
+          },
+          {
+            "name": "future",
+            "version": "1.0.0"
+          },
+          {
+            "name": "grpcio",
+            "version": "1.78.0"
+          },
+          {
+            "name": "h11",
+            "version": "0.16.0"
+          },
+          {
+            "name": "h2",
+            "version": "4.3.0"
+          },
+          {
+            "name": "hf-xet",
+            "version": "1.4.2"
+          },
+          {
+            "name": "hpack",
+            "version": "4.1.0"
+          },
+          {
+            "name": "html2text",
+            "version": "2025.4.15"
+          },
+          {
+            "name": "html5lib",
+            "version": "1.1"
+          },
+          {
+            "name": "httpcore",
+            "version": "1.0.9"
+          },
+          {
+            "name": "httpx",
+            "version": "0.28.1"
+          },
+          {
+            "name": "httpx-aiohttp",
+            "version": "0.1.12"
+          },
+          {
+            "name": "huggingface-hub",
+            "version": "0.36.2"
+          },
+          {
+            "name": "hynek/build-and-inspect-python-package",
+            "version": "v2"
+          },
+          {
+            "name": "hynek/build-and-inspect-python-package",
+            "version": "v2"
+          },
+          {
+            "name": "hyperframe",
+            "version": "6.1.0"
+          },
+          {
+            "name": "idna",
+            "version": "3.11"
+          },
+          {
+            "name": "importlib-metadata",
+            "version": "8.7.1"
+          },
+          {
+            "name": "iniconfig",
+            "version": "2.3.0"
+          },
+          {
+            "name": "installer",
+            "version": "0.7.0"
+          },
+          {
+            "name": "ipykernel",
+            "version": "7.2.0"
+          },
+          {
+            "name": "ipython",
+            "version": "9.10.0"
+          },
+          {
+            "name": "ipython",
+            "version": "9.11.0"
+          },
+          {
+            "name": "ipython-pygments-lexers",
+            "version": "1.1.1"
+          },
+          {
+            "name": "isort",
+            "version": "8.0.1"
+          },
+          {
+            "name": "j178/prek-action",
+            "version": "v2"
+          },
+          {
+            "name": "jedi",
+            "version": "0.19.2"
+          },
+          {
+            "name": "jinja2",
+            "version": "3.1.6"
+          },
+          {
+            "name": "jiter",
+            "version": "0.13.0"
+          },
+          {
+            "name": "jmespath",
+            "version": "1.1.0"
+          },
+          {
+            "name": "joblib",
+            "version": "1.5.3"
+          },
+          {
+            "name": "jsonlines",
+            "version": "4.0.0"
+          },
+          {
+            "name": "jsonref",
+            "version": "1.1.0"
+          },
+          {
+            "name": "jsonschema",
+            "version": "4.26.0"
+          },
+          {
+            "name": "jsonschema-specifications",
+            "version": "2025.9.1"
+          },
+          {
+            "name": "jupyter-client",
+            "version": "8.8.0"
+          },
+          {
+            "name": "jupyter-core",
+            "version": "5.9.1"
+          },
+          {
+            "name": "langdetect",
+            "version": "1.0.9"
+          },
+          {
+            "name": "latex2mathml",
+            "version": "3.79.0"
+          },
+          {
+            "name": "latexcodec",
+            "version": "3.0.1"
+          },
+          {
+            "name": "ldp",
+            "version": "0.45.0"
+          },
+          {
+            "name": "librt",
+            "version": "0.8.1"
+          },
+          {
+            "name": "limits",
+            "version": "5.8.0"
+          },
+          {
+            "name": "litellm",
+            "version": "1.82.4"
+          },
+          {
+            "name": "llvmlite",
+            "version": "0.46.0"
+          },
+          {
+            "name": "lxml",
+            "version": "6.0.2"
+          },
+          {
+            "name": "markdown-it-py",
+            "version": "4.0.0"
+          },
+          {
+            "name": "marko",
+            "version": "2.2.2"
+          },
+          {
+            "name": "markupsafe",
+            "version": "3.0.3"
+          },
+          {
+            "name": "matplotlib-inline",
+            "version": "0.2.1"
+          },
+          {
+            "name": "mccabe",
+            "version": "0.7.0"
+          },
+          {
+            "name": "mdurl",
+            "version": "0.1.2"
+          },
+          {
+            "name": "mpire",
+            "version": "2.10.2"
+          },
+          {
+            "name": "mpmath",
+            "version": "1.3.0"
+          },
+          {
+            "name": "msoffcrypto-tool",
+            "version": "6.0.0"
+          },
+          {
+            "name": "multidict",
+            "version": "6.7.1"
+          },
+          {
+            "name": "multiprocess",
+            "version": "0.70.19"
+          },
+          {
+            "name": "murmurhash",
+            "version": "1.0.15"
+          },
+          {
+            "name": "mypy",
+            "version": "1.19.1"
+          },
+          {
+            "name": "mypy-extensions",
+            "version": "1.1.0"
+          },
+          {
+            "name": "nest-asyncio",
+            "version": "1.6.0"
+          },
+          {
+            "name": "networkx",
+            "version": "3.6.1"
+          },
+          {
+            "name": "numba",
+            "version": "0.64.0"
+          },
+          {
+            "name": "numpy",
+            "version": "2.4.3"
+          },
+          {
+            "name": "nvidia-cublas-cu12",
+            "version": "12.8.4.1"
+          },
+          {
+            "name": "nvidia-cuda-cupti-cu12",
+            "version": "12.8.90"
+          },
+          {
+            "name": "nvidia-cuda-nvrtc-cu12",
+            "version": "12.8.93"
+          },
+          {
+            "name": "nvidia-cuda-runtime-cu12",
+            "version": "12.8.90"
+          },
+          {
+            "name": "nvidia-cudnn-cu12",
+            "version": "9.10.2.21"
+          },
+          {
+            "name": "nvidia-cufft-cu12",
+            "version": "11.3.3.83"
+          },
+          {
+            "name": "nvidia-cufile-cu12",
+            "version": "1.13.1.3"
+          },
+          {
+            "name": "nvidia-curand-cu12",
+            "version": "10.3.9.90"
+          },
+          {
+            "name": "nvidia-cusolver-cu12",
+            "version": "11.7.3.90"
+          },
+          {
+            "name": "nvidia-cusparse-cu12",
+            "version": "12.5.8.93"
+          },
+          {
+            "name": "nvidia-cusparselt-cu12",
+            "version": "0.7.1"
+          },
+          {
+            "name": "nvidia-nccl-cu12",
+            "version": "2.27.5"
+          },
+          {
+            "name": "nvidia-nvjitlink-cu12",
+            "version": "12.8.93"
+          },
+          {
+            "name": "nvidia-nvshmem-cu12",
+            "version": "3.4.5"
+          },
+          {
+            "name": "nvidia-nvtx-cu12",
+            "version": "12.8.90"
+          },
+          {
+            "name": "ocrmac",
+            "version": "1.0.1"
+          },
+          {
+            "name": "olefile",
+            "version": "0.47"
+          },
+          {
+            "name": "omegaconf",
+            "version": "2.3.0"
+          },
+          {
+            "name": "openai",
+            "version": "2.29.0"
+          },
+          {
+            "name": "opencv-python",
+            "version": "4.13.0.92"
+          },
+          {
+            "name": "opencv-python-headless",
+            "version": "4.13.0.92"
+          },
+          {
+            "name": "openpyxl",
+            "version": "3.1.5"
+          },
+          {
+            "name": "openreview-py",
+            "version": "1.52.3"
+          },
+          {
+            "name": "packaging",
+            "version": "25.0"
+          },
+          {
+            "name": "pandas",
+            "version": "3.0.1"
+          },
+          {
+            "name": "paper-qa",
+            "version": "UNKNOWN"
+          },
+          {
+            "name": "paper-qa-docling",
+            "version": "UNKNOWN"
+          },
+          {
+            "name": "paper-qa-nemotron",
+            "version": "UNKNOWN"
+          },
+          {
+            "name": "paper-qa-pymupdf",
+            "version": "UNKNOWN"
+          },
+          {
+            "name": "paper-qa-pypdf",
+            "version": "UNKNOWN"
+          },
+          {
+            "name": "parso",
+            "version": "0.8.6"
+          },
+          {
+            "name": "pathspec",
+            "version": "1.0.4"
+          },
+          {
+            "name": "pdfminer-six",
+            "version": "20251230"
+          },
+          {
+            "name": "pdfplumber",
+            "version": "0.11.9"
+          },
+          {
+            "name": "pexpect",
+            "version": "4.9.0"
+          },
+          {
+            "name": "pillow",
+            "version": "12.1.1"
+          },
+          {
+            "name": "platformdirs",
+            "version": "4.9.4"
+          },
+          {
+            "name": "pluggy",
+            "version": "1.6.0"
+          },
+          {
+            "name": "polyfactory",
+            "version": "3.3.0"
+          },
+          {
+            "name": "portalocker",
+            "version": "3.2.0"
+          },
+          {
+            "name": "pre-commit-ci/lite-action",
+            "version": "v1.1.0"
+          },
+          {
+            "name": "prek",
+            "version": "0.2.14"
+          },
+          {
+            "name": "preshed",
+            "version": "3.0.12"
+          },
+          {
+            "name": "prompt-toolkit",
+            "version": "3.0.52"
+          },
+          {
+            "name": "propcache",
+            "version": "0.4.1"
+          },
+          {
+            "name": "protobuf",
+            "version": "7.34.0"
+          },
+          {
+            "name": "psutil",
+            "version": "7.2.2"
+          },
+          {
+            "name": "ptyprocess",
+            "version": "0.7.0"
+          },
+          {
+            "name": "pure-eval",
+            "version": "0.2.3"
+          },
+          {
+            "name": "pybtex",
+            "version": "0.25.1"
+          },
+          {
+            "name": "pyclipper",
+            "version": "1.4.0"
+          },
+          {
+            "name": "pycparser",
+            "version": "3.0"
+          },
+          {
+            "name": "pycryptodome",
+            "version": "3.23.0"
+          },
+          {
+            "name": "pydantic",
+            "version": "2.12.5"
+          },
+          {
+            "name": "pydantic-core",
+            "version": "2.41.5"
+          },
+          {
+            "name": "pydantic-settings",
+            "version": "2.13.1"
+          },
+          {
+            "name": "pygments",
+            "version": "2.19.2"
+          },
+          {
+            "name": "pyjwt",
+            "version": "2.12.1"
+          },
+          {
+            "name": "pylatexenc",
+            "version": "2.10"
+          },
+          {
+            "name": "pylint",
+            "version": "4.0.5"
+          },
+          {
+            "name": "pylint-per-file-ignores",
+            "version": "3.2.0"
+          },
+          {
+            "name": "pylint-plugin-utils",
+            "version": "0.9.0"
+          },
+          {
+            "name": "pylint-pydantic",
+            "version": "0.4.1"
+          },
+          {
+            "name": "pympler",
+            "version": "1.1"
+          },
+          {
+            "name": "pymupdf",
+            "version": "1.27.2.2"
+          },
+          {
+            "name": "pyobjc-core",
+            "version": "12.1"
+          },
+          {
+            "name": "pyobjc-framework-cocoa",
+            "version": "12.1"
+          },
+          {
+            "name": "pyobjc-framework-coreml",
+            "version": "12.1"
+          },
+          {
+            "name": "pyobjc-framework-quartz",
+            "version": "12.1"
+          },
+          {
+            "name": "pyobjc-framework-vision",
+            "version": "12.1"
+          },
+          {
+            "name": "pypa/gh-action-pypi-publish",
+            "version": "release/v1"
+          },
+          {
+            "name": "pyparsing",
+            "version": "3.3.2"
+          },
+          {
+            "name": "pypdf",
+            "version": "6.9.1"
+          },
+          {
+            "name": "pypdfium2",
+            "version": "5.6.0"
+          },
+          {
+            "name": "pytest",
+            "version": "9.0.2"
+          },
+          {
+            "name": "pytest-asyncio",
+            "version": "1.3.0"
+          },
+          {
+            "name": "pytest-recording",
+            "version": "0.13.4"
+          },
+          {
+            "name": "pytest-rerunfailures",
+            "version": "16.1"
+          },
+          {
+            "name": "pytest-subtests",
+            "version": "0.15.0"
+          },
+          {
+            "name": "pytest-sugar",
+            "version": "1.1.1"
+          },
+          {
+            "name": "pytest-timeout",
+            "version": "2.4.0"
+          },
+          {
+            "name": "pytest-timer",
+            "version": "1.0.0"
+          },
+          {
+            "name": "pytest-xdist",
+            "version": "3.8.0"
+          },
+          {
+            "name": "python-dateutil",
+            "version": "2.9.0.post0"
+          },
+          {
+            "name": "python-docx",
+            "version": "1.2.0"
+          },
+          {
+            "name": "python-dotenv",
+            "version": "1.2.2"
+          },
+          {
+            "name": "python-iso639",
+            "version": "2026.1.31"
+          },
+          {
+            "name": "python-magic",
+            "version": "0.4.27"
+          },
+          {
+            "name": "python-oxmsg",
+            "version": "0.0.2"
+          },
+          {
+            "name": "python-pptx",
+            "version": "1.0.2"
+          },
+          {
+            "name": "pywin32",
+            "version": "311"
+          },
+          {
+            "name": "pyyaml",
+            "version": "6.0.3"
+          },
+          {
+            "name": "pyzmq",
+            "version": "27.1.0"
+          },
+          {
+            "name": "pyzotero",
+            "version": "1.11.0"
+          },
+          {
+            "name": "qdrant-client",
+            "version": "1.17.1"
+          },
+          {
+            "name": "rapidfuzz",
+            "version": "3.14.3"
+          },
+          {
+            "name": "rapidocr",
+            "version": "3.7.0"
+          },
+          {
+            "name": "referencing",
+            "version": "0.37.0"
+          },
+          {
+            "name": "refurb",
+            "version": "2.3.0"
+          },
+          {
+            "name": "regex",
+            "version": "2026.2.28"
+          },
+          {
+            "name": "requests",
+            "version": "2.32.5"
+          },
+          {
+            "name": "requests-toolbelt",
+            "version": "1.0.0"
+          },
+          {
+            "name": "rich",
+            "version": "14.3.3"
+          },
+          {
+            "name": "rpds-py",
+            "version": "0.30.0"
+          },
+          {
+            "name": "rtree",
+            "version": "1.4.1"
+          },
+          {
+            "name": "safetensors",
+            "version": "0.7.0"
+          },
+          {
+            "name": "scikit-learn",
+            "version": "1.8.0"
+          },
+          {
+            "name": "scipy",
+            "version": "1.17.1"
+          },
+          {
+            "name": "semchunk",
+            "version": "3.2.5"
+          },
+          {
+            "name": "sentence-transformers",
+            "version": "5.3.0"
+          },
+          {
+            "name": "setuptools",
+            "version": "82.0.1"
+          },
+          {
+            "name": "sgmllib3k",
+            "version": "1.0.0"
+          },
+          {
+            "name": "shapely",
+            "version": "2.1.2"
+          },
+          {
+            "name": "shellingham",
+            "version": "1.5.4"
+          },
+          {
+            "name": "simsimd",
+            "version": "6.5.16"
+          },
+          {
+            "name": "six",
+            "version": "1.17.0"
+          },
+          {
+            "name": "smart-open",
+            "version": "7.5.1"
+          },
+          {
+            "name": "sniffio",
+            "version": "1.3.1"
+          },
+          {
+            "name": "soupsieve",
+            "version": "2.8.3"
+          },
+          {
+            "name": "spacy",
+            "version": "3.8.11"
+          },
+          {
+            "name": "spacy-legacy",
+            "version": "3.0.12"
+          },
+          {
+            "name": "spacy-loggers",
+            "version": "1.0.5"
+          },
+          {
+            "name": "srsly",
+            "version": "2.5.2"
+          },
+          {
+            "name": "stack-data",
+            "version": "0.6.3"
+          },
+          {
+            "name": "suzuki-shunsuke/github-action-renovate-config-validator",
+            "version": "v2.1.0"
+          },
+          {
+            "name": "sympy",
+            "version": "1.14.0"
+          },
+          {
+            "name": "tabulate",
+            "version": "0.10.0"
+          },
+          {
+            "name": "tantivy",
+            "version": "0.25.1"
+          },
+          {
+            "name": "tenacity",
+            "version": "9.1.4"
+          },
+          {
+            "name": "termcolor",
+            "version": "3.3.0"
+          },
+          {
+            "name": "thinc",
+            "version": "8.3.10"
+          },
+          {
+            "name": "threadpoolctl",
+            "version": "3.6.0"
+          },
+          {
+            "name": "tiktoken",
+            "version": "0.12.0"
+          },
+          {
+            "name": "tld",
+            "version": "0.13.2"
+          },
+          {
+            "name": "tokenizers",
+            "version": "0.22.2"
+          },
+          {
+            "name": "tomlkit",
+            "version": "0.14.0"
+          },
+          {
+            "name": "torch",
+            "version": "2.10.0"
+          },
+          {
+            "name": "torchvision",
+            "version": "0.25.0"
+          },
+          {
+            "name": "tornado",
+            "version": "6.5.5"
+          },
+          {
+            "name": "tqdm",
+            "version": "4.67.3"
+          },
+          {
+            "name": "traitlets",
+            "version": "5.14.3"
+          },
+          {
+            "name": "transformers",
+            "version": "4.57.6"
+          },
+          {
+            "name": "tree-sitter",
+            "version": "0.25.2"
+          },
+          {
+            "name": "tree-sitter-c",
+            "version": "0.24.1"
+          },
+          {
+            "name": "tree-sitter-javascript",
+            "version": "0.25.0"
+          },
+          {
+            "name": "tree-sitter-python",
+            "version": "0.25.0"
+          },
+          {
+            "name": "tree-sitter-typescript",
+            "version": "0.23.2"
+          },
+          {
+            "name": "triton",
+            "version": "3.6.0"
+          },
+          {
+            "name": "typeguard",
+            "version": "4.5.1"
+          },
+          {
+            "name": "typer",
+            "version": "0.21.2"
+          },
+          {
+            "name": "typer-slim",
+            "version": "0.21.2"
+          },
+          {
+            "name": "types-aiobotocore",
+            "version": "3.2.1"
+          },
+          {
+            "name": "types-awscrt",
+            "version": "0.31.3"
+          },
+          {
+            "name": "types-pillow",
+            "version": "10.2.0.20240822"
+          },
+          {
+            "name": "types-pyyaml",
+            "version": "6.0.12.20250915"
+          },
+          {
+            "name": "types-setuptools",
+            "version": "82.0.0.20260210"
+          },
+          {
+            "name": "typing-extensions",
+            "version": "4.15.0"
+          },
+          {
+            "name": "typing-inspection",
+            "version": "0.4.2"
+          },
+          {
+            "name": "tzdata",
+            "version": "2025.3"
+          },
+          {
+            "name": "tzlocal",
+            "version": "5.3.1"
+          },
+          {
+            "name": "unstructured",
+            "version": "0.21.5"
+          },
+          {
+            "name": "unstructured-client",
+            "version": "0.42.10"
+          },
+          {
+            "name": "urllib3",
+            "version": "2.6.3"
+          },
+          {
+            "name": "usearch",
+            "version": "2.23.0"
+          },
+          {
+            "name": "vcrpy",
+            "version": "8.1.1"
+          },
+          {
+            "name": "wasabi",
+            "version": "1.1.3"
+          },
+          {
+            "name": "wcwidth",
+            "version": "0.6.0"
+          },
+          {
+            "name": "weasel",
+            "version": "0.4.3"
+          },
+          {
+            "name": "webencodings",
+            "version": "0.5.1"
+          },
+          {
+            "name": "whenever",
+            "version": "0.9.5"
+          },
+          {
+            "name": "wrapt",
+            "version": "1.17.3"
+          },
+          {
+            "name": "xlrd",
+            "version": "2.0.2"
+          },
+          {
+            "name": "xlsxwriter",
+            "version": "3.2.9"
+          },
+          {
+            "name": "yarl",
+            "version": "1.23.0"
+          },
+          {
+            "name": "zipp",
+            "version": "3.23.0"
+          },
+          {
+            "name": "Future-House/paper-qa@57e89f7223b0960d5ee5ea048c69e3c47e088572",
+            "version": null
+          }
+        ]
+      }
+    },
+    "security_posture": {
+      "scorecard": {
+        "status": "not-found",
+        "score": null,
+        "detail": "OpenSSF has no Scorecard for this repository",
+        "scope": "repository-level current snapshot; not commit-scoped"
+      }
+    },
+    "known_vulnerabilities": {
+      "osv_scanner_exit_code": 1,
+      "scanned_package_count": 302,
+      "vulnerable_package_entry_count": 23,
+      "unique_primary_advisory_count": 223,
+      "maximum_reported_severity": 9.8,
+      "vulnerable_packages": [
+        {
+          "package": {
+            "name": "aiohttp",
+            "version": "3.13.3",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 24,
+          "group_ids": [
+            "PYSEC-2026-2094",
+            "GHSA-w2fm-2cpv-w7v5",
+            "PYSEC-2026-2095",
+            "GHSA-hcc4-c3v8-rx92",
+            "PYSEC-2026-2096",
+            "GHSA-2vrm-gr82-f7m5",
+            "PYSEC-2026-2097",
+            "GHSA-p998-jp59-783m",
+            "PYSEC-2026-2098",
+            "GHSA-m5qp-6w8w-w647",
+            "PYSEC-2026-2099",
+            "GHSA-3wq7-rqq7-wx6j",
+            "PYSEC-2026-2100",
+            "GHSA-966j-vmvw-g2g9",
+            "PYSEC-2026-2101",
+            "GHSA-mwh4-6h8g-pg8w",
+            "PYSEC-2026-2102",
+            "GHSA-63hf-3vf5-4wqf",
+            "PYSEC-2026-2103",
+            "GHSA-c427-h43c-vf67",
+            "PYSEC-2026-2104",
+            "GHSA-jg22-mg44-37j8",
+            "PYSEC-2026-2105",
+            "GHSA-hg6j-4rv6-33pg",
+            "PYSEC-2026-2106",
+            "GHSA-m6qw-4cw2-hm4m",
+            "PYSEC-2026-2107",
+            "GHSA-4fvr-rgm6-gqmc",
+            "PYSEC-2026-2108",
+            "GHSA-xcgm-r5h9-7989",
+            "PYSEC-2026-2109",
+            "GHSA-hpj7-wq8m-9hgp",
+            "PYSEC-2026-2110",
+            "GHSA-63hw-fmq6-xxg2",
+            "PYSEC-2026-2111",
+            "GHSA-g3cq-j2xw-wf74",
+            "PYSEC-2026-2112",
+            "GHSA-2fqr-mr3j-6wp8",
+            "PYSEC-2026-2113",
+            "GHSA-9x8q-7h8h-wcw9",
+            "PYSEC-2026-237",
+            "GHSA-4m7w-qmgq-4wj5",
+            "PYSEC-2026-3545",
+            "GHSA-cq5v-8q36-5273",
+            "PYSEC-2026-3546",
+            "GHSA-mfx4-hv73-q22v",
+            "PYSEC-2026-3547",
+            "GHSA-mq44-7p77-q5h7"
+          ],
+          "max_severity": 9.1
+        },
+        {
+          "package": {
+            "name": "click",
+            "version": "8.3.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-2132"
+          ],
+          "max_severity": 7.2
+        },
+        {
+          "package": {
+            "name": "cryptography",
+            "version": "46.0.5",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 6,
+          "group_ids": [
+            "PYSEC-2026-35",
+            "GHSA-m959-cc7f-wv43",
+            "PYSEC-2026-3552",
+            "GHSA-g6cj-pr64-35w5",
+            "PYSEC-2026-3553",
+            "GHSA-jwv3-5hgf-82ww",
+            "PYSEC-2026-3554",
+            "GHSA-m2h6-j472-rp4c",
+            "PYSEC-2026-36",
+            "GHSA-p423-j2cm-9vmq",
+            "GHSA-537c-gmf6-5ccf"
+          ],
+          "max_severity": 9.8
+        },
+        {
+          "package": {
+            "name": "docling",
+            "version": "2.80.0",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 4,
+          "group_ids": [
+            "PYSEC-2026-2143",
+            "GHSA-cjqg-rq2h-2fvj",
+            "PYSEC-2026-2144",
+            "GHSA-r3xg-rg9j-67fv",
+            "PYSEC-2026-2145",
+            "GHSA-2j5p-7p5m-cvqr",
+            "PYSEC-2026-2146",
+            "GHSA-q29v-xc37-wh5m"
+          ],
+          "max_severity": 7.5
+        },
+        {
+          "package": {
+            "name": "docling-core",
+            "version": "2.70.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 2,
+          "group_ids": [
+            "PYSEC-2026-2456",
+            "GHSA-j5xp-7m2f-49jv",
+            "PYSEC-2026-2457",
+            "GHSA-jmmv-h3mp-59v8"
+          ],
+          "max_severity": 8.6
+        },
+        {
+          "package": {
+            "name": "h2",
+            "version": "4.3.0",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-3628",
+            "GHSA-6hr6-w5qg-qmwg"
+          ],
+          "max_severity": 5.3
+        },
+        {
+          "package": {
+            "name": "idna",
+            "version": "3.11",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-215",
+            "GHSA-65pc-fj4g-8rjx"
+          ],
+          "max_severity": 6.9
+        },
+        {
+          "package": {
+            "name": "litellm",
+            "version": "1.82.4",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 13,
+          "group_ids": [
+            "PYSEC-2026-2597",
+            "GHSA-53mr-6c8q-9789",
+            "PYSEC-2026-2598",
+            "GHSA-qrc4-49gv-mv9m",
+            "PYSEC-2026-2599",
+            "GHSA-v4p8-mg3p-g94g",
+            "PYSEC-2026-2600",
+            "GHSA-wpfp-gwwc-vwq6",
+            "PYSEC-2026-2601",
+            "GHSA-wxxx-gvqv-xp7p",
+            "PYSEC-2026-2602",
+            "GHSA-xqmj-j6mv-4862",
+            "PYSEC-2026-3476",
+            "GHSA-4g5m-c9r5-49xf",
+            "PYSEC-2026-3477",
+            "GHSA-5jmr-gcrj-2c9q",
+            "PYSEC-2026-3479",
+            "GHSA-7488-6r32-c95q",
+            "PYSEC-2026-388",
+            "GHSA-4xpc-pv4p-pm3w",
+            "PYSEC-2026-390",
+            "GHSA-jjhc-v7c2-5hh6",
+            "PYSEC-2026-391",
+            "GHSA-r75f-5x8p-qvmc",
+            "GHSA-69x8-hrgq-fjj8"
+          ],
+          "max_severity": 9.8
+        },
+        {
+          "package": {
+            "name": "lxml",
+            "version": "6.0.2",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-87",
+            "GHSA-vfmq-68hx-4jfw"
+          ],
+          "max_severity": 7.5
+        },
+        {
+          "package": {
+            "name": "pillow",
+            "version": "12.1.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 18,
+          "group_ids": [
+            "PYSEC-2026-165",
+            "GHSA-wjx4-4jcj-g98j",
+            "PYSEC-2026-2250",
+            "GHSA-whj4-6x5x-4v2j",
+            "PYSEC-2026-2251",
+            "GHSA-5xmw-vc9v-4wf2",
+            "PYSEC-2026-2252",
+            "GHSA-pwv6-vv43-88gr",
+            "PYSEC-2026-2253",
+            "GHSA-8v84-f9pq-wr9x",
+            "PYSEC-2026-2254",
+            "GHSA-5x94-69rx-g8h2",
+            "PYSEC-2026-2255",
+            "GHSA-45hq-cxwh-f6vc",
+            "PYSEC-2026-2256",
+            "GHSA-phj9-mv4w-65pm",
+            "PYSEC-2026-2257",
+            "GHSA-4x4j-2g7c-83w6",
+            "PYSEC-2026-2874",
+            "GHSA-r73j-pqj5-w3x7",
+            "PYSEC-2026-3451",
+            "GHSA-6r8x-57c9-28j4",
+            "PYSEC-2026-3452",
+            "GHSA-pg7v-jwj7-p798",
+            "PYSEC-2026-3453",
+            "GHSA-9hw9-ch79-4vh6",
+            "PYSEC-2026-3454",
+            "GHSA-xj96-63gp-2gmr",
+            "PYSEC-2026-3493",
+            "GHSA-62p4-gmf7-7g93",
+            "PYSEC-2026-3494",
+            "GHSA-fj7v-r99m-22gq",
+            "PYSEC-2026-3495",
+            "GHSA-jjj6-mw9f-p565",
+            "PYSEC-2026-3496",
+            "GHSA-vjc4-5qp5-m44j"
+          ],
+          "max_severity": 8.7
+        },
+        {
+          "package": {
+            "name": "pydantic-settings",
+            "version": "2.13.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "GHSA-4xgf-cpjx-pc3j"
+          ],
+          "max_severity": 5.3
+        },
+        {
+          "package": {
+            "name": "pygments",
+            "version": "2.19.2",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-2987",
+            "GHSA-5239-wwwm-4pmq"
+          ],
+          "max_severity": 3.3
+        },
+        {
+          "package": {
+            "name": "pyjwt",
+            "version": "2.12.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 5,
+          "group_ids": [
+            "PYSEC-2026-175",
+            "GHSA-993g-76c3-p5m4",
+            "PYSEC-2026-177",
+            "GHSA-fhv5-28vv-h8m8",
+            "PYSEC-2026-178",
+            "GHSA-w7vc-732c-9m39",
+            "PYSEC-2026-179",
+            "GHSA-xgmm-8j9v-c9wx",
+            "GHSA-jq35-7prp-9v3f"
+          ],
+          "max_severity": 7.4
+        },
+        {
+          "package": {
+            "name": "pypdf",
+            "version": "6.9.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 21,
+          "group_ids": [
+            "PYSEC-2026-3004",
+            "GHSA-248m-82v9-q6g6",
+            "PYSEC-2026-3006",
+            "GHSA-3crg-w4f6-42mx",
+            "PYSEC-2026-3007",
+            "GHSA-4pxv-j86v-mhcw",
+            "PYSEC-2026-3009",
+            "GHSA-52x6-gq3r-vpf4",
+            "PYSEC-2026-3010",
+            "GHSA-5hgr-hg42-57jg",
+            "PYSEC-2026-3011",
+            "GHSA-7gw9-cf7v-778f",
+            "PYSEC-2026-3012",
+            "GHSA-87mj-5ggw-8qc3",
+            "PYSEC-2026-3016",
+            "GHSA-cj93-chg6-vgv8",
+            "PYSEC-2026-3018",
+            "GHSA-g9xf-7f8q-9mcj",
+            "PYSEC-2026-3020",
+            "GHSA-j543-4vmf-qm7v",
+            "PYSEC-2026-3021",
+            "GHSA-jj6c-8h6c-hppx",
+            "PYSEC-2026-3022",
+            "GHSA-m2v9-299j-rv96",
+            "PYSEC-2026-3025",
+            "GHSA-wjqc-6w8f-h24c",
+            "PYSEC-2026-3026",
+            "GHSA-x284-j5p8-9c5p",
+            "PYSEC-2026-3610",
+            "GHSA-55h5-xmcq-c37v",
+            "PYSEC-2026-3611",
+            "GHSA-5qjq-93h5-hrgp",
+            "PYSEC-2026-3612",
+            "GHSA-5xf7-4p34-54qr",
+            "PYSEC-2026-3613",
+            "GHSA-g867-7843-wf8q",
+            "PYSEC-2026-3655",
+            "GHSA-fp3f-mc75-235c",
+            "PYSEC-2026-3656",
+            "GHSA-fwg2-594c-jp42",
+            "GHSA-jm82-fx9c-mx94"
+          ],
+          "max_severity": 8.7
+        },
+        {
+          "package": {
+            "name": "pytest",
+            "version": "9.0.2",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-1845",
+            "GHSA-6w46-j5rx-g56g"
+          ],
+          "max_severity": 6.8
+        },
+        {
+          "package": {
+            "name": "requests",
+            "version": "2.32.5",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-2275",
+            "GHSA-gc5v-m9x4-r6x2"
+          ],
+          "max_severity": 5.5
+        },
+        {
+          "package": {
+            "name": "setuptools",
+            "version": "82.0.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "PYSEC-2026-3447",
+            "GHSA-h35f-9h28-mq5c"
+          ],
+          "max_severity": 6.1
+        },
+        {
+          "package": {
+            "name": "soupsieve",
+            "version": "2.8.3",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 2,
+          "group_ids": [
+            "PYSEC-2026-3071",
+            "GHSA-2wc2-fm75-p42x",
+            "PYSEC-2026-3072",
+            "GHSA-836r-79rf-4m37"
+          ],
+          "max_severity": 7.5
+        },
+        {
+          "package": {
+            "name": "torch",
+            "version": "2.10.0",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 2,
+          "group_ids": [
+            "PYSEC-2026-139",
+            "GHSA-rrmf-rvhw-rf47"
+          ],
+          "max_severity": 7.8
+        },
+        {
+          "package": {
+            "name": "tornado",
+            "version": "6.5.5",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 4,
+          "group_ids": [
+            "PYSEC-2026-3387",
+            "GHSA-3x9g-8vmp-wqvf",
+            "PYSEC-2026-3388",
+            "GHSA-cx3h-4qpv-8hc9",
+            "PYSEC-2026-3389",
+            "GHSA-mgf9-4vpg-hj56",
+            "GHSA-pw6j-qg29-8w7f"
+          ],
+          "max_severity": 7.7
+        },
+        {
+          "package": {
+            "name": "transformers",
+            "version": "4.57.6",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 4,
+          "group_ids": [
+            "PYSEC-2025-217",
+            "PYSEC-2026-2288",
+            "GHSA-69w3-r845-3855",
+            "PYSEC-2026-2289",
+            "GHSA-29pf-2h5f-8g72",
+            "PYSEC-2026-2290",
+            "GHSA-fgcw-684q-jj6r"
+          ],
+          "max_severity": 9.6
+        },
+        {
+          "package": {
+            "name": "urllib3",
+            "version": "2.6.3",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 2,
+          "group_ids": [
+            "PYSEC-2026-141",
+            "GHSA-qccp-gfcp-xxvc",
+            "PYSEC-2026-142",
+            "GHSA-mf9v-mfxr-j63j"
+          ],
+          "max_severity": 8.9
+        },
+        {
+          "package": {
+            "name": "vcrpy",
+            "version": "8.1.1",
+            "ecosystem": "PyPI"
+          },
+          "group_count": 1,
+          "group_ids": [
+            "GHSA-rpj2-4hq8-938g"
+          ],
+          "max_severity": 7.8
+        }
+      ],
+      "scope_warning": "The SBOM was generated from the complete source tree. Findings are not yet classified by optional, development, or production reachability."
+    },
+    "sbom": {
+      "syft_image": {
+        "requested_reference": "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+        "resolved_id": "sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+        "repo_digests": [
+          "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0"
+        ],
+        "created": "2026-08-10T14:54:33.074910308Z",
+        "os": "linux",
+        "architecture": "amd64",
+        "labels": {
+          "io.artifacthub.package.license": "Apache-2.0",
+          "io.artifacthub.package.logo-url": "https://user-images.githubusercontent.com/5199289/136844524-1527b09f-c5cb-4aa9-be54-5aa92a6086c1.png",
+          "io.artifacthub.package.readme-url": "https://raw.githubusercontent.com/anchore/syft/main/README.md",
+          "org.opencontainers.image.created": "2026-08-10T14:48:50Z",
+          "org.opencontainers.image.description": "CLI tool and library for generating a Software Bill of Materials from container images and filesystems",
+          "org.opencontainers.image.licenses": "Apache-2.0",
+          "org.opencontainers.image.revision": "2293641e3bd628a01bb37639318d62c0ebe89b39",
+          "org.opencontainers.image.source": "https://github.com/anchore/syft",
+          "org.opencontainers.image.title": "syft",
+          "org.opencontainers.image.vendor": "Anchore, Inc.",
+          "org.opencontainers.image.version": "1.51.0"
+        }
+      },
+      "syft_command": {
+        "argv": [
+          "docker",
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "-e",
+          "SYFT_CHECK_FOR_APP_UPDATE=false",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\supply-chain\\paperqa-integrated\\source:/src:ro",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\paperqa-supply-chain-artifacts:/out",
+          "sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+          "dir:/src",
+          "--source-name",
+          "Future-House/paper-qa@57e89f7223b0960d5ee5ea048c69e3c47e088572",
+          "-o",
+          "spdx-json=/out/paperqa-2026-08-12-supply-chain.spdx.json",
+          "-o",
+          "cyclonedx-json=/out/paperqa-2026-08-12-supply-chain.cdx.json"
+        ],
+        "duration_seconds": 2.367,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "spdx": {
+        "filename": "paperqa-2026-08-12-supply-chain.spdx.json",
+        "sha256": "f7dc8d67b98c121554e169ac37d9184e9a8cd5ac1227402950ba2a18b31a8265",
+        "size": 1256351,
+        "package_count": 305,
+        "relationship_count": 1256,
+        "document_name": "Future-House/paper-qa@57e89f7223b0960d5ee5ea048c69e3c47e088572"
+      },
+      "cyclonedx": {
+        "filename": "paperqa-2026-08-12-supply-chain.cdx.json",
+        "sha256": "56fc40d40fd0e8789f30237863e46f6ae79d2f1d2a604ba68973a47b10624cd4",
+        "size": 734236,
+        "component_count": 307,
+        "dependency_count": 148
+      }
+    },
+    "vulnerability_artifact": {
+      "osv_scanner_image": {
+        "requested_reference": "ghcr.io/google/osv-scanner@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734",
+        "resolved_id": "sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734",
+        "repo_digests": [
+          "ghcr.io/google/osv-scanner@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734"
+        ],
+        "created": "2026-08-17T04:22:42.148502984Z",
+        "os": "linux",
+        "architecture": "amd64",
+        "labels": {
+          "org.opencontainers.image.created": "2026-08-17T04:17:04Z",
+          "org.opencontainers.image.description": "Vulnerability scanner written in Go which uses the data provided by https://osv.dev",
+          "org.opencontainers.image.licenses": "Apache License 2.0",
+          "org.opencontainers.image.name": "osv-scanner",
+          "org.opencontainers.image.revision": "c84fa4568f2526d0333e9a914ea8a0a5f74ad68b",
+          "org.opencontainers.image.source": "https://github.com/google/osv-scanner",
+          "org.opencontainers.image.title": "osv-scanner",
+          "org.opencontainers.image.url": "https://github.com/google/osv-scanner",
+          "org.opencontainers.image.version": "2.5.1"
+        }
+      },
+      "osv_scanner_command": {
+        "argv": [
+          "docker",
+          "run",
+          "--rm",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\paperqa-supply-chain-artifacts:/out",
+          "sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734",
+          "scan",
+          "source",
+          "-L",
+          "/out/paperqa-2026-08-12-supply-chain.cdx.json",
+          "--format",
+          "json",
+          "--all-packages",
+          "--all-vulns",
+          "--output-file",
+          "/out/paperqa-2026-08-12-supply-chain.osv.json"
+        ],
+        "duration_seconds": 2.718,
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "Starting filesystem walk for root: /\nNeither CPE nor PURL found for package: {BOMRef:ebff2c81fbaf921b MIMEType: Type:file Supplier:<nil> Manufacturer:<nil> Author: Authors:<nil> Publisher: Group: Name:/src/.github/workflows/build.yml Version: Description: Scope: Hashes:0x1264efdca4f8 Licenses:<nil> Copyright: CPE: PackageURL: OmniborID:<nil> SWHID:<nil> SWID:<nil> Modified:<nil> Pedigree:<nil> ExternalReferences:<nil> Properties:<nil> Components:<nil> Evidence:<nil> ReleaseNotes:<nil> ModelCard:<nil> Data:<nil> CryptoProperties:<nil> Tags:<nil> IsExternal:<nil> PatentAssertions:<nil> VersionRange: Signature:<nil>}\nNeither CPE nor PURL found for package: {BOMRef:9b0927f24570d5cb MIMEType: Type:file Supplier:<nil> Manufacturer:<nil> Author: Authors:<nil> Publisher: Group: Name:/src/.github/workflows/tests.yml Version: Description: Scope: Hashes:0x1264efdca510 Licenses:<nil> Copyright: CPE: PackageURL: OmniborID:<nil> SWHID:<nil> SWID:<nil> Modified:<nil> Pedigree:<nil> ExternalReferences:<nil> Properties:<nil> Components:<nil> Evidence:<nil> ReleaseNotes:<nil> ModelCard:<nil> Data:<nil> CryptoProperties:<nil> Tags:<nil> IsExternal:<nil> PatentAssertions:<nil> VersionRange: Signature:<nil>}\nNeither CPE nor PURL found for package: {BOMRef:3717ae13dd3eb744 MIMEType: Type:file Supplier:<nil> Manufacturer:<nil> Author: Authors:<nil> Publisher: Group: Name:/src/uv.lock Version: Description: Scope: Hashes:0x1264efdca528 Licenses:<nil> Copyright: CPE: PackageURL: OmniborID:<nil> SWHID:<nil> SWID:<nil> Modified:<nil> Pedigree:<nil> ExternalReferences:<nil> Properties:<nil> Components:<nil> Evidence:<nil> ReleaseNotes:<nil> ModelCard:<nil> Data:<nil> CryptoProperties:<nil> Tags:<nil> IsExternal:<nil> PatentAssertions:<nil> VersionRange: Signature:<nil>}\nScanned /out/paperqa-2026-08-12-supply-chain.cdx.json file and found 304 packages\nEnd status: 0 dirs visited, 1 inodes visited, 1 Extract calls, 14.248815ms elapsed, 14.249075ms wall time\nFiltered 5 local/unscannable package/s from the scan.\n"
+      },
+      "filename": "paperqa-2026-08-12-supply-chain.osv.json",
+      "sha256": "8d7582f0cb39e6c4def0cbcecda5ad13a9a2457a1a3e707948de6045017ab1ac",
+      "size": 2480242
+    },
+    "release_provenance": {
+      "status": "missing",
+      "pypi_release_metadata": {
+        "url": "https://pypi.org/pypi/paper-qa/2026.8.12/json",
+        "status_code": 200,
+        "error": null
+      },
+      "distribution_files": [
+        {
+          "filename": "paper_qa-2026.8.12-py3-none-any.whl",
+          "packagetype": "bdist_wheel",
+          "size": 536412,
+          "sha256": "4cdf007207dea58edf1c1f3507ca33e1e7737fd8d7a17cb1736a8a089463918c",
+          "upload_time": "2026-08-12T15:34:16.549352Z"
+        },
+        {
+          "filename": "paper_qa-2026.8.12.tar.gz",
+          "packagetype": "sdist",
+          "size": 27576224,
+          "sha256": "1120a4d233bb319477d07a62b5384d73beaa95c1cda31ed022804d27a16c23c4",
+          "upload_time": "2026-08-12T15:34:23.178608Z"
+        }
+      ],
+      "pypi_integrity": [
+        {
+          "filename": "paper_qa-2026.8.12-py3-none-any.whl",
+          "status_code": 404,
+          "available": false,
+          "message": "No provenance available for paper_qa-2026.8.12-py3-none-any.whl",
+          "attestation_bundle_count": 0,
+          "source": "https://pypi.org/integrity/paper-qa/2026.8.12/paper_qa-2026.8.12-py3-none-any.whl/provenance",
+          "error": null
+        },
+        {
+          "filename": "paper_qa-2026.8.12.tar.gz",
+          "status_code": 404,
+          "available": false,
+          "message": "No provenance available for paper_qa-2026.8.12.tar.gz",
+          "attestation_bundle_count": 0,
+          "source": "https://pypi.org/integrity/paper-qa/2026.8.12/paper_qa-2026.8.12.tar.gz/provenance",
+          "error": null
+        }
+      ],
+      "missing_files": [
+        "paper_qa-2026.8.12-py3-none-any.whl",
+        "paper_qa-2026.8.12.tar.gz"
+      ],
+      "commit_verification": {
+        "verified": true,
+        "reason": "valid",
+        "html_url": "https://github.com/Future-House/paper-qa/commit/57e89f7223b0960d5ee5ea048c69e3c47e088572"
+      },
+      "github_commit_command": {
+        "argv": [
+          "gh",
+          "api",
+          "repos/Future-House/paper-qa/commits/57e89f7223b0960d5ee5ea048c69e3c47e088572"
+        ],
+        "duration_seconds": 0.5,
+        "exit_code": 0,
+        "stdout": "{\"sha\":\"57e89f7223b0960d5ee5ea048c69e3c47e088572\",\"node_id\":\"C_kwDOI55lCtoAKDU3ZTg5ZjcyMjNiMDk2MGQ1ZWU1ZWEwNDhjNjllM2M0N2UwODg1NzI\",\"commit\":{\"author\":{\"name\":\"Christoph Stade\",\"email\":\"59069119+chris234567@users.noreply.github.com\",\"date\":\"2026-08-12T15:31:43Z\"},\"committer\":{\"name\":\"GitHub\",\"email\":\"noreply@github.com\",\"date\":\"2026-08-12T15:31:43Z\"},\"message\":\"Remove duplicated \\\"words\\\" in evidence-summary JSON system prompts (#1337)\\n\\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>\",\"tree\":{\"sha\":\"715a37b686963c1e7bdc5d50163f81cddf13124d\",\"url\":\"https://api.github.com/repos/Future-House/paper-qa/git/trees/715a37b686963c1e7bdc5d50163f81cddf13124d\"},\"url\":\"https://api.github.com/repos/Future-House/paper-qa/git/commits/57e89f7223b0960d5ee5ea048c69e3c47e088572\",\"comment_count\":0,\"verification\":{\"verified\":true,\"reason\":\"valid\",\"signature\":\"-----BEGIN PGP SIGNATURE-----\\n\\nwsFcBAABCAAQBQJqfJHgCRC1aQ7uu5UhlAAAFg8QAAg87raHr0l7vbXEWDODH/mn\\nS958LcgM1R020bIqO0xWDeg5b7dROxA19Xq0wHsyCfunPNrVJ2poYUaGmkjMDZso\\nNVpaUOAVmYT6xRtLJe7Gp2Rf6OEtXKpOsyh5SNLPytXB1gUtJ6zvdmw4IPMFdaZv\\neh6U4kwVer2WM4B4BpuVKj9CftXJUaLiOa5Ppk2OGo9DD/Jj7g9OLrGFLd3YTBLq\\nAW/J+XxtvNkIh0Kwe6j0eP6FhBjuqhXLBs1gXwZa8CpzWst5MfeQK7mChczLVU7m\\nOHqtgJgNUp7/ZHU7kH/xH10nJhRcucFO9IAWrGbyjePzN/AYXqkZqzvN2JTvLqGp\\noBtfHH8IzmJhvZi1gI/57JubmJQREtx8Cg+o+DFOXKZGyFHIOSQYP5eb9xj2DtyW\\nG8n08mEBFF9KHlA/tjMw03RkLlBIXhbNWXwKW7NvVGhsoJz4dQNfWQh0/Ctnytq3\\nuaCF73XQyMib8WdAdloD67pyKj6bZz/C1+5Kvqqohu2rAmUL1/1LOm+A+V8VOnc+\\nkXUvHyYYD6sxY3nTX9KLy+poEv5BJ/MchRv4Cw1HTew3NNEHCnPS07Tx9mG+Di7M\\nM6ELJR1u64hvD7SSQtyBDRm83MefdI3qGuqPBsIJ7gDkQr9axSpun/NpVvJD5tv8\\nUcVAisNgEBP6H2OQghsx\\n=SJvL\\n-----END PGP SIGNATURE-----\\n\",\"payload\":\"tree 715a37b686963c1e7bdc5d50163f81cddf13124d\\nparent d7675d7b7eddeb3535e8c260399c5bbeeb818c50\\nauthor Christoph Stade <59069119+chris234567@users.noreply.github.com> 1786548703 -0400\\ncommitter GitHub <noreply@github.com> 1786548703 -0700\\n\\nRemove duplicated \\\"words\\\" in evidence-summary JSON system prompts (#1337)\\n\\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>\",\"verified_at\":\"2026-08-12T15:32:45Z\"}},\"url\":\"https://api.github.com/repos/Future-House/paper-qa/commits/57e89f7223b0960d5ee5ea048c69e3c47e088572\",\"html_url\":\"https://github.com/Future-House/paper-qa/commit/57e89f7223b0960d5ee5ea048c69e3c47e088572\",\"comments_url\":\"https://api.github.com/repos/Future-House/paper-qa/commits/57e89f7223b0960d5ee5ea048c69e3c47e088572/comments\",\"author\":{\"login\":\"chris234567\",\"id\":59069119,\"node_id\":\"MDQ6VXNlcjU5MDY5MTE5\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/59069119?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/chris234567\",\"html_url\":\"https://github.com/chris234567\",\"followers_url\":\"https://api.github.com/users/chris234567/followers\",\"following_url\":\"https://api.github.com/users/chris234567/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/chris234567/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/chris234567/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/chris234567/subscriptions\",\"organizations_url\":\"https://api.github.com/users/chris234567/orgs\",\"repos_url\":\"https://api.github.com/users/chris234567/repos\",\"events_url\":\"https://api.github.com/users/chris234567/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/chris234567/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"committer\":{\"login\":\"web-flow\",\"id\":19864447,\"node_id\":\"MDQ6VXNlcjE5ODY0NDQ3\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/19864447?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/web-flow\",\"html_url\":\"https://github.com/web-flow\",\"followers_url\":\"https://api.github.com/users/web-flow/followers\",\"following_url\":\"https://api.github.com/users/web-flow/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/web-flow/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/web-flow/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/web-flow/subscriptions\",\"organizations_url\":\"https://api.github.com/users/web-flow/orgs\",\"repos_url\":\"https://api.github.com/users/web-flow/repos\",\"events_url\":\"https://api.github.com/users/web-flow/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/web-flow/received_events\",\"type\":\"User\",\"user_view_type\":\"public\",\"site_admin\":false},\"parents\":[{\"sha\":\"d7675d7b7eddeb3535e8c260399c5bbeeb818c50\",\"url\":\"https://api.github.com/repos/Future-House/paper-qa/commits/d7675d7b7eddeb3535e8c260399c5bbeeb818c50\",\"html_url\":\"https://github.com/Future-House/paper-qa/commit/d7675d7b7eddeb3535e8c260399c5bbeeb818c50\"}],\"stats\":{\"total\":4,\"additions\":2,\"deletions\":2},\"files\":[{\"sha\":\"f830d0c4096360c51e68b55f39d8d20486f1002c\",\"filename\":\"src/paperqa/prompts.py\",\"status\":\"modified\",\"additions\":2,\"deletions\":2,\"changes\":4,\"blob_url\":\"https://github.com/Future-House/paper-qa/blob/57e89f7223b0960d5ee5ea048c69e3c47e088572/src%2Fpaperqa%2Fprompts.py\",\"raw_url\":\"https://github.com/Future-House/paper-qa/raw/57e89f7223b0960d5ee5ea048c69e3c47e088572/src%2Fpaperqa%2Fprompts.py\",\"contents_url\":\"https://api.github.com/repos/Future-House/paper-qa/contents/src%2Fpaperqa%2Fprompts.py?ref=57e89f7223b0960d5ee5ea048c69e3c47e088572\",\"patch\":\"@@ -112,7 +112,7 @@\\n     \\\" will be given to the model to generate an answer.\\\"\\n     \\\" Respond with the following JSON format:\\\"\\n     '\\\\n\\\\n{{\\\\n  \\\"summary\\\": \\\"...\\\",\\\\n  \\\"relevance_score\\\": 0-10\\\\n}}'\\n-    \\\"\\\\n\\\\nwhere `summary` is relevant information from the text - {summary_length} words.\\\"\\n+    \\\"\\\\n\\\\nwhere `summary` is relevant information from the text - {summary_length}.\\\"\\n     \\\" `relevance_score` is an integer 0-10 for the relevance of `summary` to the question.\\\"\\n     \\\"\\\\n\\\\nThe excerpt may or may not contain relevant information.\\\"\\n     \\\" If not, leave `summary` empty, and make `relevance_score` be 0.\\\"\\n@@ -124,7 +124,7 @@\\n     \\\" will be given to the model to generate an answer.\\\"\\n     \\\" Respond with the following JSON format:\\\"\\n     '\\\\n\\\\n{{\\\\n  \\\"summary\\\": \\\"...\\\",\\\\n  \\\"relevance_score\\\": 0-10,\\\\n  \\\"used_images\\\": \\\"...\\\"\\\\n}}'\\n-    \\\"\\\\n\\\\nwhere `summary` is relevant information from the text - {summary_length} words.\\\"\\n+    \\\"\\\\n\\\\nwhere `summary` is relevant information from the text - {summary_length}.\\\"\\n     \\\" `relevance_score` is an integer 0-10 for the relevance of `summary` to the question.\\\"\\n     \\\" `used_images` is a boolean flag indicating\\\"\\n     \\\" if any images present in a multimodal message were used,\\\"\"}]}",
+        "stderr": ""
+      }
+    },
+    "package_evidence": {
+      "package": {
+        "system": "pypi",
+        "requested_name": "paper-qa",
+        "canonical_name": "paper-qa",
+        "available_version_count": 169,
+        "default_version": "2026.8.12"
+      },
+      "selected_version": {
+        "version": "2026.8.12",
+        "published_at": "2026-08-12T15:34:16Z",
+        "deprecated": false,
+        "deprecated_reason": "",
+        "licenses": [
+          "non-standard"
+        ],
+        "advisories": [],
+        "related_projects": [
+          {
+            "id": "github.com/future-house/paper-qa",
+            "relation_type": "ISSUE_TRACKER",
+            "provenance": "UNVERIFIED_METADATA"
+          },
+          {
+            "id": "github.com/future-house/paper-qa",
+            "relation_type": "SOURCE_REPO",
+            "provenance": "UNVERIFIED_METADATA"
+          }
+        ],
+        "registries": [
+          "https://pypi.org/simple"
+        ]
+      },
+      "dependency_graph": {
+        "available": true,
+        "node_count": 75,
+        "edge_count": 131,
+        "direct_count": 16,
+        "indirect_count": 58,
+        "direct_packages": [
+          {
+            "name": "anyio",
+            "version": "4.14.2"
+          },
+          {
+            "name": "fhaviary",
+            "version": "0.35.0"
+          },
+          {
+            "name": "fhlmi",
+            "version": "1.0.5"
+          },
+          {
+            "name": "html2text",
+            "version": "2025.4.15"
+          },
+          {
+            "name": "httpx",
+            "version": "0.28.1"
+          },
+          {
+            "name": "httpx-aiohttp",
+            "version": "0.2.0"
+          },
+          {
+            "name": "numpy",
+            "version": "2.5.2"
+          },
+          {
+            "name": "paper-qa-pypdf",
+            "version": "2026.8.12"
+          },
+          {
+            "name": "pybtex",
+            "version": "0.26.1"
+          },
+          {
+            "name": "pydantic",
+            "version": "2.13.4"
+          },
+          {
+            "name": "pydantic-settings",
+            "version": "2.15.0"
+          },
+          {
+            "name": "rich",
+            "version": "15.0.0"
+          },
+          {
+            "name": "setuptools",
+            "version": "84.0.0"
+          },
+          {
+            "name": "tantivy",
+            "version": "0.26.0"
+          },
+          {
+            "name": "tenacity",
+            "version": "9.1.4"
+          },
+          {
+            "name": "tiktoken",
+            "version": "0.14.0"
+          }
+        ],
+        "graph_error": "",
+        "node_errors": []
+      }
+    }
+  },
+  "sources": [
+    "https://github.com/Future-House/paper-qa/commit/57e89f7223b0960d5ee5ea048c69e3c47e088572",
+    "https://pypi.org/pypi/paper-qa/2026.8.12/json",
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa",
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa/versions/2026.8.12",
+    "https://api.deps.dev/v3/systems/pypi/packages/paper-qa/versions/2026.8.12:dependencies",
+    "https://docs.pypi.org/api/integrity/",
+    "https://github.com/anchore/syft/tree/v1.51.0",
+    "https://github.com/google/osv-scanner/tree/v2.5.1"
+  ],
+  "warnings": [
+    "OpenSSF Scorecard is unavailable; security posture remains unknown.",
+    "The generated SBOM contains packages without declared license data.",
+    "Direct dependency licenses include unknown, non-standard, or GPL-family results.",
+    "PyPI provenance is unavailable for at least one distribution file.",
+    "OSV-Scanner reported known vulnerabilities in the complete lock scope."
+  ]
+}

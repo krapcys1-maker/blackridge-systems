@@ -36,3 +36,10 @@ For adapter and composition probes, inspect the unmodified declarative operation
 schema errors, complete output objects, source-preservation differences, and mutation flags. A
 patch that applies without raising is not a passing contract result. The paired negative must use
 the exact same input and target schema and differ by the explicitly retained operation delta.
+
+For supply-chain probes, inspect the requested and observed commit, repository LICENSE blob,
+direct-dependency license results, SBOM counts and hashes, unknown license coverage, scanner image
+digests and argv, Scorecard status, OSV exit/findings/scope, every distribution provenance response,
+source-tree cleanliness, and container cleanup. A valid Git commit signature is not package
+provenance. A scenario may pass because missing and adverse evidence was represented correctly
+while the inspected release itself remains blocked.

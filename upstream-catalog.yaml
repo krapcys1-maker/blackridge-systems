@@ -57,6 +57,16 @@ components:
     status: selected-next
     rationale: Package inventory, vulnerability, and plugin-oriented SCA from the OSV ecosystem.
 
+  - repository: google/osv-scanner
+    role: sbom-vulnerability-scanning
+    version: v2.5.1
+    license: Apache-2.0
+    integration: pinned-oci-cli
+    status: active-in-mvp
+    rationale: >-
+      Official OSV scanner consumes the retained CycloneDX SBOM. Exit 1 is preserved as findings,
+      and complete-lockfile results stay blocked until production reachability is classified.
+
   - repository: oss-review-toolkit/ort
     role: license-and-policy-gate
     version: 92.4.0
@@ -70,8 +80,10 @@ components:
     version: v1.51.0
     license: Apache-2.0
     integration: cli-or-oci
-    status: selected-next
-    rationale: Mature multi-ecosystem SBOM generation for source trees and images.
+    status: active-in-mvp
+    rationale: >-
+      Mature multi-ecosystem SBOM generation for source trees and images, invoked through a pinned
+      OCI digest with source mounted read-only, network disabled, and update checks disabled.
 
   - repository: opensandbox-group/OpenSandbox
     role: untrusted-execution-boundary
@@ -157,8 +169,11 @@ vertical_slice_candidates:
     role: scientific-search-and-evidence-rag
     version: v2026.08.12
     license: Apache-2.0
-    status: inspect-and-contract-test
-    rationale: Mature scientific RAG package with paper search, metadata, evidence ranking, citations, CLI, and library APIs.
+    status: blocked-by-supply-chain-review
+    rationale: >-
+      Strong scientific RAG candidate, but the exact v2026.08.12 review found unresolved direct
+      dependency licenses, full-lockfile OSV findings, missing Scorecard posture, and no PyPI
+      provenance. Production reachability and policy resolution are required before selection.
 
   - repository: grobidOrg/grobid
     role: scholarly-document-parsing

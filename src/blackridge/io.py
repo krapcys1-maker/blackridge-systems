@@ -11,6 +11,7 @@ from blackridge.adaptation import AdapterExperiment
 from blackridge.evidence import ManualReview, ProbeEvidence
 from blackridge.models import DiscoveryRun, SystemBlueprint, SystemRequest
 from blackridge.sandbox import SandboxExperiment
+from blackridge.supply_chain import SupplyChainExperiment
 
 
 def load_request(path: Path) -> SystemRequest:
@@ -26,6 +27,11 @@ def load_sandbox_experiment(path: Path) -> SandboxExperiment:
 def load_adapter_experiment(path: Path) -> AdapterExperiment:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     return AdapterExperiment.model_validate(data)
+
+
+def load_supply_chain_experiment(path: Path) -> SupplyChainExperiment:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return SupplyChainExperiment.model_validate(data)
 
 
 def load_run(path: Path) -> DiscoveryRun:

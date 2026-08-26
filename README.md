@@ -16,7 +16,7 @@ system.
 
 ## Current status
 
-This repository contains the first executable vertical slice:
+This repository contains an executable, manually reviewed vertical slice:
 
 1. describe a system as capabilities with concrete acceptance scenarios;
 2. search GitHub through the existing Octocode research engine;
@@ -24,10 +24,14 @@ This repository contains the first executable vertical slice:
 4. apply license, maintenance, security, and adoption gates;
 5. inspect real package versions and resolved dependency graphs through deps.dev;
 6. separate raw probe evidence from named, explicit manual review;
-7. emit an auditable discovery run and a **provisional** system blueprint.
+7. build and exercise an exact public commit in disposable Docker through SWE-ReX;
+8. adapt and validate JSON contracts with RFC 6902 and JSON Schema, including a broken control;
+9. inspect an exact release independently with Syft, OSV-Scanner, Scorecard, deps.dev, GitHub,
+   and PyPI Integrity;
+10. emit an auditable discovery run and a **provisional** system blueprint.
 
-The current release deliberately stops before executing untrusted code. A candidate cannot be
-marked production-ready until it boots in a sandbox and passes contract and end-to-end tests.
+These probes produce evidence, not automatic approval. A candidate cannot be marked
+production-ready until its concrete acceptance scenarios pass named manual review through L4.
 
 ```mermaid
 flowchart LR
@@ -98,7 +102,7 @@ Blackridge integrates tools at stable boundaries instead of copying their code:
 | discovery | Octocode + GitHub CLI/MCP | repository and code research |
 | ecosystem intelligence | deps.dev | package versions, licenses, advisories, provenance, and resolved graphs |
 | context | Repomix | bounded, reproducible repository snapshots |
-| quality | OpenSSF Scorecard + OSV-SCALIBR | security posture and vulnerabilities |
+| quality | OpenSSF Scorecard + OSV-Scanner/OSV-SCALIBR | posture and known vulnerabilities |
 | compliance | OSS Review Toolkit + Syft | licenses, dependencies, and SBOMs |
 | execution | SWE-ReX / Docker; OpenSandbox next | pinned disposable execution backend |
 | experiments | Dagger | reproducible build and test DAGs |
@@ -132,6 +136,24 @@ The Docker backend has outbound network access and is not presented as a hardene
 sandbox. No host path is mounted during this probe. OpenSandbox with a stronger isolation backend
 and egress policy remains the production boundary.
 
+### Inspect one exact release across the supply chain
+
+Pull the immutable scanner images listed in the experiment, then retain full SBOM and vulnerability
+artifacts next to the raw probe:
+
+```powershell
+docker pull anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0
+docker pull ghcr.io/google/osv-scanner@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734
+blackridge probe-supply-chain examples/supply-chain-paperqa.yaml `
+  --work-root .blackridge/supply-chain/paperqa `
+  --artifact-dir .blackridge/evidence/paperqa-artifacts `
+  --output .blackridge/evidence/paperqa-supply-chain.json
+```
+
+The probe keeps repository and direct-dependency licensing, SBOM license coverage, Scorecard
+posture, OSV findings, GitHub commit verification, and PyPI distribution provenance as separate
+observations. OSV exit 1 is retained as a finding result. A missing source remains unknown.
+
 ### Verify a component adapter and its negative control
 
 ```powershell
@@ -159,10 +181,11 @@ upstream-catalog.yaml     pinned upstream choices and provenance
 
 ## Scope boundary
 
-Blackridge is not yet a one-command autonomous software factory. Discovery, package inspection,
-commit-pinned Docker experiments, declarative payload adapters, and paired negative contract
-verification now produce raw evidence. Compatibility solving, adapter synthesis beyond JSON Patch,
-hardened remote isolation through OpenSandbox, and full generated-system delivery are next.
+Blackridge is not yet a one-command autonomous software factory. Discovery, package and
+exact-release supply-chain inspection, commit-pinned Docker experiments, declarative payload
+adapters, and paired negative contract verification now produce raw evidence. Production-scope
+dependency classification, compatibility solving, adapter synthesis beyond JSON Patch, hardened
+remote isolation through OpenSandbox, and full generated-system delivery are next.
 
 ## License
 

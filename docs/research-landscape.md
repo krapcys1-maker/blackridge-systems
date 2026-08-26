@@ -27,6 +27,7 @@ those components and own the evidence model, compatibility solver, and feedback 
 | yamadashy/repomix | 28k stars, MIT, active; remote commit packing and safe remote-config default | reproducible source snapshot |
 | ossf/scorecard | 5.6k stars, Apache-2.0, v5.5.0, Scorecard 9.0 | repository security posture |
 | google/osv-scalibr | Apache-2.0, plugin-oriented SCA library | package and vulnerability inventory |
+| google/osv-scanner | Apache-2.0, v2.5.1, official pinned OCI image | active SBOM vulnerability scanner |
 | oss-review-toolkit/ort | 2k stars, Apache-2.0, 20k+ commits | compliance and policy pipeline |
 | anchore/syft | 9.4k stars, Apache-2.0, v1.51.0 | SBOM generation |
 | opensandbox-group/OpenSandbox | 14.7k stars, Apache-2.0, active | preferred hostile-code sandbox platform |
@@ -96,6 +97,12 @@ runtime image before resolving that built image to its immutable local ID.
 OSV-SCALIBR, ORT, Scorecard, and Syft cover complementary slices. One tool should not be forced to
 answer every supply-chain question: Scorecard evaluates project practice; SCALIBR inventories and
 finds vulnerabilities; ORT enforces license/policy; Syft emits SBOMs.
+
+The exact PaperQA v2026.08.12 experiment confirmed why these observations must remain separate.
+Syft produced SPDX and CycloneDX inventories but all 305 SPDX package license fields were unknown;
+OSV-Scanner found 23 vulnerable package entries in the full lockfile scope; Scorecard had no record;
+and PyPI exposed no provenance for either distribution file. The system retained the release as
+blocked instead of converting a successful scan or repository Apache-2.0 license into approval.
 
 ast-grep and OpenRewrite make adapter work reviewable and repeatable. The system should generate a
 structural rewrite recipe where possible instead of a one-off text patch.

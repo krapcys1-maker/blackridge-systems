@@ -18,6 +18,6 @@
   ],
   "probe_id": "66c46c0e35c54555ad439c8c5a957839",
   "probe_file": "evidence\\manual\\2026-08-26\\grobid-0.9.1-unavailable-probe.json",
-  "probe_sha256": "2ea7dfb1fe53366c2daeb9330af85144bf2efd77b40aab2e5a9a5ace352946a5",
+  "probe_sha256": "9d2f13a29efdb6f8e4723f15b839497d6bccd6704a03da1d843dc263c927b1ea",
   "notes": "PASS applies to Blackridge's exact-version guard. deps.dev itself FAILS as a source for GROBID 0.9.1 because its Maven coverage contains only 0.3.4."
 }

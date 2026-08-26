@@ -1,0 +1,12 @@
+schema_version: "1"
+name: paperqa-2026-08-12-supply-chain
+description: >-
+  Inspect the exact PaperQA release commit with separate repository/license,
+  dependency-license, Scorecard, SBOM, OSV, and provenance observations.
+repository: Future-House/paper-qa
+commit: 57e89f7223b0960d5ee5ea048c69e3c47e088572
+package_system: pypi
+package_name: paper-qa
+package_version: 2026.8.12
+syft_image: anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0
+osv_scanner_image: ghcr.io/google/osv-scanner@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734

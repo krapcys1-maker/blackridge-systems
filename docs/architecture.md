@@ -107,7 +107,8 @@ generated-system/
 ## Milestones
 
 1. **Scout** — executable discovery, metadata enrichment, ranking, blueprint, and provenance.
-2. **Inspector** — commit-pinned source snapshots, API extraction, SBOM, license, and security gates.
+2. **Inspector** — exact-commit license, SBOM, known-vulnerability, posture, and provenance probes
+   are active; API extraction and policy resolution remain next.
 3. **Experimenter** — disposable sandbox boot is active for pinned public GitHub repositories;
    generalized boot recipes, contract suites, and resource measurements remain next.
 4. **Composer** — declarative JSON Patch adaptation and paired contract verification are active;

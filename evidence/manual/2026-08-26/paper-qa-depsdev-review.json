@@ -19,6 +19,6 @@
   ],
   "probe_id": "222f0ab1f76f41fdacb18d0e2d80863b",
   "probe_file": "evidence\\manual\\2026-08-26\\paper-qa-depsdev-probe.json",
-  "probe_sha256": "fde64437cf5464d514f13c488689246af90ce77197123105edb7bacb722ada03",
+  "probe_sha256": "cfb4c1de5c549bc5cadf8c68283ede639642b28509638b7082738c2963f040b5",
   "notes": "PASS applies only to the ecosystem-intelligence probe contract. Package approval remains blocked on reconciliation of PyPI non-standard versus repository Apache-2.0 license evidence."
 }

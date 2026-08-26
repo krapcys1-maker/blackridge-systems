@@ -21,7 +21,8 @@ time-stamped snapshot and may change upstream.
 | sandbox negative boundary / `sandbox-failure-is-evidence` | PASS | The wrong expectation retained exit 1 and `expected 999, got 6`; the following sentinel was explicitly not run, the host stayed unchanged, and the container was removed. |
 | component adaptation / `schema-mismatch-adapter` | PASS | The unadapted fixture failed because `document` was absent. The RFC 6902 adapter copied `paper.title` to `document.name`, passed Draft 2020-12 validation, and preserved every source value. |
 | system verification / `deliberate-negative-case` | PASS | Working and one-operation-broken compositions used identical input and schema. Both patches executed without an exception, but artifact validation accepted only the working output and rejected missing `document.name`. |
-| complete supply-chain evaluation / `known-repository-review` | NOT RUN | Scorecard missing-state behavior was tested, but exact-commit OSV, SBOM, provenance, and complete license evidence have not all run together. |
+| complete supply-chain evaluation / `known-repository-review` | PASS for evidence behavior; candidate BLOCKED | The exact PaperQA commit was inspected independently with GitHub, deps.dev, Scorecard, Syft, OSV-Scanner, and PyPI Integrity. Missing posture, license coverage, provenance, and vulnerability findings remained explicit, so the release was not approved. |
+| built-wheel installation | PASS after defect correction | The first build failed because the dev environment did not declare `build`. After correcting it, the wheel contents were inspected and a clean venv loaded the exact experiment, exposed the CLI options, and passed dependency checks. A polluted system-site control still failed and was retained. |
 
 ## Important findings
 
@@ -42,6 +43,21 @@ time-stamped snapshot and may change upstream.
    requires.
 10. A comparison using a different target contract/schema exited 2 and retained failure evidence;
     the verifier does not draw a negative-control conclusion from different workloads.
+11. The exact PaperQA repository commit and Apache-2.0 LICENSE were confirmed, but 7 of 16 direct
+    dependencies had empty, non-standard, or GPL-family license results. All 305 SPDX package
+    entries had `licenseDeclared: NOASSERTION`; an SBOM is not proof of license clearance.
+12. Scorecard returned explicit `not-found`, independently of OSV-Scanner. OSV exited 1 and found
+    23 vulnerable package entries, 223 primary advisories, and maximum reported severity 9.8 in the
+    complete lockfile scope. Optional/development reachability is not yet classified.
+13. Both PyPI distribution files returned HTTP 404 from the Integrity API with no attestation
+    bundles. GitHub's valid commit signature was retained separately and was not misrepresented as
+    package provenance.
+14. A first manual Syft invocation exited 0 while logging a failed network update check. The final
+    probe disabled update checks explicitly and ran Syft offline; command success alone was again
+    insufficient evidence.
+15. Evidence files use canonical LF bytes and are marked `-text` in `.gitattributes`. This prevents
+    Windows checkout conversion from invalidating the recorded hashes; review digests were updated
+    once during that content-preserving normalization and then re-audited against staged Git blobs.
 
 ## Retained artifacts
 
@@ -74,32 +90,44 @@ time-stamped snapshot and may change upstream.
   operation, complete output artifacts, and the detected target-contract failure.
 - `composition-mismatched-workload-failure.json` — retained refusal to compare different target
   contracts and schemas.
+- `paperqa-supply-chain-probe.json` and `paperqa-supply-chain-review.json` — exact-commit legal,
+  posture, SBOM, vulnerability, and provenance evidence plus its named manual review.
+- `paperqa-supply-chain-artifacts/` — complete SPDX JSON, CycloneDX JSON, and OSV JSON outputs;
+  these are retained rather than replacing the detailed findings with a summary.
+- `packaging-build-missing-tool.txt` — failed first wheel build, corrected content inspection, clean
+  installation control, and the separately retained polluted-environment failure.
 
-SHA-256 checksums at creation time:
+SHA-256 checksums of the canonical bytes retained in Git:
 
 ```text
-grobid-0.9.1-unavailable-probe.json         2ea7dfb1fe53366c2daeb9330af85144bf2efd77b40aab2e5a9a5ace352946a5
-grobid-core-depsdev-probe.json              1a61e534497c27aa4ba3e7f2649ad5c6001a8ebe2b9b1acbb797a7e74b65358d
-grobid-version-guard-review.json            eef3c87b272ff4da6654edbb665061f1b2fef189869640791b47315e47ac0cdd
-invalid-version-probe.json                  1a578a1add11a6c0fde4ae2176c554c10c1844c77b5843712116accecd2368a5
-nonexistent-package-probe.json              982e9724e8b772a78dcd28b5b9403b9835e326276541f9b266e41bb34f8d970b
-paper-qa-depsdev-probe.json                 fde64437cf5464d514f13c488689246af90ce77197123105edb7bacb722ada03
-paper-qa-depsdev-review.json                acda4c595c3a2ada0f416768274f86f6c0ff009719533fb0fe55937ffa3b8352
-repository-discovery-blueprint.yaml         89165e8062034263bc081a518177724024dd72a47b9311310faaf88fce663454
-repository-discovery-invalid-query.json     2137552dab764366966bf92749ced2e28b9dfc2aa56847b99882d6a71cd21b37
-repository-discovery-run.json               09afe65bb371a8bc71cb5f9e816acfb006dcfb10a03126716cab1a31c9e597ef
-repository-discovery-scorecard-silent.json  443c25b2b027882d973274b7b6bca30a8d2e2653c3b3771a4b6dd5da419b3cdd
-sampleproject-sandbox-negative-probe.json    5bc6629c81cddd05063fe491e7ffbb25a1ba39ac397f5ccfd61f457d19aa4a34
-sampleproject-sandbox-negative-review.json   3c40fee33a4d28e5153c401b552e97a2aa6cdd43d50fca588f230e473bc83637
-sampleproject-sandbox-positive-probe.json    1bb68ace709d368286c55f9b28e8ce6ed33e76328775e5d82d5763a614a71392
-sampleproject-sandbox-positive-review.json   fc80f1edb9b4a3ae8dbfa6b5716309c78bab2405ed4cca3b535bdfab7ea79205
-swerex-1.4.0-integration-defects.txt          73b791a1d107d6e99e437c08f6efa5899908b32dbf7b2fc6cee4aca3cd5a9567
-adapter-mutated-definition-defect-probe.json e9109acf3986e104993b5a9b368bafc476477260c559568d69d69af7158f9e30
-adapter-paper-title-broken-probe.json        7a3191d482fb30e302a6d0765bbc14520486837e3317b9ae06610a555bb25ee0
+grobid-0.9.1-unavailable-probe.json                 9d2f13a29efdb6f8e4723f15b839497d6bccd6704a03da1d843dc263c927b1ea
+grobid-core-depsdev-probe.json                      33b6b94890efe5f75f57d896894c9c207490a7a6fe0ca796550f320c4e091b17
+grobid-version-guard-review.json                    ba41f4c3b5c1cb6d9898be83a70750f6362e98a153a408b5664fc950a40cf2e3
+invalid-version-probe.json                          5125073f31e8b2ef136d5018ac447bf89b331a5fd80f2c4fa56c37a6002c56d5
+nonexistent-package-probe.json                      17cfa3b3e4210c04501ff6d3fe90afcbdebe4644491c7bebddf226551dfb4662
+paper-qa-depsdev-probe.json                         cfb4c1de5c549bc5cadf8c68283ede639642b28509638b7082738c2963f040b5
+paper-qa-depsdev-review.json                        65922e8cc36081060615218ee9583301319a0f06087205c56b70e11e37357c78
+repository-discovery-blueprint.yaml                 fba9f188e6ed2e19da132fc2e1824b8d4b9698b2ccd58fde0509b786fea85961
+repository-discovery-invalid-query.json             cfbf2ea3538f825662d5ea18d0528d12182f52f0624a019fd3b970ecdd5a9f68
+repository-discovery-run.json                       c49d98209847426b0062e9a180c3851a512dcad2fd0262c8046fc04ff2f5341f
+repository-discovery-scorecard-silent.json          111eff1ed232f511a1da1bd4f1f85b401a6f03978c20cca3a8412810fbf7e747
+sampleproject-sandbox-negative-probe.json           5bc6629c81cddd05063fe491e7ffbb25a1ba39ac397f5ccfd61f457d19aa4a34
+sampleproject-sandbox-negative-review.json          3b8900169ea7bd9c980432afdf3e0d68d6adcf5e1f34b2521db13488f5ef26fd
+sampleproject-sandbox-positive-probe.json           1bb68ace709d368286c55f9b28e8ce6ed33e76328775e5d82d5763a614a71392
+sampleproject-sandbox-positive-review.json          e877601bdc1cbb84359c69c1382a71ed00b489d2f4d35420e9346755b36190f0
+swerex-1.4.0-integration-defects.txt                73b791a1d107d6e99e437c08f6efa5899908b32dbf7b2fc6cee4aca3cd5a9567
+adapter-mutated-definition-defect-probe.json        e9109acf3986e104993b5a9b368bafc476477260c559568d69d69af7158f9e30
+adapter-paper-title-broken-probe.json               7a3191d482fb30e302a6d0765bbc14520486837e3317b9ae06610a555bb25ee0
 adapter-paper-title-positive-invalid-source-probe.json 521880c3fb0bdb69cffca160f83919a1d7ff4279eb3cfdc77cf311375b7dc314
-adapter-paper-title-positive-probe.json      bffffadfc35893de0bbfd1207be43df9aa0a488536397ccd91460e3dee5bb6e7
-adapter-paper-title-positive-review.json     6e11e50517eb88f5484009d93e3936dcd6d192bccd430f0d25810d41a29dafe3
-composition-working-vs-broken-probe.json     5d7c2c1252b81b426d94eebd78265443f650fa4304d8b311108c378b46f85b21
-composition-working-vs-broken-review.json    0c39ac40f0e9953315ad51daceec1ac1b48f48bc12420fe949ea19edc06c99dc
-composition-mismatched-workload-failure.json a04804393c0bd9f604efdb33b782d1e59565d6617baafd44c354fcf3af293f77
+adapter-paper-title-positive-probe.json             bffffadfc35893de0bbfd1207be43df9aa0a488536397ccd91460e3dee5bb6e7
+adapter-paper-title-positive-review.json            6098609d72e47300bcc57fbba001e765418171c4280a3252f0cf996fd8e1bc3e
+composition-working-vs-broken-probe.json            5d7c2c1252b81b426d94eebd78265443f650fa4304d8b311108c378b46f85b21
+composition-working-vs-broken-review.json           0ea98401eb4c10774ac4d36e7a0d1eeb7b797063e52a39bd637c77aef92ccde0
+composition-mismatched-workload-failure.json        a04804393c0bd9f604efdb33b782d1e59565d6617baafd44c354fcf3af293f77
+paperqa-supply-chain-probe.json                     9d4a7d38221e423a050a66fe5ed3b4d340ade3d5e931547ef6df74b251a3b5de
+paperqa-supply-chain-review.json                    daf0a12fbe1b9e7aae058a21200e53f074920446dbfeb1f1b418a7cfa2744a5f
+paperqa-2026-08-12-supply-chain.spdx.json           f7dc8d67b98c121554e169ac37d9184e9a8cd5ac1227402950ba2a18b31a8265
+paperqa-2026-08-12-supply-chain.cdx.json            56fc40d40fd0e8789f30237863e46f6ae79d2f1d2a604ba68973a47b10624cd4
+paperqa-2026-08-12-supply-chain.osv.json            8d7582f0cb39e6c4def0cbcecda5ad13a9a2457a1a3e707948de6045017ab1ac
+packaging-build-missing-tool.txt                    d7fd652eb917ecc0c55ba45b7a0fc7e15085e6aa0359556973b701bda7c82bfa
 ```
