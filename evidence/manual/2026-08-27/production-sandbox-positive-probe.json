@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
-  "probe_id": "30db876dfea84689b432d8289d7ba7c9",
-  "observed_at": "2026-08-26T21:17:14.995714Z",
+  "probe_id": "be5a198b0d6f4dbaa3da91f91074cc66",
+  "observed_at": "2026-08-26T22:07:49.872302Z",
   "provider": "swe-rex-docker/1.4.0",
   "subject": "https://github.com/pypa/sampleproject@621e4974ca25ce531773def586ba3ed8e736b3fc",
   "request": {
@@ -76,7 +76,7 @@
   },
   "observations": {
     "probe_completed": true,
-    "duration_seconds": 5.48,
+    "duration_seconds": 5.62,
     "image": {
       "requested_reference": "blackridge/swerex-runtime:1.4.0",
       "resolved_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
@@ -99,13 +99,15 @@
     "deployment": {
       "started": true,
       "error": null,
-      "container_name": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-a7070b60-82a9-405e-998a-fb880047142a",
+      "container_name": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-e8cd7aa5-9f00-4843-a9d2-eb229ca210c6",
       "security_options": [
         "cap-drop=ALL",
         "no-new-privileges",
         "pids-limit=256",
         "memory=1g",
-        "cpus=2"
+        "memory-swap=1g",
+        "cpus=2",
+        "workload-user=65534:65534"
       ]
     },
     "execution_boundary": {
@@ -120,10 +122,10 @@
           "DriverOpts": null,
           "GwPriority": 0,
           "NetworkID": "08d69a408df90cfdfb482955dd596b13b9d670b48a8e77cdfef5e6359752c07d",
-          "EndpointID": "840ccefb3ed301bcb88c049baf368f2ea9ceb89f7653a6ced1b71baef9c24637",
+          "EndpointID": "0b4798962f9f16dbb5ae4b62c47037f4a620060ad2aeb1b44ecca6c4833a018f",
           "Gateway": "172.17.0.1",
           "IPAddress": "172.17.0.2",
-          "MacAddress": "7e:77:36:b4:26:a2",
+          "MacAddress": "f2:69:0b:64:9a:55",
           "IPPrefixLen": 16,
           "IPv6Gateway": "",
           "GlobalIPv6Address": "",
@@ -139,7 +141,7 @@
             "disconnect",
             "--force",
             "bridge",
-            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-a7070b60-82a9-405e-998a-fb880047142a"
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-e8cd7aa5-9f00-4843-a9d2-eb229ca210c6"
           ],
           "exit_code": 0,
           "stdout": "",
@@ -147,7 +149,7 @@
         }
       ],
       "networks_after": {},
-      "workload_executor": "docker-exec-shell-free",
+      "workload_executor": "docker-exec-shell-free-non-root",
       "host_environment_forwarded": []
     },
     "commands": [
@@ -162,7 +164,7 @@
         "timeout_seconds": 60,
         "phase": "runtime",
         "executor": "swe-rex",
-        "duration_seconds": 0.35,
+        "duration_seconds": 0.36,
         "stdout": "1.4.0\n",
         "stderr": "",
         "exit_code": 0,
@@ -174,14 +176,14 @@
         "argv": [
           "python",
           "-c",
-          "import json,pathlib; status=dict(line.split(':',1) for line in pathlib.Path('/proc/self/status').read_text().splitlines() if ':' in line); paths=['/sys/fs/cgroup/memory.max','/sys/fs/cgroup/pids.max','/sys/fs/cgroup/cpu.max']; result={'CapEff':status.get('CapEff','').strip(),'NoNewPrivs':status.get('NoNewPrivs','').strip(),**{p:pathlib.Path(p).read_text().strip() if pathlib.Path(p).exists() else 'unavailable' for p in paths}}; print(json.dumps(result,sort_keys=True))"
+          "import json,pathlib; status=dict(line.split(':',1) for line in pathlib.Path('/proc/self/status').read_text().splitlines() if ':' in line); paths=['/sys/fs/cgroup/memory.max','/sys/fs/cgroup/memory.swap.max','/sys/fs/cgroup/pids.max','/sys/fs/cgroup/cpu.max']; result={'CapEff':status.get('CapEff','').strip(),'NoNewPrivs':status.get('NoNewPrivs','').strip(),**{p:pathlib.Path(p).read_text().strip() if pathlib.Path(p).exists() else 'unavailable' for p in paths}}; print(json.dumps(result,sort_keys=True))"
         ],
         "cwd": null,
         "timeout_seconds": 60,
         "phase": "runtime",
         "executor": "swe-rex",
         "duration_seconds": 0.02,
-        "stdout": "{\"/sys/fs/cgroup/cpu.max\": \"200000 100000\", \"/sys/fs/cgroup/memory.max\": \"1073741824\", \"/sys/fs/cgroup/pids.max\": \"256\", \"CapEff\": \"0000000000000000\", \"NoNewPrivs\": \"1\"}\n",
+        "stdout": "{\"/sys/fs/cgroup/cpu.max\": \"200000 100000\", \"/sys/fs/cgroup/memory.max\": \"1073741824\", \"/sys/fs/cgroup/memory.swap.max\": \"0\", \"/sys/fs/cgroup/pids.max\": \"256\", \"CapEff\": \"0000000000000000\", \"NoNewPrivs\": \"1\"}\n",
         "stderr": "",
         "exit_code": 0,
         "transport_error": null
@@ -198,7 +200,7 @@
         "timeout_seconds": 60,
         "phase": "source",
         "executor": "swe-rex",
-        "duration_seconds": 0.035,
+        "duration_seconds": 0.028,
         "stdout": "Initialized empty Git repository in /workspace/repository/.git/\n",
         "stderr": "hint: Using 'master' as the name for the initial branch. This default branch name\nhint: is subject to change. To configure the initial branch name to use in all\nhint: of your new repositories, which will suppress this warning, call:\nhint:\nhint: \tgit config --global init.defaultBranch <name>\nhint:\nhint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\nhint: 'development'. The just-created branch can be renamed via this command:\nhint:\nhint: \tgit branch -m <name>\n",
         "exit_code": 0,
@@ -243,7 +245,7 @@
         "timeout_seconds": 180,
         "phase": "source",
         "executor": "swe-rex",
-        "duration_seconds": 0.893,
+        "duration_seconds": 0.962,
         "stdout": "",
         "stderr": "From https://github.com/pypa/sampleproject\n * branch            621e4974ca25ce531773def586ba3ed8e736b3fc -> FETCH_HEAD\n",
         "exit_code": 0,
@@ -305,8 +307,8 @@
         "timeout_seconds": 300.0,
         "phase": "preparation",
         "executor": "swe-rex",
-        "duration_seconds": 2.303,
-        "stdout": "Processing /workspace/repository\n  Installing build dependencies: started\n  Installing build dependencies: finished with status 'done'\n  Getting requirements to build wheel: started\n  Getting requirements to build wheel: finished with status 'done'\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nCollecting peppercorn (from sampleproject==4.0.0)\n  Downloading peppercorn-0.6-py3-none-any.whl.metadata (3.4 kB)\nDownloading peppercorn-0.6-py3-none-any.whl (4.8 kB)\nBuilding wheels for collected packages: sampleproject\n  Building wheel for sampleproject (pyproject.toml): started\n  Building wheel for sampleproject (pyproject.toml): finished with status 'done'\n  Created wheel for sampleproject: filename=sampleproject-4.0.0-py3-none-any.whl size=4697 sha256=ea5d1ab5d2f6fdae759aeff4e85e87ff5bcd5067c64e07fce63dd81529c186c5\n  Stored in directory: /tmp/pip-ephem-wheel-cache-kdyj7w9x/wheels/6b/7b/d0/4122e553583172216cdd1fced0e09004343eddd3b2b404f8e7\nSuccessfully built sampleproject\nInstalling collected packages: peppercorn, sampleproject\nSuccessfully installed peppercorn-0.6 sampleproject-4.0.0\n",
+        "duration_seconds": 2.337,
+        "stdout": "Processing /workspace/repository\n  Installing build dependencies: started\n  Installing build dependencies: finished with status 'done'\n  Getting requirements to build wheel: started\n  Getting requirements to build wheel: finished with status 'done'\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nCollecting peppercorn (from sampleproject==4.0.0)\n  Downloading peppercorn-0.6-py3-none-any.whl.metadata (3.4 kB)\nDownloading peppercorn-0.6-py3-none-any.whl (4.8 kB)\nBuilding wheels for collected packages: sampleproject\n  Building wheel for sampleproject (pyproject.toml): started\n  Building wheel for sampleproject (pyproject.toml): finished with status 'done'\n  Created wheel for sampleproject: filename=sampleproject-4.0.0-py3-none-any.whl size=4697 sha256=589911de2a86126c15745b289375818139cabdbaf32e13f4ad16bf45cc6a91ea\n  Stored in directory: /tmp/pip-ephem-wheel-cache-u0e16h7m/wheels/6b/7b/d0/4122e553583172216cdd1fced0e09004343eddd3b2b404f8e7\nSuccessfully built sampleproject\nInstalling collected packages: peppercorn, sampleproject\nSuccessfully installed peppercorn-0.6 sampleproject-4.0.0\n",
         "stderr": "WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.\n",
         "exit_code": 0,
         "transport_error": null
@@ -325,7 +327,27 @@
         "timeout_seconds": 120.0,
         "phase": "experiment",
         "executor": "docker-exec-shell-free",
-        "duration_seconds": 0.169,
+        "container_argv": [
+          "timeout",
+          "--verbose",
+          "--signal=TERM",
+          "--kill-after=1s",
+          "120s",
+          "python",
+          "-m",
+          "unittest",
+          "discover",
+          "-v"
+        ],
+        "user": "65534:65534",
+        "environment_names": [
+          "HOME",
+          "PYTHONIOENCODING",
+          "TMPDIR"
+        ],
+        "timeout_enforcer": "coreutils-timeout-term-then-kill",
+        "timed_out": false,
+        "duration_seconds": 0.172,
         "stdout": "",
         "stderr": "test_add_one (tests.test_simple.TestSimple.test_add_one) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
         "exit_code": 0,
@@ -343,7 +365,25 @@
         "timeout_seconds": 60.0,
         "phase": "experiment",
         "executor": "docker-exec-shell-free",
-        "duration_seconds": 0.124,
+        "container_argv": [
+          "timeout",
+          "--verbose",
+          "--signal=TERM",
+          "--kill-after=1s",
+          "60s",
+          "python",
+          "-c",
+          "import json,pathlib; from sample.simple import add_one; actual=add_one(41); result={\"input\":41,\"actual\":actual,\"expected\":42}; p=pathlib.Path(\"/tmp/blackridge-production-result.json\"); p.write_text(json.dumps(result,sort_keys=True)); print(p.read_text())"
+        ],
+        "user": "65534:65534",
+        "environment_names": [
+          "HOME",
+          "PYTHONIOENCODING",
+          "TMPDIR"
+        ],
+        "timeout_enforcer": "coreutils-timeout-term-then-kill",
+        "timed_out": false,
+        "duration_seconds": 0.145,
         "stdout": "{\"actual\": 42, \"expected\": 42, \"input\": 41}\n",
         "stderr": "",
         "exit_code": 0,
@@ -361,7 +401,25 @@
         "timeout_seconds": 30.0,
         "phase": "experiment",
         "executor": "docker-exec-shell-free",
-        "duration_seconds": 0.126,
+        "container_argv": [
+          "timeout",
+          "--verbose",
+          "--signal=TERM",
+          "--kill-after=1s",
+          "30s",
+          "python",
+          "-c",
+          "import json\nimport os\nimport socket\n\ndef connected(target):\n    try:\n        connection = socket.create_connection(target, timeout=2)\n        connection.close()\n        return True\n    except OSError:\n        return False\n\nneedles = (\"DEEPSEEK\", \"GITHUB\", \"OPENAI\", \"TOKEN\", \"SECRET\", \"API_KEY\")\nsensitive_names = sorted(\n    name for name in os.environ if any(token in name.upper() for token in needles)\n)\nresult = {\n    \"direct_egress\": connected((\"1.1.1.1\", 443)),\n    \"dns_egress\": connected((\"pypi.org\", 443)),\n    \"sensitive_environment_names\": sensitive_names,\n}\nprint(json.dumps(result, sort_keys=True), flush=True)\nassert not result[\"direct_egress\"], result\nassert not result[\"dns_egress\"], result\nassert not sensitive_names, result\n"
+        ],
+        "user": "65534:65534",
+        "environment_names": [
+          "HOME",
+          "PYTHONIOENCODING",
+          "TMPDIR"
+        ],
+        "timeout_enforcer": "coreutils-timeout-term-then-kill",
+        "timed_out": false,
+        "duration_seconds": 0.129,
         "stdout": "{\"direct_egress\": false, \"dns_egress\": false, \"sensitive_environment_names\": []}\n",
         "stderr": "",
         "exit_code": 0,
@@ -379,7 +437,25 @@
         "timeout_seconds": 30.0,
         "phase": "experiment",
         "executor": "docker-exec-shell-free",
-        "duration_seconds": 0.117,
+        "container_argv": [
+          "timeout",
+          "--verbose",
+          "--signal=TERM",
+          "--kill-after=1s",
+          "30s",
+          "python",
+          "-c",
+          "print('production-boundary-complete')"
+        ],
+        "user": "65534:65534",
+        "environment_names": [
+          "HOME",
+          "PYTHONIOENCODING",
+          "TMPDIR"
+        ],
+        "timeout_enforcer": "coreutils-timeout-term-then-kill",
+        "timed_out": false,
+        "duration_seconds": 0.13,
         "stdout": "production-boundary-complete\n",
         "stderr": "",
         "exit_code": 0,
@@ -388,12 +464,12 @@
     ],
     "not_run_command_ids": [],
     "host_workspace": {
-      "before_sha256": "e0b86839101742032f266bcc6e1f04b205f71d58f74fe2fea5721a84904394d2",
-      "after_sha256": "e0b86839101742032f266bcc6e1f04b205f71d58f74fe2fea5721a84904394d2",
+      "before_sha256": "997b5873fe7696dd596a8378059d7b550f8dae2b6791326d6d14bba3632461c5",
+      "after_sha256": "997b5873fe7696dd596a8378059d7b550f8dae2b6791326d6d14bba3632461c5",
       "unchanged": true,
       "changed_paths": [],
-      "file_count_before": 230,
-      "file_count_after": 230
+      "file_count_before": 255,
+      "file_count_after": 255
     },
     "cleanup": {
       "stop_error": null,
@@ -402,10 +478,10 @@
           "docker",
           "rm",
           "--force",
-          "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-a7070b60-82a9-405e-998a-fb880047142a"
+          "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-e8cd7aa5-9f00-4843-a9d2-eb229ca210c6"
         ],
         "exit_code": 0,
-        "stdout": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-a7070b60-82a9-405e-998a-fb880047142a\n",
+        "stdout": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-e8cd7aa5-9f00-4843-a9d2-eb229ca210c6\n",
         "stderr": ""
       },
       "container_exists_after_stop": false

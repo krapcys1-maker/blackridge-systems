@@ -1,0 +1,74 @@
+{
+  "schema_version": "1",
+  "observed_at": "2026-08-26T21:59:18.4210238Z",
+  "provider": "manual-docker-hostile-control-calibration/1",
+  "subject": "blackridge/swerex-runtime:1.4.0",
+  "image_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
+  "controls": {
+    "host_only_timeout": {
+      "host_result": {"type": "TimeoutExpired", "timeout_seconds": 1},
+      "exact_workload_process_after_host_timeout": {
+        "pid": 19,
+        "argv": ["python", "timeout_ignore_term.py"],
+        "still_running": true
+      },
+      "term_marker_present": false
+    },
+    "in_container_timeout": {
+      "argv_prefix": ["timeout", "--signal=TERM", "--kill-after=1s", "1s"],
+      "exit_code": 137,
+      "term_marker_present": true,
+      "exact_workload_process_after": false
+    },
+    "filesystem_root_arm": {
+      "uid": 0,
+      "gid": 0,
+      "component_write": true,
+      "etc_write": true
+    },
+    "filesystem_non_root_arm": {
+      "uid": 65534,
+      "gid": 65534,
+      "cap_eff": "0000000000000000",
+      "no_new_privs": "1",
+      "component_write": {"allowed": false, "errno": 13},
+      "etc_write": {"allowed": false, "errno": 13},
+      "scratch_write": {"allowed": true, "errno": null}
+    },
+    "memory_with_default_swap": {
+      "memory_bytes": 1073741824,
+      "memory_swap_bytes": 2147483648,
+      "cgroup_memory_max": "1073741824",
+      "cgroup_memory_swap_max": "1073741824",
+      "requested_allocation_bytes": 1258291200,
+      "allocation_exit_code": 0
+    },
+    "memory_with_swap_disabled": {
+      "memory_bytes": 1073741824,
+      "memory_swap_bytes": 1073741824,
+      "cgroup_memory_max": "1073741824",
+      "cgroup_memory_swap_max": "0",
+      "requested_allocation_bytes": 1258291200,
+      "allocation_exit_code": 137,
+      "container_running_after": true,
+      "container_oom_killed_observed": true
+    },
+    "pid_limit": {
+      "pids_max": 256,
+      "spawned_before_refusal": 253,
+      "refusal_type": "BlockingIOError",
+      "refusal_errno": 11,
+      "children_terminated_and_waited": true,
+      "container_running_after": true
+    }
+  },
+  "cleanup": {
+    "blackridge-hostile-calibration-v1": {"container_remaining": false},
+    "blackridge-timeout-calibration-v2": {"container_remaining": false},
+    "blackridge-memory-calibration-v2": {"container_remaining": false}
+  },
+  "limitations": [
+    "This record is a bounded local Docker calibration, not an L4 or production verdict.",
+    "The first process scanner also matched its own command text; exact argv inspection distinguished the scanner from the workload."
+  ]
+}

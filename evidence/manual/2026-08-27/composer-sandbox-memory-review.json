@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T22:09:11.769846Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "system-verification",
+  "scenario_id": "sandbox-memory-pressure-control",
+  "scenario_description": "The sandbox prevents a component from allocating beyond its memory-plus-swap cgroup.",
+  "expected": [
+    "The preflight observes memory.max=1073741824 and memory.swap.max=0.",
+    "The component exits 137 before the deadline and is not mislabeled as a timeout.",
+    "The pipeline remains incomplete, the component hash matches, and cleanup is confirmed."
+  ],
+  "observed": [
+    "Preflight read memory.max=1073741824 and memory.swap.max=0 from the live cgroup.",
+    "The component touching 1.2 GiB exited 137 after 0.730686 seconds, before its deadline, and timed_out remained false.",
+    "The pipeline stayed incomplete, the component hash matched, and exact cleanup left no container."
+  ],
+  "probe_id": "5cee44a7a4284ef996563ddc4421d3ca",
+  "probe_file": "evidence\\manual\\2026-08-27\\composer-sandbox-memory-probe.json",
+  "probe_sha256": "643e5b3f9aef8e42872678dfaae99b91711b99b124c26b0770945f77274920bb",
+  "notes": "PASS covers one frozen memory-pressure calibration; it is not a general denial-of-service proof."
+}

@@ -213,3 +213,101 @@ Final local regression after the portability correction:
   generated third-party notices: match
   declared-copy provenance issues: 0
   pytest: 60 passed
+
+Hostile filesystem, timeout, signal, memory, and PID calibration
+----------------------------------------------------------------
+The next controls started from attacks on the existing runtime rather than assumed Docker
+configuration. The first harness attempt used Bash `<<<` syntax under PowerShell and was
+rejected by the parser before any container existed. A corrected run then completed the
+filesystem, inner-timeout, memory, and PID arms, but its host-timeout Python one-liner had
+invalid quoting and the image did not contain `pgrep` or `pkill`. The exact containers were
+still removed. A file-backed host probe and `/proc/*/cmdline` inspection replaced those
+invalid harness pieces; neither harness error was counted as product evidence.
+
+The calibrated before/after observations were:
+  image: sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+  host-only timeout: TimeoutExpired after 1 second; exact workload PID 19 still running;
+                     no TERM marker
+  in-container timeout: TERM marker present; KILL escalation exit 137; no exact workload
+                        process remained while the container was still available
+  UID 0, CapEff=0: copied component write=true; /etc write=true
+  UID/GID 65534, CapEff=0, NoNewPrivs=1: component write=false (EACCES),
+                        /etc write=false (EACCES), /tmp scratch write=true
+  default --memory=1g: memory.swap.max=1073741824; touched 1.2 GiB allocation exit 0
+  --memory=1g --memory-swap=1g: memory.swap.max=0; same allocation exit 137;
+                        container remained available for inspection
+  --pids-limit=256: process creation refused with errno 11 after 253 children;
+                    fixture terminated and waited for every child
+  all three named calibration containers remaining after cleanup: false
+
+The first `/proc` scanner also matched its own command text. Exact argv distinguished
+`python timeout_ignore_term.py` from `python -c <scanner>`; the final inner-timeout arm
+contained only the scanner match, not the exact hostile workload. This selector correction
+is retained in `sandbox-hostile-controls-calibration.json`.
+
+Hardened generated-system controls
+----------------------------------
+The generated-system backend was changed only after those observations. Docker now disables
+memory swap, and every workload runs as UID/GID 65534 through coreutils `timeout` with TERM
+at the declared deadline and KILL one second later. Before the component pipeline, a real
+non-root process checks UID/GID, CapEff, NoNewPrivs, component and /etc write denial, /tmp
+scratch write, direct and DNS egress, sensitive environment names, and live memory, swap,
+PID, and CPU cgroups. Every copied component is hashed again after execution.
+
+Final positive composition:
+  all 13 hostile preflight checks: true
+  uid/gid: 65534/65534; CapEff: 0000000000000000; NoNewPrivs: 1
+  component and /etc writes: EACCES; /tmp scratch: allowed
+  cgroup: memory.max=1073741824, memory.swap.max=0, pids.max=256,
+          cpu.max="200000 100000"
+  direct=false, dns=false, sensitive_environment_names=[]
+  two workload users: 65534:65534; two in-container timeout wrappers; exits 0
+  component hashes before and after: 2/2 match
+  final artifact: exact prior host-calibration report
+  cleanup exit 0; container remaining false
+
+Generated hostile controls:
+  ignores-SIGTERM component: declared timeout 1 second; duration 2.117699 seconds;
+      verbose stderr records both TERM and KILL; exit 137; timed_out=true;
+      pipeline incomplete; hash match; cleanup pass
+  1.2 GiB component: live swap max 0; duration 0.730686 seconds; exit 137;
+      timed_out=false; pipeline incomplete; hash match; cleanup pass
+  400-process component: live pids.max 256; 252 children; errno 11; all children waited;
+      exit 0; blocked=true contract valid; hash match; cleanup pass
+  green-exit invalid sink: exit 0; exact /report and /trace errors retained;
+      pipeline incomplete; all post-execution hashes and cleanup pass
+
+Hardened generic SWE-ReX A/B
+----------------------------
+The generic runner was aligned with the composer so a weaker alternate path did not remain.
+The exact sampleproject A/B was repeated. Both arms used the same non-root Docker-exec and
+in-container-timeout workload boundary. Both unittest and 41 -> 42 baselines passed. The
+isolated arm again observed direct=false and dns=false and ran the sentinel. The inherited
+arm observed direct=true and dns=true, exited 1 at the hostile assertion, and did not run
+the sentinel. Both host snapshots matched and no container remained.
+
+Remaining boundary
+------------------
+These are bounded PASS results, not production enablement. Preparation still has network
+access and runs as root. The root filesystem is not mounted read-only, /tmp is deliberately
+writable, no measured per-run disk quota exists, and Docker remains a trusted host boundary.
+Production generated-runtime mode remains rejected until read-only-root/scratch and disk
+exhaustion controls pass and the wider threat model is reviewed.
+
+Final hardened wheel and regression
+-----------------------------------
+A new wheel containing both the generated backend and generic SWE-ReX controls was built
+after the final code changes and installed with the sandbox extra in another empty venv:
+  wheel SHA-256: 787ccd385934b3be5f881be9f3b076f37a09e4ce0ea7e8e32e085aafc052110a
+  imported composition and sandbox modules: fresh venv site-packages
+  pip check: no broken requirements
+  positive generated-system run: exit 0; complete=true; component exits [0,0]
+  ignores-SIGTERM run: exit 1; complete=false; component exit 137; timed_out=true;
+      verbose stderr retains TERM and KILL
+  both runs: 13/13 preflight, matching post-execution hashes, cleanup confirmed
+
+Final local checks after the hostile-control changes:
+  ruff: pass
+  generated third-party notices: match
+  declared-copy provenance issues: 0
+  pytest: 63 passed

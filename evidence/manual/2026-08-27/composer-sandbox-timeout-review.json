@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T22:09:11.319640Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "system-verification",
+  "scenario_id": "sandbox-timeout-signal-control",
+  "scenario_description": "The sandbox kills a component that ignores SIGTERM without leaving a process or container.",
+  "expected": [
+    "The in-container timeout sends TERM and escalates to KILL after one additional second.",
+    "The process exits 137, is classified as timed out, and the generated pipeline remains incomplete.",
+    "The component hash is unchanged and exact container cleanup is confirmed."
+  ],
+  "observed": [
+    "Verbose timeout stderr retained both the TERM and KILL signals; the hostile component returned 137 after 2.117699 seconds.",
+    "The process was classified timed_out=true and the generated pipeline remained incomplete.",
+    "Preflight passed, the component hash was unchanged, and exact cleanup left no container."
+  ],
+  "probe_id": "a6712db22d334949935e964a23ce254d",
+  "probe_file": "evidence\\manual\\2026-08-27\\composer-sandbox-timeout-probe.json",
+  "probe_sha256": "8d7b9f8d7447eb3b6b893aae36831c5232208a2458e57847718454dbad207d2f",
+  "notes": "PASS covers the frozen one-second hostile timeout scenario and does not enable production mode."
+}

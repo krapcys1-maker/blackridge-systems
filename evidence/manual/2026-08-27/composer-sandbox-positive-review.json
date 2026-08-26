@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "reviewed_at": "2026-08-26T21:42:15.926722Z",
+  "reviewed_at": "2026-08-26T22:09:10.413101Z",
   "reviewer": "Codex manual reviewer",
   "verdict": "pass",
   "capability_id": "system-verification",
@@ -9,16 +9,16 @@
   "expected": [
     "Copied component bytes match both locked SHA-256 values inside the container.",
     "Every input and output contract passes and the final artifact equals the reviewed host calibration result.",
-    "Egress and sensitive-name preflight passes, adapter evidence stays immutable, and cleanup is confirmed."
+    "Non-root, filesystem, cgroup, egress, and sensitive-name preflight checks all pass.",
+    "Adapter evidence stays immutable, post-execution component hashes match, and cleanup is confirmed."
   ],
   "observed": [
-    "Both copied component artifacts matched their locked SHA-256 values inside the exact container without a host mount.",
-    "All source, adapter, and sink contract boundaries passed; the final artifact exactly matched the retained host calibration result.",
-    "The preflight observed direct=false, dns=false, and no sensitive environment names; adapter add value remained an unmutated empty object.",
-    "Exact docker cleanup exited zero and no container remained."
+    "Both copied artifacts matched before and after execution and every contract passed with the exact host-calibration final report.",
+    "All thirteen non-root, filesystem, cgroup, egress, and secret-name preflight checks passed.",
+    "Both components used UID/GID 65534 and verbose in-container timeouts; adapter evidence stayed immutable and exact cleanup removed the container."
   ],
-  "probe_id": "a06e8f1134d64d2d9b2727796dd9129c",
+  "probe_id": "a142e18c4179411b9e580037411ca397",
   "probe_file": "evidence\\manual\\2026-08-27\\composer-sandbox-positive-probe.json",
-  "probe_sha256": "0e77e94ce1123085d8c8d6498e3743d8653ad9139a64cc51126b2fd8f0d96d99",
-  "notes": "PASS applies to this generated calibration bundle and sandbox backend; production mode remains disabled."
+  "probe_sha256": "3ac816cd819a0033bad6e31b33064a9fdc2f92ccfffc6d30d5293ac27f69ee85",
+  "notes": "PASS applies to this hardened calibration bundle; production runtime mode remains disabled."
 }

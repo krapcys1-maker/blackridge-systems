@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "reviewed_at": "2026-08-26T21:17:47.955882Z",
+  "reviewed_at": "2026-08-26T22:09:09.507632Z",
   "reviewer": "Codex manual reviewer",
   "verdict": "pass",
   "capability_id": "environment-construction",
@@ -9,16 +9,16 @@
   "expected": [
     "Repository preparation succeeds before isolation and the real workload still passes after isolation.",
     "Direct IP and DNS egress both fail during the workload.",
+    "Every workload command runs as UID/GID 65534 through an in-container TERM-to-KILL timeout.",
     "No sensitive host environment name is forwarded, the host stays unchanged, and the container is removed."
   ],
   "observed": [
-    "The exact commit was fetched and installed during the SWE-ReX preparation phase while bridge networking was present.",
-    "Blackridge detached bridge, observed zero remaining container networks, and executed all four workload commands through shell-free docker exec.",
-    "The real unittest and add_one(41)=42 artifact passed after isolation; direct IP egress and DNS egress were false and sensitive environment names were empty.",
-    "The host snapshot was unchanged, exact docker rm --force cleanup exited zero, and no container remained."
+    "Preparation completed through SWE-ReX before every Docker network was detached; unittest and add_one(41)=42 then passed.",
+    "All four workload commands used docker-exec shell-free as UID/GID 65534 with fixed environment values and the verbose in-container TERM-to-KILL timeout.",
+    "Direct and DNS egress were false, sensitive host environment names were absent, memory swap max was recorded, the host snapshot matched, and exact cleanup removed the container."
   ],
-  "probe_id": "30db876dfea84689b432d8289d7ba7c9",
+  "probe_id": "be5a198b0d6f4dbaa3da91f91074cc66",
   "probe_file": "evidence\\manual\\2026-08-27\\production-sandbox-positive-probe.json",
-  "probe_sha256": "6dec94737f6cd24989a534143c20ac681366e1c7dd0575431d46b1a93d41585d",
-  "notes": "PASS is limited to the tested single-container production boundary; it is not a hardened multi-tenant claim."
+  "probe_sha256": "bea46e45bf45fe3a5cf872e2ad3fe5572d4a4eed463131e2ebaaae888f131b40",
+  "notes": "PASS covers this pinned repository and hardened two-phase primitive; it is not a public-image or multi-tenant production verdict."
 }

@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T22:09:12.215825Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "system-verification",
+  "scenario_id": "sandbox-pids-pressure-control",
+  "scenario_description": "The sandbox limits and cleans a component attempting to create four hundred processes.",
+  "expected": [
+    "The preflight observes pids.max=256.",
+    "Process creation is refused with errno 11 below 256 children and the component exits zero.",
+    "The structured output contract passes, the component hash matches, and cleanup is confirmed."
+  ],
+  "observed": [
+    "Preflight read pids.max=256 from the live cgroup.",
+    "The attempt to start four hundred sleeps was refused after 252 children with errno 11; the fixture terminated and waited for each child.",
+    "The component exited zero with a valid blocked=true artifact, its hash matched, and exact cleanup left no container."
+  ],
+  "probe_id": "28272c3283024931bab104fa313af5b4",
+  "probe_file": "evidence\\manual\\2026-08-27\\composer-sandbox-pids-probe.json",
+  "probe_sha256": "1ddf0da61fedde3e4bc4ce72f080fb05378a1abfad56de5edefdf2542182bda3",
+  "notes": "PASS covers one frozen PID-pressure calibration; it is not a general denial-of-service proof."
+}
