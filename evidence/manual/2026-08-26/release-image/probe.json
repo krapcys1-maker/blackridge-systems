@@ -1,0 +1,333 @@
+{
+  "schema_version": "1",
+  "probe_id": "31744ec20446488fa809d692138cb818",
+  "observed_at": "2026-08-26T19:59:40.223647Z",
+  "provider": "blackridge-image-release-compliance/1+syft/1.51.0",
+  "subject": "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07",
+  "request": {
+    "image_ref": "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07",
+    "syft_image": "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0"
+  },
+  "observations": {
+    "probe_completed": true,
+    "image_manifest": {
+      "schema_version": "1",
+      "requested_image": "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07",
+      "observed_image_id": "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07",
+      "repo_digests": [
+        "blackridge/swerex-runtime@sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07"
+      ],
+      "created": "2026-08-26T19:56:23.642012848Z",
+      "base_image": {
+        "id": "python-slim-base",
+        "name": "Python slim OCI base",
+        "package_name": null,
+        "version": "sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17",
+        "license_spdx": "LicenseRef-MultiLicense-Image",
+        "upstream": "https://github.com/docker-library/python",
+        "license_source": "generated exact-image license-bundle.zip",
+        "usage": "Base operating system and CPython runtime for the SWE-ReX image.",
+        "boundary": "docker-base",
+        "distributed_in": [
+          "SWE-ReX runtime image"
+        ]
+      },
+      "license_analysis": {
+        "sbom_package_count": 161,
+        "sbom_without_declared_license_count": 23,
+        "sbom_without_declared_license": [
+          {
+            "name": "Simple Launcher",
+            "version": "1.1.0.14"
+          },
+          {
+            "name": "Simple Launcher",
+            "version": "1.1.0.14"
+          },
+          {
+            "name": "Simple Launcher",
+            "version": "1.1.0.14"
+          },
+          {
+            "name": "Simple Launcher",
+            "version": "1.1.0.14"
+          },
+          {
+            "name": "Simple Launcher",
+            "version": "1.1.0.14"
+          },
+          {
+            "name": "Simple Launcher",
+            "version": "1.1.0.14"
+          },
+          {
+            "name": "debian-archive-keyring",
+            "version": "2025.1"
+          },
+          {
+            "name": "gcc-14-base",
+            "version": "14.2.0-19"
+          },
+          {
+            "name": "libcrypt1",
+            "version": "1:4.4.38-1"
+          },
+          {
+            "name": "libgcc-s1",
+            "version": "14.2.0-19"
+          },
+          {
+            "name": "libgnutls30t64",
+            "version": "3.8.9-3+deb13u4"
+          },
+          {
+            "name": "libgssapi-krb5-2",
+            "version": "1.21.3-5+deb13u1"
+          },
+          {
+            "name": "libk5crypto3",
+            "version": "1.21.3-5+deb13u1"
+          },
+          {
+            "name": "libkrb5-3",
+            "version": "1.21.3-5+deb13u1"
+          },
+          {
+            "name": "libkrb5support0",
+            "version": "1.21.3-5+deb13u1"
+          },
+          {
+            "name": "librtmp1",
+            "version": "2.4+20151223.gitfa8646d.1-2+b5"
+          },
+          {
+            "name": "libstdc++6",
+            "version": "14.2.0-19"
+          },
+          {
+            "name": "libtasn1-6",
+            "version": "4.20.0-2+deb13u1"
+          },
+          {
+            "name": "markdown-it-py",
+            "version": "4.2.0"
+          },
+          {
+            "name": "mdurl",
+            "version": "0.1.2"
+          },
+          {
+            "name": "python",
+            "version": "3.12.14"
+          },
+          {
+            "name": "swe-rex",
+            "version": "1.4.0"
+          },
+          {
+            "name": "/scan/image.tar",
+            "version": "sha256:87af5fca75b9d5e4fbd2e6fd555caf930ed3ad075e0e2d5cc61868883d4b0082"
+          }
+        ],
+        "python_package_count": 35,
+        "python_unknown_license_metadata": [
+          {
+            "name": "markdown-it-py",
+            "version": "4.2.0",
+            "license": "NOASSERTION",
+            "license_files": [
+              "markdown_it_py-4.2.0.dist-info/licenses/LICENSE",
+              "markdown_it_py-4.2.0.dist-info/licenses/LICENSE.markdown-it"
+            ]
+          },
+          {
+            "name": "mdurl",
+            "version": "0.1.2",
+            "license": "NOASSERTION",
+            "license_files": [
+              "mdurl-0.1.2.dist-info/LICENSE"
+            ]
+          },
+          {
+            "name": "ptyprocess",
+            "version": "0.7.0",
+            "license": "UNKNOWN",
+            "license_files": [
+              "ptyprocess-0.7.0.dist-info/LICENSE"
+            ]
+          },
+          {
+            "name": "swe-rex",
+            "version": "1.4.0",
+            "license": "NOASSERTION",
+            "license_files": [
+              "swe_rex-1.4.0.dist-info/licenses/LICENSE.txt"
+            ]
+          }
+        ],
+        "python_without_extracted_license_text": [],
+        "python_review_license_packages": [
+          {
+            "name": "bashlex",
+            "version": "0.18",
+            "license": "GPLv3+",
+            "license_files": [
+              "bashlex-0.18.dist-info/LICENSE"
+            ]
+          },
+          {
+            "name": "certifi",
+            "version": "2026.7.22",
+            "license": "MPL-2.0",
+            "license_files": [
+              "certifi-2026.7.22.dist-info/licenses/LICENSE"
+            ]
+          }
+        ],
+        "os_package_count": 118,
+        "os_without_extracted_copyright_file": []
+      },
+      "release_blockers": [
+        "Python packages have unknown license metadata",
+        "Python packages use licenses that require an explicit distribution review",
+        "Corresponding source archives or a reviewed source-offer mechanism are not bundled",
+        "Dockerfile apt and transitive Python package resolution are not completely locked"
+      ],
+      "release_gate_open": false
+    },
+    "artifacts": {
+      "sbom.spdx.json": {
+        "sha256": "4a3c2184a9d291ed182accd47624d64236c9f4ebdd108c2fc4be96afc89a7124",
+        "size": 4016774
+      },
+      "sbom.cdx.json": {
+        "sha256": "ac2c5f332d75d30d593960f65fb35f9b56108119a25f70e33d95ee1b4cf31989",
+        "size": 1697627
+      },
+      "python-packages.json": {
+        "sha256": "978dcaa36c9de82827587e08ccb9461ecf29d27984da76362c3069648798ab83",
+        "size": 6172
+      },
+      "os-packages.tsv": {
+        "sha256": "a00c8e8c765ea2771d2416f0ab54a61a49b09139de10910c081dc0f1d918e421",
+        "size": 5615
+      },
+      "os-source-manifest.json": {
+        "sha256": "cf0684abb94683ebf992c67fae05932d375abb7e147c59daf7708fd1e6901812",
+        "size": 25014
+      },
+      "image-components.json": {
+        "sha256": "6f4e3fbab7d2246bd667acab12c041c849a4ed46224f6b35f13056d8440d8822",
+        "size": 4909
+      },
+      "license-bundle.zip": {
+        "sha256": "cb0d8fbfe42f9edae1bd85a683137b53c2b24511a4de3d456880932e38fdeade",
+        "size": 651411
+      }
+    },
+    "commands": [
+      {
+        "argv": [
+          "docker",
+          "image",
+          "save",
+          "--output",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\blackridge-image-8119wd07\\image.tar",
+          "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "docker",
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "-e",
+          "SYFT_CHECK_FOR_APP_UPDATE=false",
+          "-v",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\blackridge-image-8119wd07:/scan:ro",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\release-image:/out",
+          "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+          "docker-archive:/scan/image.tar",
+          "-o",
+          "spdx-json=/out/sbom.spdx.json"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "docker",
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "-e",
+          "SYFT_CHECK_FOR_APP_UPDATE=false",
+          "-v",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\blackridge-image-8119wd07:/scan:ro",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\release-image:/out",
+          "anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0",
+          "docker-archive:/scan/image.tar",
+          "-o",
+          "cyclonedx-json=/out/sbom.cdx.json"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "docker",
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "-v",
+          "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\release-image:/out",
+          "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07",
+          "python",
+          "-c",
+          "\nimport importlib.metadata as md\nimport json\nimport pathlib\nimport shutil\nimport subprocess\n\nout = pathlib.Path(\"/out\")\nlicense_root = out / \"license-bundle\"\nrecords = []\nfor dist in md.distributions():\n    name = dist.metadata.get(\"Name\") or \"unknown\"\n    version = dist.version\n    license_value = (\n        dist.metadata.get(\"License-Expression\")\n        or dist.metadata.get(\"License\")\n        or \"NOASSERTION\"\n    )\n    copied = []\n    for item in dist.files or []:\n        relative = pathlib.Path(str(item))\n        lowered = relative.name.lower()\n        license_names = (\"license\", \"copying\", \"notice\", \"copyright\", \"authors\")\n        if not any(token in lowered for token in license_names):\n            continue\n        source = pathlib.Path(dist.locate_file(item))\n        if not source.is_file():\n            continue\n        target = license_root / \"python\" / f\"{name}-{version}\" / relative\n        target.parent.mkdir(parents=True, exist_ok=True)\n        shutil.copy2(source, target)\n        copied.append(str(relative))\n    records.append({\n        \"name\": name,\n        \"version\": version,\n        \"license\": license_value,\n        \"license_files\": sorted(copied),\n    })\n(out / \"python-packages.json\").write_text(\n    json.dumps(sorted(records, key=lambda x: x[\"name\"].casefold()), indent=2) + \"\\n\"\n)\n\nformat_value = \"${binary:Package}\\t${Version}\\t${source:Package}\\t${source:Version}\\n\"\nrows = subprocess.run(\n    [\"dpkg-query\", \"-W\", \"-f=\" + format_value],\n    check=True,\n    capture_output=True,\n    text=True,\n).stdout\nheader = \"binary_package\\tbinary_version\\tsource_package\\tsource_version\\n\"\n(out / \"os-packages.tsv\").write_text(header + rows)\nos_records = []\nfor row in rows.splitlines():\n    values = (row.split(\"\\t\") + [\"\", \"\", \"\", \"\"])[:4]\n    binary_name, binary_version, source_name, source_version = values\n    source_name = source_name or binary_name.split(\":\", 1)[0]\n    source_version = source_version or binary_version\n    copyright_file = pathlib.Path(\"/usr/share/doc\") / binary_name.split(\":\", 1)[0] / \"copyright\"\n    copied = None\n    if copyright_file.is_file():\n        target = license_root / \"debian\" / binary_name.replace(\":\", \"_\") / \"copyright\"\n        target.parent.mkdir(parents=True, exist_ok=True)\n        shutil.copy2(copyright_file, target)\n        copied = str(target.relative_to(license_root))\n    os_records.append({\n        \"binary_package\": binary_name,\n        \"binary_version\": binary_version,\n        \"source_package\": source_name,\n        \"source_version\": source_version,\n        \"copyright_file\": copied,\n    })\n(out / \"os-source-manifest.json\").write_text(json.dumps(os_records, indent=2) + \"\\n\")\n"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "release_blockers": [
+      "Python packages have unknown license metadata",
+      "Python packages use licenses that require an explicit distribution review",
+      "Corresponding source archives or a reviewed source-offer mechanism are not bundled",
+      "Dockerfile apt and transitive Python package resolution are not completely locked"
+    ],
+    "release_gate_open": false
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/blob/main/src/blackridge/release_compliance.py",
+    "https://www.apache.org/licenses/LICENSE-2.0",
+    "https://github.com/anchore/syft/tree/v1.51.0"
+  ],
+  "warnings": [
+    "The exact image is intentionally blocked until every listed obligation is resolved."
+  ]
+}

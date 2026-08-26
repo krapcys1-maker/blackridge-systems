@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:59:51.034498Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "exact-image-block",
+  "scenario_description": "A real runtime image remains blocked while obligations are unresolved.",
+  "expected": [
+    "The image runs SWE-ReX and contains Blackridge license and notice files.",
+    "Unknown metadata and review-required licenses remain explicit.",
+    "Missing corresponding-source handling and incomplete dependency locks block publication."
+  ],
+  "observed": [
+    "Built through a 97-byte allowlisted Docker context against the pinned base digest and inspected immutable image ID sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07.",
+    "Ran the exact image without network: SWE-ReX reported 1.4.0, aiohttp reported 3.14.3, and all three Blackridge license/notice files were nonempty.",
+    "Inspected 161 SBOM packages, 35 Python distributions, 118 Debian packages, and a readable complete extracted license bundle.",
+    "The probe exposed four unknown Python metadata records, bashlex GPLv3+, certifi MPL-2.0, missing corresponding-source handling, and incomplete apt/transitive locks; it exited 1 and kept release_gate_open false."
+  ],
+  "probe_id": "31744ec20446488fa809d692138cb818",
+  "probe_file": "evidence\\manual\\2026-08-26\\release-image\\probe.json",
+  "probe_sha256": "7e83752686a05e37d66fbb4ae58837eb01e1810b4f0bc901a0fb72c93d04f9fd",
+  "notes": "The compliance mechanism passed its negative release control by blocking a functioning image for concrete unresolved obligations. The image itself is NOT approved for publication."
+}

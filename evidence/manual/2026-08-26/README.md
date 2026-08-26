@@ -30,6 +30,11 @@ time-stamped snapshot and may change upstream.
 | composer / `missing-edge-stops-generation` | PASS | Removing the only adapter left `report-sink` unresolved. The CLI exited nonzero, generation and runtime stayed null, and no system directory was created. |
 | composer / `green-exit-invalid-artifact-stops-runtime` | PASS | The source and adapter passed. The deliberately broken sink exited zero, but its retained JSON lacked `report.title` and `trace.source`; two schema errors stopped the runtime. |
 | composer / `unreviewed-production-evidence-refused` | PASS | An immutable command file matched its hash, but its self-declared L3 had no named review. Production solving exited nonzero without generation or execution. |
+| source provenance / `exact-source-history` | PASS within the frozen scan scope | All 22 tracked Python files have SHA-256 and first-add history. Four requested commits matched their checkouts, 1,133 upstream files were scanned, and no exact normalized six-line fragment matched. The probe explicitly does not call that proof of originality. |
+| provenance gate / `empty-copy-registry` | PASS | The current registry contains no copied/adapted source, no attribution marker was found, and the gate reported zero issues while retaining the need for a separate similarity scan. |
+| provenance gate / `incomplete-copy-control` | PASS | A deliberately unsafe copy record exited 1 with 11 concrete issues, including mutable revision, missing source paths, license, attribution, modifications, review, and destination. Copy remained disallowed. |
+| wheel release / `exact-wheel-bundle` | PASS for the wheel evidence; no legal verdict | An isolated build produced a wheel with 29 members, seven runtime and seven optional declarations, and all three Blackridge legal files. Pinned Syft generated both SBOMs; a second clean venv installed and imported the exact wheel. |
+| image release / `exact-image-block` | PASS for the blocking mechanism; IMAGE BLOCKED | The exact runnable image yielded 161 SBOM packages, 35 Python distributions, 118 Debian packages, and 161 readable bundled license files. Four unresolved obligation classes kept `release_gate_open: false` and the CLI exited 1. |
 
 ## Important findings
 
@@ -92,6 +97,34 @@ time-stamped snapshot and may change upstream.
     remains behind the sandbox boundary. Both generated fixtures stay `release_ready: false`.
 25. An explicit production control proved that immutable provenance is necessary but insufficient:
     the command hash matched while its self-declared L3 was rejected for lacking a named review.
+26. Git history inspection covered every one of the 22 tracked `src/blackridge/*.py` files. The
+    exact-fragment comparison scanned 1,133 files at four frozen upstream commits and found no
+    normalized six-line match. This does not detect renamed, reordered, translated, or heavily
+    edited source and is not an originality guarantee.
+27. The copy gate's deliberately incomplete record produced 11 separate causes instead of one
+    generic failure. An empty no-copy registry passed only because no derived-code markers were
+    present; marker-free copying remains outside that gate and inside the similarity/manual review.
+28. The final wheel contains `LICENSE`, `NOTICE`, and generated `THIRD_PARTY_NOTICES.md` as PEP 639
+    license files. Its seven runtime requirements exactly matched the active manifest; seven extras
+    were retained separately rather than misclassified as embedded dependencies.
+29. A no-dependencies install correctly could not import the compliance module because PyYAML was
+    absent. Installing the exact wheel with its declared dependencies in the clean venv succeeded,
+    imported `blackridge.release_compliance`, and ran the installed notice consistency check.
+30. The exact image is functional but not publishable. SWE-ReX 1.4.0 and aiohttp 3.14.3 ran with
+    networking disabled, and all Blackridge legal files were present, while the compliance CLI
+    still exited 1 because functionality is not license clearance.
+31. Image inspection found four Python packages with missing/unknown metadata (`markdown-it-py`,
+    `mdurl`, `ptyprocess`, and `swe-rex`). Their extracted texts respectively show MIT, MIT, ISC,
+    and MIT terms, but no reviewed override is yet part of the release policy. `bashlex` reports
+    GPLv3+ and `certifi` MPL-2.0, so both remain explicit review targets.
+32. Every one of the 35 Python distributions had at least one extracted license/notice file, and
+    every one of the 118 Debian packages had an extracted `copyright` file. That still does not
+    satisfy corresponding-source obligations: no reviewed source archive/offer mechanism exists,
+    and apt plus transitive pip resolution is not completely locked.
+33. The first compliance build exposed that the repository had no explicit `.dockerignore`.
+    A fail-closed allowlist now sends only `LICENSE`, `NOTICE`, and `THIRD_PARTY_NOTICES.md`;
+    BuildKit reported a 97-byte context. The final scanned image was rebuilt through that boundary,
+    so `.env`, Git history, source, and retained evidence were outside the build context.
 
 ## Retained artifacts
 
@@ -152,6 +185,17 @@ time-stamped snapshot and may change upstream.
 - `composer-positive-system/` and `composer-broken-output-system/` — complete generated bundles.
   Each `provenance.json` retains hashes for the other 15 files, including exact definition and plan
   copies; both manifests were independently recomputed with zero mismatches.
+- `source-provenance-probe.json` and `source-provenance-review.json` — file-by-file SHA/history,
+  exact upstream checkout identities, 1,133-file comparison scope, limitations, and named review.
+- `provenance-gate-positive-*` and `provenance-gate-incomplete-copy-*` — paired no-copy baseline
+  and deliberately incomplete copy control with their named reviews.
+- `release-wheel/` and `release-wheel-review.json` — exact wheel manifest, SPDX, CycloneDX,
+  license bundle, checksums, commands, and clean-install manual verdict.
+- `release-image/` and `release-image-blocked-review.json` — exact image manifest, complete SBOMs,
+  Python and Debian inventories, source-package mapping, license bundle, blockers, and named review
+  that passes the blocking behavior while explicitly leaving the image unapproved.
+- `docker-context-control.txt` — exact build/runtime commands and observed 97-byte allowlisted
+  context, retained separately from the legal release verdict.
 
 SHA-256 checksums of the canonical bytes retained in Git:
 
@@ -203,4 +247,26 @@ composer-positive-probe.json                        5ab51701feef1a142c661086a9bf
 composer-positive-review.json                       67e129dba7830e5779586af25b951c44f94069c763f4db3cbf44530a9a001bf4
 composer-unreviewed-production-probe.json           0a22c4d5c488d253828e0b5a6d997c7580f04af96d80c7a2f5227ad68a6c68d9
 composer-unreviewed-production-review.json          37d70e6b426a03c05886ec575048db862283bb8606cdbf855b40d7fd0d4d3f1d
+docker-context-control.txt                          a9fee655e92cb91ea90f8e58a3ba0d02e0605c17fb7050f2942bb75c4c33f3ee
+provenance-gate-incomplete-copy-probe.json           234b21eb02b14e50f9ea4bc9fa9bb13544f0d679b7c3628a94e9a960f9af9289
+provenance-gate-incomplete-copy-review.json          d045b9b45347ef5046efa569ae0b6af74fbc9ff5786e6a82a7ca876e52171f4d
+provenance-gate-positive-probe.json                  471174a2853b6b934ef2e8d6fc6b33e1ad5d3e61b9ac2d563bca54f29d0d85bf
+provenance-gate-positive-review.json                 aa591b8565bc092a017ac1d0ef146bc033d48c122e941d9d95ce19e575461b85
+release-image-blocked-review.json                    20e6ffc4e5e7d3e330d845b7d27ce4167527e5b57e2731d3394248c23fcbaaa7
+release-image/image-components.json                 6f4e3fbab7d2246bd667acab12c041c849a4ed46224f6b35f13056d8440d8822
+release-image/license-bundle.zip                     cb0d8fbfe42f9edae1bd85a683137b53c2b24511a4de3d456880932e38fdeade
+release-image/os-packages.tsv                        a00c8e8c765ea2771d2416f0ab54a61a49b09139de10910c081dc0f1d918e421
+release-image/os-source-manifest.json                cf0684abb94683ebf992c67fae05932d375abb7e147c59daf7708fd1e6901812
+release-image/probe.json                             7e83752686a05e37d66fbb4ae58837eb01e1810b4f0bc901a0fb72c93d04f9fd
+release-image/python-packages.json                   978dcaa36c9de82827587e08ccb9461ecf29d27984da76362c3069648798ab83
+release-image/sbom.cdx.json                          ac2c5f332d75d30d593960f65fb35f9b56108119a25f70e33d95ee1b4cf31989
+release-image/sbom.spdx.json                         4a3c2184a9d291ed182accd47624d64236c9f4ebdd108c2fc4be96afc89a7124
+release-wheel-review.json                            47796eb66219e2dc1a08946c693ea074a42214b9f33a1c1b73d4fc01966d07c0
+release-wheel/license-bundle.zip                     f54c7f6135cbce64837ecd43e49056cd642bfc971be78681e912dbb582386798
+release-wheel/probe.json                             713bd9009ee9e08b7c9ca651733ec776f2830f2fc147497a8c833707d1f8b3cd
+release-wheel/sbom.cdx.json                          d289520f1f8e649dc8fc1074f39c89600d3ea5b6f0dd35a74ab67a490f8a0a6c
+release-wheel/sbom.spdx.json                         cb0a19e67e208c371b94576b63f0f2b174c6846fa7be945028423689f56cbd60
+release-wheel/wheel-components.json                  e4f6e5e44f713e59367769f48e8f5c6891b3db6538400ccc5a577354139f637c
+source-provenance-probe.json                         4bf6e276fb2bc5f9f753d44115238cd2fca91c9f987ed82453ff13b1aeaef7a7
+source-provenance-review.json                        ead2b7872d125d46f218c3e70bf7d48d7d3e54629c85b7eafa74991207c82eb0
 ```

@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:57:26.334958Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "exact-wheel-bundle",
+  "scenario_description": "A cleanly built wheel yields byte-specific inventory and license artifacts.",
+  "expected": [
+    "Wheel metadata declares exactly the seven runtime dependencies in the manifest.",
+    "LICENSE, NOTICE, and THIRD_PARTY_NOTICES are physically present in the wheel.",
+    "SPDX, CycloneDX, checksums, and a readable license bundle are retained."
+  ],
+  "observed": [
+    "Built the sdist and wheel in a dedicated venv using isolated PEP 517 build environments; the final wheel SHA-256 is recorded in wheel-components.json.",
+    "Inspected 29 wheel members: LICENSE, NOTICE, and THIRD_PARTY_NOTICES are all embedded, with seven runtime and seven optional dependency declarations separated.",
+    "Installed the exact wheel with dependencies into a second clean venv, imported blackridge.release_compliance, verified License-Expression Apache-2.0, and ran the installed notices check.",
+    "Opened license-bundle.zip and verified its members and CRC; SPDX and CycloneDX files have retained checksums."
+  ],
+  "probe_id": "72b438c1b9214e948a8c936233b69afc",
+  "probe_file": "evidence\\manual\\2026-08-26\\release-wheel\\probe.json",
+  "probe_sha256": "713bd9009ee9e08b7c9ca651733ec776f2830f2fc147497a8c833707d1f8b3cd",
+  "notes": "Manual inspection of real wheel bytes and a clean installation satisfies the wheel evidence scenario; dependency packages are declared, not embedded."
+}

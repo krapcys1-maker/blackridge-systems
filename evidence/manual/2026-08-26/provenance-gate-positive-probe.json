@@ -1,0 +1,48 @@
+{
+  "schema_version": "1",
+  "probe_id": "d837a52e8dee41aaa1486c8eb1b2e607",
+  "observed_at": "2026-08-26T19:46:37.087054Z",
+  "provider": "blackridge-copy-provenance-gate/1",
+  "subject": "D:\\Skladacz aplikacji\\blackridge-systems",
+  "request": {
+    "manifest": {
+      "schema_version": "1",
+      "allowed_copy_licenses": [
+        "Apache-2.0",
+        "BSD-2-Clause",
+        "BSD-3-Clause",
+        "ISC",
+        "MIT"
+      ],
+      "legal_review_licenses": [
+        "AGPL-3.0-only",
+        "AGPL-3.0-or-later",
+        "GPL-2.0-only",
+        "GPL-2.0-or-later",
+        "GPL-3.0-only",
+        "GPL-3.0-or-later",
+        "LGPL-2.1-only",
+        "LGPL-2.1-or-later",
+        "LGPL-3.0-only",
+        "LGPL-3.0-or-later",
+        "MPL-2.0"
+      ],
+      "records": []
+    }
+  },
+  "observations": {
+    "probe_completed": true,
+    "record_count": 0,
+    "records": [],
+    "derived_markers": [],
+    "issue_count": 0,
+    "issues": [],
+    "gate_allows_copy": true,
+    "scope_warning": "The registry gate validates declared copies. Pair it with the source similarity audit because an undeclared copy can omit its attribution marker."
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/blob/main/src/blackridge/provenance.py",
+    "https://www.apache.org/licenses/LICENSE-2.0"
+  ],
+  "warnings": []
+}

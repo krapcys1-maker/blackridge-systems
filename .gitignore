@@ -13,3 +13,6 @@ build/
 .env
 .env.*
 !.env.example
+
+# Release evidence retains the canonical license-bundle ZIP; expanded copies stay local.
+evidence/manual/**/release-*/license-bundle/
