@@ -44,6 +44,132 @@ def test_source_setup_fetches_only_requested_commit_without_shell() -> None:
     assert "shell" not in fetch
 
 
+def test_production_experiment_requires_networkless_workload() -> None:
+    data = experiment_data()
+    data["execution_profile"] = "production"
+    data["execution_network"] = "inherit"
+
+    with pytest.raises(ValidationError, match="execution_network=none"):
+        SandboxExperiment.model_validate(data)
+
+
+def test_preparation_and_workload_ids_are_unique() -> None:
+    data = experiment_data()
+    data["preparation_commands"] = [data["commands"][0]]
+
+    with pytest.raises(ValidationError, match="command ids must be unique"):
+        SandboxExperiment.model_validate(data)
+
+
+def test_preparation_commands_have_a_separate_phase() -> None:
+    data = experiment_data()
+    data["preparation_commands"] = [
+        {
+            "id": "install-package",
+            "description": "Install the exact package before workload isolation.",
+            "argv": ["python", "-m", "pip", "install", "."],
+        }
+    ]
+    experiment = SandboxExperiment.model_validate(data)
+
+    commands = SwerexDockerProbe._preparation_commands(experiment)
+
+    assert commands[0]["id"] == "install-package"
+    assert commands[0]["phase"] == "preparation"
+
+
+def test_network_isolation_disconnects_every_observed_network(monkeypatch) -> None:
+    snapshots = iter([{"bridge": {"IPAddress": "172.17.0.2"}}, {}])
+    calls: list[list[str]] = []
+
+    monkeypatch.setattr(
+        SwerexDockerProbe,
+        "_container_networks",
+        staticmethod(lambda _name: next(snapshots)),
+    )
+
+    def fake_run(argv, **_kwargs):
+        calls.append(argv)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    result = SwerexDockerProbe._isolate_execution_network("exact-container")
+
+    assert result["applied"] is True
+    assert result["networks_after"] == {}
+    assert result["host_environment_forwarded"] == []
+    assert calls == [
+        [
+            "docker",
+            "network",
+            "disconnect",
+            "--force",
+            "bridge",
+            "exact-container",
+        ]
+    ]
+
+
+def test_network_isolation_fails_closed_when_a_network_remains(monkeypatch) -> None:
+    network = {"bridge": {"IPAddress": "172.17.0.2"}}
+    snapshots = iter([network, network])
+    monkeypatch.setattr(
+        SwerexDockerProbe,
+        "_container_networks",
+        staticmethod(lambda _name: next(snapshots)),
+    )
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda argv, **_kwargs: subprocess.CompletedProcess(argv, 1, "", "denied"),
+    )
+
+    result = SwerexDockerProbe._isolate_execution_network("exact-container")
+
+    assert result["applied"] is False
+    assert result["error"] == (
+        "container network isolation did not remove every attached network"
+    )
+    assert result["networks_after"] == network
+
+
+def test_networkless_workload_uses_shell_free_docker_exec(monkeypatch) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(argv, **kwargs):
+        observed["argv"] = argv
+        observed["kwargs"] = kwargs
+        return subprocess.CompletedProcess(argv, 0, "ok\n", "")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    result = SwerexDockerProbe._docker_exec_result(
+        "exact-container",
+        {
+            "id": "real-check",
+            "description": "Run one behavior-bearing command.",
+            "argv": ["python", "-c", "print(42)"],
+            "cwd": "/workspace/repository",
+            "timeout_seconds": 30,
+            "phase": "experiment",
+        },
+    )
+
+    assert observed["argv"] == [
+        "docker",
+        "exec",
+        "--workdir",
+        "/workspace/repository",
+        "exact-container",
+        "python",
+        "-c",
+        "print(42)",
+    ]
+    assert "shell" not in observed["kwargs"]
+    assert result["executor"] == "docker-exec-shell-free"
+    assert result["exit_code"] == 0
+
+
 def test_workspace_snapshot_detects_real_content_change(tmp_path) -> None:
     subprocess.run(["git", "init", "--quiet"], cwd=tmp_path, check=True)
     source = tmp_path / "component.py"

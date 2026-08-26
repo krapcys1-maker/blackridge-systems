@@ -41,6 +41,8 @@ This repository contains an executable, manually reviewed vertical slice:
 15. emit an auditable discovery run and a **provisional** system blueprint.
 16. freeze the internal SWE-ReX runtime through a Debian snapshot, a 118-package OS lock, and
     hash-locked 35-distribution Python closure while prohibiting public image publication.
+17. split sandbox preparation from production workload execution, detach every Docker network
+    before workload argv runs, forward no host environment, and verify exact container cleanup.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.

@@ -14,7 +14,7 @@ from time import perf_counter
 from typing import Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
@@ -49,15 +49,21 @@ class SandboxExperiment(BaseModel):
     commit: str = Field(pattern=r"^[a-f0-9]{40}$")
     image: str = Field(min_length=3)
     workdir: str = Field(default="/workspace/repository", pattern=r"^/[A-Za-z0-9_./-]+$")
+    execution_profile: Literal["calibration", "production"] = "calibration"
+    execution_network: Literal["inherit", "none"] = "inherit"
+    preparation_commands: list[SandboxCommandSpec] = Field(default_factory=list)
     commands: list[SandboxCommandSpec] = Field(min_length=1)
 
-    @field_validator("commands")
-    @classmethod
-    def unique_command_ids(cls, value: list[SandboxCommandSpec]) -> list[SandboxCommandSpec]:
-        ids = [command.id for command in value]
+    @model_validator(mode="after")
+    def production_policy_and_unique_ids(self) -> SandboxExperiment:
+        ids = [
+            command.id for command in [*self.preparation_commands, *self.commands]
+        ]
         if len(ids) != len(set(ids)):
             raise ValueError("sandbox command ids must be unique")
-        return value
+        if self.execution_profile == "production" and self.execution_network != "none":
+            raise ValueError("production sandbox experiments require execution_network=none")
+        return self
 
 
 @dataclass(frozen=True)
@@ -276,6 +282,127 @@ class SwerexDockerProbe:
             for command in experiment.commands
         ]
 
+    @staticmethod
+    def _preparation_commands(experiment: SandboxExperiment) -> list[dict[str, object]]:
+        return [
+            {
+                "id": command.id,
+                "description": command.description,
+                "argv": command.argv,
+                "cwd": experiment.workdir,
+                "timeout_seconds": command.timeout_seconds,
+                "phase": "preparation",
+            }
+            for command in experiment.preparation_commands
+        ]
+
+    @staticmethod
+    def _container_networks(container_name: str) -> dict[str, object]:
+        completed = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                "--format",
+                "{{json .NetworkSettings.Networks}}",
+                container_name,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        value = json.loads(completed.stdout)
+        if not isinstance(value, dict):
+            raise BlackridgeError("Docker returned invalid container network metadata")
+        return value
+
+    @classmethod
+    def _isolate_execution_network(cls, container_name: str) -> dict[str, object]:
+        before = cls._container_networks(container_name)
+        commands: list[dict[str, object]] = []
+        for network in sorted(before):
+            argv = [
+                "docker",
+                "network",
+                "disconnect",
+                "--force",
+                network,
+                container_name,
+            ]
+            completed = subprocess.run(argv, capture_output=True, text=True)
+            commands.append(
+                {
+                    "argv": argv,
+                    "exit_code": completed.returncode,
+                    "stdout": completed.stdout,
+                    "stderr": completed.stderr,
+                }
+            )
+        after = cls._container_networks(container_name)
+        failures = [item for item in commands if item["exit_code"] != 0]
+        error = None
+        if failures or after:
+            error = "container network isolation did not remove every attached network"
+        return {
+            "requested": "none",
+            "applied": error is None,
+            "error": error,
+            "networks_before": before,
+            "disconnect_commands": commands,
+            "networks_after": after,
+            "workload_executor": "docker-exec-shell-free",
+            "host_environment_forwarded": [],
+        }
+
+    @staticmethod
+    def _docker_exec_result(
+        container_name: str, item: dict[str, object]
+    ) -> dict[str, object]:
+        argv = [
+            "docker",
+            "exec",
+            "--workdir",
+            str(item["cwd"]),
+            container_name,
+            *[str(argument) for argument in item["argv"]],
+        ]
+        started = perf_counter()
+        try:
+            completed = subprocess.run(
+                argv,
+                capture_output=True,
+                text=True,
+                timeout=float(item["timeout_seconds"]),
+            )
+            return {
+                **item,
+                "executor": "docker-exec-shell-free",
+                "duration_seconds": round(perf_counter() - started, 3),
+                "stdout": completed.stdout,
+                "stderr": completed.stderr,
+                "exit_code": completed.returncode,
+                "transport_error": None,
+            }
+        except subprocess.TimeoutExpired as exc:
+            stdout = (
+                exc.stdout.decode(errors="replace")
+                if isinstance(exc.stdout, bytes)
+                else exc.stdout
+            )
+            stderr = (
+                exc.stderr.decode(errors="replace")
+                if isinstance(exc.stderr, bytes)
+                else exc.stderr
+            )
+            return {
+                **item,
+                "executor": "docker-exec-shell-free",
+                "duration_seconds": round(perf_counter() - started, 3),
+                "stdout": stdout or "",
+                "stderr": stderr or "",
+                "exit_code": None,
+                "transport_error": f"TimeoutExpired: exceeded {item['timeout_seconds']} seconds",
+            }
+
     async def _probe(self, experiment: SandboxExperiment, host_root: Path) -> ProbeEvidence:
         DockerDeployment, Command = self._runtime_types()
         image = inspect_local_image(experiment.image)
@@ -286,7 +413,26 @@ class SwerexDockerProbe:
         deployment_error: str | None = None
         stop_error: str | None = None
         container_name: str | None = None
-        all_commands = self._setup_commands(experiment) + self._experiment_commands(experiment)
+        force_remove: dict[str, object] | None = None
+        control_commands = self._setup_commands(experiment) + self._preparation_commands(
+            experiment
+        )
+        workload_commands = self._experiment_commands(experiment)
+        all_commands = control_commands + workload_commands
+        execution_boundary: dict[str, object] = {
+            "requested": experiment.execution_network,
+            "applied": experiment.execution_network == "inherit",
+            "error": None,
+            "networks_before": None,
+            "disconnect_commands": [],
+            "networks_after": None,
+            "workload_executor": (
+                "docker-exec-shell-free"
+                if experiment.execution_network == "none"
+                else "swe-rex"
+            ),
+            "host_environment_forwarded": [],
+        }
 
         deployment = DockerDeployment(
             image=image["resolved_id"],
@@ -303,58 +449,99 @@ class SwerexDockerProbe:
             logger=self._logger(),
         )
         attempted = 0
+
+        async def execute_through_swerex(item: dict[str, object]) -> dict[str, object]:
+            command_started = perf_counter()
+            try:
+                response = await deployment.runtime.execute(
+                    Command(
+                        command=item["argv"],
+                        timeout=item["timeout_seconds"],
+                        cwd=item["cwd"],
+                        shell=False,
+                        check=False,
+                    )
+                )
+                return {
+                    **item,
+                    "executor": "swe-rex",
+                    "duration_seconds": round(perf_counter() - command_started, 3),
+                    "stdout": response.stdout,
+                    "stderr": response.stderr,
+                    "exit_code": response.exit_code,
+                    "transport_error": None,
+                }
+            except Exception as exc:  # upstream transports several remote exception types
+                return {
+                    **item,
+                    "executor": "swe-rex",
+                    "duration_seconds": round(perf_counter() - command_started, 3),
+                    "stdout": "",
+                    "stderr": "",
+                    "exit_code": None,
+                    "transport_error": f"{type(exc).__name__}: {exc}",
+                }
+
         try:
             await deployment.start()
             deployment_started = True
             container_name = deployment.container_name
-            for item in all_commands:
+            control_failed = False
+            for item in control_commands:
                 attempted += 1
-                command_started = perf_counter()
-                try:
-                    response = await deployment.runtime.execute(
-                        Command(
-                            command=item["argv"],
-                            timeout=item["timeout_seconds"],
-                            cwd=item["cwd"],
-                            shell=False,
-                            check=False,
-                        )
-                    )
-                    result = {
-                        **item,
-                        "duration_seconds": round(perf_counter() - command_started, 3),
-                        "stdout": response.stdout,
-                        "stderr": response.stderr,
-                        "exit_code": response.exit_code,
-                        "transport_error": None,
-                    }
-                except Exception as exc:  # upstream transports several remote exception types
-                    result = {
-                        **item,
-                        "duration_seconds": round(perf_counter() - command_started, 3),
-                        "stdout": "",
-                        "stderr": "",
-                        "exit_code": None,
-                        "transport_error": f"{type(exc).__name__}: {exc}",
-                    }
+                result = await execute_through_swerex(item)
                 command_results.append(result)
                 if result["transport_error"] is not None or result["exit_code"] != 0:
+                    control_failed = True
                     break
+            if not control_failed and experiment.execution_network == "none":
+                try:
+                    execution_boundary = self._isolate_execution_network(container_name)
+                except Exception as exc:
+                    execution_boundary["applied"] = False
+                    execution_boundary["error"] = f"{type(exc).__name__}: {exc}"
+            if not control_failed and execution_boundary["applied"]:
+                for item in workload_commands:
+                    attempted += 1
+                    result = (
+                        self._docker_exec_result(container_name, item)
+                        if experiment.execution_network == "none"
+                        else await execute_through_swerex(item)
+                    )
+                    command_results.append(result)
+                    if result["transport_error"] is not None or result["exit_code"] != 0:
+                        break
         except Exception as exc:  # retain startup failure as evidence in the normal result
             deployment_error = f"{type(exc).__name__}: {exc}"
             container_name = deployment.container_name
         finally:
-            try:
-                await deployment.stop()
-            except Exception as exc:
-                stop_error = f"{type(exc).__name__}: {exc}"
+            if deployment_started and experiment.execution_network == "none" and container_name:
+                argv = ["docker", "rm", "--force", container_name]
+                completed = subprocess.run(argv, capture_output=True, text=True)
+                force_remove = {
+                    "argv": argv,
+                    "exit_code": completed.returncode,
+                    "stdout": completed.stdout,
+                    "stderr": completed.stderr,
+                }
+            else:
+                try:
+                    await deployment.stop()
+                except Exception as exc:
+                    stop_error = f"{type(exc).__name__}: {exc}"
 
         after = WorkspaceSnapshot.capture(host_root)
         changed_paths = before.changed_paths(after)
         not_run = [str(item["id"]) for item in all_commands[attempted:]]
         warnings: list[str] = []
         if deployment_error:
-            warnings.append("The disposable deployment did not start; no repository commands ran.")
+            warnings.append(
+                "The disposable deployment did not complete; inspect retained commands."
+            )
+        if execution_boundary["error"]:
+            warnings.append(
+                "Execution network isolation failed closed; workload commands did not run."
+            )
         if command_results and (
             command_results[-1]["transport_error"] is not None
             or command_results[-1]["exit_code"] != 0
@@ -365,7 +552,9 @@ class SwerexDockerProbe:
         if changed_paths:
             warnings.append("The host source snapshot changed during the sandbox probe.")
         container_exists = _container_exists(container_name)
-        if stop_error or container_exists:
+        if stop_error or container_exists is not False or (
+            force_remove is not None and force_remove["exit_code"] != 0
+        ):
             warnings.append("Container cleanup could not be confirmed.")
 
         repository_url = experiment.repository_url.removesuffix(".git")
@@ -391,6 +580,7 @@ class SwerexDockerProbe:
                         "cpus=2",
                     ],
                 },
+                "execution_boundary": execution_boundary,
                 "commands": command_results,
                 "not_run_command_ids": not_run,
                 "host_workspace": {
@@ -403,6 +593,7 @@ class SwerexDockerProbe:
                 },
                 "cleanup": {
                     "stop_error": stop_error,
+                    "force_remove": force_remove,
                     "container_exists_after_stop": container_exists,
                 },
             },

@@ -285,7 +285,8 @@ def probe_environment(
     console.print(f"Commands executed: {len(command_results)}")
     console.print(f"Host source unchanged: {observations['host_workspace']['unchanged']}")
     console.print(
-        f"Container remaining after stop: {observations['cleanup']['container_exists_after_stop']}"
+        "Container remaining after cleanup: "
+        f"{observations['cleanup']['container_exists_after_stop']}"
     )
     if failed:
         console.print(

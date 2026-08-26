@@ -1,0 +1,67 @@
+schema_version: "1"
+name: pypa-sampleproject-unisolated-control
+description: >-
+  Run the identical repository and hostile workload with inherited container networking
+  to prove that the production boundary test detects the deliberately unsafe control.
+repository_url: https://github.com/pypa/sampleproject
+commit: 621e4974ca25ce531773def586ba3ed8e736b3fc
+image: blackridge/swerex-runtime:1.4.0
+execution_profile: calibration
+execution_network: inherit
+preparation_commands:
+  - id: install-package
+    description: Build and install the exact checked-out source before the control workload.
+    argv: [python, -m, pip, install, --disable-pip-version-check, .]
+    timeout_seconds: 300
+commands:
+  - id: baseline-unittest
+    description: Run the same real repository unittest used by the production experiment.
+    argv: [python, -m, unittest, discover, -v]
+    timeout_seconds: 120
+  - id: behavior-artifact
+    description: Exercise the same add_one behavior used by the production experiment.
+    argv:
+      - python
+      - -c
+      - >-
+        import json,pathlib; from sample.simple import add_one;
+        actual=add_one(41); result={"input":41,"actual":actual,"expected":42};
+        p=pathlib.Path("/tmp/blackridge-production-result.json");
+        p.write_text(json.dumps(result,sort_keys=True)); print(p.read_text())
+    timeout_seconds: 60
+  - id: network-and-secret-boundary
+    description: Apply the exact hostile assertions while inherited networking remains enabled.
+    argv:
+      - python
+      - -c
+      - |
+        import json
+        import os
+        import socket
+
+        def connected(target):
+            try:
+                connection = socket.create_connection(target, timeout=2)
+                connection.close()
+                return True
+            except OSError:
+                return False
+
+        needles = ("DEEPSEEK", "GITHUB", "OPENAI", "TOKEN", "SECRET", "API_KEY")
+        sensitive_names = sorted(
+            name for name in os.environ if any(token in name.upper() for token in needles)
+        )
+        result = {
+            "direct_egress": connected(("1.1.1.1", 443)),
+            "dns_egress": connected(("pypi.org", 443)),
+            "sensitive_environment_names": sensitive_names,
+        }
+        print(json.dumps(result, sort_keys=True), flush=True)
+        assert not result["direct_egress"], result
+        assert not result["dns_egress"], result
+        assert not sensitive_names, result
+    timeout_seconds: 30
+  - id: boundary-sentinel
+    description: This sentinel must not run after the deliberately unsafe control is detected.
+    argv: [python, -c, "print('production-boundary-complete')"]
+    timeout_seconds: 30

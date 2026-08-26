@@ -111,6 +111,22 @@ capabilities:
           - The mismatch has a nonzero exit status and retains its diagnostic stderr.
           - The sentinel command after the failure is explicitly recorded as not run.
           - Host source remains unchanged and the disposable container is removed.
+      - id: production-network-and-secret-boundary
+        description: Preparation keeps network access, but the production workload runs without egress or host secrets.
+        given: The exact sampleproject commit, a networked preparation command, and hostile direct and DNS probes.
+        when: Blackridge detaches every container network before executing workload commands.
+        then:
+          - Repository preparation succeeds before isolation and the real workload still passes after isolation.
+          - Direct IP and DNS egress both fail during the workload.
+          - No sensitive host environment name is forwarded, the host stays unchanged, and the container is removed.
+      - id: unisolated-boundary-control
+        description: The identical hostile workload rejects a deliberately inherited network boundary.
+        given: The same image, repository commit, preparation, behavior, and hostile command with networking inherited.
+        when: The exact boundary assertions run without the production network policy.
+        then:
+          - Baseline behavior still passes, isolating the difference to the execution boundary.
+          - At least one egress attempt succeeds and the hostile assertion exits nonzero.
+          - The following sentinel is not run and cleanup is still confirmed.
 
   - id: component-adaptation
     description: Bridge incompatible component contracts with the smallest reviewable change.
