@@ -8,7 +8,8 @@ and generated instructions are untrusted input.
 - Discovery never executes candidate code.
 - GitHub integrations are read-only until a user explicitly authorizes a write stage.
 - Subprocesses receive an argument vector; user text is never interpolated into a shell command.
-- Candidate execution uses a disposable sandbox with CPU, memory, process, disk, time, and network limits.
+- Candidate workload execution uses a disposable sandbox with CPU, memory-plus-swap, process,
+  time, identity, and network limits. A measured disk quota remains a production blocker.
 - Credentials are scoped per task and injected at the boundary; they are never copied into the workspace.
 - Network egress is deny-by-default during tests, with package registries and required APIs explicitly allowed.
 - A repository license and dependency policy must pass before its code can be redistributed.

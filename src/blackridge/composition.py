@@ -1323,6 +1323,79 @@ def _sandbox_component_argv(
     return effective_argv
 
 
+_SANDBOX_PREFLIGHT_CODE = """\
+import json
+import os
+import pathlib
+import socket
+import sys
+
+
+def write_probe(path, payload):
+    try:
+        with path.open("a", encoding="utf-8") as stream:
+            stream.write(payload)
+        return {"allowed": True, "errno": None}
+    except OSError as exc:
+        return {"allowed": False, "errno": exc.errno}
+
+
+def connect_probe(target):
+    try:
+        connection = socket.create_connection(target, timeout=2)
+        connection.close()
+        return True
+    except OSError:
+        return False
+
+
+status = dict(
+    line.split(":", 1)
+    for line in pathlib.Path("/proc/self/status").read_text(encoding="utf-8").splitlines()
+    if ":" in line
+)
+cgroup_paths = {
+    "memory_max": "/sys/fs/cgroup/memory.max",
+    "memory_swap_max": "/sys/fs/cgroup/memory.swap.max",
+    "pids_max": "/sys/fs/cgroup/pids.max",
+    "cpu_max": "/sys/fs/cgroup/cpu.max",
+}
+scratch = pathlib.Path("/tmp/blackridge-preflight-write")
+etc_probe = pathlib.Path("/etc/blackridge-preflight-write")
+result = {
+    "uid": os.getuid(),
+    "gid": os.getgid(),
+    "cap_eff": status.get("CapEff", "").strip(),
+    "no_new_privs": status.get("NoNewPrivs", "").strip(),
+    "component_write": write_probe(pathlib.Path(sys.argv[1]), ""),
+    "etc_write": write_probe(etc_probe, "x"),
+    "scratch_write": write_probe(scratch, "x"),
+    "direct": connect_probe(("1.1.1.1", 443)),
+    "dns": connect_probe(("pypi.org", 443)),
+    "sensitive_environment_names": sorted(
+        key
+        for key in os.environ
+        if any(
+            needle in key.upper()
+            for needle in ("DEEPSEEK", "GITHUB", "OPENAI", "TOKEN", "SECRET", "API_KEY")
+        )
+    ),
+    "cgroup": {
+        name: pathlib.Path(path).read_text(encoding="utf-8").strip()
+        if pathlib.Path(path).is_file()
+        else "unavailable"
+        for name, path in cgroup_paths.items()
+    },
+}
+for path in (scratch, etc_probe):
+    try:
+        path.unlink()
+    except OSError:
+        pass
+print(json.dumps(result, sort_keys=True))
+"""
+
+
 def run_generated_system_sandboxed(
     bundle_directory: Path,
     input_artifact: object,
@@ -1381,6 +1454,8 @@ def run_generated_system_sandboxed(
         if not artifact_path.is_file() or _sha256_file(artifact_path) != artifact_hash:
             raise BlackridgeError(f"component launch artifact failed integrity: {subject_id}")
         component_controls.append((subject_id, launch))
+    if not component_controls:
+        raise BlackridgeError("sandboxed generated-system v1 requires a component step")
 
     adapter = SwerexDockerProbe()
     DockerDeployment, Command = adapter._runtime_types()
@@ -1395,6 +1470,7 @@ def run_generated_system_sandboxed(
             "--security-opt=no-new-privileges",
             "--pids-limit=256",
             "--memory=1g",
+            "--memory-swap=1g",
             "--cpus=2",
         ],
         logger=adapter._logger(),
@@ -1442,11 +1518,22 @@ def run_generated_system_sandboxed(
             "docker",
             "exec",
             "-i",
+            "--user",
+            "65534:65534",
             "--workdir",
             "/workspace/components",
             "--env",
             "PYTHONIOENCODING=utf-8",
+            "--env",
+            "HOME=/tmp",
+            "--env",
+            "TMPDIR=/tmp",
             container_name,
+            "timeout",
+            "--verbose",
+            "--signal=TERM",
+            "--kill-after=1s",
+            f"{float(launch['timeout_seconds']):g}s",
             *effective_argv,
         ]
         started = datetime.now(UTC)
@@ -1458,18 +1545,26 @@ def run_generated_system_sandboxed(
                 encoding="utf-8",
                 errors="replace",
                 capture_output=True,
-                timeout=float(launch["timeout_seconds"]),
+                timeout=float(launch["timeout_seconds"]) + 5,
                 check=False,
                 shell=False,
+            )
+            duration_seconds = (datetime.now(UTC) - started).total_seconds()
+            timed_out = (
+                completed.returncode in {124, 137}
+                and duration_seconds >= float(launch["timeout_seconds"]) * 0.9
             )
             return {
                 "executor": "docker-exec-shell-free",
                 "declared_argv": declared_argv,
                 "argv": effective_argv,
+                "container_argv": argv[argv.index(container_name) + 1 :],
                 "working_directory": "/workspace/components",
-                "environment_names": ["PYTHONIOENCODING"],
-                "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
-                "timed_out": False,
+                "user": "65534:65534",
+                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
+                "duration_seconds": duration_seconds,
+                "timeout_enforcer": "coreutils-timeout-term-then-kill",
+                "timed_out": timed_out,
                 "exit_code": completed.returncode,
                 "stdout": completed.stdout,
                 "stderr": completed.stderr,
@@ -1479,9 +1574,12 @@ def run_generated_system_sandboxed(
                 "executor": "docker-exec-shell-free",
                 "declared_argv": declared_argv,
                 "argv": effective_argv,
+                "container_argv": argv[argv.index(container_name) + 1 :],
                 "working_directory": "/workspace/components",
-                "environment_names": ["PYTHONIOENCODING"],
+                "user": "65534:65534",
+                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
                 "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
+                "timeout_enforcer": "coreutils-timeout-term-then-kill",
                 "timed_out": True,
                 "exit_code": None,
                 "stdout": _normalized_process_text(exc.stdout),
@@ -1527,19 +1625,17 @@ def run_generated_system_sandboxed(
         preflight_argv = [
             "docker",
             "exec",
+            "--user",
+            "65534:65534",
+            "--env",
+            "HOME=/tmp",
+            "--env",
+            "TMPDIR=/tmp",
             container_name,
             "python",
             "-c",
-            (
-                "import json,os,socket;out={};socket.setdefaulttimeout(2);"
-                "\nfor label,target in [('direct',('1.1.1.1',443)),"
-                "('dns',('pypi.org',443))]:"
-                "\n try:s=socket.create_connection(target,2);s.close();out[label]=True"
-                "\n except OSError:out[label]=False"
-                "\nneedles=('DEEPSEEK','GITHUB','OPENAI','TOKEN','SECRET','API_KEY');"
-                "out['sensitive_environment_names']=sorted(k for k in os.environ "
-                "if any(n in k.upper() for n in needles));print(json.dumps(out,sort_keys=True))"
-            ),
+            _SANDBOX_PREFLIGHT_CODE,
+            container_artifacts[component_controls[0][0]],
         ]
         preflight_process = subprocess.run(
             preflight_argv,
@@ -1558,19 +1654,68 @@ def run_generated_system_sandboxed(
                 else None
             ),
         }
-        expected_preflight = {
-            "direct": False,
-            "dns": False,
-            "sensitive_environment_names": [],
+        preflight_result = preflight["result"]
+        if not isinstance(preflight_result, dict):
+            raise BlackridgeError("sandbox preflight did not return a JSON object")
+        cgroup = preflight_result.get("cgroup")
+        component_write = preflight_result.get("component_write")
+        etc_write = preflight_result.get("etc_write")
+        scratch_write = preflight_result.get("scratch_write")
+        preflight_checks = {
+            "non_root_user": preflight_result.get("uid") != 0
+            and preflight_result.get("gid") != 0,
+            "no_effective_capabilities": preflight_result.get("cap_eff")
+            == "0000000000000000",
+            "no_new_privileges": preflight_result.get("no_new_privs") == "1",
+            "component_write_denied": isinstance(component_write, dict)
+            and component_write.get("allowed") is False,
+            "etc_write_denied": isinstance(etc_write, dict)
+            and etc_write.get("allowed") is False,
+            "scratch_write_allowed": isinstance(scratch_write, dict)
+            and scratch_write.get("allowed") is True,
+            "direct_egress_denied": preflight_result.get("direct") is False,
+            "dns_egress_denied": preflight_result.get("dns") is False,
+            "sensitive_names_absent": preflight_result.get("sensitive_environment_names") == [],
+            "memory_limit_exact": isinstance(cgroup, dict)
+            and cgroup.get("memory_max") == "1073741824",
+            "memory_swap_disabled": isinstance(cgroup, dict)
+            and cgroup.get("memory_swap_max") == "0",
+            "pids_limit_exact": isinstance(cgroup, dict) and cgroup.get("pids_max") == "256",
+            "cpu_limit_exact": isinstance(cgroup, dict)
+            and cgroup.get("cpu_max") == "200000 100000",
         }
-        if preflight["result"] != expected_preflight:
-            raise BlackridgeError("sandbox preflight did not prove egress and secret isolation")
+        preflight["checks"] = preflight_checks
+        preflight["passed"] = all(preflight_checks.values())
+        if not preflight["passed"]:
+            raise BlackridgeError("sandbox hostile-control preflight did not pass every check")
         runtime_probe = run_generated_system(
             bundle,
             input_artifact,
             _component_process=sandbox_component_process,
             _provider="blackridge-generated-sandbox-runtime/1",
         )
+        post_execution_integrity: list[dict[str, object]] = []
+        for subject_id, launch in component_controls:
+            target = container_artifacts[subject_id]
+            hash_process = subprocess.run(
+                ["docker", "exec", container_name, "sha256sum", target],
+                capture_output=True,
+                text=True,
+            )
+            actual_hash = (
+                hash_process.stdout.split()[0] if hash_process.returncode == 0 else None
+            )
+            post_execution_integrity.append(
+                {
+                    "subject_id": subject_id,
+                    "target": target,
+                    "expected_sha256": launch["artifact_sha256"],
+                    "actual_sha256": actual_hash,
+                    "matches": actual_hash == launch["artifact_sha256"],
+                }
+            )
+        if not all(item["matches"] for item in post_execution_integrity):
+            raise BlackridgeError("sandboxed component bytes changed during execution")
     finally:
         if container_name:
             remove_argv = ["docker", "rm", "--force", container_name]
@@ -1593,9 +1738,12 @@ def run_generated_system_sandboxed(
             "no-new-privileges",
             "pids-limit=256",
             "memory=1g",
+            "memory-swap=1g",
             "cpus=2",
+            "workload-user=65534:65534",
         ],
         "copied_components": copied,
+        "post_execution_component_integrity": post_execution_integrity,
         "execution_boundary": boundary,
         "preflight": preflight,
         "cleanup": {

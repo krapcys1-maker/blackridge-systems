@@ -1,0 +1,51 @@
+schema_version: "1"
+name: resource-cgroup-calibration
+goal: >-
+  Prove real memory and PID pressure behavior inside the generated-system sandbox cgroups.
+mode: calibration
+external_input: resource-pressure-request/v1
+required_output: resource-pressure-result/v1
+required_capabilities: [resource-pressure-hostile]
+allowed_licenses: [Apache-2.0]
+allowed_integrations: [command-json]
+minimum_evidence_level: 0
+contracts:
+  - contract_id: resource-pressure-request/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [case]
+      properties:
+        case: {enum: [memory, pids]}
+  - contract_id: resource-pressure-result/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [case, blocked]
+      properties:
+        case: {enum: [memory, pids]}
+        blocked: {const: true}
+        allocated: {type: integer}
+        spawned: {type: integer, minimum: 1, maximum: 255}
+        errno: {type: [integer, "null"]}
+components:
+  - component_id: hostile-resource-pressure-component
+    capability_id: resource-pressure-hostile
+    source_uri: blackridge://calibration/hostile-resource-pressure-component
+    revision: sha256:bf6ad8af35339317514e32764972a1ebc284523ab725c536d7a0b074bd8796fb
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [resource-pressure-request/v1]
+    produces: [resource-pressure-result/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/resource_pressure_component.py"]
+      artifact_file: "{definition_dir}/fixtures/resource_pressure_component.py"
+      artifact_sha256: bf6ad8af35339317514e32764972a1ebc284523ab725c536d7a0b074bd8796fb
+      working_directory: "{definition_dir}"
+      timeout_seconds: 10
+      environment_allowlist: []
+    evidence: {level: 0}
+    selection_priority: 10
+adapters: []

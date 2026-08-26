@@ -202,7 +202,8 @@ class SwerexDockerProbe:
                         "status=dict(line.split(':',1) for line in "
                         "pathlib.Path('/proc/self/status').read_text().splitlines() "
                         "if ':' in line); "
-                        "paths=['/sys/fs/cgroup/memory.max','/sys/fs/cgroup/pids.max',"
+                        "paths=['/sys/fs/cgroup/memory.max',"
+                        "'/sys/fs/cgroup/memory.swap.max','/sys/fs/cgroup/pids.max',"
                         "'/sys/fs/cgroup/cpu.max']; "
                         "result={'CapEff':status.get('CapEff','').strip(),"
                         "'NoNewPrivs':status.get('NoNewPrivs','').strip(),"
@@ -349,7 +350,7 @@ class SwerexDockerProbe:
             "networks_before": before,
             "disconnect_commands": commands,
             "networks_after": after,
-            "workload_executor": "docker-exec-shell-free",
+            "workload_executor": "docker-exec-shell-free-non-root",
             "host_environment_forwarded": [],
         }
 
@@ -360,9 +361,22 @@ class SwerexDockerProbe:
         argv = [
             "docker",
             "exec",
+            "--user",
+            "65534:65534",
             "--workdir",
             str(item["cwd"]),
+            "--env",
+            "HOME=/tmp",
+            "--env",
+            "PYTHONIOENCODING=utf-8",
+            "--env",
+            "TMPDIR=/tmp",
             container_name,
+            "timeout",
+            "--verbose",
+            "--signal=TERM",
+            "--kill-after=1s",
+            f"{float(item['timeout_seconds']):g}s",
             *[str(argument) for argument in item["argv"]],
         ]
         started = perf_counter()
@@ -371,12 +385,22 @@ class SwerexDockerProbe:
                 argv,
                 capture_output=True,
                 text=True,
-                timeout=float(item["timeout_seconds"]),
+                timeout=float(item["timeout_seconds"]) + 5,
+            )
+            duration_seconds = round(perf_counter() - started, 3)
+            timed_out = (
+                completed.returncode in {124, 137}
+                and duration_seconds >= float(item["timeout_seconds"]) * 0.9
             )
             return {
                 **item,
                 "executor": "docker-exec-shell-free",
-                "duration_seconds": round(perf_counter() - started, 3),
+                "container_argv": argv[argv.index(container_name) + 1 :],
+                "user": "65534:65534",
+                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
+                "timeout_enforcer": "coreutils-timeout-term-then-kill",
+                "timed_out": timed_out,
+                "duration_seconds": duration_seconds,
                 "stdout": completed.stdout,
                 "stderr": completed.stderr,
                 "exit_code": completed.returncode,
@@ -396,6 +420,11 @@ class SwerexDockerProbe:
             return {
                 **item,
                 "executor": "docker-exec-shell-free",
+                "container_argv": argv[argv.index(container_name) + 1 :],
+                "user": "65534:65534",
+                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
+                "timeout_enforcer": "coreutils-timeout-term-then-kill",
+                "timed_out": True,
                 "duration_seconds": round(perf_counter() - started, 3),
                 "stdout": stdout or "",
                 "stderr": stderr or "",
@@ -426,11 +455,7 @@ class SwerexDockerProbe:
             "networks_before": None,
             "disconnect_commands": [],
             "networks_after": None,
-            "workload_executor": (
-                "docker-exec-shell-free"
-                if experiment.execution_network == "none"
-                else "swe-rex"
-            ),
+            "workload_executor": "docker-exec-shell-free-non-root",
             "host_environment_forwarded": [],
         }
 
@@ -444,6 +469,7 @@ class SwerexDockerProbe:
                 "--security-opt=no-new-privileges",
                 "--pids-limit=256",
                 "--memory=1g",
+                "--memory-swap=1g",
                 "--cpus=2",
             ],
             logger=self._logger(),
@@ -503,11 +529,7 @@ class SwerexDockerProbe:
             if not control_failed and execution_boundary["applied"]:
                 for item in workload_commands:
                     attempted += 1
-                    result = (
-                        self._docker_exec_result(container_name, item)
-                        if experiment.execution_network == "none"
-                        else await execute_through_swerex(item)
-                    )
+                    result = self._docker_exec_result(container_name, item)
                     command_results.append(result)
                     if result["transport_error"] is not None or result["exit_code"] != 0:
                         break
@@ -577,7 +599,9 @@ class SwerexDockerProbe:
                         "no-new-privileges",
                         "pids-limit=256",
                         "memory=1g",
+                        "memory-swap=1g",
                         "cpus=2",
+                        "workload-user=65534:65534",
                     ],
                 },
                 "execution_boundary": execution_boundary,

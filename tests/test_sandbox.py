@@ -158,16 +158,63 @@ def test_networkless_workload_uses_shell_free_docker_exec(monkeypatch) -> None:
     assert observed["argv"] == [
         "docker",
         "exec",
+        "--user",
+        "65534:65534",
         "--workdir",
         "/workspace/repository",
+        "--env",
+        "HOME=/tmp",
+        "--env",
+        "PYTHONIOENCODING=utf-8",
+        "--env",
+        "TMPDIR=/tmp",
         "exact-container",
+        "timeout",
+        "--verbose",
+        "--signal=TERM",
+        "--kill-after=1s",
+        "30s",
         "python",
         "-c",
         "print(42)",
     ]
     assert "shell" not in observed["kwargs"]
     assert result["executor"] == "docker-exec-shell-free"
+    assert result["user"] == "65534:65534"
+    assert result["timed_out"] is False
     assert result["exit_code"] == 0
+
+
+def test_container_timeout_escalation_is_retained(monkeypatch) -> None:
+    ticks = iter([100.0, 102.1])
+    monkeypatch.setattr("blackridge.sandbox.perf_counter", lambda: next(ticks))
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda argv, **_kwargs: subprocess.CompletedProcess(argv, 137, "", ""),
+    )
+
+    result = SwerexDockerProbe._docker_exec_result(
+        "exact-container",
+        {
+            "id": "ignore-term",
+            "description": "Ignore TERM until the timeout escalates to KILL.",
+            "argv": ["python", "hanging.py"],
+            "cwd": "/workspace/repository",
+            "timeout_seconds": 1,
+            "phase": "experiment",
+        },
+    )
+
+    assert result["container_argv"][:5] == [
+        "timeout",
+        "--verbose",
+        "--signal=TERM",
+        "--kill-after=1s",
+        "1s",
+    ]
+    assert result["timed_out"] is True
+    assert result["exit_code"] == 137
 
 
 def test_workspace_snapshot_detects_real_content_change(tmp_path) -> None:

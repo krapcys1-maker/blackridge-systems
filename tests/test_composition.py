@@ -27,6 +27,8 @@ POSITIVE = ROOT / "examples" / "composition-linear-calibration.yaml"
 NO_ADAPTER = ROOT / "examples" / "composition-linear-no-adapter.yaml"
 BROKEN_OUTPUT = ROOT / "examples" / "composition-linear-broken-output.yaml"
 PRODUCTION_UNREVIEWED = ROOT / "examples" / "composition-production-unreviewed.yaml"
+TIMEOUT_HOSTILE = ROOT / "examples" / "composition-timeout-calibration.yaml"
+RESOURCE_HOSTILE = ROOT / "examples" / "composition-resource-calibration.yaml"
 INPUT = {"topic": "evidence-driven composition"}
 
 
@@ -67,6 +69,27 @@ def test_production_mode_rejects_unreviewed_claimed_l3() -> None:
     assert plan.unresolved_capabilities == ["research-source"]
     qualification = plan.qualifications[0]
     assert qualification.reasons == ["claimed evidence level has no named manual review"]
+    assert qualification.evidence_observations["launch_artifact_hash_matches"] is True
+
+
+@pytest.mark.parametrize(
+    ("definition_file", "component_id"),
+    [
+        (TIMEOUT_HOSTILE, "hostile-timeout-component"),
+        (RESOURCE_HOSTILE, "hostile-resource-pressure-component"),
+    ],
+)
+def test_hostile_control_definitions_stay_hash_locked_and_solvable(
+    definition_file: Path,
+    component_id: str,
+) -> None:
+    definition = load_composition_definition(definition_file)
+
+    plan = solve_composition(definition, definition_file=definition_file)
+
+    assert plan.complete is True
+    assert plan.selected_component_ids == [component_id]
+    qualification = next(item for item in plan.qualifications if item.subject_id == component_id)
     assert qualification.evidence_observations["launch_artifact_hash_matches"] is True
 
 

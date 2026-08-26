@@ -1,0 +1,47 @@
+schema_version: "1"
+name: timeout-signal-calibration
+goal: >-
+  Prove that a generated component which ignores SIGTERM is killed inside the sandbox timeout.
+mode: calibration
+external_input: hostile-request/v1
+required_output: hostile-response/v1
+required_capabilities: [timeout-hostile]
+allowed_licenses: [Apache-2.0]
+allowed_integrations: [command-json]
+minimum_evidence_level: 0
+contracts:
+  - contract_id: hostile-request/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [case]
+      properties:
+        case: {const: ignores-sigterm}
+  - contract_id: hostile-response/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [completed]
+      properties:
+        completed: {const: false}
+components:
+  - component_id: hostile-timeout-component
+    capability_id: timeout-hostile
+    source_uri: blackridge://calibration/hostile-timeout-component
+    revision: sha256:0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [hostile-request/v1]
+    produces: [hostile-response/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/hanging_component.py"]
+      artifact_file: "{definition_dir}/fixtures/hanging_component.py"
+      artifact_sha256: 0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74
+      working_directory: "{definition_dir}"
+      timeout_seconds: 1
+      environment_allowlist: []
+    evidence: {level: 0}
+    selection_priority: 10
+adapters: []

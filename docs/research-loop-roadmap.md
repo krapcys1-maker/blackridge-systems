@@ -250,8 +250,9 @@ roadmap does not require universal software composition to be valuable.
 
 1. Preserve the locked v1 runtime as internal-only; do not publish it while the two recorded public
    distribution blockers remain.
-2. Keep the new generated-system sandbox backend calibration-only until filesystem, timeout,
-   signal, and resource hostile controls also pass; only then evaluate production enablement.
+2. Keep the generated-system sandbox backend calibration-only. Non-root filesystem, timeout,
+   signal, memory, and PID hostile controls now pass; next require read-only-root/scratch and
+   disk-exhaustion controls before evaluating production enablement.
 3. Run the already frozen scientific-researcher smoke A/B without changing its hidden evaluator.
 4. Define Registry v1 from the existing evidence formats; do not create a parallel truth store.
 5. Ingest only reviewed Blackridge evidence and test invalid, stale, and conflicting records.

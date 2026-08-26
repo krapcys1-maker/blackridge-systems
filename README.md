@@ -45,6 +45,8 @@ This repository contains an executable, manually reviewed vertical slice:
     before workload argv runs, forward no host environment, and verify exact container cleanup.
 18. copy hash-locked generated-system components into that boundary without host mounts and run
     contract validation and trusted adapters while production mode remains disabled.
+19. run workloads as UID/GID 65534, enforce TERM-to-KILL deadlines inside the container, disable
+    memory swap, and retain real filesystem, memory, PID, timeout, and signal hostile controls.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.
