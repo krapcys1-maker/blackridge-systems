@@ -397,6 +397,7 @@ class BenchmarkEvaluator:
             "docker",
             "run",
             "--rm",
+            "--interactive",
             "--name",
             container_name,
             "--network",

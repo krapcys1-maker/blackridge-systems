@@ -5,12 +5,33 @@ from pathlib import Path
 
 import pytest
 
-from blackridge.process_boundary import resolve_executable, run_bounded
+from blackridge.process_boundary import _write_stdin, resolve_executable, run_bounded
 
 
-def test_resolve_executable_finds_script_beside_interpreter(
-    tmp_path: Path, monkeypatch
-) -> None:
+class _CloseFailsAfterWrite:
+    def __init__(self) -> None:
+        self.written = b""
+
+    def write(self, data: bytes) -> int:
+        self.written += data
+        return len(data)
+
+    def flush(self) -> None:
+        return None
+
+    def close(self) -> None:
+        raise OSError(22, "invalid pipe handle")
+
+
+def test_stdin_writer_suppresses_windows_close_race() -> None:
+    stream = _CloseFailsAfterWrite()
+
+    _write_stdin(stream, b"payload")  # type: ignore[arg-type]
+
+    assert stream.written == b"payload"
+
+
+def test_resolve_executable_finds_script_beside_interpreter(tmp_path: Path, monkeypatch) -> None:
     scripts = tmp_path / "Scripts"
     scripts.mkdir()
     interpreter = scripts / "python.exe"

@@ -161,6 +161,7 @@ def test_docker_candidate_command_disables_root_and_swap(tmp_path: Path) -> None
     assert command.argv[
         command.argv.index("--memory-swap") : command.argv.index("--memory-swap") + 2
     ] == ["--memory-swap", "256m"]
+    assert "--interactive" in command.argv
     assert "HOME=/tmp" in command.argv
     assert "TMPDIR=/tmp" in command.argv
 
