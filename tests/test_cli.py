@@ -67,6 +67,17 @@ def test_cli_help_is_runnable() -> None:
     assert "Evidence-driven" in result.stdout
 
 
+def test_release_help_does_not_render_a_truncated_image_digest() -> None:
+    for command in ("probe-wheel-release", "probe-image-release"):
+        result = runner.invoke(app, [command, "--help"])
+
+        assert result.exit_code == 0
+        assert "--syft-image" in result.stdout
+        assert "…" not in result.stdout
+        assert "\ufffd" not in result.stdout
+        assert "678bfa565b60" not in result.stdout
+
+
 def test_review_probe_help_is_runnable() -> None:
     result = runner.invoke(app, ["review-probe", "--help"])
 

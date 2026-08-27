@@ -868,7 +868,9 @@ def probe_wheel_compliance(
     output_directory: Annotated[Path, typer.Option("--output-directory", "-o")] = Path(
         ".blackridge/release/wheel"
     ),
-    syft_image: Annotated[str, typer.Option("--syft-image")] = DEFAULT_SYFT_IMAGE,
+    syft_image: Annotated[
+        str, typer.Option("--syft-image", show_default=False)
+    ] = DEFAULT_SYFT_IMAGE,
 ) -> None:
     """Create wheel SBOMs, component inventory, license bundle, and raw evidence."""
 
@@ -905,7 +907,9 @@ def probe_image_compliance(
     license_review: Annotated[
         Path, typer.Option("--license-review", exists=True, dir_okay=False, readable=True)
     ] = Path("docker/python-license-review.yaml"),
-    syft_image: Annotated[str, typer.Option("--syft-image")] = DEFAULT_SYFT_IMAGE,
+    syft_image: Annotated[
+        str, typer.Option("--syft-image", show_default=False)
+    ] = DEFAULT_SYFT_IMAGE,
 ) -> None:
     """Inspect an exact image and block while distribution obligations remain unresolved."""
 
