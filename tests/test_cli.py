@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 
 from blackridge.cli import app
 from blackridge.doctor import ToolCheck
+from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
 from blackridge.io import load_request, write_run
 from blackridge.models import CapabilityResult, DiscoveryRun
@@ -341,6 +342,67 @@ def test_compose_run_sandbox_reports_isolation_and_cleanup(tmp_path, monkeypatch
     assert json.loads(output.read_text(encoding="utf-8")) == {"sandboxed": True}
     assert "Container remaining after cleanup: False" in result.stdout
     assert "Calibration only" in result.stdout
+
+
+def test_verify_holdout_cli_retains_success_and_failure_evidence(tmp_path, monkeypatch) -> None:
+    suite = tmp_path / "suite"
+    suite.mkdir()
+    manifest = suite / "holdout-manifest.json"
+    manifest.write_text("{}", encoding="utf-8")
+    success_output = tmp_path / "success.json"
+    failure_output = tmp_path / "failure.json"
+    probe = ProbeEvidence(
+        probe_id="f" * 32,
+        observed_at=datetime(2026, 8, 27, tzinfo=UTC),
+        provider="blackridge-sealed-holdout-verifier/1",
+        subject="external-suite@1",
+        request={},
+        observations={"probe_completed": True, "file_count": 3, "case_file_count": 1},
+        sources=[str(manifest)],
+    )
+    monkeypatch.setattr("blackridge.cli.verify_sealed_holdout", lambda *_args, **_kwargs: probe)
+
+    success = runner.invoke(
+        app,
+        [
+            "verify-holdout",
+            str(suite),
+            "--manifest-sha256",
+            "a" * 64,
+            "--system-revision",
+            "b" * 40,
+            "--output",
+            str(success_output),
+        ],
+    )
+
+    assert success.exit_code == 0
+    assert "Sealed holdout verified: external-suite@1" in success.stdout
+    assert json.loads(success_output.read_text(encoding="utf-8"))["probe_id"] == "f" * 32
+
+    def fail(*_args, **_kwargs):
+        raise BlackridgeError("fixture seal mismatch")
+
+    monkeypatch.setattr("blackridge.cli.verify_sealed_holdout", fail)
+    failure = runner.invoke(
+        app,
+        [
+            "verify-holdout",
+            str(suite),
+            "--manifest-sha256",
+            "a" * 64,
+            "--system-revision",
+            "b" * 40,
+            "--output",
+            str(failure_output),
+        ],
+    )
+
+    assert failure.exit_code == 2
+    assert "fixture seal mismatch" in failure.stdout
+    retained = json.loads(failure_output.read_text(encoding="utf-8"))
+    assert retained["observations"]["probe_completed"] is False
+    assert retained["observations"]["error_type"] == "BlackridgeError"
 
 
 def test_compose_run_retains_evidence_but_does_not_publish_failed_output(

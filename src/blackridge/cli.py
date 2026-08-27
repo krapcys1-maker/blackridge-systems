@@ -44,6 +44,7 @@ from blackridge.evidence import (
     ProbeEvidence,
 )
 from blackridge.github import GitHubCli
+from blackridge.holdout import verify_sealed_holdout
 from blackridge.io import (
     load_adapter_experiment,
     load_composition_definition,
@@ -1095,6 +1096,47 @@ def review_probe(
         f"Manual verdict recorded: {capability}/{scenario} = [bold]{verdict.value}[/bold]"
     )
     console.print(f"Review written to {output}")
+
+
+@app.command("verify-holdout")
+def verify_holdout(
+    suite_root: Annotated[Path, typer.Argument(exists=True, file_okay=False, readable=True)],
+    manifest_sha256: Annotated[str, typer.Option("--manifest-sha256")],
+    system_revision: Annotated[str, typer.Option("--system-revision")],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/sealed-holdout-verification.json"
+    ),
+) -> None:
+    """Verify an externally authored holdout inventory without executing hidden cases."""
+
+    try:
+        probe = verify_sealed_holdout(
+            suite_root,
+            expected_manifest_sha256=manifest_sha256,
+            expected_system_revision=system_revision,
+        )
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-sealed-holdout-verifier/1",
+            subject=str(suite_root),
+            request={
+                "suite_root": str(suite_root),
+                "expected_manifest_sha256": manifest_sha256,
+                "expected_system_revision": system_revision,
+            },
+            sources=[str(suite_root / "holdout-manifest.json")],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, output)
+        console.print(f"[red]Sealed holdout verification failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"Sealed holdout verified: {probe.subject}")
+    console.print(f"Files verified: {probe.observations['file_count']}")
+    console.print(f"Case files retained: {probe.observations['case_file_count']}")
+    console.print(f"Raw evidence written to {output}")
+    console.print("[yellow]No evaluator cases were interpreted or executed.[/yellow]")
 
 
 if __name__ == "__main__":

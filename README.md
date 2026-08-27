@@ -197,6 +197,10 @@ The frozen two-arm procedure and contamination boundary are documented in
 [`docs/benchmark-protocol.md`](docs/benchmark-protocol.md). Real baseline and Blackridge runs start
 only after this harness is manually calibrated.
 
+An independently authored blinded suite can be byte-verified without interpreting its cases via
+`blackridge verify-holdout`. The external manifest format and separation rules are documented in
+[`docs/sealed-holdout.md`](docs/sealed-holdout.md).
+
 ### Verify a component adapter and its negative control
 
 ```powershell
