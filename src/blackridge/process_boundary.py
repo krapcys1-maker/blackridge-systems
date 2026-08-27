@@ -26,7 +26,10 @@ def resolve_executable(name: str) -> str | None:
     resolved = shutil.which(name)
     if resolved is not None:
         return resolved
-    scripts_directory = Path(sys.executable).resolve().parent
+    # Virtual-environment interpreters are commonly symlinks on POSIX.  Keep the
+    # invoked interpreter's directory so sibling console scripts are found in
+    # that environment instead of beside the symlink target.
+    scripts_directory = Path(sys.executable).parent
     candidates = [scripts_directory / name]
     if not Path(name).suffix:
         candidates.append(scripts_directory / f"{name}.exe")

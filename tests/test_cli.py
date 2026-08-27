@@ -20,7 +20,12 @@ def test_cli_help_is_runnable() -> None:
 
 
 def test_review_probe_help_is_runnable() -> None:
-    result = runner.invoke(app, ["review-probe", "--help"])
+    result = runner.invoke(
+        app,
+        ["review-probe", "--help"],
+        color=False,
+        terminal_width=160,
+    )
 
     assert result.exit_code == 0
     assert "--subject-type" in result.stdout

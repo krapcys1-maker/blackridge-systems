@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 from blackridge.process_boundary import resolve_executable, run_bounded
 
 
@@ -17,6 +19,28 @@ def test_resolve_executable_finds_script_beside_interpreter(
     console_script.touch()
     monkeypatch.setattr("blackridge.process_boundary.shutil.which", lambda _name: None)
     monkeypatch.setattr("blackridge.process_boundary.sys.executable", str(interpreter))
+
+    assert resolve_executable("fixture-tool") == str(console_script)
+
+
+def test_resolve_executable_keeps_symlinked_interpreter_directory(
+    tmp_path: Path, monkeypatch
+) -> None:
+    real_directory = tmp_path / "real"
+    real_directory.mkdir()
+    real_interpreter = real_directory / "python"
+    real_interpreter.touch()
+    environment_bin = tmp_path / "environment" / "bin"
+    environment_bin.mkdir(parents=True)
+    interpreter_link = environment_bin / "python"
+    try:
+        interpreter_link.symlink_to(real_interpreter)
+    except OSError as exc:
+        pytest.skip(f"symlinks are unavailable: {exc}")
+    console_script = environment_bin / "fixture-tool"
+    console_script.touch()
+    monkeypatch.setattr("blackridge.process_boundary.shutil.which", lambda _name: None)
+    monkeypatch.setattr("blackridge.process_boundary.sys.executable", str(interpreter_link))
 
     assert resolve_executable("fixture-tool") == str(console_script)
 
