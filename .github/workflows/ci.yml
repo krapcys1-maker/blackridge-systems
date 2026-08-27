@@ -40,10 +40,12 @@ jobs:
         run: python -m pip check
       - name: Lint
         run: ruff check .
+      - name: Verify canonical formatting
+        run: ruff format --check src tests tools components
       - name: Type-check production source
         run: mypy src/blackridge
       - name: Compile source and tests
-        run: python -m compileall -q src tests tools
+        run: python -m compileall -q src tests tools components
       - name: Scan Python source for medium and high severity issues
         run: bandit -r src -ll -ii
       - name: Audit the exact resolved Python environment
@@ -53,7 +55,7 @@ jobs:
       - name: Enforce declared copy provenance
         run: blackridge check-provenance provenance/derived-code.yaml
       - name: Test
-        run: pytest --cov=blackridge --cov-report=term-missing --cov-fail-under=60
+        run: pytest --cov=blackridge --cov-report=term-missing --cov-fail-under=70
       - name: Build exact distribution artifacts
         if: matrix.package
         run: python -m build --outdir ci-dist

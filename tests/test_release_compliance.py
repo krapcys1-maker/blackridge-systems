@@ -231,3 +231,11 @@ def test_v1_workflow_cannot_publish_internal_runtime_image() -> None:
     assert 'manifest["runtime_locks"]["complete"] is True' in workflow
     assert 'review["valid_entry_count"] == 6' in workflow
     assert 'observed["release_blockers"] == expected_blockers' in workflow
+
+
+def test_ci_enforces_format_components_and_seventy_percent_coverage() -> None:
+    workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+
+    assert "ruff format --check src tests tools components" in workflow
+    assert "python -m compileall -q src tests tools components" in workflow
+    assert "--cov-fail-under=70" in workflow
