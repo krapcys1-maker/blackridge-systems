@@ -389,8 +389,18 @@ def _inspect(
         output.get("request_id"),
     )
     add("expected-status", output.get("status") == case.expected_status, output.get("status"))
-    claims = output.get("claims") if isinstance(output.get("claims"), list) else []
-    sources = output.get("sources") if isinstance(output.get("sources"), list) else []
+    raw_claims = output.get("claims")
+    claims: list[dict[str, Any]] = (
+        [item for item in raw_claims if isinstance(item, dict)]
+        if isinstance(raw_claims, list)
+        else []
+    )
+    raw_sources = output.get("sources")
+    sources: list[dict[str, Any]] = (
+        [item for item in raw_sources if isinstance(item, dict)]
+        if isinstance(raw_sources, list)
+        else []
+    )
     if case.expected_status == "insufficient-evidence":
         add(
             "clean-abstention",
@@ -399,14 +409,23 @@ def _inspect(
         )
         return checks
 
-    documents = {
+    raw_documents = case.request.get("documents")
+    request_documents = raw_documents if isinstance(raw_documents, list) else []
+    documents: dict[str, dict[str, Any]] = {
         item["document_id"]: item
-        for item in case.request["documents"]
+        for item in request_documents
         if isinstance(item, dict) and isinstance(item.get("document_id"), str)
     }
-    source_ids = [item.get("document_id") for item in sources if isinstance(item, dict)]
+    source_ids = [
+        identifier for item in sources if isinstance(identifier := item.get("document_id"), str)
+    ]
     unique_sources = set(source_ids)
-    minimum_sources = case.request["minimum_sources"]
+    raw_minimum_sources = case.request.get("minimum_sources")
+    minimum_sources = (
+        raw_minimum_sources
+        if isinstance(raw_minimum_sources, int) and not isinstance(raw_minimum_sources, bool)
+        else 0
+    )
     add("unique-source-identities", len(source_ids) == len(unique_sources), source_ids)
     add("minimum-source-count", len(unique_sources) >= minimum_sources, len(unique_sources))
     add("allowed-source-selection", unique_sources <= case.allowed_sources, sorted(unique_sources))
@@ -418,21 +437,17 @@ def _inspect(
             item.get("document_id") in documents
             and item.get("title") == documents[item["document_id"]]["title"]
             for item in sources
-            if isinstance(item, dict)
         ),
         True,
     )
-    citations = [
-        citation
-        for claim in claims
-        if isinstance(claim, dict)
-        for citation in claim.get("citations", [])
-        if isinstance(citation, dict)
-    ]
+    citations: list[dict[str, Any]] = []
+    for claim in claims:
+        raw_citations = claim.get("citations")
+        if isinstance(raw_citations, list):
+            citations.extend(item for item in raw_citations if isinstance(item, dict))
     add(
         "every-claim-cited",
-        bool(claims)
-        and all(isinstance(claim, dict) and bool(claim.get("citations")) for claim in claims),
+        bool(claims) and all(bool(claim.get("citations")) for claim in claims),
         {"claims": len(claims), "citations": len(citations)},
     )
     grounded = all(

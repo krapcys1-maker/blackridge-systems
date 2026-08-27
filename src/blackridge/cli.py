@@ -11,7 +11,6 @@ from typing import Annotated, Literal
 import typer
 from pydantic import ValidationError
 from rich.console import Console
-from rich.table import Table
 
 from blackridge.adaptation import (
     JSON_PATCH_SOURCE,
@@ -105,19 +104,21 @@ def _publish_completed_artifact(probe: ProbeEvidence, output: Path) -> bool:
 def doctor() -> None:
     """Check the local MVP prerequisites and upcoming sandbox tools."""
 
-    table = Table(title="Blackridge toolchain")
-    table.add_column("Tool")
-    table.add_column("Status")
-    table.add_column("Required now")
-    table.add_column("Purpose")
-    table.add_column("Diagnostic")
+    console.print("Blackridge toolchain")
     missing_required = False
     for check in check_tools():
-        status = "[green]ready[/green]" if check.available else "[yellow]missing[/yellow]"
+        status = "ready" if check.available else "missing"
         required = "yes" if check.required_for_mvp else "later"
-        table.add_row(check.name, status, required, check.purpose, check.detail)
+        # Keep the complete diagnostic in captured output and legacy Windows
+        # terminals. Rich tables otherwise truncate with a Unicode ellipsis or
+        # split tool names according to the current terminal width.
+        console.print(
+            f"- {check.name}: {status}; required={required}; "
+            f"purpose={check.purpose}; diagnostic={check.detail}",
+            markup=False,
+            soft_wrap=True,
+        )
         missing_required |= check.required_for_mvp and not check.available
-    console.print(table)
     if missing_required:
         raise typer.Exit(code=1)
 
@@ -175,23 +176,17 @@ def report(
 
     console.print(f"[bold]{run.request.name}[/bold] - {run.request.goal}")
     for result in run.results:
-        table = Table(title=f"Capability: {result.capability.id}")
-        table.add_column("Repository", overflow="fold")
-        table.add_column("Score", justify="right")
-        table.add_column("License")
-        table.add_column("Evidence")
-        table.add_column("Decision", overflow="fold")
+        console.print(f"Capability: {result.capability.id}", markup=False)
         for candidate in result.candidates[:top]:
-            table.add_row(
-                candidate.metadata.full_name,
-                f"{candidate.score.total:.2f}",
-                candidate.metadata.license_spdx or "unknown",
-                f"L{int(candidate.evidence_level)}",
-                candidate.decision,
+            console.print(
+                f"- {candidate.metadata.full_name}: score={candidate.score.total:.2f}; "
+                f"license={candidate.metadata.license_spdx or 'unknown'}; "
+                f"evidence=L{int(candidate.evidence_level)}; decision={candidate.decision}",
+                markup=False,
+                soft_wrap=True,
             )
         if not result.candidates:
-            table.add_row("-", "-", "-", "-", "no candidates")
-        console.print(table)
+            console.print("- no candidates")
 
 
 @app.command()
@@ -1048,10 +1043,13 @@ def review_probe(
         if promotion_level is not None:
             if probe.observations.get("probe_completed") is not True:
                 raise BlackridgeError("an incomplete probe cannot promote evidence")
-            assert subject_type is not None
-            assert subject_revision is not None
-            assert subject_license_spdx is not None
-            assert artifact_sha256 is not None
+            if (
+                subject_type is None
+                or subject_revision is None
+                or subject_license_spdx is None
+                or artifact_sha256 is None
+            ):
+                raise BlackridgeError("all evidence promotion options must be supplied together")
             if subject_type not in {"component", "adapter"}:
                 raise BlackridgeError("subject type must be component or adapter")
             promotion_subject_type: Literal["component", "adapter"] = (

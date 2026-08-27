@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from time import perf_counter
-from typing import ClassVar
+from typing import Any, ClassVar
 from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
@@ -111,7 +111,7 @@ def _run_case(
     adapter: Path,
     request: dict[str, object],
     api_url: str,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     environment = dict(os.environ)
     for name in list(environment):
         if any(token in name.upper() for token in ("SEMANTIC_SCHOLAR", "S2_API")):
@@ -135,6 +135,8 @@ def _run_case(
     )
     duration = round(perf_counter() - started, 3)
     output = json.loads(completed.stdout)
+    if not isinstance(output, dict):
+        raise AssertionError("adapter stdout JSON is not an object")
     return {
         "request": request,
         "execution": {
@@ -159,7 +161,7 @@ def main() -> int:
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     api_url = f"http://127.0.0.1:{server.server_port}"
-    definitions = [
+    definitions: list[tuple[str, dict[str, object], str, str | None, list[str]]] = [
         (
             "pagination",
             {
@@ -233,13 +235,14 @@ def main() -> int:
             [],
         ),
     ]
-    cases: list[dict[str, object]] = []
+    cases: list[dict[str, Any]] = []
     try:
         for case_id, request, status, error_code, paper_ids in definitions:
             before_requests = len(ReplayHandler.requests)
             case = _run_case(args.python.absolute(), args.adapter.resolve(), request, api_url)
             output = case["output"]
-            assert isinstance(output, dict)
+            if not isinstance(output, dict):
+                raise AssertionError("adapter case output is not an object")
             observed_ids = [
                 item.get("paper_id") for item in output.get("papers", []) if isinstance(item, dict)
             ]

@@ -13,7 +13,14 @@ from blackridge.doctor import ToolCheck
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
 from blackridge.io import load_request, write_run
-from blackridge.models import CapabilityResult, DiscoveryRun
+from blackridge.models import (
+    Candidate,
+    CapabilityResult,
+    DiscoveryRun,
+    RepositoryMetadata,
+    ScoreBreakdown,
+    SearchQuery,
+)
 
 runner = CliRunner()
 REPOSITORY = Path(__file__).resolve().parents[1]
@@ -89,6 +96,72 @@ def test_doctor_exits_nonzero_for_a_nonfunctional_required_tool(monkeypatch) -> 
 
     assert result.exit_code == 1
     assert "broken installation" in result.stdout
+
+
+def test_doctor_preserves_complete_tool_names_and_diagnostics(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "blackridge.cli.check_tools",
+        lambda: [
+            ToolCheck(
+                name="pypi-attestations",
+                required_for_mvp=False,
+                available=True,
+                purpose="cryptographic PyPI provenance verification",
+                path="/tools/pypi-attestations",
+                detail="pypi-attestations 0.0.30 on windows",
+            )
+        ],
+    )
+
+    result = runner.invoke(app, ["doctor"])
+
+    assert result.exit_code == 0
+    assert "…" not in result.stdout
+    assert "\ufffd" not in result.stdout
+    assert "pypi-attestations" in result.stdout
+    assert "pypi-attestations 0.0.30 on windows" in result.stdout
+
+
+def test_report_preserves_complete_repository_and_decision(tmp_path: Path) -> None:
+    request_file = _request_file(tmp_path)
+    request = load_request(request_file)
+    candidate = Candidate(
+        capability_id="first-capability",
+        metadata=RepositoryMetadata(
+            full_name="zongmin-yu/semantic-scholar-fastmcp-mcp-server",
+            url="https://github.com/zongmin-yu/semantic-scholar-fastmcp-mcp-server",
+            license_spdx="MIT",
+        ),
+        search_query=SearchQuery(keywords=["semantic", "scholar"]),
+        search_position=1,
+        decision="eligible-for-inspection",
+        score=ScoreBreakdown(
+            search_fit=1,
+            maintenance=1,
+            adoption=1,
+            community=1,
+            issue_health=1,
+            license_confidence=1,
+            security_posture=1,
+            total=7,
+        ),
+    )
+    run = DiscoveryRun(
+        created_at=datetime(2026, 8, 27, tzinfo=UTC),
+        provider="fixture-discovery/1",
+        request=request,
+        results=[CapabilityResult(capability=request.capabilities[0], candidates=[candidate])],
+    )
+    run_file = tmp_path / "discovery.json"
+    write_run(run, run_file)
+
+    result = runner.invoke(app, ["report", str(run_file)])
+
+    assert result.exit_code == 0
+    assert "zongmin-yu/semantic-scholar-fastmcp-mcp-server" in result.stdout
+    assert "decision=eligible-for-inspection" in result.stdout
+    assert "…" not in result.stdout
+    assert "\ufffd" not in result.stdout
 
 
 def test_discover_filters_capability_and_writes_a_strict_run(tmp_path, monkeypatch) -> None:

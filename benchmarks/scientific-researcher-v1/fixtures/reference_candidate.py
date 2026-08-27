@@ -5,9 +5,7 @@ import sys
 
 request = json.load(sys.stdin)
 documents = request["documents"]
-selected = [
-    document for document in documents if document["document_id"].startswith("evidence-")
-]
+selected = [document for document in documents if document["document_id"].startswith("evidence-")]
 if len(selected) < request["minimum_sources"]:
     result = {
         "schema_version": "1",
