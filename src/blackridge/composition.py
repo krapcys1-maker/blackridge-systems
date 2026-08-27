@@ -621,6 +621,41 @@ def _expand_control_value(value: str, definition_directory: Path) -> str:
     )
 
 
+def _portable_component_argv(
+    values: Sequence[str],
+    *,
+    definition_directory: Path,
+    source_artifact: Path,
+    component_id: str,
+) -> list[str]:
+    """Replace host-bound launch paths with runtime-resolved bundle markers."""
+
+    portable: list[str] = []
+    for value in values:
+        if value == "{python}":
+            portable.append("{python}")
+            continue
+        expanded = value.replace("{definition_dir}", str(definition_directory.resolve()))
+        candidate = Path(expanded)
+        if candidate.is_absolute() and candidate.resolve() == source_artifact:
+            portable.append("{artifact}")
+        elif "{definition_dir}" in value or candidate.is_absolute():
+            raise BlackridgeError(
+                f"selected component has an unmapped host path in argv: {component_id}"
+            )
+        elif "{python}" in value or "{artifact}" in value:
+            raise BlackridgeError(
+                f"selected component uses a launch marker inside another argument: {component_id}"
+            )
+        else:
+            portable.append(value)
+    if "{artifact}" not in portable:
+        raise BlackridgeError(
+            f"selected component argv does not reference its locked artifact: {component_id}"
+        )
+    return portable
+
+
 def generate_system(
     definition: CompositionDefinition,
     plan: CompositionPlan,
@@ -664,6 +699,28 @@ def generate_system(
             component_by_id[component_id] for component_id in plan.selected_component_ids
         ]
         selected_adapters = [adapter_by_id[adapter_id] for adapter_id in plan.selected_adapter_ids]
+        bundled_components: dict[str, tuple[Path, str]] = {}
+        for component in selected_components:
+            if component.launch is None:
+                raise BlackridgeError(
+                    "selected component is not executable by the v1 runtime: "
+                    f"{component.component_id}"
+                )
+            source = Path(
+                _expand_control_value(component.launch.artifact_file, definition_directory)
+            ).resolve()
+            suffix = source.suffix if re.fullmatch(r"\.[A-Za-z0-9]+", source.suffix) else ""
+            relative = f"components/{component.component_id}{suffix}"
+            destination = temporary / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, destination)
+            copied_hash = _sha256_file(destination)
+            if copied_hash != component.launch.artifact_sha256:
+                raise BlackridgeError(
+                    "selected component changed while generating its bundle: "
+                    f"{component.component_id}"
+                )
+            bundled_components[component.component_id] = (source, relative)
         component_locks = [_primitive(component) for component in selected_components]
         _write_yaml(
             temporary / "components.lock.yaml",
@@ -686,17 +743,16 @@ def generate_system(
                         "selected component is not executable by the v1 runtime: "
                         f"{component.component_id}"
                     )
+                source_artifact, bundled_artifact = bundled_components[component.component_id]
                 runtime_step["launch"] = {
-                    "argv": [
-                        _expand_control_value(value, definition_directory)
-                        for value in component.launch.argv
-                    ],
-                    "working_directory": _expand_control_value(
-                        component.launch.working_directory, definition_directory
+                    "argv": _portable_component_argv(
+                        component.launch.argv,
+                        definition_directory=definition_directory,
+                        source_artifact=source_artifact,
+                        component_id=component.component_id,
                     ),
-                    "artifact_file": _expand_control_value(
-                        component.launch.artifact_file, definition_directory
-                    ),
+                    "working_directory": "components",
+                    "artifact_file": bundled_artifact,
                     "artifact_sha256": component.launch.artifact_sha256,
                     "timeout_seconds": component.launch.timeout_seconds,
                     "environment_allowlist": component.launch.environment_allowlist,
@@ -780,6 +836,8 @@ def generate_system(
             f"{definition.goal}\n\n"
             "This bundle has a complete compatibility route, but it is not release-ready until "
             "representative L4 workloads receive named manual review.\n\n"
+            "The locked component artifacts are included under `components/`; copy or move the "
+            "whole bundle when executing it on another host.\n\n"
             "Run: `blackridge compose-run . INPUT.json --output OUTPUT.json "
             "--evidence evidence/run-probe.json --provenance-sha256 "
             "<trusted hash printed by compose-generate>`",
@@ -851,6 +909,212 @@ def _resolve_bundle_file(bundle: Path, relative: str) -> Path:
     if not resolved.is_file():
         raise BlackridgeError(f"generated bundle file is missing: {relative}")
     return resolved
+
+
+def _resolve_bundle_directory(bundle: Path, relative: str) -> Path:
+    resolved = (bundle / relative).resolve()
+    try:
+        resolved.relative_to(bundle.resolve())
+    except ValueError as exc:
+        raise BlackridgeError(f"generated bundle path escapes its root: {relative}") from exc
+    if not resolved.is_dir():
+        raise BlackridgeError(f"generated bundle directory is missing: {relative}")
+    return resolved
+
+
+def _resolve_component_launch(
+    bundle: Path,
+    launch: dict[str, Any],
+    *,
+    subject_id: str,
+) -> dict[str, Any]:
+    """Resolve a self-contained component launch without accepting host-bound paths."""
+
+    artifact_value = launch.get("artifact_file")
+    working_value = launch.get("working_directory")
+    argv_value = launch.get("argv")
+    if (
+        not isinstance(artifact_value, str)
+        or not isinstance(working_value, str)
+        or not isinstance(argv_value, list)
+        or not argv_value
+        or not all(isinstance(value, str) for value in argv_value)
+    ):
+        raise BlackridgeError(f"component launch control is invalid: {subject_id}")
+    artifact = _resolve_bundle_file(bundle, artifact_value)
+    working_directory = _resolve_bundle_directory(bundle, working_value)
+    argv: list[str] = []
+    for value in argv_value:
+        if value == "{python}":
+            argv.append(sys.executable)
+        elif value == "{artifact}":
+            argv.append(str(artifact))
+        elif "{python}" in value or "{artifact}" in value:
+            raise BlackridgeError(
+                f"component launch marker is not a complete argument: {subject_id}"
+            )
+        elif Path(value).is_absolute():
+            raise BlackridgeError(f"generated component has a host-bound argv path: {subject_id}")
+        else:
+            argv.append(value)
+    if str(artifact) not in argv:
+        raise BlackridgeError(
+            f"generated component argv does not reference its bundled artifact: {subject_id}"
+        )
+    resolved = dict(launch)
+    resolved.update(
+        {
+            "argv": argv,
+            "working_directory": str(working_directory),
+            "artifact_file": str(artifact),
+        }
+    )
+    return resolved
+
+
+def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None:
+    """Reject a hash-valid bundle whose generated control files disagree semantically."""
+
+    definition_file = _resolve_bundle_file(bundle, "composition.definition.yaml")
+    definition = _load_yaml_mapping(definition_file)
+    plan_value = json.loads(
+        _resolve_bundle_file(bundle, "composition.plan.json").read_text(encoding="utf-8")
+    )
+    component_locks = _load_yaml_mapping(_resolve_bundle_file(bundle, "components.lock.yaml"))
+    if not isinstance(plan_value, dict):
+        raise BlackridgeError("generated composition plan is invalid")
+    if plan_value.get("definition_sha256") != _sha256_file(definition_file):
+        raise BlackridgeError("generated plan disagrees with its frozen definition hash")
+    for runtime_key, definition_key in (
+        ("system_name", "name"),
+        ("mode", "mode"),
+        ("external_input", "external_input"),
+        ("required_output", "required_output"),
+    ):
+        if runtime.get(runtime_key) != definition.get(definition_key):
+            raise BlackridgeError(f"generated runtime disagrees with its definition: {runtime_key}")
+    if runtime.get("system_name") != plan_value.get("system_name") or runtime.get(
+        "mode"
+    ) != plan_value.get("mode"):
+        raise BlackridgeError("generated runtime disagrees with its composition plan")
+
+    definition_contracts_value = definition.get("contracts")
+    runtime_contracts = runtime.get("contract_files")
+    if not isinstance(definition_contracts_value, list) or not isinstance(runtime_contracts, dict):
+        raise BlackridgeError("generated runtime or definition contracts are invalid")
+    definition_contracts: dict[str, object] = {}
+    for contract in definition_contracts_value:
+        if (
+            not isinstance(contract, dict)
+            or not isinstance(contract.get("contract_id"), str)
+            or not isinstance(contract.get("schema"), dict)
+        ):
+            raise BlackridgeError("generated definition contract is invalid")
+        definition_contracts[contract["contract_id"]] = contract["schema"]
+    if len(definition_contracts) != len(definition_contracts_value) or set(
+        runtime_contracts
+    ) != set(definition_contracts):
+        raise BlackridgeError("generated runtime contract inventory disagrees with definition")
+    for contract_id, relative in runtime_contracts.items():
+        if not isinstance(relative, str):
+            raise BlackridgeError("generated runtime contract path is invalid")
+        actual_schema = json.loads(
+            _resolve_bundle_file(bundle, relative).read_text(encoding="utf-8")
+        )
+        if actual_schema != definition_contracts[contract_id]:
+            raise BlackridgeError(
+                f"generated runtime contract disagrees with definition: {contract_id}"
+            )
+
+    runtime_steps = runtime.get("steps")
+    plan_steps = plan_value.get("steps")
+    if not isinstance(runtime_steps, list) or not isinstance(plan_steps, list):
+        raise BlackridgeError("generated runtime or plan steps are invalid")
+    step_keys = {
+        "index",
+        "step_type",
+        "subject_id",
+        "input_contract",
+        "output_contract",
+    }
+    if len(runtime_steps) != len(plan_steps):
+        raise BlackridgeError("generated runtime step count disagrees with its plan")
+    for runtime_step, plan_step in zip(runtime_steps, plan_steps, strict=True):
+        if not isinstance(runtime_step, dict) or not isinstance(plan_step, dict):
+            raise BlackridgeError("generated runtime or plan step is invalid")
+        if {key: runtime_step.get(key) for key in step_keys} != {
+            key: plan_step.get(key) for key in step_keys
+        }:
+            raise BlackridgeError("generated runtime step disagrees with its plan")
+
+    locked_components_value = component_locks.get("components")
+    if not isinstance(locked_components_value, list) or not all(
+        isinstance(item, dict) and isinstance(item.get("component_id"), str)
+        for item in locked_components_value
+    ):
+        raise BlackridgeError("generated component lock is invalid")
+    locked_components = {item.get("component_id"): item for item in locked_components_value}
+    selected_components = plan_value.get("selected_component_ids")
+    if (
+        len(locked_components) != len(locked_components_value)
+        or not isinstance(selected_components, list)
+        or not all(isinstance(item, str) for item in selected_components)
+        or set(locked_components) != set(selected_components)
+    ):
+        raise BlackridgeError("generated component lock disagrees with its plan")
+    selected_adapters = plan_value.get("selected_adapter_ids")
+    runtime_adapter_ids = {
+        step.get("subject_id")
+        for step in runtime_steps
+        if isinstance(step, dict) and step.get("step_type") == "adapter"
+    }
+    if (
+        not isinstance(selected_adapters, list)
+        or not all(isinstance(item, str) for item in selected_adapters)
+        or runtime_adapter_ids != set(selected_adapters)
+    ):
+        raise BlackridgeError("generated adapter inventory disagrees with its plan")
+
+    for runtime_step in runtime_steps:
+        subject_id = runtime_step.get("subject_id")
+        if not isinstance(subject_id, str):
+            raise BlackridgeError("generated runtime step has no subject id")
+        if runtime_step.get("step_type") == "component":
+            locked = locked_components.get(subject_id)
+            launch = runtime_step.get("launch")
+            if not isinstance(locked, dict) or not isinstance(launch, dict):
+                raise BlackridgeError(f"generated component lock is missing: {subject_id}")
+            locked_launch = locked.get("launch")
+            if not isinstance(locked_launch, dict):
+                raise BlackridgeError(f"generated component launch lock is missing: {subject_id}")
+            if locked.get("accepts") != [runtime_step.get("input_contract")] or locked.get(
+                "produces"
+            ) != [runtime_step.get("output_contract")]:
+                raise BlackridgeError(
+                    f"generated component contracts disagree with their lock: {subject_id}"
+                )
+            for field in ("artifact_sha256", "timeout_seconds", "environment_allowlist"):
+                if launch.get(field) != locked_launch.get(field):
+                    raise BlackridgeError(
+                        f"generated component launch disagrees with its lock: {subject_id}"
+                    )
+        elif runtime_step.get("step_type") == "adapter":
+            manifest = _load_yaml_mapping(
+                _resolve_bundle_file(bundle, f"adapters/{subject_id}.yaml")
+            )
+            operations = runtime_step.get("operations")
+            if (
+                manifest.get("adapter_id") != subject_id
+                or manifest.get("source_contract") != runtime_step.get("input_contract")
+                or manifest.get("target_contract") != runtime_step.get("output_contract")
+                or manifest.get("operations") != operations
+                or manifest.get("operations_sha256") != _sha256_json(operations)
+            ):
+                raise BlackridgeError(
+                    f"generated adapter runtime disagrees with its lock: {subject_id}"
+                )
+        else:
+            raise BlackridgeError("generated runtime contains an unsupported step type")
 
 
 def _verify_provenance_root(provenance_file: Path, expected_sha256: str) -> str:
@@ -944,6 +1208,7 @@ def run_generated_system(
     runtime = _load_yaml_mapping(runtime_file)
     if runtime.get("mode") != _runtime_mode:
         raise BlackridgeError("generated runtime mode is not enabled by this execution backend")
+    _validate_runtime_consistency(bundle, runtime)
     contract_files = runtime.get("contract_files")
     steps = runtime.get("steps")
     if not isinstance(contract_files, dict) or not isinstance(steps, list):
@@ -981,6 +1246,8 @@ def run_generated_system(
         launch = raw_step.get("launch")
         if not isinstance(launch, dict):
             raise BlackridgeError(f"component step has no launch control: {subject_id}")
+        launch = _resolve_component_launch(bundle, launch, subject_id=subject_id)
+        raw_step["launch"] = launch
         argv = launch.get("argv")
         cwd = launch.get("working_directory")
         timeout = launch.get("timeout_seconds")
@@ -1358,6 +1625,7 @@ def run_generated_system_sandboxed(
         raise BlackridgeError(
             "sandboxed generated-system v1 remains calibration-only pending hostile controls"
         )
+    _validate_runtime_consistency(bundle, runtime)
     steps = runtime.get("steps")
     if not isinstance(steps, list):
         raise BlackridgeError("generated runtime is missing steps")
@@ -1369,6 +1637,7 @@ def run_generated_system_sandboxed(
         launch = raw_step.get("launch")
         if not isinstance(subject_id, str) or not isinstance(launch, dict):
             raise BlackridgeError("generated component launch control is invalid")
+        launch = _resolve_component_launch(bundle, launch, subject_id=subject_id)
         artifact_file = launch.get("artifact_file")
         artifact_hash = launch.get("artifact_sha256")
         allowlist = launch.get("environment_allowlist", [])

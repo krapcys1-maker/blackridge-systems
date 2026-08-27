@@ -145,13 +145,26 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
     )
     containers_before = _docker_container_ids(harness, "containers-before", docker)
 
+    positive_source = work / "positive-source"
+    shutil.copytree(examples, positive_source)
+    portable_input = work / "positive-input.json"
+    shutil.copy2(input_file, portable_input)
     positive = work / "positive"
     bundle, provenance_sha256 = _generate_bundle(
         harness,
         name="positive",
-        definition=examples / "composition-linear-calibration.yaml",
+        definition=positive_source / "composition-linear-calibration.yaml",
         destination=positive,
     )
+    bundled_components = sorted((bundle / "components").glob("*"))
+    _expect(len(bundled_components) == 2, "positive bundle did not retain both components")
+    runtime_text = (bundle / "runtime.yaml").read_text(encoding="utf-8")
+    _expect(
+        str(positive_source.resolve()) not in runtime_text,
+        "positive runtime retained its source checkout path",
+    )
+    shutil.rmtree(positive_source)
+    _expect(not positive_source.exists(), "positive source fixture was not removed")
     host_output = positive / "host-output.json"
     host_evidence = positive / "host-evidence.json"
     harness.cli(
@@ -159,7 +172,7 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         [
             "compose-run",
             bundle,
-            input_file,
+            portable_input,
             "--provenance-sha256",
             provenance_sha256,
             "--output",
@@ -175,7 +188,7 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         [
             "compose-run-sandbox",
             bundle,
-            input_file,
+            portable_input,
             "--provenance-sha256",
             provenance_sha256,
             "--image",
@@ -221,7 +234,7 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         [
             "compose-run",
             bundle,
-            input_file,
+            portable_input,
             "--provenance-sha256",
             "0" * 64,
             "--output",
@@ -236,6 +249,112 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
     _expect(isinstance(wrong_observations, dict), "wrong-root evidence is invalid")
     _expect(wrong_observations["probe_completed"] is False, "wrong trust root completed")
     _expect(not wrong_output.exists(), "wrong trust root published output")
+
+    invalid_input = controls / "invalid-input.json"
+    invalid_input.write_text('{"topic": "x"}\n', encoding="utf-8", newline="\n")
+    invalid_output = controls / "invalid-input-output.json"
+    invalid_evidence = controls / "invalid-input-evidence.json"
+    harness.cli(
+        "invalid-input",
+        [
+            "compose-run",
+            bundle,
+            invalid_input,
+            "--provenance-sha256",
+            provenance_sha256,
+            "--output",
+            invalid_output,
+            "--evidence",
+            invalid_evidence,
+        ],
+        expected_exit_codes={1},
+    )
+    invalid_probe = _load_json(invalid_evidence)
+    invalid_observations = invalid_probe["observations"]
+    _expect(isinstance(invalid_observations, dict), "invalid-input evidence is invalid")
+    invalid_errors = invalid_observations["initial_validation_errors"]
+    invalid_steps = invalid_observations["steps"]
+    _expect(isinstance(invalid_errors, list) and invalid_errors, "invalid input passed schema")
+    _expect(isinstance(invalid_steps, list), "invalid-input steps are invalid")
+    _expect(
+        all(isinstance(step, dict) and step.get("status") == "skipped" for step in invalid_steps),
+        "a step was not skipped after invalid external input",
+    )
+    _expect(
+        not any(isinstance(step, dict) and "process" in step for step in invalid_steps),
+        "a component executed after invalid external input",
+    )
+    _expect(not invalid_output.exists(), "invalid external input published output")
+
+    no_adapter_plan = controls / "no-adapter-plan.yaml"
+    no_adapter_definition = examples / "composition-linear-no-adapter.yaml"
+    harness.cli(
+        "no-adapter-solve",
+        ["compose-solve", no_adapter_definition, "--output", no_adapter_plan],
+        expected_exit_codes={1},
+    )
+    no_adapter_text = no_adapter_plan.read_text(encoding="utf-8")
+    _expect("complete: false" in no_adapter_text, "missing-adapter route completed")
+    _expect("unresolved_capabilities:" in no_adapter_text, "missing route was not explained")
+    no_adapter_bundle = controls / "no-adapter-bundle"
+    harness.cli(
+        "no-adapter-generate",
+        ["compose-generate", no_adapter_definition, no_adapter_plan, no_adapter_bundle],
+        expected_exit_codes={2},
+    )
+    _expect(not no_adapter_bundle.exists(), "incomplete no-adapter bundle was generated")
+
+    adapter_source = controls / "adapter-failure-source"
+    shutil.copytree(examples, adapter_source)
+    adapter_definition = adapter_source / "composition-linear-calibration.yaml"
+    adapter_text = adapter_definition.read_text(encoding="utf-8")
+    adapter_text = adapter_text.replace("/paper/title", "/paper/missing")
+    adapter_text = adapter_text.replace(
+        "a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9",
+        "62c020b6f3c8c2349b586b9595163e037e3a41a1891842e0f2ae43fec791deb2",
+    )
+    adapter_definition.write_text(adapter_text, encoding="utf-8", newline="\n")
+    adapter_failure = controls / "adapter-failure"
+    adapter_bundle, adapter_hash = _generate_bundle(
+        harness,
+        name="adapter-failure",
+        definition=adapter_definition,
+        destination=adapter_failure,
+    )
+    shutil.rmtree(adapter_source)
+    adapter_output = adapter_failure / "output.json"
+    adapter_evidence = adapter_failure / "evidence.json"
+    harness.cli(
+        "adapter-failure-run",
+        [
+            "compose-run",
+            adapter_bundle,
+            portable_input,
+            "--provenance-sha256",
+            adapter_hash,
+            "--output",
+            adapter_output,
+            "--evidence",
+            adapter_evidence,
+        ],
+        expected_exit_codes={1},
+    )
+    adapter_probe = _load_json(adapter_evidence)
+    adapter_observations = adapter_probe["observations"]
+    _expect(isinstance(adapter_observations, dict), "adapter-failure evidence is invalid")
+    adapter_steps = adapter_observations["steps"]
+    _expect(isinstance(adapter_steps, list), "adapter-failure steps are invalid")
+    adapter_statuses = [step.get("status") for step in adapter_steps if isinstance(step, dict)]
+    _expect(
+        adapter_statuses == ["completed", "failed", "skipped"],
+        "adapter failure did not stop the boundary chain",
+    )
+    failed_adapter = adapter_steps[1]
+    _expect(
+        isinstance(failed_adapter, dict) and failed_adapter.get("patch_error"),
+        "adapter failure did not retain its patch error",
+    )
+    _expect(not adapter_output.exists(), "failed adapter published output")
 
     broken = controls / "broken-contract"
     broken_bundle, broken_hash = _generate_bundle(
@@ -327,9 +446,20 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         definition=tamper_examples / "composition-linear-calibration.yaml",
         destination=tamper,
     )
-    sink = tamper_examples / "fixtures" / "report_sink.py"
+    sink = tamper_bundle / "components" / "fixture-report-sink.py"
     with sink.open("a", encoding="utf-8", newline="\n") as stream:
         stream.write("\n# Deliberate post-generation E2E tamper.\n")
+    tamper_provenance = tamper_bundle / "provenance.json"
+    tamper_manifest = _load_json(tamper_provenance)
+    tamper_artifacts = tamper_manifest.get("artifact_sha256")
+    _expect(isinstance(tamper_artifacts, dict), "tamper provenance artifacts are invalid")
+    tamper_artifacts["components/fixture-report-sink.py"] = _sha256_file(sink)
+    tamper_provenance.write_text(
+        json.dumps(tamper_manifest, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    tamper_hash = _sha256_file(tamper_provenance)
     tamper_output = tamper / "output.json"
     tamper_evidence = tamper / "evidence.json"
     harness.cli(
@@ -399,9 +529,14 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
             "output_sha256": _sha256_file(host_output),
             "step_count": len(host_observations["steps"]),
             "sandbox_preflight_checks": len(checks),
+            "source_removed_before_execution": not positive_source.exists(),
+            "bundled_component_count": len(bundled_components),
         },
         "controls": {
             "wrong_provenance_rejected": True,
+            "invalid_input_processes_executed": 0,
+            "missing_adapter_rejected": True,
+            "adapter_failure_statuses": adapter_statuses,
             "green_exit_invalid_contract_rejected": True,
             "timeout_exit_code": timeout_process["exit_code"],
             "tamper_processes_executed": len(processes),

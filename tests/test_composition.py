@@ -131,6 +131,13 @@ def test_generator_writes_locked_layout_and_runtime_completes(tmp_path: Path) ->
         "runtime.yaml",
     }
     assert expected <= {path.name for path in bundle.iterdir() if path.is_file()}
+    bundled_components = sorted(path.name for path in (bundle / "components").iterdir())
+    assert bundled_components == ["fixture-report-sink.py", "fixture-research-source.py"]
+    runtime = yaml.safe_load((bundle / "runtime.yaml").read_text(encoding="utf-8"))
+    launches = [step["launch"] for step in runtime["steps"] if step["step_type"] == "component"]
+    assert all(launch["working_directory"] == "components" for launch in launches)
+    assert all(not Path(launch["artifact_file"]).is_absolute() for launch in launches)
+    assert all(launch["argv"] == ["{python}", "{artifact}"] for launch in launches)
     assert generated.execution_ready is True
     assert generated.release_ready is False
     assert probe.observations["all_steps_completed"] is True
@@ -189,7 +196,7 @@ def test_runtime_rejects_tampered_generated_artifact(tmp_path: Path) -> None:
         )
 
 
-def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path) -> None:
+def test_generated_bundle_runs_after_its_definition_source_is_removed(tmp_path: Path) -> None:
     examples = tmp_path / "examples"
     shutil.copytree(ROOT / "examples", examples)
     definition_file = examples / "composition-linear-calibration.yaml"
@@ -202,8 +209,39 @@ def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path
         definition_file=definition_file,
         output_directory=bundle,
     )
-    sink = examples / "fixtures" / "report_sink.py"
+    shutil.rmtree(examples)
+
+    probe = run_generated_system(
+        bundle,
+        INPUT,
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
+
+    assert probe.observations["all_steps_completed"] is True
+    assert probe.observations["final_artifact"]["report"]["based_on"] == "fixture-paper-001"
+
+
+def test_runtime_preflights_every_bundled_component_hash_before_execution(
+    tmp_path: Path,
+) -> None:
+    definition = load_composition_definition(POSITIVE)
+    plan = solve_composition(definition, definition_file=POSITIVE)
+    bundle = tmp_path / "generated"
+    generate_system(
+        definition,
+        plan,
+        definition_file=POSITIVE,
+        output_directory=bundle,
+    )
+    sink = bundle / "components" / "fixture-report-sink.py"
     sink.write_text(sink.read_text(encoding="utf-8") + "# tampered\n", encoding="utf-8")
+    provenance_file = bundle / "provenance.json"
+    provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
+    provenance["artifact_sha256"]["components/fixture-report-sink.py"] = sha256(
+        sink.read_bytes()
+    ).hexdigest()
+    provenance_file.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
+    resigned_root = sha256(provenance_file.read_bytes()).hexdigest()
 
     def unexpected_process(*_args, **_kwargs):
         raise AssertionError("no component may execute after a preflight hash mismatch")
@@ -211,7 +249,7 @@ def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path
     probe = run_generated_system(
         bundle,
         INPUT,
-        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        expected_provenance_sha256=resigned_root,
         _component_process=unexpected_process,
     )
 
@@ -299,8 +337,35 @@ def test_sandboxed_generated_runner_refuses_environment_forwarding(tmp_path: Pat
 
     provenance_sha256 = _rewrite_runtime_and_relock(bundle, add_environment)
 
-    with pytest.raises(BlackridgeError, match="forwards no component environment"):
+    with pytest.raises(BlackridgeError, match="component launch disagrees with its lock"):
         run_generated_system_sandboxed(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=provenance_sha256,
+        )
+
+
+def test_runtime_rejects_resigned_adapter_operations_that_disagree_with_lock(
+    tmp_path: Path,
+) -> None:
+    definition = load_composition_definition(POSITIVE)
+    plan = solve_composition(definition, definition_file=POSITIVE)
+    bundle = tmp_path / "adapter-mismatch"
+    generate_system(
+        definition,
+        plan,
+        definition_file=POSITIVE,
+        output_directory=bundle,
+    )
+
+    def change_adapter(runtime) -> None:
+        adapter = next(step for step in runtime["steps"] if step["step_type"] == "adapter")
+        adapter["operations"][-1]["from"] = "/paper/missing"
+
+    provenance_sha256 = _rewrite_runtime_and_relock(bundle, change_adapter)
+
+    with pytest.raises(BlackridgeError, match="adapter runtime disagrees with its lock"):
+        run_generated_system(
             bundle,
             INPUT,
             expected_provenance_sha256=provenance_sha256,
