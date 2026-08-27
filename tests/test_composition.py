@@ -431,6 +431,38 @@ def test_sandboxed_generated_runner_refuses_environment_forwarding(tmp_path: Pat
         )
 
 
+def test_generated_runtime_locks_explicit_sandbox_resources(tmp_path: Path) -> None:
+    examples = tmp_path / "examples"
+    shutil.copytree(ROOT / "examples", examples)
+    definition_file = examples / POSITIVE.name
+    definition_value = yaml.safe_load(definition_file.read_text(encoding="utf-8"))
+    definition_value["sandbox_resources"] = {
+        "memory_mb": 4096,
+        "cpus": 3.5,
+        "pids": 512,
+    }
+    definition_file.write_text(
+        yaml.safe_dump(definition_value, sort_keys=False), encoding="utf-8"
+    )
+    definition = load_composition_definition(definition_file)
+    plan = solve_composition(definition, definition_file=definition_file)
+    bundle = tmp_path / "resource-bounded"
+
+    generate_system(
+        definition,
+        plan,
+        definition_file=definition_file,
+        output_directory=bundle,
+    )
+
+    runtime = yaml.safe_load((bundle / "runtime.yaml").read_text(encoding="utf-8"))
+    assert runtime["sandbox_resources"] == {
+        "memory_mb": 4096,
+        "cpus": 3.5,
+        "pids": 512,
+    }
+
+
 def test_runtime_rejects_resigned_adapter_operations_that_disagree_with_lock(
     tmp_path: Path,
 ) -> None:

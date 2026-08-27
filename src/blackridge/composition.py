@@ -131,6 +131,14 @@ class AdapterOption(StrictModel):
         return self
 
 
+class SandboxResources(StrictModel):
+    """Explicit bounded resources carried into the generated runtime lock."""
+
+    memory_mb: int = Field(default=1024, ge=128, le=32768)
+    cpus: float = Field(default=2.0, ge=0.25, le=32)
+    pids: int = Field(default=256, ge=32, le=4096)
+
+
 class CompositionDefinition(StrictModel):
     """A frozen contract-graph composition problem and all permitted choices."""
 
@@ -145,6 +153,7 @@ class CompositionDefinition(StrictModel):
     allowed_integrations: list[str] = Field(min_length=1)
     minimum_evidence_level: EvidenceLevel = EvidenceLevel.CONTRACT_TESTED
     max_combinations: int = Field(default=10_000, ge=1, le=100_000)
+    sandbox_resources: SandboxResources = Field(default_factory=SandboxResources)
     contracts: list[ContractDefinition] = Field(min_length=2)
     components: list[ComponentOption] = Field(min_length=1)
     adapters: list[AdapterOption] = Field(default_factory=list)
@@ -919,6 +928,7 @@ def generate_system(
             "schema_version": "1",
             "system_name": definition.name,
             "mode": definition.mode,
+            "sandbox_resources": _primitive(definition.sandbox_resources),
             "external_input": definition.external_input,
             "required_output": definition.required_output,
             "contract_files": contract_files,
@@ -1186,6 +1196,14 @@ def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None
     ):
         if runtime.get(runtime_key) != definition.get(definition_key):
             raise BlackridgeError(f"generated runtime disagrees with its definition: {runtime_key}")
+    default_sandbox_resources = _primitive(SandboxResources())
+    definition_sandbox_resources = definition.get(
+        "sandbox_resources", default_sandbox_resources
+    )
+    if runtime.get("sandbox_resources") != definition_sandbox_resources:
+        raise BlackridgeError(
+            "generated runtime disagrees with its definition: sandbox_resources"
+        )
     if runtime.get("system_name") != plan_value.get("system_name") or runtime.get(
         "mode"
     ) != plan_value.get("mode"):
@@ -1904,6 +1922,14 @@ def run_generated_system_sandboxed(
             "sandboxed generated-system v1 remains calibration-only pending hostile controls"
         )
     _validate_runtime_consistency(bundle, runtime)
+    try:
+        sandbox_resources = SandboxResources.model_validate(runtime.get("sandbox_resources"))
+    except ValueError as exc:
+        raise BlackridgeError("generated sandbox resource control is invalid") from exc
+    memory_flag = f"{sandbox_resources.memory_mb}m"
+    cpu_flag = f"{sandbox_resources.cpus:g}"
+    expected_memory_bytes = str(sandbox_resources.memory_mb * 1024 * 1024)
+    expected_cpu_max = f"{round(sandbox_resources.cpus * 100_000)} 100000"
     steps = runtime.get("steps")
     if not isinstance(steps, list):
         raise BlackridgeError("generated runtime is missing steps")
@@ -1943,10 +1969,10 @@ def run_generated_system_sandboxed(
         docker_args=[
             "--cap-drop=ALL",
             "--security-opt=no-new-privileges",
-            "--pids-limit=256",
-            "--memory=1g",
-            "--memory-swap=1g",
-            "--cpus=2",
+            f"--pids-limit={sandbox_resources.pids}",
+            f"--memory={memory_flag}",
+            f"--memory-swap={memory_flag}",
+            f"--cpus={cpu_flag}",
         ],
         logger=adapter._logger(),
     )
@@ -2182,12 +2208,13 @@ def run_generated_system_sandboxed(
             "dns_egress_denied": preflight_result.get("dns") is False,
             "sensitive_names_absent": preflight_result.get("sensitive_environment_names") == [],
             "memory_limit_exact": isinstance(cgroup, dict)
-            and cgroup.get("memory_max") == "1073741824",
+            and cgroup.get("memory_max") == expected_memory_bytes,
             "memory_swap_disabled": isinstance(cgroup, dict)
             and cgroup.get("memory_swap_max") == "0",
-            "pids_limit_exact": isinstance(cgroup, dict) and cgroup.get("pids_max") == "256",
+            "pids_limit_exact": isinstance(cgroup, dict)
+            and cgroup.get("pids_max") == str(sandbox_resources.pids),
             "cpu_limit_exact": isinstance(cgroup, dict)
-            and cgroup.get("cpu_max") == "200000 100000",
+            and cgroup.get("cpu_max") == expected_cpu_max,
         }
         preflight["checks"] = preflight_checks
         preflight["passed"] = all(preflight_checks.values())
@@ -2269,10 +2296,10 @@ def run_generated_system_sandboxed(
         "security_options": [
             "cap-drop=ALL",
             "no-new-privileges",
-            "pids-limit=256",
-            "memory=1g",
-            "memory-swap=1g",
-            "cpus=2",
+            f"pids-limit={sandbox_resources.pids}",
+            f"memory={memory_flag}",
+            f"memory-swap={memory_flag}",
+            f"cpus={cpu_flag}",
             "workload-user=65534:65534",
         ],
         "copied_components": copied,

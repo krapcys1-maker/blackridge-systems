@@ -127,10 +127,11 @@ relocking.
    are active; API extraction and policy resolution remain next.
 3. **Experimenter** — disposable sandbox boot is active for pinned public GitHub repositories;
    generalized boot recipes, contract suites, and resource measurements remain next.
-4. **Composer** — declarative JSON Patch adaptation and paired contract verification are active;
-   linear compatibility solving, locked generation, provenance validation, and a shell-free
-   calibration runtime are active; multi-input DAGs, sandbox-backed production execution,
-   structural/AI adapter generation, and replacement loops remain next.
+4. **Composer** — declarative JSON Patch adaptation, paired contract verification, multi-input DAG
+   solving, bundled hash-locked resources, locked generation, provenance validation, and
+   shell-free host and sandbox calibration runtimes are active. Production execution,
+   component-specific locked dependency images, structural/AI adapter generation, and replacement
+   loops remain next.
 5. **Foundry** — reusable integration memory and delivery of verified systems from natural-language goals.
 
 ## Comparative benchmark boundary

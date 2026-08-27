@@ -88,3 +88,9 @@ invalid artifact must fail at its output contract. The v1 host runner is calibra
 production execution remains behind the sandbox boundary. For a saved bundle, retain the
 generator's provenance SHA-256 outside the bundle and prove that a bundle with internally rewritten
 hashes is rejected against the original digest.
+
+For sandbox runs, compare the declared `sandbox_resources` in the frozen definition with
+`runtime.yaml`, the Docker arguments, and the observed cgroup values. Memory swap must remain zero,
+and the process must run as the declared non-root user with no effective capabilities. A larger
+limit is not evidence of success; it only makes the resource boundary honest for workloads that
+cannot execute under the default 1024 MiB ceiling.

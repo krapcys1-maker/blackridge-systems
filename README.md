@@ -33,8 +33,8 @@ This repository contains an executable, manually reviewed vertical slice:
 9. inspect an exact release independently with Syft, OSV-Scanner, Scorecard, deps.dev, GitHub,
    and PyPI Integrity;
 10. freeze and calibrate an artifact-first A/B benchmark before either builder is run;
-11. solve a linear compatibility graph, reject blocked or unreviewed choices, and generate a
-    provenance-locked runnable system bundle;
+11. solve acyclic compatibility graphs with fan-out and fan-in, reject blocked or unreviewed
+    choices, and generate a provenance-locked runnable system bundle;
 12. audit source history and exact multi-line similarity against frozen upstream commits;
 13. generate artifact-specific notices, package manifests, SBOMs, and license bundles;
 14. fail closed on incomplete copy provenance and unresolved image-distribution obligations;
@@ -47,6 +47,8 @@ This repository contains an executable, manually reviewed vertical slice:
     contract validation and trusted adapters while production mode remains disabled.
 19. run workloads as UID/GID 65534, enforce TERM-to-KILL deadlines inside the container, disable
     memory swap, and retain real filesystem, memory, PID, timeout, and signal hostile controls.
+20. bundle separately licensed, hash-locked component resources and carry explicit memory, CPU,
+    and PID limits from the frozen definition through Docker and live cgroup verification.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.
@@ -229,12 +231,19 @@ blackridge compose-run .blackridge/generated-research examples/composition-input
 ```
 
 The v1 solver uses hard gates, not a hidden weighted score. It checks allowed licenses and
-integration modes, exact command and adapter hashes, evidence levels, named review hashes in
-production mode, and a complete contract route. The generator writes component and evidence
-locks, the exact definition and full plan, schemas, adapter definitions, a shell-free runtime,
-provenance hashes, an SBOM gate, and an explicit `release_ready: false`. Host execution is
-restricted to Blackridge-owned calibration fixtures; production components must run through a
-sandbox in a later runtime backend.
+integration modes, exact command, resource, and adapter hashes, evidence levels, named review
+hashes in production mode, and a complete acyclic contract graph. Independent branches may fan out
+from one artifact and a later component may consume their contract-keyed outputs together. The
+generator copies code and declared non-code resources into the bundle, writes component and
+evidence locks, the exact definition and full plan, schemas, adapter definitions, a shell-free
+runtime, provenance hashes, an SBOM gate, and an explicit `release_ready: false`.
+
+Definitions may set bounded `sandbox_resources` (`memory_mb`, `cpus`, and `pids`). The selected
+values are copied into `runtime.yaml`, covered by provenance, applied to Docker, and checked against
+the live cgroup before any component executes. Defaults remain 1024 MiB, 2 CPUs, and 256 processes.
+Host execution is calibration-only. A component-specific dependency image and its distribution
+evidence are still separate release surfaces; generated code and data do not imply that an
+arbitrary host Python already contains the component's dependencies.
 
 The SHA-256 printed by `compose-generate` is an external trust root. Saved bundles cannot execute
 by merely rewriting `runtime.yaml` and updating the hashes inside their own `provenance.json`;
@@ -286,11 +295,11 @@ docker/                   runtime Dockerfile and declared image component manife
 
 Blackridge is not yet a one-command autonomous software factory. Discovery, package and
 exact-release supply-chain inspection, commit-pinned Docker experiments, declarative payload
-adapters, paired negative contract verification, frozen benchmark calibration, linear
-compatibility solving, locked generation, and calibration runtime execution now produce raw
-evidence. The first isolated A/B attempts, production-scope dependency classification,
-multi-input/DAG solving, production sandbox execution, adapter synthesis beyond JSON Patch,
-hardened remote isolation through OpenSandbox, and L4 delivery are next.
+adapters, paired negative contract verification, frozen benchmark calibration, multi-input DAG
+solving, hash-locked resource bundling, locked generation, and host/sandbox calibration runtime
+execution now produce raw evidence. Production-scope dependency images, production sandbox
+execution, adapter synthesis beyond JSON Patch, hardened remote isolation through OpenSandbox,
+additional independent workloads, and L4 delivery are next.
 
 ## License
 
