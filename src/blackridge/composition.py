@@ -858,13 +858,9 @@ def generate_system(
                 resource_source = Path(
                     _expand_control_value(resource.artifact_file, definition_directory)
                 ).resolve()
-                resource_suffix = (
-                    resource_source.suffix
-                    if re.fullmatch(r"\.[A-Za-z0-9]+", resource_source.suffix)
-                    else ""
-                )
                 resource_relative = (
-                    f"resources/{component.component_id}/{resource.resource_id}{resource_suffix}"
+                    f"resources/{component.component_id}/{resource.resource_id}/"
+                    f"{resource_source.name}"
                 )
                 resource_destination = temporary / resource_relative
                 resource_destination.parent.mkdir(parents=True, exist_ok=True)
@@ -1859,6 +1855,15 @@ def _sandbox_component_argv(
     return effective_argv
 
 
+def _sandbox_resource_target(component_index: int, resource_file: str) -> str:
+    """Keep a bundled resource basename stable across host and sandbox runtimes."""
+
+    resource_name = Path(resource_file).name
+    if component_index < 1 or not resource_name or resource_name in {".", ".."}:
+        raise BlackridgeError("sandboxed component resource target is invalid")
+    return f"/workspace/resources/component-{component_index}/{resource_name}"
+
+
 _SANDBOX_PREFLIGHT_CODE = """\
 import json
 import os
@@ -2049,9 +2054,19 @@ def run_generated_system_sandboxed(
         nonlocal container_name
         await deployment.start()
         container_name = deployment.container_name
+        resource_directories = [
+            f"/workspace/resources/component-{index}"
+            for index in range(1, len(component_controls) + 1)
+        ]
         response = await deployment.runtime.execute(
             Command(
-                command=["mkdir", "-p", "/workspace/components", "/workspace/resources"],
+                command=[
+                    "mkdir",
+                    "-p",
+                    "/workspace/components",
+                    "/workspace/resources",
+                    *resource_directories,
+                ],
                 timeout=30,
                 shell=False,
                 check=False,
@@ -2161,7 +2176,7 @@ def run_generated_system_sandboxed(
             resources = launch.get("resources", [])
             if not isinstance(resources, list):
                 raise BlackridgeError(f"component resources are invalid: {subject_id}")
-            for resource_index, resource in enumerate(resources, start=1):
+            for resource in resources:
                 if not isinstance(resource, dict):
                     raise BlackridgeError(f"component resource is invalid: {subject_id}")
                 resource_id = resource.get("resource_id")
@@ -2178,10 +2193,7 @@ def run_generated_system_sandboxed(
                 ):
                     raise BlackridgeError(f"component resource is invalid: {subject_id}")
                 resource_source = Path(resource_file).resolve()
-                resource_suffix = resource_source.suffix if resource_source.suffix.isascii() else ""
-                resource_target = (
-                    f"/workspace/resources/resource-{index}-{resource_index}{resource_suffix}"
-                )
+                resource_target = _sandbox_resource_target(index, str(resource_source))
                 resource_copy_argv = [
                     "docker",
                     "cp",

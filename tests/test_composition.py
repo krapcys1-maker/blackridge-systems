@@ -16,6 +16,7 @@ from blackridge.composition import (
     EvidenceReference,
     _host_component_process,
     _sandbox_component_argv,
+    _sandbox_resource_target,
     _verify_evidence,
     generate_system,
     run_generated_system,
@@ -346,9 +347,15 @@ def test_bundled_resource_runs_without_source_tree_and_tampering_is_blocked(
     assert probe.observations["all_steps_completed"] is True
     assert probe.observations["final_artifact"] == {"result": "locked:42"}
 
-    resource = bundle / "resources" / "fixture-resource-calculator" / "calculation-data.json"
+    resource = (
+        bundle
+        / "resources"
+        / "fixture-resource-calculator"
+        / "calculation-data"
+        / "resource_data.json"
+    )
     resource.write_text(resource.read_text(encoding="utf-8") + " ", encoding="utf-8")
-    with pytest.raises(BlackridgeError, match=r"calculation-data\.json"):
+    with pytest.raises(BlackridgeError, match=r"resource_data\.json"):
         run_generated_system(
             bundle,
             {"value": 14},
@@ -574,6 +581,16 @@ def test_sandboxed_component_maps_a_different_python_venv_safely(tmp_path: Path)
             container_artifact="/workspace/components/component-1.py",
             subject_id="portable-python-component",
         )
+
+
+def test_sandbox_resource_target_preserves_the_generated_bundle_basename(
+    tmp_path: Path,
+) -> None:
+    bundled_resource = tmp_path / "resources" / "component" / "wheel.whl"
+
+    assert _sandbox_resource_target(2, str(bundled_resource)) == (
+        "/workspace/resources/component-2/wheel.whl"
+    )
 
 
 def test_evidence_review_is_bound_to_exact_probe_subject(tmp_path: Path) -> None:
