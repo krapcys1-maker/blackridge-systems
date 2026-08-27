@@ -53,13 +53,18 @@ def discover(
 
     for capability in request.capabilities:
         hits = discovery.search(capability, limit=limit)
-        enriched: list[tuple[DiscoveryHit, RepositoryMetadata]] = []
+        enriched: list[tuple[DiscoveryHit, RepositoryMetadata, list[str]]] = []
         with ThreadPoolExecutor(max_workers=max(1, min(workers, len(hits) or 1))) as pool:
             futures = {pool.submit(_enrich_one, hit, github, scorecard): hit for hit in hits}
             for future in as_completed(futures):
                 hit, metadata, warnings = future.result()
-                enriched.append((hit, metadata))
-                run_warnings.extend(warnings)
+                enriched.append((hit, metadata, warnings))
+
+        # Completion order is intentionally nondeterministic. Restore provider order with a
+        # stable repository tie-break before emitting candidates or warnings.
+        enriched.sort(key=lambda item: (item[0].position, item[1].full_name.casefold()))
+        for _, _, warnings in enriched:
+            run_warnings.extend(warnings)
 
         candidates = [
             rank_candidate(
@@ -69,9 +74,11 @@ def discover(
                 position=hit.position,
                 now=current_time,
             )
-            for hit, metadata in enriched
+            for hit, metadata, _ in enriched
         ]
-        candidates.sort(key=lambda candidate: candidate.score.total, reverse=True)
+        candidates.sort(
+            key=lambda candidate: (-candidate.score.total, candidate.metadata.full_name.casefold())
+        )
         results.append(CapabilityResult(capability=capability, candidates=candidates))
 
     return DiscoveryRun(
