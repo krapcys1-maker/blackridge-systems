@@ -76,7 +76,7 @@ def public_material(repo: Path) -> str:
 
 
 def eligible_component(repo: Path) -> tuple[dict[str, Any], Path, dict[str, object]]:
-    """Load one hash-bound component and independently enforce its L2 evidence gate."""
+    """Load one hash-bound component and independently enforce its L3 evidence gate."""
 
     manifest_path = repo / "components" / "grounded_researcher_v1" / "component.yaml"
     manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
@@ -93,8 +93,16 @@ def eligible_component(repo: Path) -> tuple[dict[str, Any], Path, dict[str, obje
     ):
         raise RuntimeError("component source SHA-256 does not match its manifest")
     evidence = EvidenceReference.model_validate(manifest.get("evidence"))
-    if evidence.level < EvidenceLevel.BOOTED:
-        raise RuntimeError("component does not reach the frozen L2 reuse gate")
+    if evidence.level < EvidenceLevel.CONTRACT_TESTED:
+        raise RuntimeError("component does not reach the frozen L3 reuse gate")
+    public_root = repo / "benchmarks" / "scientific-researcher-v1" / "public"
+    contract_bindings = {
+        "input_contract_sha256": public_root / "research-input.schema.json",
+        "output_contract_sha256": public_root / "research-output.schema.json",
+    }
+    for field, contract_path in contract_bindings.items():
+        if manifest.get(field) != sha256_bytes(contract_path.read_bytes()):
+            raise RuntimeError(f"component {field} does not match the public contract")
     reasons, observations = verify_evidence(
         evidence,
         definition_directory=manifest_path.parent,
@@ -112,7 +120,7 @@ def eligible_component(repo: Path) -> tuple[dict[str, Any], Path, dict[str, obje
 def treatment_material(repo: Path) -> str:
     manifest, source_path, observations = eligible_component(repo)
     retained = {
-        "gate": "eligible-at-L2",
+        "gate": "eligible-at-L3-with-exact-contract-hashes",
         "reviewer": observations.get("reviewer"),
         "review_verdict": observations.get("review_verdict"),
         "review_hash_matches": observations.get("review_hash_matches"),
@@ -142,12 +150,12 @@ def builder_prompt(repo: Path, method: str) -> str:
             "Use the Blackridge reuse-first policy represented by the registry material below. "
             "Reuse source only when its retained evidence actually reaches the stated gate. "
             "Do not import or claim reuse of provisional, blocked, or merely discovered entries. "
-            "The orchestrator has independently verified the listed component's source hash and "
-            "named L2 review. If it satisfies the public contract, select it by setting "
-            "selected_component_id to grounded-researcher-v1; the orchestrator will install the "
-            "exact retained bytes as candidate.py. Do not retranscribe that file. If it does not "
-            "fit, set selected_component_id to null, implement candidate.py, and explain the exact "
-            "mismatch.\n\nBLACKRIDGE REGISTRY MATERIAL:\n" + treatment_material(repo)
+            "The deterministic orchestrator has verified the listed component's source hash, "
+            "named L3 review, and exact public input/output contract hashes. It has therefore "
+            "preselected grounded-researcher-v1 and will install the exact retained bytes as "
+            "candidate.py. Record that selected_component_id and do not retranscribe or replace "
+            "candidate.py. Your files may contain only supporting README.md, requirements.lock, "
+            "or BUILD.json metadata.\n\nBLACKRIDGE REGISTRY MATERIAL:\n" + treatment_material(repo)
         )
     return f"""You are one isolated software builder in a controlled experiment.
 
@@ -163,7 +171,7 @@ Keep the implementation deliberately small and reviewable: candidate.py must con
 physical lines and at most 20,000 characters. Do not emit giant stopword, synonym, phrase, or
 domain-vocabulary tables. Prefer a compact general algorithm over enumerating possible content.
 
-Return one JSON object, without Markdown fences, with this exact shape:
+Return one JSON object, without Markdown fences. In the from-scratch arm use this shape:
 {{
   "files": [{{"path": "candidate.py", "content": "..."}}, ...],
   "candidate_command": ["python", "/workspace/candidate.py"],
@@ -172,6 +180,9 @@ Return one JSON object, without Markdown fences, with this exact shape:
   "reused_source_lines": 0,
   "reuse_evidence": ["..."]
 }}
+
+In the Blackridge arm use selected_component_id "grounded-researcher-v1", omit candidate.py from
+files, report 293 reused_source_lines, and identify the retained L3 review and artifact SHA-256.
 
 Allowed output files are candidate.py, README.md, requirements.lock, and BUILD.json. candidate.py
 is mandatory when selected_component_id is null and must be omitted when a retained component is
@@ -248,12 +259,10 @@ def validate_and_write_bundle(
         raise RuntimeError("builder returned an invalid selected_component_id")
     selected: dict[str, Any] | None = None
     selected_source: Path | None = None
-    if selected_id is not None:
-        if method != "blackridge-hybrid":
-            raise RuntimeError("from-scratch builder attempted component reuse")
+    if method == "blackridge-hybrid":
         selected, selected_source, _ = eligible_component(repo)
-        if selected_id != selected.get("component_id"):
-            raise RuntimeError(f"builder selected an unknown component: {selected_id!r}")
+    elif selected_id is not None:
+        raise RuntimeError("from-scratch builder attempted component reuse")
     seen: set[str] = set()
     for item in files:
         if not isinstance(item, dict) or not isinstance(item.get("content"), str):
@@ -272,9 +281,8 @@ def validate_and_write_bundle(
         ):
             raise RuntimeError("builder exceeded the frozen candidate size budget")
         seen.add(name)
-        (workspace / name).write_text(item["content"], encoding="utf-8", newline="\n")
-    if selected is not None and "candidate.py" in seen:
-        raise RuntimeError("builder retranscribed candidate.py despite selecting a component")
+        if not (selected is not None and name == "candidate.py"):
+            (workspace / name).write_text(item["content"], encoding="utf-8", newline="\n")
     if selected is None and "candidate.py" not in seen:
         raise RuntimeError("builder omitted candidate.py")
     if selected is not None:
@@ -498,6 +506,8 @@ def main() -> int:
         "artifact_sha256": component["artifact_sha256"],
         "source_file": str(component_source.relative_to(repo)),
         "evidence_level": component["evidence"]["level"],
+        "input_contract_sha256": component["input_contract_sha256"],
+        "output_contract_sha256": component["output_contract_sha256"],
         "reviewer": component_gate.get("reviewer"),
         "review_verdict": component_gate.get("review_verdict"),
         "probe_completed": component_gate.get("probe_completed"),

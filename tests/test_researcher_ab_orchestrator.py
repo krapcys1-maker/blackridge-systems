@@ -21,27 +21,36 @@ run_plan = ORCHESTRATOR.run_plan
 validate_and_write_bundle = ORCHESTRATOR.validate_and_write_bundle
 
 
-def test_eligible_component_has_hash_bound_l2_review() -> None:
+def test_eligible_component_has_hash_bound_l3_review_and_contracts() -> None:
     manifest, source, observations = eligible_component(REPOSITORY)
 
     assert manifest["component_id"] == "grounded-researcher-v1"
-    assert manifest["evidence"]["level"] == 2
+    assert manifest["evidence"]["level"] == 3
+    assert manifest["input_contract_sha256"] == (
+        "bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f"
+    )
+    assert manifest["output_contract_sha256"] == (
+        "5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409"
+    )
     assert observations["review_hash_matches"] is True
     assert observations["probe_completed"] is True
     assert observations["probe_subject_matches"] is True
     assert source.is_file()
 
 
-def test_hybrid_installs_exact_component_and_measures_reuse(tmp_path: Path) -> None:
+def test_hybrid_deterministically_replaces_builder_candidate_with_component(
+    tmp_path: Path,
+) -> None:
     bundle = {
         "files": [
+            {"path": "candidate.py", "content": "raise SystemExit('untrusted')\n"},
             {
                 "path": "requirements.lock",
                 "content": "# No third-party runtime dependencies.\n",
-            }
+            },
         ],
         "candidate_command": ["python", "/workspace/candidate.py"],
-        "selected_component_id": "grounded-researcher-v1",
+        "selected_component_id": None,
         "reused_source_lines": 0,
     }
 
@@ -100,4 +109,5 @@ def test_prompts_keep_component_out_of_baseline() -> None:
 
     assert "grounded_researcher.py (exact eligible source)" not in baseline
     assert "grounded_researcher.py (exact eligible source)" in hybrid
-    assert "selected_component_id to grounded-researcher-v1" in hybrid
+    assert "preselected grounded-researcher-v1" in hybrid
+    assert "report 293 reused_source_lines" in hybrid

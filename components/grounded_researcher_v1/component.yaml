@@ -6,24 +6,27 @@ description: >-
   distractor resistance, minimum-source enforcement, and clean abstention.
 source_uri: blackridge://components/grounded-researcher-v1
 source_file: grounded_researcher.py
-revision: 64fbdd83229ee582a9552ab063d1697b9ebadb4b
+revision: efadac17efd630415c8c2bc862b8de55b4a9835e
 license_spdx: Apache-2.0
 integration: command-json
 accepts: grounded-research-request/v1
 produces: grounded-research-response/v1
 candidate_command: [python, /workspace/candidate.py]
-artifact_sha256: a6118dee68e01d2ea9b0ec162f9bcb36d918383e813d3c4df87f409352f08fb8
+artifact_sha256: 092a3d7208ab0d983d95ceb51b8c8cd1c3fc45e6d71005d0893a6474d403b2c8
+physical_source_lines: 293
+input_contract_sha256: bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f
+output_contract_sha256: 5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409
 evidence:
-  level: 2
-  review_file: ../../evidence/manual/2026-08-27/grounded-researcher-component-review.json
-  review_sha256: 26c823122d2c30d8c7285f853ec247877af766b66e0647e02786b24e7180d9d9
+  level: 3
+  review_file: ../../evidence/manual/2026-08-27/grounded-researcher-component-l3-review.json
+  review_sha256: 1a7afdf1e2cf84ca522937325917c949c2ba247766f4b8b357f38d01d82deb8d
   capability_id: grounded-research-synthesis
   scenario_id: independent-domains-and-negative-control
-  probe_subject: grounded-researcher-v1@a6118dee68e01d2ea9b0ec162f9bcb36d918383e813d3c4df87f409352f08fb8
+  probe_subject: grounded-researcher-v1@092a3d7208ab0d983d95ceb51b8c8cd1c3fc45e6d71005d0893a6474d403b2c8
 scope:
-  - Two independent answerable domains with exact expected source selection.
+  - Three independent answerable domains with exact expected source selection.
   - Exact-substring citation grounding against the supplied corpus.
   - One unrelated negative corpus with empty abstention.
 limitations:
-  - L2 is boot evidence, not L3 contract coverage or L4 system verification.
+  - L3 is contract evidence, not L4 end-system verification.
   - Relevance behavior is not claimed universal beyond the reviewed fixtures.
