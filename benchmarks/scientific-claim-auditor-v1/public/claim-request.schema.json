@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackridge.systems/contracts/scientific-claim-request-v1.schema.json",
+  "title": "scientific-claim-request/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "claim", "minimum_evidence_documents", "maximum_candidates"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "request_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "claim": {"type": "string", "minLength": 10, "maxLength": 1000},
+    "minimum_evidence_documents": {"type": "integer", "minimum": 1, "maximum": 20},
+    "maximum_candidates": {"type": "integer", "minimum": 1, "maximum": 100}
+  }
+}

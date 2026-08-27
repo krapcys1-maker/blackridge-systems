@@ -37,6 +37,13 @@ sandbox = [
   "swe-rex==1.4.0",
 ]
 supply-chain = ["pypi-attestations==0.0.30"]
+scientific-auditor = [
+  "numpy==2.4.2",
+  "safetensors==0.7.0",
+  "tokenizers==0.22.2",
+  "torch==2.10.0",
+  "transformers==5.1.0",
+]
 dev = [
   "bandit==1.9.4",
   "build>=1,<2",
@@ -78,5 +85,19 @@ python_version = "3.11"
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = ["jsonpatch", "swerex.*"]
+module = [
+  "jsonpatch",
+  "numpy",
+  "numpy.*",
+  "safetensors",
+  "safetensors.*",
+  "swerex.*",
+  "tokenizers",
+  "tokenizers.*",
+  "torch",
+  "torch.*",
+  "transformers",
+  "transformers.*",
+]
 ignore_missing_imports = true
+follow_imports = "skip"

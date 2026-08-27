@@ -1,0 +1,16 @@
+FROM blackridge/swerex-runtime:1.4.0
+
+LABEL org.opencontainers.image.title="Blackridge Scientific Auditor Runtime"
+LABEL org.opencontainers.image.description="CPU-only calibration runtime for the frozen MultiVerS component"
+LABEL org.opencontainers.image.base.digest="sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903"
+
+RUN python -m pip install --no-cache-dir \
+      --index-url https://download.pytorch.org/whl/cpu \
+      torch==2.10.0+cpu \
+    && python -m pip install --no-cache-dir \
+      numpy==2.4.2 \
+      safetensors==0.7.0 \
+      tokenizers==0.22.2 \
+      transformers==5.1.0
+
+RUN python -c "import safetensors, tokenizers, torch, transformers; assert torch.__version__ == '2.10.0+cpu'; assert transformers.__version__ == '5.1.0'"
