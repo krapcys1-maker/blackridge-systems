@@ -1,0 +1,79 @@
+{
+  "schema_version": "1",
+  "probe_id": "5e829fec0e7342598c9835cd6dbc650a",
+  "observed_at": "2026-08-27T18:39:05.5918181+00:00",
+  "provider": "blackridge-upstream-unittest/1",
+  "subject": "semanticscholar@3189ecb80bd985b6cd9b4a56fb410b05515f0f15",
+  "request": {
+    "suite": "python -m coverage run --branch -m unittest discover -v",
+    "test_source": "upstream exact-release checkout plus named hermetic harness patch",
+    "network": "none"
+  },
+  "observations": {
+    "probe_completed": true,
+    "upstream_commit": "3189ecb80bd985b6cd9b4a56fb410b05515f0f15",
+    "upstream_tree": "1e8944a90a0fb6f7257a41b31cf24ea80e25bb56",
+    "upstream_test_blob_before_patch": "48f1ff130efc1b6e183ffa6c4cefdd04320276f8",
+    "upstream_test_blob_after_patch": "9bdd361d1629b2e5cea6bc0fb7d295fb90f92831",
+    "production_source_files_patched": 0,
+    "test_harness_files_patched": 1,
+    "hermetic_patch_sha256": "708afce3eaf9d24e5ebb5db41c55ea7b9069e1979ef5702221368d227355f44b",
+    "test_lock_sha256": "198d2bc7fb4e106f8fe5fb3a323e68aa7a167b2e73a539192af10dba64345ab2",
+    "runtime_image_id": "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+    "runtime_image_repository": "blackridge/swerex-runtime:1.4.0",
+    "runtime_python": "3.12.14",
+    "runtime_limits": {
+      "network": "none",
+      "root_filesystem": "read-only",
+      "source_mount": "read-only",
+      "capabilities": "all-dropped",
+      "no_new_privileges": true,
+      "temporary_filesystem": "/tmp:rw,noexec,nosuid,64MiB",
+      "memory_mebibytes": 512,
+      "memory_swap_mebibytes": 512,
+      "cpus": 1,
+      "pids": 128
+    },
+    "offline_install": {
+      "pip_require_hashes": true,
+      "pip_no_index": true,
+      "pip_only_binary": true,
+      "wheel_count": 13,
+      "wheelhouse_bytes": 1903498,
+      "pip_check": "No broken requirements found"
+    },
+    "unpatched_harness_findings": [
+      "VCR record_mode was the invalid list ['new_episodes'], preventing test discovery with VCRPy 8.3.0.",
+      "Two timeout tests had no cassette and depended on a live external request."
+    ],
+    "test_count": 130,
+    "passed": 130,
+    "failures": 0,
+    "errors": 0,
+    "duration_seconds": 15.098,
+    "coverage": {
+      "tool": "coverage.py 7.10.7",
+      "branch_coverage": true,
+      "statements": 1240,
+      "covered_lines": 1177,
+      "missing_lines": 63,
+      "branches": 342,
+      "covered_branches": 269,
+      "missing_branches": 73,
+      "percent_covered": 91.40328697850822,
+      "json_sha256": "b4835518f469624ed471854dee5d56db6d02cb986fe5ee232177e6d24ceaa2eb",
+      "json_path": "D:\\Skladacz aplikacji\\blackridge-experiments\\semanticscholar-upstream-tests-eval\\coverage.json"
+    },
+    "containers_remaining": 0
+  },
+  "sources": [
+    "https://github.com/danielnsilva/semanticscholar/tree/v0.12.0",
+    "https://pypi.org/project/semanticscholar/0.12.0/",
+    "blackridge://benchmarks/semanticscholar-v0.12.0"
+  ],
+  "warnings": [
+    "The passing result requires the named test-only hermetic patch; the upstream release suite does not run unchanged with the pinned current VCRPy.",
+    "This verifies the upstream library against recorded fixtures and deterministic timeout injection, not current public API contents.",
+    "The upstream package still lacks PyPI provenance and OpenSSF Scorecard coverage, so this evidence does not promote the adapter beyond L2."
+  ]
+}
