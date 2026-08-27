@@ -1,4 +1,4 @@
-"""Compatibility solving, provenance-locked generation, and linear system execution."""
+"""Compatibility solving, provenance-locked generation, and graph system execution."""
 
 from __future__ import annotations
 
@@ -54,6 +54,15 @@ class ContractDefinition(StrictModel):
     schema_definition: dict[str, object] = Field(alias="schema")
 
 
+class ComponentResource(StrictModel):
+    resource_id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+    source_uri: str = Field(min_length=3)
+    revision: str = Field(min_length=7)
+    license_spdx: str = Field(min_length=2)
+    artifact_file: str = Field(min_length=1)
+    artifact_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
 class ComponentLaunch(StrictModel):
     argv: list[str] = Field(min_length=1)
     artifact_file: str = Field(min_length=1)
@@ -61,10 +70,18 @@ class ComponentLaunch(StrictModel):
     working_directory: str = "{definition_dir}"
     timeout_seconds: float = Field(default=30, gt=0, le=300)
     environment_allowlist: list[str] = Field(default_factory=list)
+    resources: list[ComponentResource] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def resource_ids_are_unique(self) -> ComponentLaunch:
+        resource_ids = [resource.resource_id for resource in self.resources]
+        if len(resource_ids) != len(set(resource_ids)):
+            raise ValueError("component launch resource ids must be unique")
+        return self
 
 
 class ComponentOption(StrictModel):
-    """One replaceable implementation behind a single-stream contract boundary."""
+    """One replaceable implementation behind explicit contract boundaries."""
 
     component_id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     capability_id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -72,7 +89,7 @@ class ComponentOption(StrictModel):
     revision: str = Field(min_length=7)
     license_spdx: str = Field(min_length=2)
     integration: Literal["command-json", "python-library", "cli", "api", "oci"]
-    accepts: list[str] = Field(min_length=1, max_length=1)
+    accepts: list[str] = Field(min_length=1, max_length=20)
     produces: list[str] = Field(min_length=1, max_length=1)
     launch: ComponentLaunch | None = None
     evidence: EvidenceReference
@@ -81,6 +98,8 @@ class ComponentOption(StrictModel):
 
     @model_validator(mode="after")
     def command_integration_has_launch(self) -> ComponentOption:
+        if len(self.accepts) != len(set(self.accepts)):
+            raise ValueError("component input contracts must be unique")
         if self.integration == "command-json" and self.launch is None:
             raise ValueError("command-json components require a launch definition")
         if self.integration != "command-json" and self.launch is not None:
@@ -113,7 +132,7 @@ class AdapterOption(StrictModel):
 
 
 class CompositionDefinition(StrictModel):
-    """A frozen single-stream composition problem and all permitted choices."""
+    """A frozen contract-graph composition problem and all permitted choices."""
 
     schema_version: Literal["1"] = "1"
     name: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -183,7 +202,15 @@ class PlanStep(StrictModel):
     step_type: Literal["component", "adapter"]
     subject_id: str
     input_contract: str
+    additional_input_contracts: list[str] = Field(default_factory=list)
     output_contract: str
+
+    @model_validator(mode="after")
+    def input_contracts_are_unique(self) -> PlanStep:
+        inputs = [self.input_contract, *self.additional_input_contracts]
+        if len(inputs) != len(set(inputs)):
+            raise ValueError("plan step input contracts must be unique")
+        return self
 
 
 class CombinationObservation(StrictModel):
@@ -193,6 +220,7 @@ class CombinationObservation(StrictModel):
     steps: list[PlanStep]
     unresolved_capabilities: list[str]
     terminal_contract: str
+    available_contracts: list[str] = Field(default_factory=list)
 
 
 class CompositionPlan(StrictModel):
@@ -309,6 +337,47 @@ def _qualify_component(
         observations["launch_artifact_referenced_by_argv"] = artifact_path in argv_paths
         if artifact_path not in argv_paths:
             reasons.append("locked command artifact is not referenced by argv")
+        resource_observations: list[dict[str, object]] = []
+        for resource in component.launch.resources:
+            resource_value = resource.artifact_file.replace(
+                "{definition_dir}", str(definition_directory.resolve())
+            )
+            resource_path = Path(resource_value).resolve()
+            marker = f"{{resource:{resource.resource_id}}}"
+            referenced = marker in component.launch.argv or resource_path in argv_paths
+            resource_observation: dict[str, object] = {
+                "resource_id": resource.resource_id,
+                "artifact_file": str(resource_path),
+                "exists": resource_path.is_file(),
+                "expected_sha256": resource.artifact_sha256,
+                "referenced_by_argv": referenced,
+                "license_allowed": resource.license_spdx in definition.allowed_licenses,
+            }
+            if resource.license_spdx not in definition.allowed_licenses:
+                reasons.append(
+                    f"resource {resource.resource_id} license "
+                    f"{resource.license_spdx} is not allowed"
+                )
+            if definition.mode == "production" and not _is_immutable_revision(resource.revision):
+                reasons.append(
+                    f"production resource {resource.resource_id} revision is not immutable"
+                )
+            if not resource_path.is_file():
+                reasons.append(f"resource {resource.resource_id} artifact does not exist")
+            else:
+                actual_resource_hash = _sha256_file(resource_path)
+                resource_observation["actual_sha256"] = actual_resource_hash
+                resource_observation["hash_matches"] = (
+                    actual_resource_hash == resource.artifact_sha256
+                )
+                if actual_resource_hash != resource.artifact_sha256:
+                    reasons.append(
+                        f"resource {resource.resource_id} SHA-256 does not match its lock"
+                    )
+            if not referenced:
+                reasons.append(f"resource {resource.resource_id} is not referenced by argv")
+            resource_observations.append(resource_observation)
+        observations["resources"] = resource_observations
     return QualificationObservation(
         subject_type="component",
         subject_id=component.component_id,
@@ -364,60 +433,73 @@ def _route_combination(
 ) -> CombinationObservation:
     selected = {component.component_id: component for component in components}
     required_ids = frozenset(selected)
-    queue: list[tuple[int, int, tuple[str, ...], str, frozenset[str], tuple[PlanStep, ...]]] = [
-        (0, 0, (), definition.external_input, frozenset(), ())
-    ]
-    visited: dict[tuple[str, frozenset[str]], tuple[int, int, tuple[str, ...]]] = {}
-    furthest: tuple[str, frozenset[str], tuple[PlanStep, ...]] = (
-        definition.external_input,
+    queue: list[
+        tuple[
+            int,
+            int,
+            tuple[str, ...],
+            tuple[str, ...],
+            frozenset[str],
+            tuple[PlanStep, ...],
+        ]
+    ] = [(0, 0, (), (definition.external_input,), frozenset(), ())]
+    visited: dict[tuple[frozenset[str], frozenset[str]], tuple[int, int, tuple[str, ...]]] = {}
+    furthest: tuple[frozenset[str], frozenset[str], tuple[PlanStep, ...]] = (
+        frozenset({definition.external_input}),
         frozenset(),
         (),
     )
 
     while queue:
-        adapter_count, step_count, path_key, current, executed, steps = heapq.heappop(queue)
-        state = (current, executed)
+        adapter_count, step_count, path_key, available_tuple, executed, steps = heapq.heappop(queue)
+        available = frozenset(available_tuple)
+        state = (available, executed)
         cost = (adapter_count, step_count, path_key)
         if state in visited and visited[state] <= cost:
             continue
         visited[state] = cost
         if len(executed) > len(furthest[1]) or (
-            len(executed) == len(furthest[1]) and len(steps) < len(furthest[2])
+            len(executed) == len(furthest[1])
+            and (
+                len(available) > len(furthest[0])
+                or (len(available) == len(furthest[0]) and len(steps) < len(furthest[2]))
+            )
         ):
-            furthest = (current, executed, steps)
-        if executed == required_ids and current == definition.required_output:
+            furthest = (available, executed, steps)
+        if executed == required_ids and definition.required_output in available:
             return CombinationObservation(
                 component_ids=sorted(selected),
                 complete=True,
                 adapter_count=adapter_count,
                 steps=list(steps),
                 unresolved_capabilities=[],
-                terminal_contract=current,
+                terminal_contract=definition.required_output,
+                available_contracts=sorted(available),
             )
 
-        actions: list[tuple[Literal["component", "adapter"], str, str, str]] = []
+        actions: list[tuple[Literal["component", "adapter"], str, tuple[str, ...], str]] = []
         for component in components:
-            if component.component_id not in executed and component.accepts[0] == current:
+            if component.component_id not in executed and set(component.accepts) <= available:
                 actions.append(
                     (
                         "component",
                         component.component_id,
-                        component.accepts[0],
+                        tuple(component.accepts),
                         component.produces[0],
                     )
                 )
         for adapter in adapters:
-            if adapter.source_contract == current and adapter.target_contract != current:
+            if adapter.source_contract in available and adapter.target_contract not in available:
                 actions.append(
                     (
                         "adapter",
                         adapter.adapter_id,
-                        adapter.source_contract,
+                        (adapter.source_contract,),
                         adapter.target_contract,
                     )
                 )
         actions.sort(key=lambda item: (item[0], item[1]))
-        for step_type, subject_id, input_contract, output_contract in actions:
+        for step_type, subject_id, input_contracts, output_contract in actions:
             next_executed = executed
             next_adapter_count = adapter_count
             if step_type == "component":
@@ -428,17 +510,19 @@ def _route_combination(
                 index=step_count + 1,
                 step_type=step_type,
                 subject_id=subject_id,
-                input_contract=input_contract,
+                input_contract=input_contracts[0],
+                additional_input_contracts=list(input_contracts[1:]),
                 output_contract=output_contract,
             )
             next_path = (*path_key, f"{step_type}:{subject_id}")
+            next_available = tuple(sorted(available | {output_contract}))
             heapq.heappush(
                 queue,
                 (
                     next_adapter_count,
                     step_count + 1,
                     next_path,
-                    output_contract,
+                    next_available,
                     next_executed,
                     (*steps, next_step),
                 ),
@@ -447,13 +531,19 @@ def _route_combination(
     unresolved = sorted(
         {selected[component_id].capability_id for component_id in required_ids - furthest[1]}
     )
+    terminal_contract = (
+        definition.required_output
+        if definition.required_output in furthest[0]
+        else (furthest[2][-1].output_contract if furthest[2] else definition.external_input)
+    )
     return CombinationObservation(
         component_ids=sorted(selected),
         complete=False,
         adapter_count=sum(step.step_type == "adapter" for step in furthest[2]),
         steps=list(furthest[2]),
         unresolved_capabilities=unresolved,
-        terminal_contract=furthest[0],
+        terminal_contract=terminal_contract,
+        available_contracts=sorted(furthest[0]),
     )
 
 
@@ -626,6 +716,7 @@ def _portable_component_argv(
     *,
     definition_directory: Path,
     source_artifact: Path,
+    source_resources: dict[str, Path],
     component_id: str,
 ) -> list[str]:
     """Replace host-bound launch paths with runtime-resolved bundle markers."""
@@ -635,15 +726,30 @@ def _portable_component_argv(
         if value == "{python}":
             portable.append("{python}")
             continue
+        if value.startswith("{resource:") and value.endswith("}"):
+            resource_id = value.removeprefix("{resource:").removesuffix("}")
+            if resource_id not in source_resources:
+                raise BlackridgeError(
+                    f"selected component references an unknown resource marker: {component_id}"
+                )
+            portable.append(value)
+            continue
         expanded = value.replace("{definition_dir}", str(definition_directory.resolve()))
         candidate = Path(expanded)
         if candidate.is_absolute() and candidate.resolve() == source_artifact:
             portable.append("{artifact}")
+        elif candidate.is_absolute() and candidate.resolve() in source_resources.values():
+            resource_id = next(
+                item_id
+                for item_id, source in source_resources.items()
+                if source == candidate.resolve()
+            )
+            portable.append(f"{{resource:{resource_id}}}")
         elif "{definition_dir}" in value or candidate.is_absolute():
             raise BlackridgeError(
                 f"selected component has an unmapped host path in argv: {component_id}"
             )
-        elif "{python}" in value or "{artifact}" in value:
+        elif "{python}" in value or "{artifact}" in value or "{resource:" in value:
             raise BlackridgeError(
                 f"selected component uses a launch marker inside another argument: {component_id}"
             )
@@ -653,6 +759,11 @@ def _portable_component_argv(
         raise BlackridgeError(
             f"selected component argv does not reference its locked artifact: {component_id}"
         )
+    for resource_id in source_resources:
+        if f"{{resource:{resource_id}}}" not in portable:
+            raise BlackridgeError(
+                f"selected component argv does not reference resource {resource_id}: {component_id}"
+            )
     return portable
 
 
@@ -700,6 +811,7 @@ def generate_system(
         ]
         selected_adapters = [adapter_by_id[adapter_id] for adapter_id in plan.selected_adapter_ids]
         bundled_components: dict[str, tuple[Path, str]] = {}
+        bundled_resources: dict[str, dict[str, tuple[Path, str]]] = {}
         for component in selected_components:
             if component.launch is None:
                 raise BlackridgeError(
@@ -721,6 +833,32 @@ def generate_system(
                     f"{component.component_id}"
                 )
             bundled_components[component.component_id] = (source, relative)
+            component_resources: dict[str, tuple[Path, str]] = {}
+            for resource in component.launch.resources:
+                resource_source = Path(
+                    _expand_control_value(resource.artifact_file, definition_directory)
+                ).resolve()
+                resource_suffix = (
+                    resource_source.suffix
+                    if re.fullmatch(r"\.[A-Za-z0-9]+", resource_source.suffix)
+                    else ""
+                )
+                resource_relative = (
+                    f"resources/{component.component_id}/{resource.resource_id}{resource_suffix}"
+                )
+                resource_destination = temporary / resource_relative
+                resource_destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(resource_source, resource_destination)
+                if _sha256_file(resource_destination) != resource.artifact_sha256:
+                    raise BlackridgeError(
+                        "selected component resource changed while generating its bundle: "
+                        f"{component.component_id}/{resource.resource_id}"
+                    )
+                component_resources[resource.resource_id] = (
+                    resource_source,
+                    resource_relative,
+                )
+            bundled_resources[component.component_id] = component_resources
         component_locks = [_primitive(component) for component in selected_components]
         _write_yaml(
             temporary / "components.lock.yaml",
@@ -744,11 +882,16 @@ def generate_system(
                         f"{component.component_id}"
                     )
                 source_artifact, bundled_artifact = bundled_components[component.component_id]
+                component_resources = bundled_resources[component.component_id]
                 runtime_step["launch"] = {
                     "argv": _portable_component_argv(
                         component.launch.argv,
                         definition_directory=definition_directory,
                         source_artifact=source_artifact,
+                        source_resources={
+                            resource_id: source
+                            for resource_id, (source, _relative) in component_resources.items()
+                        },
                         component_id=component.component_id,
                     ),
                     "working_directory": "components",
@@ -756,6 +899,17 @@ def generate_system(
                     "artifact_sha256": component.launch.artifact_sha256,
                     "timeout_seconds": component.launch.timeout_seconds,
                     "environment_allowlist": component.launch.environment_allowlist,
+                    "resources": [
+                        {
+                            "resource_id": resource.resource_id,
+                            "source_uri": resource.source_uri,
+                            "revision": resource.revision,
+                            "license_spdx": resource.license_spdx,
+                            "artifact_file": component_resources[resource.resource_id][1],
+                            "artifact_sha256": resource.artifact_sha256,
+                        }
+                        for resource in component.launch.resources
+                    ],
                 }
             else:
                 runtime_step["operations"] = adapter_by_id[step.subject_id].operations
@@ -933,23 +1087,56 @@ def _resolve_component_launch(
     artifact_value = launch.get("artifact_file")
     working_value = launch.get("working_directory")
     argv_value = launch.get("argv")
+    resources_value = launch.get("resources", [])
     if (
         not isinstance(artifact_value, str)
         or not isinstance(working_value, str)
         or not isinstance(argv_value, list)
         or not argv_value
         or not all(isinstance(value, str) for value in argv_value)
+        or not isinstance(resources_value, list)
     ):
         raise BlackridgeError(f"component launch control is invalid: {subject_id}")
     artifact = _resolve_bundle_file(bundle, artifact_value)
     working_directory = _resolve_bundle_directory(bundle, working_value)
+    resolved_resources: list[dict[str, Any]] = []
+    resource_paths: dict[str, Path] = {}
+    for resource_value in resources_value:
+        if not isinstance(resource_value, dict):
+            raise BlackridgeError(f"component resource control is invalid: {subject_id}")
+        resource_id = resource_value.get("resource_id")
+        resource_file = resource_value.get("artifact_file")
+        resource_hash = resource_value.get("artifact_sha256")
+        if (
+            not isinstance(resource_id, str)
+            or resource_id in resource_paths
+            or not isinstance(resource_file, str)
+            or not isinstance(resource_hash, str)
+        ):
+            raise BlackridgeError(f"component resource control is invalid: {subject_id}")
+        resource_path = _resolve_bundle_file(bundle, resource_file)
+        if _sha256_file(resource_path) != resource_hash:
+            raise BlackridgeError(
+                f"component resource failed integrity: {subject_id}/{resource_id}"
+            )
+        resource_paths[resource_id] = resource_path
+        resolved_resource = dict(resource_value)
+        resolved_resource["artifact_file"] = str(resource_path)
+        resolved_resources.append(resolved_resource)
     argv: list[str] = []
     for value in argv_value:
         if value == "{python}":
             argv.append(sys.executable)
         elif value == "{artifact}":
             argv.append(str(artifact))
-        elif "{python}" in value or "{artifact}" in value:
+        elif value.startswith("{resource:") and value.endswith("}"):
+            resource_id = value.removeprefix("{resource:").removesuffix("}")
+            if resource_id not in resource_paths:
+                raise BlackridgeError(
+                    f"component launch references an unknown resource: {subject_id}"
+                )
+            argv.append(str(resource_paths[resource_id]))
+        elif "{python}" in value or "{artifact}" in value or "{resource:" in value:
             raise BlackridgeError(
                 f"component launch marker is not a complete argument: {subject_id}"
             )
@@ -961,12 +1148,18 @@ def _resolve_component_launch(
         raise BlackridgeError(
             f"generated component argv does not reference its bundled artifact: {subject_id}"
         )
+    for resource_id, resource_path in resource_paths.items():
+        if str(resource_path) not in argv:
+            raise BlackridgeError(
+                f"generated component argv does not reference resource {resource_id}: {subject_id}"
+            )
     resolved = dict(launch)
     resolved.update(
         {
             "argv": argv,
             "working_directory": str(working_directory),
             "artifact_file": str(artifact),
+            "resources": resolved_resources,
         }
     )
     return resolved
@@ -1035,6 +1228,7 @@ def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None
         "step_type",
         "subject_id",
         "input_contract",
+        "additional_input_contracts",
         "output_contract",
     }
     if len(runtime_steps) != len(plan_steps):
@@ -1087,11 +1281,48 @@ def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None
             locked_launch = locked.get("launch")
             if not isinstance(locked_launch, dict):
                 raise BlackridgeError(f"generated component launch lock is missing: {subject_id}")
-            if locked.get("accepts") != [runtime_step.get("input_contract")] or locked.get(
-                "produces"
-            ) != [runtime_step.get("output_contract")]:
+            additional_inputs = runtime_step.get("additional_input_contracts", [])
+            if not isinstance(additional_inputs, list) or not all(
+                isinstance(item, str) for item in additional_inputs
+            ):
+                raise BlackridgeError(
+                    f"generated component input contracts are invalid: {subject_id}"
+                )
+            runtime_inputs = [runtime_step.get("input_contract"), *additional_inputs]
+            if locked.get("accepts") != runtime_inputs or locked.get("produces") != [
+                runtime_step.get("output_contract")
+            ]:
                 raise BlackridgeError(
                     f"generated component contracts disagree with their lock: {subject_id}"
+                )
+            locked_resources = locked_launch.get("resources", [])
+            runtime_resources = launch.get("resources", [])
+            if not isinstance(locked_resources, list) or not isinstance(runtime_resources, list):
+                raise BlackridgeError(f"generated component resources are invalid: {subject_id}")
+            resource_fields = {
+                "resource_id",
+                "source_uri",
+                "revision",
+                "license_spdx",
+                "artifact_sha256",
+            }
+            locked_resource_controls = [
+                {field: resource.get(field) for field in resource_fields}
+                for resource in locked_resources
+                if isinstance(resource, dict)
+            ]
+            runtime_resource_controls = [
+                {field: resource.get(field) for field in resource_fields}
+                for resource in runtime_resources
+                if isinstance(resource, dict)
+            ]
+            if (
+                len(locked_resource_controls) != len(locked_resources)
+                or len(runtime_resource_controls) != len(runtime_resources)
+                or locked_resource_controls != runtime_resource_controls
+            ):
+                raise BlackridgeError(
+                    f"generated component resources disagree with their lock: {subject_id}"
                 )
             for field in ("artifact_sha256", "timeout_seconds", "environment_allowlist"):
                 if launch.get(field) != locked_launch.get(field):
@@ -1106,6 +1337,7 @@ def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None
             if (
                 manifest.get("adapter_id") != subject_id
                 or manifest.get("source_contract") != runtime_step.get("input_contract")
+                or runtime_step.get("additional_input_contracts", []) != []
                 or manifest.get("target_contract") != runtime_step.get("output_contract")
                 or manifest.get("operations") != operations
                 or manifest.get("operations_sha256") != _sha256_json(operations)
@@ -1172,7 +1404,7 @@ def run_generated_system(
     _component_process: Callable[
         [str, dict[str, Any], object], dict[str, object]
     ] = _host_component_process,
-    _provider: str = "blackridge-generated-linear-runtime/1",
+    _provider: str = "blackridge-generated-graph-runtime/1",
     _runtime_mode: Literal["calibration"] = "calibration",
 ) -> ProbeEvidence:
     """Execute a generated calibration bundle and retain every boundary observation."""
@@ -1223,7 +1455,7 @@ def run_generated_system(
         Draft202012Validator.check_schema(schema)
         schemas[contract_id] = schema
 
-    validated_steps: list[tuple[dict[str, Any], str, str, str, str]] = []
+    validated_steps: list[tuple[dict[str, Any], str, str, list[str], str]] = []
     component_controls: dict[int, tuple[dict[str, Any], Path, str, dict[str, object]]] = {}
     component_integrity_failures: dict[int, str] = {}
     for step_index, raw_step in enumerate(steps):
@@ -1232,15 +1464,23 @@ def run_generated_system(
         subject_id = raw_step.get("subject_id")
         step_type = raw_step.get("step_type")
         input_contract = raw_step.get("input_contract")
+        additional_input_contracts = raw_step.get("additional_input_contracts", [])
         output_contract = raw_step.get("output_contract")
         if not (
             isinstance(subject_id, str)
             and isinstance(step_type, str)
             and isinstance(input_contract, str)
+            and isinstance(additional_input_contracts, list)
+            and all(isinstance(item, str) for item in additional_input_contracts)
             and isinstance(output_contract, str)
         ):
             raise BlackridgeError("generated runtime step fields are invalid")
-        validated_steps.append((raw_step, subject_id, step_type, input_contract, output_contract))
+        input_contracts = [input_contract, *additional_input_contracts]
+        if len(input_contracts) != len(set(input_contracts)):
+            raise BlackridgeError("generated runtime step repeats an input contract")
+        if step_type == "adapter" and additional_input_contracts:
+            raise BlackridgeError("generated adapter runtime has multiple input contracts")
+        validated_steps.append((raw_step, subject_id, step_type, input_contracts, output_contract))
         if step_type != "component":
             continue
         launch = raw_step.get("launch")
@@ -1285,12 +1525,13 @@ def run_generated_system(
                 f"component {subject_id} launch artifact failed integrity"
             )
 
-    current_contract = runtime.get("external_input")
+    external_input = runtime.get("external_input")
     required_output = runtime.get("required_output")
-    if not isinstance(current_contract, str) or not isinstance(required_output, str):
+    if not isinstance(external_input, str) or not isinstance(required_output, str):
         raise BlackridgeError("generated runtime contract endpoints are invalid")
-    artifact = input_artifact
-    initial_errors = _validation_errors(schemas[current_contract], artifact)
+    artifacts_by_contract: dict[str, object] = {external_input: input_artifact}
+    last_contract = external_input
+    initial_errors = _validation_errors(schemas[external_input], input_artifact)
     step_observations: list[dict[str, object]] = []
     failed = bool(initial_errors) or bool(component_integrity_failures)
     if component_integrity_failures:
@@ -1304,7 +1545,7 @@ def run_generated_system(
         raw_step,
         subject_id,
         step_type,
-        input_contract,
+        input_contracts,
         output_contract,
     ) in enumerate(validated_steps):
         if component_integrity_failures:
@@ -1338,10 +1579,15 @@ def run_generated_system(
                 }
             )
             continue
-        if input_contract != current_contract:
+        missing_inputs = [
+            contract_id
+            for contract_id in input_contracts
+            if contract_id not in artifacts_by_contract
+        ]
+        if missing_inputs:
             failed = True
             failure_reason = (
-                f"step {subject_id} expected {input_contract} but runtime held {current_contract}"
+                f"step {subject_id} is missing input contracts: {', '.join(missing_inputs)}"
             )
             step_observations.append(
                 {
@@ -1352,7 +1598,15 @@ def run_generated_system(
                 }
             )
             continue
-        before_errors = _validation_errors(schemas[current_contract], artifact)
+        before_errors = {
+            contract_id: errors
+            for contract_id in input_contracts
+            if (
+                errors := _validation_errors(
+                    schemas[contract_id], artifacts_by_contract[contract_id]
+                )
+            )
+        }
         if before_errors:
             failed = True
             failure_reason = f"step {subject_id} received an invalid input artifact"
@@ -1367,11 +1621,23 @@ def run_generated_system(
             )
             continue
 
+        artifact = (
+            artifacts_by_contract[input_contracts[0]]
+            if len(input_contracts) == 1
+            else {
+                "inputs": {
+                    contract_id: artifacts_by_contract[contract_id]
+                    for contract_id in input_contracts
+                }
+            }
+        )
+
         observation: dict[str, Any] = {
             "subject_id": subject_id,
             "step_type": step_type,
             "status": "failed",
-            "input_contract": input_contract,
+            "input_contract": input_contracts[0],
+            "additional_input_contracts": input_contracts[1:],
             "output_contract": output_contract,
             "input_artifact": artifact,
         }
@@ -1438,8 +1704,8 @@ def run_generated_system(
             observation["output_contract_valid"] = not after_errors
             if not after_errors and not artifact_integrity_failed:
                 observation["status"] = "completed"
-                artifact = produced
-                current_contract = output_contract
+                artifacts_by_contract[output_contract] = produced
+                last_contract = output_contract
             elif after_errors:
                 failure_reason = f"step {subject_id} produced an invalid output artifact"
         if observation["status"] != "completed":
@@ -1447,12 +1713,13 @@ def run_generated_system(
             observation["reason"] = failure_reason
         step_observations.append(observation)
 
+    final_artifact = artifacts_by_contract.get(required_output)
     final_errors = (
-        _validation_errors(schemas[required_output], artifact)
-        if current_contract == required_output
+        _validation_errors(schemas[required_output], final_artifact)
+        if required_output in artifacts_by_contract
         else []
     )
-    completed = not failed and current_contract == required_output and not final_errors
+    completed = not failed and required_output in artifacts_by_contract and not final_errors
     warnings: list[str] = []
     if not completed:
         warnings.append("The generated system did not produce a valid required output artifact.")
@@ -1478,9 +1745,16 @@ def run_generated_system(
             "steps": step_observations,
             "all_steps_completed": completed,
             "failure_reason": failure_reason,
-            "final_contract": current_contract,
+            "final_contract": required_output
+            if required_output in artifacts_by_contract
+            else last_contract,
+            "available_contracts": sorted(artifacts_by_contract),
             "required_output": required_output,
-            "final_artifact": artifact,
+            "final_artifact": (
+                final_artifact
+                if required_output in artifacts_by_contract
+                else artifacts_by_contract[last_contract]
+            ),
             "final_validation_errors": final_errors,
         },
         sources=[COMPOSITION_SOURCE, JSON_PATCH_SOURCE, JSON_SCHEMA_SOURCE],
@@ -1493,11 +1767,13 @@ def _sandbox_component_argv(
     *,
     artifact_file: str,
     container_artifact: str,
+    resource_files: dict[str, str] | None = None,
     subject_id: str,
 ) -> list[str]:
     """Map one locked Python component launch without trusting host absolute paths."""
 
     effective_argv: list[str] = []
+    resource_files = resource_files or {}
     python_names = {"python", "python.exe", "python3", "python3.exe"}
     for index, value in enumerate(declared_argv):
         argument = str(value)
@@ -1505,6 +1781,8 @@ def _sandbox_component_argv(
             effective_argv.append("python")
         elif str(Path(argument).resolve()) == artifact_file:
             effective_argv.append(container_artifact)
+        elif str(Path(argument).resolve()) in resource_files:
+            effective_argv.append(resource_files[str(Path(argument).resolve())])
         elif Path(argument).is_absolute():
             raise BlackridgeError(
                 f"sandboxed component has an unmapped absolute argv path: {subject_id}"
@@ -1675,6 +1953,7 @@ def run_generated_system_sandboxed(
     container_name: str | None = None
     copied: list[dict[str, object]] = []
     container_artifacts: dict[str, str] = {}
+    container_resources: dict[str, dict[str, str]] = {}
     boundary: dict[str, object] | None = None
     preflight: dict[str, object] | None = None
     force_remove: dict[str, object] | None = None
@@ -1687,7 +1966,7 @@ def run_generated_system_sandboxed(
         container_name = deployment.container_name
         response = await deployment.runtime.execute(
             Command(
-                command=["mkdir", "-p", "/workspace/components"],
+                command=["mkdir", "-p", "/workspace/components", "/workspace/resources"],
                 timeout=30,
                 shell=False,
                 check=False,
@@ -1709,6 +1988,7 @@ def run_generated_system_sandboxed(
             declared_argv,
             artifact_file=artifact_file,
             container_artifact=container_artifacts[subject_id],
+            resource_files=container_resources[subject_id],
             subject_id=subject_id,
         )
         argv = [
@@ -1792,6 +2072,64 @@ def run_generated_system_sandboxed(
             if not record["hash_matches"]:
                 raise BlackridgeError(f"copied component hash mismatch: {subject_id}")
             container_artifacts[subject_id] = target
+            container_resources[subject_id] = {}
+            resources = launch.get("resources", [])
+            if not isinstance(resources, list):
+                raise BlackridgeError(f"component resources are invalid: {subject_id}")
+            for resource_index, resource in enumerate(resources, start=1):
+                if not isinstance(resource, dict):
+                    raise BlackridgeError(f"component resource is invalid: {subject_id}")
+                resource_id = resource.get("resource_id")
+                resource_file = resource.get("artifact_file")
+                resource_hash = resource.get("artifact_sha256")
+                if (
+                    not isinstance(resource_id, str)
+                    or not isinstance(resource_file, str)
+                    or not isinstance(resource_hash, str)
+                ):
+                    raise BlackridgeError(f"component resource is invalid: {subject_id}")
+                resource_source = Path(resource_file).resolve()
+                resource_suffix = resource_source.suffix if resource_source.suffix.isascii() else ""
+                resource_target = (
+                    f"/workspace/resources/resource-{index}-{resource_index}{resource_suffix}"
+                )
+                resource_copy_argv = [
+                    "docker",
+                    "cp",
+                    str(resource_source),
+                    f"{container_name}:{resource_target}",
+                ]
+                resource_copy = run_bounded(resource_copy_argv, timeout_seconds=30)
+                resource_record: dict[str, object] = {
+                    "subject_id": subject_id,
+                    "resource_id": resource_id,
+                    "argv": resource_copy_argv,
+                    "exit_code": resource_copy.returncode,
+                    "stderr": resource_copy.stderr,
+                    "target": resource_target,
+                    "expected_sha256": resource_hash,
+                }
+                copied.append(resource_record)
+                if resource_copy.returncode != 0:
+                    raise BlackridgeError(
+                        f"component resource copy failed: {subject_id}/{resource_id}"
+                    )
+                resource_hash_process = run_bounded(
+                    ["docker", "exec", container_name, "sha256sum", resource_target],
+                    timeout_seconds=15,
+                )
+                actual_resource_hash = (
+                    resource_hash_process.stdout.split()[0]
+                    if resource_hash_process.returncode == 0
+                    else None
+                )
+                resource_record["container_sha256"] = actual_resource_hash
+                resource_record["hash_matches"] = actual_resource_hash == resource_hash
+                if not resource_record["hash_matches"]:
+                    raise BlackridgeError(
+                        f"copied component resource hash mismatch: {subject_id}/{resource_id}"
+                    )
+                container_resources[subject_id][str(resource_source)] = resource_target
 
         boundary = adapter._isolate_execution_network(container_name)
         if not boundary["applied"]:
@@ -1879,6 +2217,32 @@ def run_generated_system_sandboxed(
                     "matches": actual_hash == launch["artifact_sha256"],
                 }
             )
+            resources = launch.get("resources", [])
+            if isinstance(resources, list):
+                for resource in resources:
+                    if not isinstance(resource, dict):
+                        continue
+                    resource_file = str(Path(str(resource.get("artifact_file"))).resolve())
+                    resource_target = container_resources[subject_id][resource_file]
+                    resource_hash_process = run_bounded(
+                        ["docker", "exec", container_name, "sha256sum", resource_target],
+                        timeout_seconds=15,
+                    )
+                    actual_resource_hash = (
+                        resource_hash_process.stdout.split()[0]
+                        if resource_hash_process.returncode == 0
+                        else None
+                    )
+                    post_execution_integrity.append(
+                        {
+                            "subject_id": subject_id,
+                            "resource_id": resource.get("resource_id"),
+                            "target": resource_target,
+                            "expected_sha256": resource.get("artifact_sha256"),
+                            "actual_sha256": actual_resource_hash,
+                            "matches": actual_resource_hash == resource.get("artifact_sha256"),
+                        }
+                    )
         if not all(item["matches"] for item in post_execution_integrity):
             raise BlackridgeError("sandboxed component bytes changed during execution")
     finally:

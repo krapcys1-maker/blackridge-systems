@@ -701,7 +701,7 @@ def compose_run(
         output_published = _publish_completed_artifact(probe, output)
     except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
         failure = ProbeEvidence.failure(
-            provider="blackridge-generated-linear-runtime/1",
+            provider="blackridge-generated-graph-runtime/1",
             subject=str(bundle_directory),
             request={
                 "bundle_directory": str(bundle_directory),

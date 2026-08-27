@@ -36,6 +36,8 @@ BROKEN_OUTPUT = ROOT / "examples" / "composition-linear-broken-output.yaml"
 PRODUCTION_UNREVIEWED = ROOT / "examples" / "composition-production-unreviewed.yaml"
 TIMEOUT_HOSTILE = ROOT / "examples" / "composition-timeout-calibration.yaml"
 RESOURCE_HOSTILE = ROOT / "examples" / "composition-resource-calibration.yaml"
+FANIN = ROOT / "examples" / "composition-fanin-calibration.yaml"
+BUNDLED_RESOURCE = ROOT / "examples" / "composition-bundled-resource-calibration.yaml"
 INPUT = {"topic": "evidence-driven composition"}
 
 
@@ -70,6 +72,55 @@ def test_solver_keeps_missing_adapter_route_incomplete() -> None:
     assert plan.unresolved_capabilities == ["report-sink"]
     assert plan.selected_adapter_ids == []
     assert [step.subject_id for step in plan.steps] == ["fixture-research-source"]
+
+
+def test_solver_and_runtime_preserve_independent_branches_for_fanin(tmp_path: Path) -> None:
+    definition = load_composition_definition(FANIN)
+    plan = solve_composition(definition, definition_file=FANIN)
+
+    assert plan.complete is True
+    assert [step.subject_id for step in plan.steps] == [
+        "fixture-length-branch",
+        "fixture-uppercase-branch",
+        "fixture-join-branches",
+    ]
+    join = plan.steps[-1]
+    assert [join.input_contract, *join.additional_input_contracts] == [
+        "uppercase/v1",
+        "length/v1",
+    ]
+
+    bundle = tmp_path / "fanin"
+    generated = generate_system(
+        definition,
+        plan,
+        definition_file=FANIN,
+        output_directory=bundle,
+    )
+    probe = run_generated_system(
+        bundle,
+        {"text": "Blackridge"},
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
+
+    assert probe.observations["all_steps_completed"] is True
+    assert probe.observations["available_contracts"] == [
+        "joined/v1",
+        "length/v1",
+        "seed/v1",
+        "uppercase/v1",
+    ]
+    assert probe.observations["final_artifact"] == {
+        "observed_contracts": ["length/v1", "uppercase/v1"],
+        "summary": "BLACKRIDGE:10",
+    }
+    join_observation = probe.observations["steps"][-1]
+    assert join_observation["input_artifact"] == {
+        "inputs": {
+            "uppercase/v1": {"uppercase": "BLACKRIDGE"},
+            "length/v1": {"length": 10},
+        }
+    }
 
 
 def test_production_mode_rejects_unreviewed_claimed_l3() -> None:
@@ -219,6 +270,41 @@ def test_generated_bundle_runs_after_its_definition_source_is_removed(tmp_path: 
 
     assert probe.observations["all_steps_completed"] is True
     assert probe.observations["final_artifact"]["report"]["based_on"] == "fixture-paper-001"
+
+
+def test_bundled_resource_runs_without_source_tree_and_tampering_is_blocked(
+    tmp_path: Path,
+) -> None:
+    examples = tmp_path / "examples"
+    shutil.copytree(ROOT / "examples", examples)
+    definition_file = examples / "composition-bundled-resource-calibration.yaml"
+    definition = load_composition_definition(definition_file)
+    plan = solve_composition(definition, definition_file=definition_file)
+    bundle = tmp_path / "generated-resource"
+    generated = generate_system(
+        definition,
+        plan,
+        definition_file=definition_file,
+        output_directory=bundle,
+    )
+    shutil.rmtree(examples)
+
+    probe = run_generated_system(
+        bundle,
+        {"value": 14},
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
+    assert probe.observations["all_steps_completed"] is True
+    assert probe.observations["final_artifact"] == {"result": "locked:42"}
+
+    resource = bundle / "resources" / "fixture-resource-calculator" / "calculation-data.json"
+    resource.write_text(resource.read_text(encoding="utf-8") + " ", encoding="utf-8")
+    with pytest.raises(BlackridgeError, match=r"calculation-data\.json"):
+        run_generated_system(
+            bundle,
+            {"value": 14},
+            expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        )
 
 
 def test_runtime_preflights_every_bundled_component_hash_before_execution(

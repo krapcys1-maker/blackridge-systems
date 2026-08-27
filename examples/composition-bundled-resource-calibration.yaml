@@ -1,0 +1,55 @@
+schema_version: "1"
+name: bundled-resource-calibration
+goal: >-
+  Prove that a hash-locked non-code resource remains usable after its source tree disappears.
+mode: calibration
+external_input: number/v1
+required_output: calculated/v1
+required_capabilities: [resource-calculation]
+allowed_licenses: [Apache-2.0]
+allowed_integrations: [command-json]
+minimum_evidence_level: 0
+contracts:
+  - contract_id: number/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [value]
+      properties:
+        value: {type: integer}
+  - contract_id: calculated/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result: {type: string, pattern: "^locked:-?[0-9]+$"}
+components:
+  - component_id: fixture-resource-calculator
+    capability_id: resource-calculation
+    source_uri: blackridge://calibration/resource-reader
+    revision: sha256:4f1525dd992b63976c06a370858772998bab8bb8aa2e662a9c38245a6c185bcf
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [number/v1]
+    produces: [calculated/v1]
+    launch:
+      argv:
+        - "{python}"
+        - "{definition_dir}/fixtures/resource_reader.py"
+        - "{resource:calculation-data}"
+      artifact_file: "{definition_dir}/fixtures/resource_reader.py"
+      artifact_sha256: 4f1525dd992b63976c06a370858772998bab8bb8aa2e662a9c38245a6c185bcf
+      working_directory: "{definition_dir}"
+      timeout_seconds: 10
+      environment_allowlist: []
+      resources:
+        - resource_id: calculation-data
+          source_uri: blackridge://calibration/resource-data
+          revision: sha256:c4bb8580eae7a8b7f015a056d6d15eda76035dd40f25da27354919161bfb2e90
+          license_spdx: Apache-2.0
+          artifact_file: "{definition_dir}/fixtures/resource_data.json"
+          artifact_sha256: c4bb8580eae7a8b7f015a056d6d15eda76035dd40f25da27354919161bfb2e90
+    evidence: {level: 0}
