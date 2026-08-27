@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import importlib.metadata
 import json
-import shutil
 import tomllib
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
@@ -22,7 +21,7 @@ from blackridge.depsdev import DepsDevClient, PackageSystem
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
 from blackridge.git_integrity import inspect_pristine_checkout
-from blackridge.process_boundary import run_bounded
+from blackridge.process_boundary import resolve_executable, run_bounded
 from blackridge.quality import OpenSSFScorecardClient
 from blackridge.sandbox import inspect_local_image
 
@@ -219,7 +218,7 @@ def _ensure_exact_checkout(
 
 
 def _pypi_attestation_verifier() -> tuple[str | None, str | None]:
-    executable = shutil.which("pypi-attestations")
+    executable = resolve_executable("pypi-attestations")
     try:
         version = importlib.metadata.version("pypi-attestations")
     except importlib.metadata.PackageNotFoundError:

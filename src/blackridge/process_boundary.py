@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import os
+import shutil
 import signal
 import subprocess
+import sys
 import threading
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -16,6 +18,22 @@ DEFAULT_MAX_OUTPUT_BYTES_PER_STREAM = 8 * 1024 * 1024
 DEFAULT_TIMEOUT_SECONDS = 120.0
 _CHUNK_BYTES = 64 * 1024
 _TERMINATION_GRACE_SECONDS = 2.0
+
+
+def resolve_executable(name: str) -> str | None:
+    """Resolve PATH tools and console scripts installed beside this interpreter."""
+
+    resolved = shutil.which(name)
+    if resolved is not None:
+        return resolved
+    scripts_directory = Path(sys.executable).resolve().parent
+    candidates = [scripts_directory / name]
+    if not Path(name).suffix:
+        candidates.append(scripts_directory / f"{name}.exe")
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return None
 
 
 @dataclass(frozen=True)

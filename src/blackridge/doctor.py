@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import shutil
 from dataclasses import dataclass
 
-from blackridge.process_boundary import run_bounded
+from blackridge.process_boundary import resolve_executable, run_bounded
 
 
 @dataclass(frozen=True)
@@ -45,7 +44,7 @@ TOOLS = (
 def check_tools() -> list[ToolCheck]:
     checks: list[ToolCheck] = []
     for name, required, version_args, purpose in TOOLS:
-        resolved = shutil.which(name)
+        resolved = resolve_executable(name)
         if resolved is None:
             checks.append(
                 ToolCheck(name, required, False, purpose, None, "executable not found")

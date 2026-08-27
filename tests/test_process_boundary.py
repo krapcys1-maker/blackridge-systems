@@ -1,8 +1,24 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
-from blackridge.process_boundary import run_bounded
+from blackridge.process_boundary import resolve_executable, run_bounded
+
+
+def test_resolve_executable_finds_script_beside_interpreter(
+    tmp_path: Path, monkeypatch
+) -> None:
+    scripts = tmp_path / "Scripts"
+    scripts.mkdir()
+    interpreter = scripts / "python.exe"
+    interpreter.touch()
+    console_script = scripts / "fixture-tool.exe"
+    console_script.touch()
+    monkeypatch.setattr("blackridge.process_boundary.shutil.which", lambda _name: None)
+    monkeypatch.setattr("blackridge.process_boundary.sys.executable", str(interpreter))
+
+    assert resolve_executable("fixture-tool") == str(console_script)
 
 
 def test_bounded_process_retains_normal_output() -> None:

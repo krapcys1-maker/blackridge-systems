@@ -6,7 +6,7 @@ from blackridge.process_boundary import BoundedProcessResult
 
 def test_doctor_requires_a_functional_command_not_only_a_path(monkeypatch) -> None:
     monkeypatch.setattr("blackridge.doctor.TOOLS", (("git", True, ("--version",), "source"),))
-    monkeypatch.setattr("blackridge.doctor.shutil.which", lambda _name: "/tools/git")
+    monkeypatch.setattr("blackridge.doctor.resolve_executable", lambda _name: "/tools/git")
     monkeypatch.setattr(
         "blackridge.doctor.run_bounded",
         lambda _argv, **_kwargs: BoundedProcessResult(
