@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import yaml
 from jsonschema import Draft202012Validator
+
+from blackridge.composition_evidence import EvidenceReference, verify_evidence
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPONENT = ROOT / "components" / "semanticscholar_search_v1"
@@ -18,7 +23,7 @@ ADAPTER = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = ADAPTER
 SPEC.loader.exec_module(ADAPTER)
 RESPONSE_VALIDATOR = Draft202012Validator(
-    __import__("json").loads((COMPONENT / "contracts" / "response.schema.json").read_text())
+    json.loads((COMPONENT / "contracts" / "response.schema.json").read_text())
 )
 
 
@@ -153,3 +158,33 @@ def test_wrapped_rate_limit_is_classified_without_exposing_details() -> None:
     wrapped.last_attempt = Attempt()
 
     assert ADAPTER._upstream_error_code(wrapped) == "rate-limited"
+
+
+def test_component_descriptor_binds_artifacts_and_named_l2_review() -> None:
+    descriptor = yaml.safe_load((COMPONENT / "component.yaml").read_text(encoding="utf-8"))
+
+    assert descriptor["physical_source_lines"] == len(
+        (COMPONENT / descriptor["source_file"]).read_text(encoding="utf-8").splitlines()
+    )
+    for field, path in (
+        ("artifact_sha256", COMPONENT / descriptor["source_file"]),
+        ("dependency_lock_sha256", COMPONENT / descriptor["dependency_lock"]),
+        ("input_contract_sha256", COMPONENT / "contracts" / "request.schema.json"),
+        ("output_contract_sha256", COMPONENT / "contracts" / "response.schema.json"),
+    ):
+        assert descriptor[field] == hashlib.sha256(path.read_bytes()).hexdigest()
+
+    evidence = EvidenceReference.model_validate(descriptor["evidence"])
+    reasons, observations = verify_evidence(
+        evidence,
+        definition_directory=COMPONENT,
+        mode="calibration",
+        subject_type="component",
+        subject_revision=descriptor["revision"],
+        subject_license_spdx=descriptor["license_spdx"],
+        artifact_sha256=descriptor["artifact_sha256"],
+    )
+
+    assert reasons == []
+    assert observations["promotion_target_level"] == 2
+    assert observations["probe_completed"] is True

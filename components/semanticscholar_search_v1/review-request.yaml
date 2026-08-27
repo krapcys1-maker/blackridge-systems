@@ -1,0 +1,35 @@
+schema_version: "1"
+name: semanticscholar-search-adapter-review
+goal: >-
+  Verify that the exact Semantic Scholar adapter and hash-pinned client install boot
+  in a constrained networkless container and fail closed across replayed API boundaries.
+constraints:
+  execution: pinned-read-only-container
+  public_network: disabled
+  dependency_install: local-hash-verified-wheelhouse
+  review: named-manual-review
+capabilities:
+  - id: literature-search-adapter
+    description: Normalize Semantic Scholar paper lookup and search behind a strict JSON contract.
+    accepts: [semanticscholar-search-request/v1]
+    produces: [semanticscholar-search-response/v1]
+    seeds: [danielnsilva/semanticscholar]
+    searches:
+      - keywords: [semantic-scholar, literature-search, python]
+    acceptance:
+      - id: networkless-boot-and-replay
+        description: Boot exact dependencies and exercise success and failure API boundaries offline.
+        given: >-
+          A nine-wheel hash-verified dependency closure, immutable adapter and contracts,
+          deterministic loopback replay server, and pinned sandbox runtime image.
+        when: >-
+          Dependencies install and seven adapter cases execute with Docker public networking
+          disabled, a read-only root filesystem, bounded CPU, memory, and process count.
+        then:
+          - Every dependency installs offline under pip require-hashes and exact reviewed versions load.
+          - Search traverses two replayed pages and returns the exact three paper identities.
+          - Empty search and exact paper lookup satisfy the frozen response contract.
+          - Not-found, rate-limit, malformed JSON, and invalid request cases return stable safe errors.
+          - Invalid input performs no HTTP request and caller-controlled API URLs are rejected.
+          - Direct IP and DNS public egress both fail while loopback replay remains functional.
+          - The probe completes all seven cases and leaves no sandbox container behind.
