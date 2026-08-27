@@ -6,27 +6,35 @@ description: >-
   distractor resistance, minimum-source enforcement, and clean abstention.
 source_uri: blackridge://components/grounded-researcher-v1
 source_file: grounded_researcher.py
-revision: efadac17efd630415c8c2bc862b8de55b4a9835e
+revision: fc3b7705f620132f5c5ad866b75a66ab5cc9c775
 license_spdx: Apache-2.0
 integration: command-json
 accepts: grounded-research-request/v1
 produces: grounded-research-response/v1
 candidate_command: [python, /workspace/candidate.py]
-artifact_sha256: 092a3d7208ab0d983d95ceb51b8c8cd1c3fc45e6d71005d0893a6474d403b2c8
-physical_source_lines: 293
+artifact_sha256: c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d
+physical_source_lines: 319
 input_contract_sha256: bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f
 output_contract_sha256: 5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409
 evidence:
   level: 3
-  review_file: ../../evidence/manual/2026-08-27/grounded-researcher-component-l3-review.json
-  review_sha256: 1a7afdf1e2cf84ca522937325917c949c2ba247766f4b8b357f38d01d82deb8d
+  review_file: ../../evidence/manual/2026-08-27/grounded-researcher-component-l3-v2-review.json
+  review_sha256: d8eede51f0111b06673b7e0c1e4ea85bba1ee420a736b6fcb89fab614f658fec
   capability_id: grounded-research-synthesis
   scenario_id: independent-domains-and-negative-control
-  probe_subject: grounded-researcher-v1@092a3d7208ab0d983d95ceb51b8c8cd1c3fc45e6d71005d0893a6474d403b2c8
+  probe_subject: grounded-researcher-v1@c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d
+supplemental_evidence:
+  level: 3
+  review_file: ../../evidence/manual/2026-08-27/grounded-researcher-adversarial-review.json
+  review_sha256: 8bddd5f58aecaafa089a0de30031989e11d1695fea87ab86253ca4ca09281b32
+  capability_id: grounded-research-synthesis
+  scenario_id: adversarial-order-bridges-and-scale
+  probe_subject: grounded-researcher-v1@c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d
 scope:
   - Three independent answerable domains with exact expected source selection.
   - Exact-substring citation grounding against the supplied corpus.
   - One unrelated negative corpus with empty abstention.
+  - Deterministic adversarial coverage for order, bridges, scale, invalid minima, and partial evidence.
 limitations:
   - L3 is contract evidence, not L4 end-system verification.
   - Relevance behavior is not claimed universal beyond the reviewed fixtures.

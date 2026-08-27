@@ -35,7 +35,32 @@ def test_eligible_component_has_hash_bound_l3_review_and_contracts() -> None:
     assert observations["review_hash_matches"] is True
     assert observations["probe_completed"] is True
     assert observations["probe_subject_matches"] is True
+    supplemental = observations["supplemental_evidence"]
+    assert isinstance(supplemental, dict)
+    assert supplemental["review_hash_matches"] is True
+    assert supplemental["probe_completed"] is True
+    assert supplemental["probe_subject_matches"] is True
     assert source.is_file()
+
+
+def test_eligible_component_rejects_failed_supplemental_gate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = ORCHESTRATOR.verify_evidence
+    calls = 0
+
+    def fail_second_gate(*args: object, **kwargs: object) -> tuple[list[str], dict[str, object]]:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            return ["adversarial review hash mismatch"], {}
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(ORCHESTRATOR, "verify_evidence", fail_second_gate)
+
+    with pytest.raises(RuntimeError, match="supplemental evidence gate failed"):
+        eligible_component(REPOSITORY)
+    assert calls == 2
 
 
 def test_hybrid_deterministically_replaces_builder_candidate_with_component(
@@ -110,4 +135,4 @@ def test_prompts_keep_component_out_of_baseline() -> None:
     assert "grounded_researcher.py (exact eligible source)" not in baseline
     assert "grounded_researcher.py (exact eligible source)" in hybrid
     assert "preselected grounded-researcher-v1" in hybrid
-    assert "report 293 reused_source_lines" in hybrid
+    assert "physical_source_lines as reused_source_lines" in hybrid

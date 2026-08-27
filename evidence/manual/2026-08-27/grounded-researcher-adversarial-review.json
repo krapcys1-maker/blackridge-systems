@@ -1,0 +1,40 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-27T15:38:57.853090Z",
+  "reviewer": "Codex /root manual artifact reviewer",
+  "verdict": "pass",
+  "capability_id": "grounded-research-synthesis",
+  "scenario_id": "adversarial-order-bridges-and-scale",
+  "scenario_description": "Resist order changes, lexical bridges, invalid minima, and large distractor corpora.",
+  "expected": [
+    "Reordering the same corpus does not change the exact selected source set.",
+    "Bridge and negated distractors are excluded from every answered source set.",
+    "Partial or contract-invalid requests produce clean abstention without claims or sources.",
+    "Source minima of one, three, and six select only the permitted evidence community.",
+    "The 200-document case selects twenty permitted sources within eight seconds.",
+    "Every output satisfies the public contract and every citation quote is exactly grounded.",
+    "Every container cleanup command succeeds and no probe container remains."
+  ],
+  "observed": [
+    "Both policy permutations selected the same exact five-source set.",
+    "Lexical-bridge and negated-near-duplicate cases selected only the permitted calibration and release sources.",
+    "Partial evidence, boolean minimum_sources, and duplicate document identities produced clean abstention.",
+    "Minimum-source cases one, three, and six selected only custody evidence and met the requested counts.",
+    "The 200-document case selected twenty seismic sources in 0.432 seconds in the bounded container.",
+    "All 162 checks matched, every output contract and exact citation check passed, all cleanup exits were zero, and no probe container remained."
+  ],
+  "probe_id": "5485f919be104403b4ddff6dfb66c617",
+  "probe_file": "evidence\\manual\\2026-08-27\\grounded-researcher-adversarial-probe.json",
+  "probe_sha256": "1de5089385799ffbb09a8c46da6bfd9331365ae04003ae67dcf9a8c608028475",
+  "promotion": {
+    "target_level": 3,
+    "subject_type": "component",
+    "probe_provider": "blackridge-grounded-researcher-adversarial/1",
+    "probe_subject": "grounded-researcher-v1@c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+    "probe_completed": true,
+    "subject_revision": "fc3b7705f620132f5c5ad866b75a66ab5cc9c775",
+    "subject_license_spdx": "Apache-2.0",
+    "artifact_sha256": "c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d"
+  },
+  "notes": "Manual review compared all eleven raw requests, stdout artifacts, selected identities, citations, schema and typed-contract classifications, duration limits, and cleanup evidence. The suite is deterministic adversarial remediation evidence, not a blinded holdout or universal semantic claim."
+}

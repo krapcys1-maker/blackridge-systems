@@ -92,6 +92,9 @@ def eligible_component(repo: Path) -> tuple[dict[str, Any], Path, dict[str, obje
         or sha256_bytes(source_path.read_bytes()) != artifact_hash
     ):
         raise RuntimeError("component source SHA-256 does not match its manifest")
+    physical_lines = len(source_path.read_text(encoding="utf-8").splitlines())
+    if manifest.get("physical_source_lines") != physical_lines:
+        raise RuntimeError("component physical line count does not match its manifest")
     evidence = EvidenceReference.model_validate(manifest.get("evidence"))
     if evidence.level < EvidenceLevel.CONTRACT_TESTED:
         raise RuntimeError("component does not reach the frozen L3 reuse gate")
@@ -114,6 +117,21 @@ def eligible_component(repo: Path) -> tuple[dict[str, Any], Path, dict[str, obje
     )
     if reasons:
         raise RuntimeError("component evidence gate failed: " + "; ".join(reasons))
+    supplemental = EvidenceReference.model_validate(manifest.get("supplemental_evidence"))
+    supplemental_reasons, supplemental_observations = verify_evidence(
+        supplemental,
+        definition_directory=manifest_path.parent,
+        mode="calibration",
+        subject_type="component",
+        subject_revision=str(manifest.get("revision", "")),
+        subject_license_spdx=str(manifest.get("license_spdx", "")),
+        artifact_sha256=artifact_hash,
+    )
+    if supplemental_reasons:
+        raise RuntimeError(
+            "component supplemental evidence gate failed: " + "; ".join(supplemental_reasons)
+        )
+    observations["supplemental_evidence"] = supplemental_observations
     return manifest, source_path, observations
 
 
@@ -182,7 +200,8 @@ Return one JSON object, without Markdown fences. In the from-scratch arm use thi
 }}
 
 In the Blackridge arm use selected_component_id "grounded-researcher-v1", omit candidate.py from
-files, report 293 reused_source_lines, and identify the retained L3 review and artifact SHA-256.
+files, report the manifest's physical_source_lines as reused_source_lines, and identify the
+retained L3 review and artifact SHA-256.
 
 Allowed output files are candidate.py, README.md, requirements.lock, and BUILD.json. candidate.py
 is mandatory when selected_component_id is null and must be omitted when a retained component is
