@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
 from copy import deepcopy
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -13,6 +14,7 @@ import yaml
 from blackridge.composition import (
     ContractDefinition,
     EvidenceReference,
+    _host_component_process,
     _sandbox_component_argv,
     _verify_evidence,
     generate_system,
@@ -39,6 +41,48 @@ RESOURCE_HOSTILE = ROOT / "examples" / "composition-resource-calibration.yaml"
 FANIN = ROOT / "examples" / "composition-fanin-calibration.yaml"
 BUNDLED_RESOURCE = ROOT / "examples" / "composition-bundled-resource-calibration.yaml"
 INPUT = {"topic": "evidence-driven composition"}
+
+
+def test_host_component_gets_isolated_runtime_identity_and_scratch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    component = tmp_path / "inspect_environment.py"
+    component.write_text(
+        "import getpass, json, os, sys, tempfile\n"
+        "json.load(sys.stdin)\n"
+        "print(json.dumps({\n"
+        "  'user': getpass.getuser(),\n"
+        "  'home': os.environ['HOME'],\n"
+        "  'temp': tempfile.gettempdir(),\n"
+        "  'secret': os.environ['BLACKRIDGE_TEST_ALLOWED'],\n"
+        "  'names': sorted(os.environ),\n"
+        "}))\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("BLACKRIDGE_TEST_ALLOWED", "allowed-value")
+    monkeypatch.setenv("HOME", str(tmp_path / "real-host-home"))
+
+    process = _host_component_process(
+        "environment-fixture",
+        {
+            "argv": [sys.executable, str(component)],
+            "working_directory": str(tmp_path),
+            "environment_allowlist": ["BLACKRIDGE_TEST_ALLOWED"],
+            "timeout_seconds": 5,
+        },
+        {},
+    )
+
+    assert process["exit_code"] == 0
+    observed = json.loads(str(process["stdout"]))
+    assert observed["user"] == "blackridge"
+    assert observed["secret"] == "allowed-value"
+    assert observed["home"] == observed["temp"]
+    assert not Path(observed["home"]).exists()
+    assert "HOME" in process["environment_names"]
+    assert "USERNAME" in process["environment_names"]
+    assert "real-host-home" not in observed["home"]
+    assert "PYTHONIOENCODING" in observed["names"]
 
 
 def test_contract_identifier_cannot_escape_generated_contract_directory() -> None:

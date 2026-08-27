@@ -1390,14 +1390,41 @@ def _host_component_process(
     environment = {
         key: os.environ[key] for key in allowlist if isinstance(key, str) and key in os.environ
     }
-    environment["PYTHONIOENCODING"] = "utf-8"
-    completed = run_bounded(
-        argv,
-        input_text=json.dumps(artifact),
-        cwd=cwd,
-        env=environment,
-        timeout_seconds=float(timeout),
-    )
+    with tempfile.TemporaryDirectory(prefix="blackridge-component-") as scratch:
+        # Give libraries a writable, per-process home/cache without exposing the
+        # host user's profile.  A fixed synthetic identity also keeps Windows'
+        # getpass fallback from attempting to import the Unix-only ``pwd`` module.
+        environment.update(
+            {
+                "HOME": scratch,
+                "TEMP": scratch,
+                "TMP": scratch,
+                "TMPDIR": scratch,
+                "USER": "blackridge",
+                "USERNAME": "blackridge",
+                "PYTHONIOENCODING": "utf-8",
+            }
+        )
+        if os.name == "nt" and "SYSTEMROOT" in os.environ:
+            # CPython and native extensions use the Windows system directory to
+            # initialize core providers even when no user environment is forwarded.
+            system_root = Path(os.environ["SYSTEMROOT"])
+            environment["SYSTEMROOT"] = str(system_root)
+            environment["USERPROFILE"] = scratch
+            environment["PATH"] = os.pathsep.join(
+                [
+                    str(Path(sys.executable).parent),
+                    str(system_root / "System32"),
+                    str(system_root),
+                ]
+            )
+        completed = run_bounded(
+            argv,
+            input_text=json.dumps(artifact),
+            cwd=cwd,
+            env=environment,
+            timeout_seconds=float(timeout),
+        )
     return {
         "executor": "host-shell-free",
         "argv": argv,
