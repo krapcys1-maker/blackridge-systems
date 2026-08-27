@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import time
 import urllib.error
@@ -22,10 +23,12 @@ from typing import Any
 import yaml
 
 from blackridge.benchmark import BenchmarkComparisonProbe
+from blackridge.composition_evidence import EvidenceReference, verify_evidence
+from blackridge.models import EvidenceLevel
 
 MODEL = "deepseek-v4-flash"
-CANDIDATE_MAX_LINES = 220
-CANDIDATE_MAX_CHARACTERS = 18_000
+CANDIDATE_MAX_LINES = 320
+CANDIDATE_MAX_CHARACTERS = 20_000
 MODEL_CONFIGURATION = {
     "temperature": 0.2,
     "max_tokens": 8192,
@@ -72,13 +75,59 @@ def public_material(repo: Path) -> str:
     return "\n\n".join(sections)
 
 
-def treatment_material(repo: Path) -> str:
-    files = (
-        repo / ".blackridge" / "scientific-researcher.blueprint.yaml",
-        repo / "upstream-catalog.yaml",
-        repo / "docs" / "research-landscape.md",
+def eligible_component(repo: Path) -> tuple[dict[str, Any], Path, dict[str, object]]:
+    """Load one hash-bound component and independently enforce its L2 evidence gate."""
+
+    manifest_path = repo / "components" / "grounded_researcher_v1" / "component.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(manifest, dict):
+        raise RuntimeError("component manifest is not an object")
+    source_name = manifest.get("source_file")
+    if not isinstance(source_name, str) or Path(source_name).name != source_name:
+        raise RuntimeError("component source_file is unsafe")
+    source_path = manifest_path.parent / source_name
+    artifact_hash = manifest.get("artifact_sha256")
+    if (
+        not isinstance(artifact_hash, str)
+        or sha256_bytes(source_path.read_bytes()) != artifact_hash
+    ):
+        raise RuntimeError("component source SHA-256 does not match its manifest")
+    evidence = EvidenceReference.model_validate(manifest.get("evidence"))
+    if evidence.level < EvidenceLevel.BOOTED:
+        raise RuntimeError("component does not reach the frozen L2 reuse gate")
+    reasons, observations = verify_evidence(
+        evidence,
+        definition_directory=manifest_path.parent,
+        mode="calibration",
+        subject_type="component",
+        subject_revision=str(manifest.get("revision", "")),
+        subject_license_spdx=str(manifest.get("license_spdx", "")),
+        artifact_sha256=artifact_hash,
     )
-    return "\n\n".join(f"--- {path.name} ---\n{path.read_text(encoding='utf-8')}" for path in files)
+    if reasons:
+        raise RuntimeError("component evidence gate failed: " + "; ".join(reasons))
+    return manifest, source_path, observations
+
+
+def treatment_material(repo: Path) -> str:
+    manifest, source_path, observations = eligible_component(repo)
+    retained = {
+        "gate": "eligible-at-L2",
+        "reviewer": observations.get("reviewer"),
+        "review_verdict": observations.get("review_verdict"),
+        "review_hash_matches": observations.get("review_hash_matches"),
+        "probe_completed": observations.get("probe_completed"),
+        "probe_subject_matches": observations.get("probe_subject_matches"),
+    }
+    return "\n\n".join(
+        (
+            "--- component.yaml ---\n" + yaml.safe_dump(manifest, sort_keys=False),
+            "--- independently-verified-gate.json ---\n"
+            + json.dumps(retained, indent=2, sort_keys=True),
+            f"--- {source_path.name} (exact eligible source) ---\n"
+            + source_path.read_text(encoding="utf-8"),
+        )
+    )
 
 
 def builder_prompt(repo: Path, method: str) -> str:
@@ -93,8 +142,12 @@ def builder_prompt(repo: Path, method: str) -> str:
             "Use the Blackridge reuse-first policy represented by the registry material below. "
             "Reuse source only when its retained evidence actually reaches the stated gate. "
             "Do not import or claim reuse of provisional, blocked, or merely discovered entries. "
-            "If no component is eligible, implement the missing seam and explicitly report zero "
-            "reused source lines.\n\nBLACKRIDGE REGISTRY MATERIAL:\n" + treatment_material(repo)
+            "The orchestrator has independently verified the listed component's source hash and "
+            "named L2 review. If it satisfies the public contract, select it by setting "
+            "selected_component_id to grounded-researcher-v1; the orchestrator will install the "
+            "exact retained bytes as candidate.py. Do not retranscribe that file. If it does not "
+            "fit, set selected_component_id to null, implement candidate.py, and explain the exact "
+            "mismatch.\n\nBLACKRIDGE REGISTRY MATERIAL:\n" + treatment_material(repo)
         )
     return f"""You are one isolated software builder in a controlled experiment.
 
@@ -106,21 +159,24 @@ be general: do not hardcode request IDs, document IDs, titles, quotations, expec
 any guessed hidden case. It must read exactly one JSON request from stdin, write exactly one JSON
 artifact to stdout, and put diagnostics only on stderr.
 
-Keep the implementation deliberately small and reviewable: candidate.py must contain at most 220
-physical lines and at most 18,000 characters. Do not emit giant stopword, synonym, phrase, or
+Keep the implementation deliberately small and reviewable: candidate.py must contain at most 320
+physical lines and at most 20,000 characters. Do not emit giant stopword, synonym, phrase, or
 domain-vocabulary tables. Prefer a compact general algorithm over enumerating possible content.
 
 Return one JSON object, without Markdown fences, with this exact shape:
 {{
   "files": [{{"path": "candidate.py", "content": "..."}}, ...],
   "candidate_command": ["python", "/workspace/candidate.py"],
+  "selected_component_id": null,
   "architecture_notes": ["..."],
   "reused_source_lines": 0,
   "reuse_evidence": ["..."]
 }}
 
 Allowed output files are candidate.py, README.md, requirements.lock, and BUILD.json. candidate.py
-is mandatory. requirements.lock must state that there are no third-party runtime dependencies.
+is mandatory when selected_component_id is null and must be omitted when a retained component is
+selected. A selected component is allowed only in the Blackridge arm. requirements.lock must state
+that there are no third-party runtime dependencies.
 Do not include tests derived from guessed hidden inputs. This is a one-shot build with no repair
 after evaluator feedback.
 
@@ -179,12 +235,25 @@ def call_builder(
     return envelope, bundle, duration
 
 
-def validate_and_write_bundle(workspace: Path, bundle: dict[str, Any]) -> None:
+def validate_and_write_bundle(
+    repo: Path, workspace: Path, bundle: dict[str, Any], method: str
+) -> dict[str, Any] | None:
     if bundle.get("candidate_command") != ["python", "/workspace/candidate.py"]:
         raise RuntimeError("builder returned a non-frozen candidate command")
     files = bundle.get("files")
-    if not isinstance(files, list) or not files:
+    if not isinstance(files, list):
         raise RuntimeError("builder returned no files")
+    selected_id = bundle.get("selected_component_id")
+    if selected_id is not None and not isinstance(selected_id, str):
+        raise RuntimeError("builder returned an invalid selected_component_id")
+    selected: dict[str, Any] | None = None
+    selected_source: Path | None = None
+    if selected_id is not None:
+        if method != "blackridge-hybrid":
+            raise RuntimeError("from-scratch builder attempted component reuse")
+        selected, selected_source, _ = eligible_component(repo)
+        if selected_id != selected.get("component_id"):
+            raise RuntimeError(f"builder selected an unknown component: {selected_id!r}")
     seen: set[str] = set()
     for item in files:
         if not isinstance(item, dict) or not isinstance(item.get("content"), str):
@@ -204,8 +273,49 @@ def validate_and_write_bundle(workspace: Path, bundle: dict[str, Any]) -> None:
             raise RuntimeError("builder exceeded the frozen candidate size budget")
         seen.add(name)
         (workspace / name).write_text(item["content"], encoding="utf-8", newline="\n")
-    if "candidate.py" not in seen:
+    if selected is not None and "candidate.py" in seen:
+        raise RuntimeError("builder retranscribed candidate.py despite selecting a component")
+    if selected is None and "candidate.py" not in seen:
         raise RuntimeError("builder omitted candidate.py")
+    if selected is not None:
+        assert selected_source is not None
+        shutil.copyfile(selected_source, workspace / "candidate.py")
+    return selected
+
+
+def measure_reuse(
+    workspace: Path,
+    selected: dict[str, Any] | None,
+    builder_claim: object,
+) -> dict[str, Any]:
+    """Measure reuse from installed bytes; never use builder self-report as telemetry."""
+
+    if not isinstance(builder_claim, int) or isinstance(builder_claim, bool) or builder_claim < 0:
+        raise RuntimeError("builder returned invalid reused_source_lines")
+    candidate = workspace / "candidate.py"
+    candidate_hash = sha256_bytes(candidate.read_bytes())
+    total = source_lines(workspace)
+    if selected is None:
+        reused = 0
+        selected_hash = None
+        exact_artifact_match = False
+    else:
+        selected_hash = selected["artifact_sha256"]
+        exact_artifact_match = candidate_hash == selected_hash
+        if not exact_artifact_match:
+            raise RuntimeError("installed candidate does not match the selected component hash")
+        reused = len(candidate.read_text(encoding="utf-8").splitlines())
+    return {
+        "candidate_sha256": candidate_hash,
+        "selected_artifact_sha256": selected_hash,
+        "exact_artifact_match": exact_artifact_match,
+        "total_source_lines": total,
+        "generated_source_lines": total - reused,
+        "reused_source_lines": reused,
+        "builder_claimed_reused_source_lines": builder_claim,
+        "builder_claim_matches_measurement": builder_claim == reused,
+        "measurement_source": "orchestrator-sha256-and-physical-lines",
+    }
 
 
 def run_checked(argv: list[str], cwd: Path, timeout: int = 120) -> subprocess.CompletedProcess[str]:
@@ -280,7 +390,12 @@ def source_lines(workspace: Path) -> int:
 
 
 def run_plan(
-    *, method: str, attempt: int, workspace: Path, duration: float, generated: int, reused: int
+    *,
+    method: str,
+    attempt: int,
+    workspace: Path,
+    duration: float,
+    reuse: dict[str, Any],
 ) -> dict[str, Any]:
     return {
         "schema_version": "1",
@@ -312,12 +427,14 @@ def run_plan(
             "builder_wall_seconds": round(duration, 3),
             "model_cost_usd": None,
             "repair_iterations": 0,
-            "generated_source_lines": generated,
-            "reused_source_lines": reused,
+            "generated_source_lines": reuse["generated_source_lines"],
+            "reused_source_lines": reuse["reused_source_lines"],
             "clean_install": "pass",
             "measurement_source": "orchestrator",
             "notes": [
                 "API usage retained in builder-response.json; provider did not report USD cost.",
+                "Reuse is counted only when installed candidate bytes match the retained "
+                "artifact SHA-256.",
                 "Source lines count nonblank and blank physical Python lines in the deliverable.",
             ],
         },
@@ -374,6 +491,17 @@ def main() -> int:
         ],
         "runs": [],
     }
+    component, component_source, component_gate = eligible_component(repo)
+    manifest["eligible_component"] = {
+        "component_id": component["component_id"],
+        "revision": component["revision"],
+        "artifact_sha256": component["artifact_sha256"],
+        "source_file": str(component_source.relative_to(repo)),
+        "evidence_level": component["evidence"]["level"],
+        "reviewer": component_gate.get("reviewer"),
+        "review_verdict": component_gate.get("review_verdict"),
+        "probe_completed": component_gate.get("probe_completed"),
+    }
     write_json(output_root / "manifest.json", manifest)
 
     for attempt in range(1, args.attempts + 1):
@@ -391,23 +519,19 @@ def main() -> int:
                     api_key, prompt, run_root / "builder-response.json"
                 )
                 write_json(run_root / "builder-bundle.json", bundle)
-                validate_and_write_bundle(workspace, bundle)
+                selected = validate_and_write_bundle(repo, workspace, bundle, method)
                 install = clean_install_probe(workspace)
                 write_json(run_root / "clean-install.json", install)
                 if not install["pass"]:
                     raise RuntimeError(f"clean install failed for {method} attempt {attempt}")
                 commit = commit_workspace(workspace)
-                generated = source_lines(workspace)
-                reused = bundle.get("reused_source_lines")
-                if not isinstance(reused, int) or reused < 0:
-                    raise RuntimeError("builder returned invalid reused_source_lines")
+                reuse = measure_reuse(workspace, selected, bundle.get("reused_source_lines"))
                 plan = run_plan(
                     method=method,
                     attempt=attempt,
                     workspace=workspace,
                     duration=duration,
-                    generated=generated,
-                    reused=reused,
+                    reuse=reuse,
                 )
                 plan_path = run_root / "run-plan.yaml"
                 plan_path.write_text(
@@ -423,8 +547,9 @@ def main() -> int:
                     "workspace_commit": commit,
                     "builder_prompt_sha256": sha256_bytes(prompt.encode("utf-8")),
                     "builder_wall_seconds": round(duration, 3),
-                    "generated_source_lines": generated,
-                    "reused_source_lines": reused,
+                    "generated_source_lines": reuse["generated_source_lines"],
+                    "reused_source_lines": reuse["reused_source_lines"],
+                    "reuse_measurement": reuse,
                     "api_usage": envelope.get("usage"),
                 }
             except Exception as exc:

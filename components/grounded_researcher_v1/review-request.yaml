@@ -1,0 +1,32 @@
+schema_version: "1"
+name: grounded-researcher-component-review
+goal: >-
+  Verify that the offline grounded researcher selects relevant evidence, emits exact
+  document-backed citations, rejects distractors, and abstains when evidence is absent.
+constraints:
+  execution: isolated-pinned-container
+  network: disabled
+  review: named-manual-review
+capabilities:
+  - id: grounded-research-synthesis
+    description: Produce a concise answer with exact corpus-backed claims or abstain cleanly.
+    accepts: [grounded-research-request/v1]
+    produces: [grounded-research-response/v1]
+    seeds: []
+    searches:
+      - keywords: [offline, grounded, research, citations]
+    acceptance:
+      - id: independent-domains-and-negative-control
+        description: Answer two unrelated domains exactly and reject an unsupported third domain.
+        given: >-
+          Frozen policy, backup, and astronomy fixtures containing relevant documents,
+          plausible distractors, keyword stuffing, and an unrelated corpus.
+        when: >-
+          The immutable component and a green-exit broken control run with identical stdin
+          inside a pinned networkless read-only non-root container.
+        then:
+          - The component exits zero and returns the exact expected source set for both answerable domains.
+          - Every emitted citation quote occurs verbatim in its identified input document.
+          - The component returns insufficient-evidence with no claims or sources for the unrelated corpus.
+          - The green-exit broken control is rejected by semantic checks despite exiting zero.
+          - All probe containers are removed after execution.

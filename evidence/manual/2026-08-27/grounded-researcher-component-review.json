@@ -1,0 +1,37 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-27T14:57:21.835917Z",
+  "reviewer": "Codex /root manual artifact reviewer",
+  "verdict": "pass",
+  "capability_id": "grounded-research-synthesis",
+  "scenario_id": "independent-domains-and-negative-control",
+  "scenario_description": "Answer two unrelated domains exactly and reject an unsupported third domain.",
+  "expected": [
+    "The component exits zero and returns the exact expected source set for both answerable domains.",
+    "Every emitted citation quote occurs verbatim in its identified input document.",
+    "The component returns insufficient-evidence with no claims or sources for the unrelated corpus.",
+    "The green-exit broken control is rejected by semantic checks despite exiting zero.",
+    "All probe containers are removed after execution."
+  ],
+  "observed": [
+    "Policy fixture returned exactly five expected sources; all five citation quotes occur verbatim in their identified input documents.",
+    "Backup fixture returned exactly four expected sources; all four citation quotes occur verbatim in their identified input documents.",
+    "Astronomy fixture returned insufficient-evidence with zero claims and zero sources.",
+    "Broken green-exit control exited zero in all three cases but failed eight semantic checks across source selection, grounding, status, and abstention.",
+    "Candidate and broken-control cleanup commands exited zero and an independent docker ps check found zero remaining probe containers."
+  ],
+  "probe_id": "7cecd371bd3d4680b9d2ffc937992323",
+  "probe_file": "evidence\\manual\\2026-08-27\\grounded-researcher-component-probe.json",
+  "probe_sha256": "7f0efbe7e6bf7ec0e556a981b30521cffebc01b323ce1c137906d376ff6cfddb",
+  "promotion": {
+    "target_level": 2,
+    "subject_type": "component",
+    "probe_provider": "blackridge-grounded-researcher-probe/1",
+    "probe_subject": "grounded-researcher-v1@a6118dee68e01d2ea9b0ec162f9bcb36d918383e813d3c4df87f409352f08fb8",
+    "probe_completed": true,
+    "subject_revision": "64fbdd83229ee582a9552ab063d1697b9ebadb4b",
+    "subject_license_spdx": "Apache-2.0",
+    "artifact_sha256": "a6118dee68e01d2ea9b0ec162f9bcb36d918383e813d3c4df87f409352f08fb8"
+  },
+  "notes": "Named manual comparison performed against complete raw stdout, parsed artifacts, frozen fixtures, process constraints, cleanup results, and an independent exact-substring check. Scope is limited to these two answerable domains and one unrelated negative corpus."
+}

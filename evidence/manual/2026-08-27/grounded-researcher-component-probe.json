@@ -1,0 +1,727 @@
+{
+  "schema_version": "1",
+  "probe_id": "7cecd371bd3d4680b9d2ffc937992323",
+  "observed_at": "2026-08-27T14:55:07.463089Z",
+  "provider": "blackridge-grounded-researcher-probe/1",
+  "subject": "grounded-researcher-v1@a6118dee68e01d2ea9b0ec162f9bcb36d918383e813d3c4df87f409352f08fb8",
+  "request": {
+    "repository": "D:\\Skladacz aplikacji\\blackridge-systems",
+    "repository_revision": "64fbdd83229ee582a9552ab063d1697b9ebadb4b",
+    "component_file": "D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1\\grounded_researcher.py",
+    "component_sha256": "a6118dee68e01d2ea9b0ec162f9bcb36d918383e813d3c4df87f409352f08fb8",
+    "broken_control_file": "D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1\\fixtures\\broken_grounded_researcher.py",
+    "broken_control_sha256": "386c0f0ffdb3632b06da7eb94d351bdf2bed74f20ac5ac9acdf469e326135e2d",
+    "image": "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903"
+  },
+  "observations": {
+    "probe_completed": true,
+    "case_count": 3,
+    "candidate_all_checks_matched": true,
+    "broken_all_processes_exited_zero": true,
+    "broken_detected_check_count": 8,
+    "cases": [
+      {
+        "fixture": "policy-answerable.json",
+        "fixture_sha256": "11185e9798bf28288e114e8508be163293c99123482da7d3786628c8eabec091",
+        "expected_source_ids": [
+          "policy-approval",
+          "policy-audit",
+          "policy-identity",
+          "policy-negative",
+          "policy-rollback"
+        ],
+        "candidate": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-2b2f6fc1155f48808abdd267efb2c4bb",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"policy-answerable\", \"status\": \"answered\", \"answer\": \"A named owner records approval only after inspecting the retained evidence. A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision.\", \"claims\": [{\"text\": \"A named owner records approval only after inspecting the retained evidence.\", \"citations\": [{\"document_id\": \"policy-approval\", \"quote\": \"A named owner records approval only after inspecting the retained evidence.\"}]}, {\"text\": \"A deliberately malformed record must be rejected even when the import command reports success.\", \"citations\": [{\"document_id\": \"policy-negative\", \"quote\": \"A deliberately malformed record must be rejected even when the import command reports success.\"}]}, {\"text\": \"A release record binds the dataset to an immutable snapshot digest.\", \"citations\": [{\"document_id\": \"policy-identity\", \"quote\": \"A release record binds the dataset to an immutable snapshot digest.\"}]}, {\"text\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\", \"citations\": [{\"document_id\": \"policy-rollback\", \"quote\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\"}]}, {\"text\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\", \"citations\": [{\"document_id\": \"policy-audit\", \"quote\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\"}]}], \"sources\": [{\"document_id\": \"policy-approval\", \"title\": \"Named Approval\"}, {\"document_id\": \"policy-negative\", \"title\": \"Adverse Data Control\"}, {\"document_id\": \"policy-identity\", \"title\": \"Immutable Dataset Identity\"}, {\"document_id\": \"policy-rollback\", \"title\": \"Reversible Publication\"}, {\"document_id\": \"policy-audit\", \"title\": \"Raw Audit Trail\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "policy-answerable",
+            "status": "answered",
+            "answer": "A named owner records approval only after inspecting the retained evidence. A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision.",
+            "claims": [
+              {
+                "text": "A named owner records approval only after inspecting the retained evidence.",
+                "citations": [
+                  {
+                    "document_id": "policy-approval",
+                    "quote": "A named owner records approval only after inspecting the retained evidence."
+                  }
+                ]
+              },
+              {
+                "text": "A deliberately malformed record must be rejected even when the import command reports success.",
+                "citations": [
+                  {
+                    "document_id": "policy-negative",
+                    "quote": "A deliberately malformed record must be rejected even when the import command reports success."
+                  }
+                ]
+              },
+              {
+                "text": "A release record binds the dataset to an immutable snapshot digest.",
+                "citations": [
+                  {
+                    "document_id": "policy-identity",
+                    "quote": "A release record binds the dataset to an immutable snapshot digest."
+                  }
+                ]
+              },
+              {
+                "text": "A staged release keeps the prior dataset available and documents a tested rollback procedure.",
+                "citations": [
+                  {
+                    "document_id": "policy-rollback",
+                    "quote": "A staged release keeps the prior dataset available and documents a tested rollback procedure."
+                  }
+                ]
+              },
+              {
+                "text": "Raw validation output, warnings, and failed checks remain attached to the release decision.",
+                "citations": [
+                  {
+                    "document_id": "policy-audit",
+                    "quote": "Raw validation output, warnings, and failed checks remain attached to the release decision."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "policy-approval",
+                "title": "Named Approval"
+              },
+              {
+                "document_id": "policy-negative",
+                "title": "Adverse Data Control"
+              },
+              {
+                "document_id": "policy-identity",
+                "title": "Immutable Dataset Identity"
+              },
+              {
+                "document_id": "policy-rollback",
+                "title": "Reversible Publication"
+              },
+              {
+                "document_id": "policy-audit",
+                "title": "Raw Audit Trail"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": true,
+              "observed": [
+                "policy-approval",
+                "policy-audit",
+                "policy-identity",
+                "policy-negative",
+                "policy-rollback"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 5,
+                "source_count": 5
+              }
+            }
+          ]
+        },
+        "broken_control": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-27ac2a86f3f84758bfbd9ae369d7ba20",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "fixtures/broken_grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"policy-answerable\", \"status\": \"answered\", \"answer\": \"The requested conclusion is fully supported.\", \"claims\": [{\"text\": \"The requested conclusion is fully supported.\", \"citations\": [{\"document_id\": \"policy-identity\", \"quote\": \"This fabricated quote is absent from the document.\"}]}], \"sources\": [{\"document_id\": \"policy-identity\", \"title\": \"Immutable Dataset Identity\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "policy-answerable",
+            "status": "answered",
+            "answer": "The requested conclusion is fully supported.",
+            "claims": [
+              {
+                "text": "The requested conclusion is fully supported.",
+                "citations": [
+                  {
+                    "document_id": "policy-identity",
+                    "quote": "This fabricated quote is absent from the document."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "policy-identity",
+                "title": "Immutable Dataset Identity"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": false,
+              "observed": [
+                "policy-identity"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": false,
+              "observed": false
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 1,
+                "source_count": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fixture": "backup-answerable.json",
+        "fixture_sha256": "d1abaa08fb79da3ea318f46254a480945e8c4fe00f6fd45a2a6422d372f722b0",
+        "expected_source_ids": [
+          "backup-offsite",
+          "backup-restore",
+          "backup-review",
+          "backup-snapshot"
+        ],
+        "candidate": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-bbb00962874649449dfa04d48bc03c6e",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"backup-answerable\", \"status\": \"answered\", \"answer\": \"A copied archive is not accepted until the restored content matches. Operators do not replace failed drill evidence with a later successful screenshot. Every backup run records a content digest and completion timestamp. This separation preserves recovery material after a local or account-wide failure.\", \"claims\": [{\"text\": \"A copied archive is not accepted until the restored content matches.\", \"citations\": [{\"document_id\": \"backup-restore\", \"quote\": \"A copied archive is not accepted until the restored content matches.\"}]}, {\"text\": \"Operators do not replace failed drill evidence with a later successful screenshot.\", \"citations\": [{\"document_id\": \"backup-review\", \"quote\": \"Operators do not replace failed drill evidence with a later successful screenshot.\"}]}, {\"text\": \"Every backup run records a content digest and completion timestamp.\", \"citations\": [{\"document_id\": \"backup-snapshot\", \"quote\": \"Every backup run records a content digest and completion timestamp.\"}]}, {\"text\": \"This separation preserves recovery material after a local or account-wide failure.\", \"citations\": [{\"document_id\": \"backup-offsite\", \"quote\": \"This separation preserves recovery material after a local or account-wide failure.\"}]}], \"sources\": [{\"document_id\": \"backup-restore\", \"title\": \"Restore Drill\"}, {\"document_id\": \"backup-review\", \"title\": \"Failed Recovery Evidence\"}, {\"document_id\": \"backup-snapshot\", \"title\": \"Pinned Backup Snapshot\"}, {\"document_id\": \"backup-offsite\", \"title\": \"Independent Storage\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "backup-answerable",
+            "status": "answered",
+            "answer": "A copied archive is not accepted until the restored content matches. Operators do not replace failed drill evidence with a later successful screenshot. Every backup run records a content digest and completion timestamp. This separation preserves recovery material after a local or account-wide failure.",
+            "claims": [
+              {
+                "text": "A copied archive is not accepted until the restored content matches.",
+                "citations": [
+                  {
+                    "document_id": "backup-restore",
+                    "quote": "A copied archive is not accepted until the restored content matches."
+                  }
+                ]
+              },
+              {
+                "text": "Operators do not replace failed drill evidence with a later successful screenshot.",
+                "citations": [
+                  {
+                    "document_id": "backup-review",
+                    "quote": "Operators do not replace failed drill evidence with a later successful screenshot."
+                  }
+                ]
+              },
+              {
+                "text": "Every backup run records a content digest and completion timestamp.",
+                "citations": [
+                  {
+                    "document_id": "backup-snapshot",
+                    "quote": "Every backup run records a content digest and completion timestamp."
+                  }
+                ]
+              },
+              {
+                "text": "This separation preserves recovery material after a local or account-wide failure.",
+                "citations": [
+                  {
+                    "document_id": "backup-offsite",
+                    "quote": "This separation preserves recovery material after a local or account-wide failure."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "backup-restore",
+                "title": "Restore Drill"
+              },
+              {
+                "document_id": "backup-review",
+                "title": "Failed Recovery Evidence"
+              },
+              {
+                "document_id": "backup-snapshot",
+                "title": "Pinned Backup Snapshot"
+              },
+              {
+                "document_id": "backup-offsite",
+                "title": "Independent Storage"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": true,
+              "observed": [
+                "backup-offsite",
+                "backup-restore",
+                "backup-review",
+                "backup-snapshot"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 4,
+                "source_count": 4
+              }
+            }
+          ]
+        },
+        "broken_control": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-0beaca412b484387aba4646fe51c4c6a",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "fixtures/broken_grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"backup-answerable\", \"status\": \"answered\", \"answer\": \"The requested conclusion is fully supported.\", \"claims\": [{\"text\": \"The requested conclusion is fully supported.\", \"citations\": [{\"document_id\": \"backup-snapshot\", \"quote\": \"This fabricated quote is absent from the document.\"}]}], \"sources\": [{\"document_id\": \"backup-snapshot\", \"title\": \"Pinned Backup Snapshot\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "backup-answerable",
+            "status": "answered",
+            "answer": "The requested conclusion is fully supported.",
+            "claims": [
+              {
+                "text": "The requested conclusion is fully supported.",
+                "citations": [
+                  {
+                    "document_id": "backup-snapshot",
+                    "quote": "This fabricated quote is absent from the document."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "backup-snapshot",
+                "title": "Pinned Backup Snapshot"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": false,
+              "observed": [
+                "backup-snapshot"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": false,
+              "observed": false
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 1,
+                "source_count": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fixture": "astronomy-insufficient.json",
+        "fixture_sha256": "b92c08c05559b864ff52067f362a0d799e3e028927a61bb5e72270894978a0d6",
+        "expected_source_ids": [],
+        "candidate": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-cd56156a7ae448f28ee50272665c8efc",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"astronomy-insufficient\", \"status\": \"insufficient-evidence\", \"answer\": \"The corpus does not contain enough relevant evidence.\", \"claims\": [], \"sources\": []}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "astronomy-insufficient",
+            "status": "insufficient-evidence",
+            "answer": "The corpus does not contain enough relevant evidence.",
+            "claims": [],
+            "sources": []
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "insufficient-evidence"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 0,
+                "source_count": 0
+              }
+            }
+          ]
+        },
+        "broken_control": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-46cb699355584d9a97c720afc17c7df3",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "fixtures/broken_grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"astronomy-insufficient\", \"status\": \"answered\", \"answer\": \"The requested conclusion is fully supported.\", \"claims\": [{\"text\": \"The requested conclusion is fully supported.\", \"citations\": [{\"document_id\": \"garden-mulch\", \"quote\": \"This fabricated quote is absent from the document.\"}]}], \"sources\": [{\"document_id\": \"garden-mulch\", \"title\": \"Mulching Berry Plants\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "astronomy-insufficient",
+            "status": "answered",
+            "answer": "The requested conclusion is fully supported.",
+            "claims": [
+              {
+                "text": "The requested conclusion is fully supported.",
+                "citations": [
+                  {
+                    "document_id": "garden-mulch",
+                    "quote": "This fabricated quote is absent from the document."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "garden-mulch",
+                "title": "Mulching Berry Plants"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "expected-status",
+              "matched": false,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": false,
+              "observed": [
+                "garden-mulch"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": false,
+              "observed": false
+            },
+            {
+              "check": "clean-abstention",
+              "matched": false,
+              "observed": {
+                "claim_count": 1,
+                "source_count": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "sources": [
+    "blackridge://components/grounded-researcher-v1"
+  ],
+  "warnings": [
+    "The probe covers two independent answerable domains and one unrelated corpus; it is not a universal relevance claim.",
+    "A named review is required before evidence promotion."
+  ]
+}
