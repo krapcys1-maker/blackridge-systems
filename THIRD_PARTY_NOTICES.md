@@ -115,6 +115,14 @@ and license bundle must be generated from the exact image digest for every relea
 - Usage: Vulnerability inspection of retained CycloneDX SBOMs.
 - Distributed in: none
 
+### pypi-attestations (0.0.30)
+
+- License: `Apache-2.0`
+- Upstream: https://github.com/pypi/pypi-attestations/tree/v0.0.30
+- License text: https://github.com/pypi/pypi-attestations/blob/v0.0.30/LICENSE
+- Usage: Cryptographic verification of PyPI artifact attestations and publisher identity.
+- Distributed in: wheel optional dependency metadata
+
 ### Syft (v1.51.0 OCI digest 678bfa565b60)
 
 - License: `Apache-2.0`

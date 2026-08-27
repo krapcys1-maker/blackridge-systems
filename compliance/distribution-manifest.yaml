@@ -127,6 +127,16 @@ components:
     boundary: build-or-inspection-tool
     distributed_in: []
 
+  - id: pypi-attestations
+    name: pypi-attestations
+    version: "0.0.30"
+    license_spdx: Apache-2.0
+    upstream: https://github.com/pypi/pypi-attestations/tree/v0.0.30
+    license_source: https://github.com/pypi/pypi-attestations/blob/v0.0.30/LICENSE
+    usage: Cryptographic verification of PyPI artifact attestations and publisher identity.
+    boundary: build-or-inspection-tool
+    distributed_in: [wheel optional dependency metadata]
+
   - id: osv-scanner
     name: OSV-Scanner
     version: v2.5.1 OCI digest 8108ae94eade

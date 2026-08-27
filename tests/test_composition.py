@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from copy import deepcopy
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -20,7 +21,12 @@ from blackridge.composition import (
     solve_composition,
 )
 from blackridge.errors import BlackridgeError
-from blackridge.evidence import ManualReview, ManualVerdict, ProbeEvidence
+from blackridge.evidence import (
+    EvidencePromotion,
+    ManualReview,
+    ManualVerdict,
+    ProbeEvidence,
+)
 from blackridge.io import load_composition_definition
 
 ROOT = Path(__file__).parents[1]
@@ -189,6 +195,43 @@ def test_runtime_rejects_tampered_generated_artifact(tmp_path: Path) -> None:
         )
 
 
+def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path) -> None:
+    examples = tmp_path / "examples"
+    shutil.copytree(ROOT / "examples", examples)
+    definition_file = examples / "composition-linear-calibration.yaml"
+    definition = load_composition_definition(definition_file)
+    plan = solve_composition(definition, definition_file=definition_file)
+    bundle = tmp_path / "generated"
+    generated = generate_system(
+        definition,
+        plan,
+        definition_file=definition_file,
+        output_directory=bundle,
+    )
+    sink = examples / "fixtures" / "report_sink.py"
+    sink.write_text(sink.read_text(encoding="utf-8") + "# tampered\n", encoding="utf-8")
+
+    def unexpected_process(*_args, **_kwargs):
+        raise AssertionError("no component may execute after a preflight hash mismatch")
+
+    probe = run_generated_system(
+        bundle,
+        INPUT,
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        _component_process=unexpected_process,
+    )
+
+    assert probe.observations["all_steps_completed"] is False
+    assert probe.observations["failure_reason"] == (
+        "component fixture-report-sink launch artifact failed integrity"
+    )
+    assert [step["status"] for step in probe.observations["steps"]] == [
+        "skipped",
+        "skipped",
+        "failed",
+    ]
+
+
 def _rewrite_runtime_and_relock(bundle: Path, mutate) -> str:
     runtime_file = bundle / "runtime.yaml"
     runtime = yaml.safe_load(runtime_file.read_text(encoding="utf-8"))
@@ -315,6 +358,16 @@ def test_evidence_review_is_bound_to_exact_probe_subject(tmp_path: Path) -> None
         probe_id=probe.probe_id,
         probe_file="probe.json",
         probe_sha256=sha256(probe_file.read_bytes()).hexdigest(),
+        promotion=EvidencePromotion(
+            target_level=3,
+            subject_type="component",
+            probe_provider=probe.provider,
+            probe_subject=probe.subject,
+            probe_completed=True,
+            subject_revision="a" * 40,
+            subject_license_spdx="MIT",
+            artifact_sha256="b" * 64,
+        ),
         notes="This fixture checks subject binding rather than component behavior.",
     )
     review_file = tmp_path / "review.json"
@@ -332,11 +385,129 @@ def test_evidence_review_is_bound_to_exact_probe_subject(tmp_path: Path) -> None
         evidence,
         definition_directory=tmp_path,
         mode="production",
+        subject_type="component",
+        subject_revision="a" * 40,
+        subject_license_spdx="MIT",
+        artifact_sha256="b" * 64,
     )
 
     assert reasons == ["reviewed probe subject does not match evidence reference"]
     assert observations["probe_id_matches_review"] is True
     assert observations["probe_subject_matches"] is False
+
+
+def test_evidence_review_cannot_escape_repository_boundary(tmp_path: Path) -> None:
+    definition_directory = tmp_path / "definitions"
+    definition_directory.mkdir()
+    outside_review = tmp_path / "review.json"
+    outside_review.write_text("{}", encoding="utf-8")
+    evidence = EvidenceReference(
+        level=3,
+        review_file="../review.json",
+        review_sha256=sha256(outside_review.read_bytes()).hexdigest(),
+        capability_id="test-capability",
+        scenario_id="test-scenario",
+        probe_subject="fixture-component",
+    )
+
+    reasons, observations = _verify_evidence(
+        evidence,
+        definition_directory=definition_directory,
+        mode="production",
+        subject_type="component",
+        subject_revision="a" * 40,
+        subject_license_spdx="MIT",
+        artifact_sha256="b" * 64,
+    )
+
+    assert reasons == ["manual review file resolves outside the repository"]
+    assert observations["review_within_repository"] is False
+
+
+@pytest.mark.parametrize(
+    ("mutation", "expected_reason"),
+    [
+        (
+            lambda probe, promotion: probe.observations.update({"probe_completed": False}),
+            "reviewed probe did not complete successfully",
+        ),
+        (
+            lambda probe, promotion: setattr(probe, "provider", "unexpected-provider"),
+            "reviewed probe provider does not match promotion",
+        ),
+        (
+            lambda probe, promotion: setattr(promotion, "subject_revision", "c" * 40),
+            "review promotion revision does not match qualified subject",
+        ),
+        (
+            lambda probe, promotion: setattr(promotion, "artifact_sha256", "d" * 64),
+            "review promotion artifact does not match qualified subject",
+        ),
+    ],
+)
+def test_production_promotion_rejects_unbound_or_failed_evidence(
+    tmp_path: Path,
+    mutation,
+    expected_reason: str,
+) -> None:
+    probe = ProbeEvidence(
+        probe_id="a" * 32,
+        observed_at=datetime(2026, 8, 26, tzinfo=UTC),
+        provider="component-contract-probe/v1",
+        subject="fixture-component",
+        request={"fixture": True},
+        observations={"probe_completed": True},
+        sources=["https://example.test/source"],
+    )
+    promotion = EvidencePromotion(
+        target_level=3,
+        subject_type="component",
+        probe_provider=probe.provider,
+        probe_subject=probe.subject,
+        probe_completed=True,
+        subject_revision="a" * 40,
+        subject_license_spdx="MIT",
+        artifact_sha256="b" * 64,
+    )
+    mutation(probe, promotion)
+    probe_file = tmp_path / "probe.json"
+    probe_file.write_text(probe.model_dump_json(indent=2), encoding="utf-8")
+    review = ManualReview.create(
+        reviewer="manual tester",
+        verdict=ManualVerdict.PASS,
+        capability_id="test-capability",
+        scenario_id="test-scenario",
+        scenario_description="Inspect the exact component and its locked artifact.",
+        expected=["The promoted evidence is bound to the qualified component."],
+        observed=["The retained fixture was inspected manually."],
+        probe_id=probe.probe_id,
+        probe_file="probe.json",
+        probe_sha256=sha256(probe_file.read_bytes()).hexdigest(),
+        promotion=promotion,
+        notes="This fixture verifies fail-closed evidence promotion bindings.",
+    )
+    review_file = tmp_path / "review.json"
+    review_file.write_text(review.model_dump_json(indent=2), encoding="utf-8")
+    evidence = EvidenceReference(
+        level=3,
+        review_file="review.json",
+        review_sha256=sha256(review_file.read_bytes()).hexdigest(),
+        capability_id="test-capability",
+        scenario_id="test-scenario",
+        probe_subject="fixture-component",
+    )
+
+    reasons, _ = _verify_evidence(
+        evidence,
+        definition_directory=tmp_path,
+        mode="production",
+        subject_type="component",
+        subject_revision="a" * 40,
+        subject_license_spdx="MIT",
+        artifact_sha256="b" * 64,
+    )
+
+    assert expected_reason in reasons
 
 
 def test_green_exit_broken_output_fails_contract(tmp_path: Path) -> None:

@@ -101,6 +101,17 @@ def test_wheel_probe_compares_real_metadata_and_packages_license(
     assert (tmp_path / "out" / "license-bundle.zip").is_file()
 
 
+def test_wheel_probe_refuses_a_nonempty_output_directory(tmp_path: Path) -> None:
+    wheel = tmp_path / "fixture.whl"
+    wheel.write_bytes(b"not inspected because output preflight fails")
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "stale.json").write_text("{}", encoding="utf-8")
+
+    with pytest.raises(BlackridgeError, match="must be empty"):
+        probe_wheel_release(wheel, project_manifest(), output_dir=output)
+
+
 def test_image_probe_refuses_mutable_tag_before_invoking_docker(tmp_path: Path) -> None:
     with pytest.raises(BlackridgeError, match="immutable image"):
         probe_image_release(

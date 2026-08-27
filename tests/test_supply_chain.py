@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import subprocess
+
 import pytest
 from pydantic import ValidationError
 
 from blackridge.errors import BlackridgeError
 from blackridge.supply_chain import (
     SupplyChainExperiment,
+    _inspect_checkout,
     _license_summary,
     _vulnerability_summary,
 )
@@ -31,6 +34,38 @@ def test_supply_chain_requires_exact_commit_and_image_digests() -> None:
 
     with pytest.raises(ValidationError):
         SupplyChainExperiment.model_validate(data)
+
+
+def test_supply_chain_rejects_an_unsupported_package_ecosystem() -> None:
+    data = experiment_data()
+    data["package_system"] = "npm"
+
+    with pytest.raises(ValidationError, match="only pypi"):
+        SupplyChainExperiment.model_validate(data)
+
+
+def test_checkout_inspection_rejects_tracked_and_ignored_residue(tmp_path) -> None:
+    subprocess.run(["git", "init", "--quiet"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.test"], cwd=tmp_path, check=True
+    )
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, check=True)
+    tracked = tmp_path / "tracked.txt"
+    tracked.write_text("clean\n", encoding="utf-8")
+    (tmp_path / ".gitignore").write_text("ignored.txt\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "--quiet", "-m", "fixture"], cwd=tmp_path, check=True)
+
+    _, clean = _inspect_checkout(tmp_path)
+    assert clean["pristine"] is True
+
+    tracked.write_text("dirty\n", encoding="utf-8")
+    with pytest.raises(BlackridgeError, match="not pristine"):
+        _inspect_checkout(tmp_path)
+    tracked.write_text("clean\n", encoding="utf-8")
+    (tmp_path / "ignored.txt").write_text("residue\n", encoding="utf-8")
+    with pytest.raises(BlackridgeError, match="not pristine"):
+        _inspect_checkout(tmp_path)
 
 
 def test_sbom_unknown_licenses_remain_explicit() -> None:

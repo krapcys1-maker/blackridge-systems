@@ -9,6 +9,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from blackridge.models import EvidenceLevel
+
 
 class ManualVerdict(StrEnum):
     """A verdict deliberately entered by a named reviewer."""
@@ -59,6 +61,21 @@ class ProbeEvidence(BaseModel):
         )
 
 
+class EvidencePromotion(BaseModel):
+    """The exact subject bindings reviewed when promoting evidence above L0."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    target_level: EvidenceLevel
+    subject_type: Literal["component", "adapter"]
+    probe_provider: str = Field(min_length=2)
+    probe_subject: str = Field(min_length=1)
+    probe_completed: Literal[True]
+    subject_revision: str = Field(min_length=7)
+    subject_license_spdx: str = Field(min_length=2)
+    artifact_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
 class ManualReview(BaseModel):
     """A manual comparison of raw evidence with one acceptance scenario."""
 
@@ -76,6 +93,7 @@ class ManualReview(BaseModel):
     probe_id: str
     probe_file: str
     probe_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    promotion: EvidencePromotion | None = None
     notes: str = Field(min_length=10)
 
     @classmethod

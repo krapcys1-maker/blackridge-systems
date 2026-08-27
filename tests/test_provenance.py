@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
-from blackridge.provenance import load_provenance_manifest, provenance_gate
+import pytest
+
+from blackridge.errors import BlackridgeError
+from blackridge.provenance import _checkout_state, load_provenance_manifest, provenance_gate
 
 
 def test_empty_reviewed_registry_allows_no_copy(tmp_path: Path) -> None:
@@ -40,3 +44,21 @@ def test_incomplete_copy_record_retains_each_missing_control(tmp_path: Path) -> 
     assert "missing license_spdx" in issues
     assert "missing manual_review_file" in issues
     assert "license compatibility is not approved" in issues
+
+
+def test_upstream_checkout_state_rejects_ignored_residue(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "--quiet"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.test"], cwd=tmp_path, check=True
+    )
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, check=True)
+    (tmp_path / ".gitignore").write_text("ignored.txt\n", encoding="utf-8")
+    (tmp_path / "source.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "--quiet", "-m", "fixture"], cwd=tmp_path, check=True)
+
+    assert _checkout_state(tmp_path)["pristine"] is True
+    (tmp_path / "ignored.txt").write_text("stale\n", encoding="utf-8")
+
+    with pytest.raises(BlackridgeError, match="not pristine"):
+        _checkout_state(tmp_path)

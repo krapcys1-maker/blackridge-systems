@@ -36,6 +36,7 @@ sandbox = [
   "aiohttp>=3.10,<4",
   "swe-rex==1.4.0",
 ]
+supply-chain = ["pypi-attestations==0.0.30"]
 dev = [
   "bandit==1.9.4",
   "build>=1,<2",
@@ -57,6 +58,9 @@ Repository = "https://github.com/krapcys1-maker/blackridge-systems"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/blackridge"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/evidence", "/.blackridge", "/dist", "/build"]
 
 [tool.pytest.ini_options]
 addopts = "-q"

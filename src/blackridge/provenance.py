@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import subprocess
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,6 +16,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
 from blackridge.formats import load_yaml
+from blackridge.git_integrity import inspect_pristine_checkout
+from blackridge.process_boundary import run_bounded
 
 PROVENANCE_SOURCE = (
     "https://github.com/krapcys1-maker/blackridge-systems/blob/main/src/blackridge/provenance.py"
@@ -31,7 +32,11 @@ def _sha256(path: Path) -> str:
 
 
 def _run(argv: list[str], *, cwd: Path | None = None) -> str:
-    completed = subprocess.run(argv, cwd=cwd, capture_output=True, text=True)
+    completed = run_bounded(argv, cwd=cwd)
+    if completed.timed_out:
+        raise BlackridgeError(f"command timed out: {argv[0]}")
+    if completed.output_limit_exceeded:
+        raise BlackridgeError(f"command exceeded the output limit: {argv[0]}")
     if completed.returncode != 0:
         raise BlackridgeError(
             f"command failed with exit {completed.returncode}: {argv[0]} {completed.stderr.strip()}"
@@ -101,9 +106,30 @@ def load_provenance_manifest(path: Path) -> ProvenanceManifest:
     return ProvenanceManifest.model_validate(load_yaml(path))
 
 
-def _exact_checkout(reference: UpstreamReference, root: Path) -> Path:
+def _checkout_state(
+    destination: Path,
+    *,
+    expected_commit: str | None = None,
+    expected_tree: str | None = None,
+) -> dict[str, object]:
+    _, state = inspect_pristine_checkout(
+        destination,
+        expected_commit=expected_commit,
+        expected_tree=expected_tree,
+        context=f"upstream checkout {destination}",
+    )
+    return state
+
+
+def _exact_checkout(reference: UpstreamReference, root: Path) -> tuple[Path, dict[str, object]]:
     destination = root / reference.id
     destination.parent.mkdir(parents=True, exist_ok=True)
+    if (
+        destination.exists()
+        and not (destination / ".git").is_dir()
+        and any(destination.iterdir())
+    ):
+        raise BlackridgeError(f"non-empty audit directory is not Git: {destination}")
     if not (destination / ".git").is_dir():
         _run(["git", "init", str(destination)])
         _run(
@@ -117,18 +143,16 @@ def _exact_checkout(reference: UpstreamReference, root: Path) -> Path:
                 f"https://github.com/{reference.repository}.git",
             ]
         )
+    else:
+        _checkout_state(destination)
     remote = _run(["git", "-C", str(destination), "remote", "get-url", "origin"]).strip()
     expected = f"https://github.com/{reference.repository}.git"
     if remote.removesuffix(".git") != expected.removesuffix(".git"):
         raise BlackridgeError(f"wrong origin in existing audit directory: {destination}")
     _run(["git", "-C", str(destination), "fetch", "--depth", "1", "origin", reference.commit])
     _run(["git", "-C", str(destination), "checkout", "--detach", "FETCH_HEAD"])
-    observed = _run(["git", "-C", str(destination), "rev-parse", "HEAD"]).strip()
-    if observed != reference.commit:
-        raise BlackridgeError(
-            f"upstream checkout mismatch for {reference.id}: {observed} != {reference.commit}"
-        )
-    return destination
+    state = _checkout_state(destination, expected_commit=reference.commit)
+    return destination, state
 
 
 def _normalized_lines(path: Path) -> list[tuple[int, str]]:
@@ -225,9 +249,13 @@ def audit_source_provenance(
     upstream_rows: list[dict[str, object]] = []
     extensions = {".py", ".pyi", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx"}
     for reference in definition.upstreams:
-        checkout = _exact_checkout(reference, work_root)
+        checkout, checkout_before = _exact_checkout(reference, work_root)
         scanned_files = 0
+        skipped_symlinks: list[str] = []
         for upstream_file in checkout.rglob("*"):
+            if upstream_file.is_symlink():
+                skipped_symlinks.append(upstream_file.relative_to(checkout).as_posix())
+                continue
             if not upstream_file.is_file() or upstream_file.suffix.lower() not in extensions:
                 continue
             if ".git" in upstream_file.parts:
@@ -250,12 +278,21 @@ def audit_source_provenance(
                             "window_sha256": hashlib.sha256("\n".join(window).encode()).hexdigest(),
                         }
                     )
+        checkout_after = _checkout_state(
+            checkout,
+            expected_commit=reference.commit,
+            expected_tree=str(checkout_before["tree"]),
+        )
         upstream_rows.append(
             {
                 **reference.model_dump(),
                 "checkout": str(checkout),
-                "observed_commit": _run(["git", "-C", str(checkout), "rev-parse", "HEAD"]).strip(),
+                "observed_commit": checkout_before["commit"],
+                "tree": checkout_before["tree"],
+                "checkout_before_scan": checkout_before,
+                "checkout_after_scan": checkout_after,
                 "scanned_files": scanned_files,
+                "skipped_symlinks": skipped_symlinks,
             }
         )
 

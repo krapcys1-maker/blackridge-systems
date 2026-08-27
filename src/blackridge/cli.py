@@ -6,7 +6,7 @@ import json
 from contextlib import suppress
 from hashlib import sha256
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
 from pydantic import ValidationError
@@ -37,7 +37,12 @@ from blackridge.composition import (
 from blackridge.depsdev import DepsDevClient, PackageSystem
 from blackridge.doctor import check_tools
 from blackridge.errors import BlackridgeError
-from blackridge.evidence import ManualReview, ManualVerdict, ProbeEvidence
+from blackridge.evidence import (
+    EvidencePromotion,
+    ManualReview,
+    ManualVerdict,
+    ProbeEvidence,
+)
 from blackridge.github import GitHubCli
 from blackridge.io import (
     load_adapter_experiment,
@@ -54,6 +59,7 @@ from blackridge.io import (
     write_probe,
     write_run,
 )
+from blackridge.models import EvidenceLevel
 from blackridge.octocode import DEFAULT_OCTOCODE_PACKAGE, OctocodeDiscovery
 from blackridge.provenance import (
     audit_source_provenance,
@@ -80,6 +86,20 @@ app = typer.Typer(
 console = Console()
 
 
+def _publish_completed_artifact(probe: ProbeEvidence, output: Path) -> bool:
+    """Publish the normal output channel only for a completed system run."""
+
+    if probe.observations.get("all_steps_completed") is not True:
+        return False
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return True
+
+
 @app.command()
 def doctor() -> None:
     """Check the local MVP prerequisites and upcoming sandbox tools."""
@@ -89,11 +109,12 @@ def doctor() -> None:
     table.add_column("Status")
     table.add_column("Required now")
     table.add_column("Purpose")
+    table.add_column("Diagnostic")
     missing_required = False
     for check in check_tools():
         status = "[green]ready[/green]" if check.available else "[yellow]missing[/yellow]"
         required = "yes" if check.required_for_mvp else "later"
-        table.add_row(check.name, status, required, check.purpose)
+        table.add_row(check.name, status, required, check.purpose, check.detail)
         missing_required |= check.required_for_mvp and not check.available
     console.print(table)
     if missing_required:
@@ -684,12 +705,7 @@ def compose_run(
             expected_provenance_sha256=provenance_sha256,
         )
         write_probe(probe, evidence)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(
-            json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+        output_published = _publish_completed_artifact(probe, output)
     except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
         failure = ProbeEvidence.failure(
             provider="blackridge-generated-linear-runtime/1",
@@ -708,7 +724,10 @@ def compose_run(
         raise typer.Exit(code=2) from exc
     complete = probe.observations["all_steps_completed"]
     console.print(f"All generated steps completed: {complete}")
-    console.print(f"Output artifact written to {output}")
+    if output_published:
+        console.print(f"Output artifact written to {output}")
+    else:
+        console.print("[yellow]Output artifact not published after failed execution.[/yellow]")
     console.print(f"Raw evidence written to {evidence}")
     console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
     if not complete:
@@ -739,12 +758,7 @@ def compose_run_sandbox(
             image_ref=image,
         )
         write_probe(probe, evidence)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(
-            json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+        output_published = _publish_completed_artifact(probe, output)
     except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
         failure = ProbeEvidence.failure(
             provider="blackridge-generated-sandbox-runtime/1",
@@ -770,7 +784,10 @@ def compose_run_sandbox(
         "Container remaining after cleanup: "
         f"{sandbox['cleanup']['container_exists_after']}"
     )
-    console.print(f"Output artifact written to {output}")
+    if output_published:
+        console.print(f"Output artifact written to {output}")
+    else:
+        console.print("[yellow]Output artifact not published after failed execution.[/yellow]")
     console.print(f"Raw evidence written to {evidence}")
     console.print(
         "[yellow]Calibration only; no production or release verdict was assigned.[/yellow]"
@@ -993,6 +1010,13 @@ def review_probe(
     reviewer: Annotated[str, typer.Option("--reviewer")],
     observed: Annotated[list[str] | None, typer.Option("--observed")] = None,
     notes: Annotated[str, typer.Option("--notes")] = "Manual comparison completed.",
+    promotion_level: Annotated[int | None, typer.Option("--promotion-level")] = None,
+    subject_type: Annotated[str | None, typer.Option("--subject-type")] = None,
+    subject_revision: Annotated[str | None, typer.Option("--subject-revision")] = None,
+    subject_license_spdx: Annotated[
+        str | None, typer.Option("--subject-license-spdx")
+    ] = None,
+    artifact_sha256: Annotated[str | None, typer.Option("--artifact-sha256")] = None,
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/evidence/manual-review.json"
     ),
@@ -1014,6 +1038,46 @@ def review_probe(
             raise BlackridgeError(f"acceptance scenario not found in {capability}: {scenario}")
         if not observed:
             raise BlackridgeError("at least one --observed statement is required")
+        promotion_values = [
+            promotion_level,
+            subject_type,
+            subject_revision,
+            subject_license_spdx,
+            artifact_sha256,
+        ]
+        if any(value is not None for value in promotion_values) and not all(
+            value is not None for value in promotion_values
+        ):
+            raise BlackridgeError("all evidence promotion options must be supplied together")
+        promotion = None
+        if promotion_level is not None:
+            if probe.observations.get("probe_completed") is not True:
+                raise BlackridgeError("an incomplete probe cannot promote evidence")
+            assert subject_type is not None
+            assert subject_revision is not None
+            assert subject_license_spdx is not None
+            assert artifact_sha256 is not None
+            if subject_type not in {"component", "adapter"}:
+                raise BlackridgeError("subject type must be component or adapter")
+            promotion_subject_type: Literal["component", "adapter"] = (
+                "component" if subject_type == "component" else "adapter"
+            )
+            try:
+                target_level = EvidenceLevel(promotion_level)
+            except ValueError as exc:
+                raise BlackridgeError("promotion level must be an integer from 0 to 4") from exc
+            if target_level == EvidenceLevel.DISCOVERED:
+                raise BlackridgeError("L0 discovery does not require a manual promotion")
+            promotion = EvidencePromotion(
+                target_level=target_level,
+                subject_type=promotion_subject_type,
+                probe_provider=probe.provider,
+                probe_subject=probe.subject,
+                probe_completed=True,
+                subject_revision=subject_revision,
+                subject_license_spdx=subject_license_spdx,
+                artifact_sha256=artifact_sha256,
+            )
         review = ManualReview.create(
             reviewer=reviewer,
             verdict=verdict,
@@ -1025,6 +1089,7 @@ def review_probe(
             probe_id=probe.probe_id,
             probe_file=str(probe_file),
             probe_sha256=sha256(probe_file.read_bytes()).hexdigest(),
+            promotion=promotion,
             notes=notes,
         )
         write_manual_review(review, output)

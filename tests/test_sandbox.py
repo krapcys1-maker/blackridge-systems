@@ -5,6 +5,7 @@ import subprocess
 import pytest
 from pydantic import ValidationError
 
+from blackridge.process_boundary import BoundedProcessResult
 from blackridge.sandbox import SandboxExperiment, SwerexDockerProbe, WorkspaceSnapshot
 
 
@@ -23,6 +24,22 @@ def experiment_data() -> dict[str, object]:
             }
         ],
     }
+
+
+def process_result(
+    argv: list[str], returncode: int = 0, stdout: str = "", stderr: str = ""
+) -> BoundedProcessResult:
+    return BoundedProcessResult(
+        argv=tuple(argv),
+        returncode=returncode,
+        stdout=stdout,
+        stderr=stderr,
+        duration_seconds=0.1,
+        timed_out=False,
+        output_limit_exceeded=False,
+        stdout_bytes_seen=len(stdout.encode()),
+        stderr_bytes_seen=len(stderr.encode()),
+    )
 
 
 def test_experiment_requires_an_exact_commit() -> None:
@@ -102,9 +119,9 @@ def test_network_isolation_disconnects_every_observed_network(monkeypatch) -> No
 
     def fake_run(argv, **_kwargs):
         calls.append(argv)
-        return subprocess.CompletedProcess(argv, 0, "", "")
+        return process_result(argv)
 
-    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr("blackridge.sandbox.run_bounded", fake_run)
 
     result = SwerexDockerProbe._isolate_execution_network("exact-container")
 
@@ -132,9 +149,8 @@ def test_network_isolation_fails_closed_when_a_network_remains(monkeypatch) -> N
         staticmethod(lambda _name: next(snapshots)),
     )
     monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda argv, **_kwargs: subprocess.CompletedProcess(argv, 1, "", "denied"),
+        "blackridge.sandbox.run_bounded",
+        lambda argv, **_kwargs: process_result(argv, 1, stderr="denied"),
     )
 
     result = SwerexDockerProbe._isolate_execution_network("exact-container")
@@ -152,9 +168,9 @@ def test_networkless_workload_uses_shell_free_docker_exec(monkeypatch) -> None:
     def fake_run(argv, **kwargs):
         observed["argv"] = argv
         observed["kwargs"] = kwargs
-        return subprocess.CompletedProcess(argv, 0, "ok\n", "")
+        return process_result(argv, stdout="ok\n")
 
-    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr("blackridge.sandbox.run_bounded", fake_run)
     result = SwerexDockerProbe._docker_exec_result(
         "exact-container",
         {
@@ -190,7 +206,7 @@ def test_networkless_workload_uses_shell_free_docker_exec(monkeypatch) -> None:
         "-c",
         "print(42)",
     ]
-    assert "shell" not in observed["kwargs"]
+    assert observed["kwargs"] == {"timeout_seconds": 35.0}
     assert result["executor"] == "docker-exec-shell-free"
     assert result["user"] == "65534:65534"
     assert result["timed_out"] is False
@@ -201,9 +217,8 @@ def test_container_timeout_escalation_is_retained(monkeypatch) -> None:
     ticks = iter([100.0, 102.1])
     monkeypatch.setattr("blackridge.sandbox.perf_counter", lambda: next(ticks))
     monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda argv, **_kwargs: subprocess.CompletedProcess(argv, 137, "", ""),
+        "blackridge.sandbox.run_bounded",
+        lambda argv, **_kwargs: process_result(argv, 137),
     )
 
     result = SwerexDockerProbe._docker_exec_result(

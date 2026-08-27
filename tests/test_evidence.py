@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from blackridge.errors import ExternalToolError
-from blackridge.evidence import ManualReview, ManualVerdict, ProbeEvidence
+from blackridge.evidence import EvidencePromotion, ManualReview, ManualVerdict, ProbeEvidence
 
 
 def test_manual_review_requires_concrete_observations() -> None:
@@ -36,3 +36,17 @@ def test_failed_probe_retains_error_without_assigning_verdict() -> None:
     assert probe.observations["probe_completed"] is False
     assert probe.observations["error_type"] == "ExternalToolError"
     assert "verdict" not in probe.model_dump()
+
+
+def test_evidence_promotion_requires_a_completed_probe() -> None:
+    with pytest.raises(ValidationError):
+        EvidencePromotion(
+            target_level=3,
+            subject_type="component",
+            probe_provider="component-contract-probe/v1",
+            probe_subject="fixture-component",
+            probe_completed=False,
+            subject_revision="a" * 40,
+            subject_license_spdx="MIT",
+            artifact_sha256="b" * 64,
+        )
