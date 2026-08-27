@@ -194,8 +194,14 @@ def _audit_case(
                     ],
                 }
             )
-        if candidate_policy != "top3" and position >= 3 and documents:
+        if (
+            candidate_policy != "top3"
+            and position >= 3
+            and len(documents) >= request.get("minimum_evidence_documents", 1)
+        ):
             break
+    if len(documents) < request.get("minimum_evidence_documents", 1):
+        documents = []
     labels = {document["verdict"] for document in documents}
     if labels == {"support", "contradict"}:
         status = "mixed"
