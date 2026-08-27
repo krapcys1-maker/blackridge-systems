@@ -23,10 +23,12 @@ fabricate verdicts, and unresolved evidence prevented promotion.
 | `b4b9093` | Windows-safe report output without replacement characters or truncated names | Real subprocess report inspection and encoding regression assertions |
 | `b08aaa3` | Hash-bound, exact-inventory sealed holdout verification | Manifest, role, hash, size, revision, extra/missing file, and symlink tests |
 | `d7cd2e4` | Reproducible semantic SBOM inventory fingerprints | Unit test plus three real PaperQA probe comparisons |
+| `6931e7c` | Checkout-independent packaged license line endings | Wheel comparison between independent Windows checkouts |
+| `3e526c9` | Checkout-independent packaged JSON, lock, and ignore files | Byte-identical wheel and sdist from two independent builds |
 
 ## Full regression result
 
-- 160 tests passed and 3 Windows symlink-permission cases were skipped.
+- 161 tests passed and 3 Windows symlink-permission cases were skipped.
 - Total statement coverage: 71.53%; enforced minimum: 70%.
 - Ruff lint: pass.
 - Ruff format check across `src`, `tests`, `tools`, and `components`: pass.
@@ -98,13 +100,17 @@ inventory hash, so this expected metadata variance no longer masquerades as a gr
 ## Package result
 
 The wheel and source distribution built in isolated environments and both passed `twine check`.
+An independent fresh clone with `core.autocrlf=true` initially exposed non-reproducible packaged
+line endings. After extending `.gitattributes`, two independent builds produced byte-identical
+wheel and source archives.
 
 - Wheel SHA-256:
   `47e7ad830d5e5db478e8fd66a726a8f3d128e4f49f92cc4dbae79b7e444adf12`.
 - Source distribution SHA-256:
-  `379aa3dfbd7b43acda7f6ee6b09b7801ebae03e903386d2c422733d2f00055fd`.
-- Artifact root:
-  `D:\Skladacz aplikacji\blackridge-experiments\package-d7cd2e4`.
+  `2db8b9a4f69e00c06d75c4542f1e7ef871f2cdaa294afdffa11a4132b7070c66`.
+- Independent artifact roots:
+  `D:\Skladacz aplikacji\blackridge-experiments\package-repro-3e526c9-current` and
+  `D:\Skladacz aplikacji\blackridge-experiments\package-repro-3e526c9-clone`.
 
 ## Remaining gates and next action
 
