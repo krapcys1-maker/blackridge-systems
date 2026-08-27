@@ -1,0 +1,38 @@
+{
+  "schema_version": "1",
+  "request_id": "backup-answerable",
+  "question": "What evidence shows that a small business backup can be restored after a failure?",
+  "minimum_sources": 4,
+  "documents": [
+    {
+      "document_id": "backup-snapshot",
+      "title": "Pinned Backup Snapshot",
+      "full_text": "Every backup run records a content digest and completion timestamp. The immutable snapshot identity lets an operator select the exact archive during recovery."
+    },
+    {
+      "document_id": "backup-restore",
+      "title": "Restore Drill",
+      "full_text": "A quarterly drill restores files into an empty environment and compares their hashes with the recorded manifest. A copied archive is not accepted until the restored content matches."
+    },
+    {
+      "document_id": "backup-offsite",
+      "title": "Independent Storage",
+      "full_text": "One encrypted copy remains outside the primary office and outside the production account. This separation preserves recovery material after a local or account-wide failure."
+    },
+    {
+      "document_id": "backup-review",
+      "title": "Failed Recovery Evidence",
+      "full_text": "Restore errors and missing files stay in the audit record and trigger a named follow-up. Operators do not replace failed drill evidence with a later successful screenshot."
+    },
+    {
+      "document_id": "recipe-soup",
+      "title": "Freezing Vegetable Soup",
+      "full_text": "Soup can be frozen in small containers after cooling. Leave space at the top because liquids expand in the freezer."
+    },
+    {
+      "document_id": "fitness-recovery",
+      "title": "Recovery After Exercise",
+      "full_text": "Gentle movement and sleep support recovery after a difficult training session. Training load should increase gradually."
+    }
+  ]
+}

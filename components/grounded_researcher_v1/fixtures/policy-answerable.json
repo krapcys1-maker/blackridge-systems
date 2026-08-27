@@ -1,0 +1,48 @@
+{
+  "schema_version": "1",
+  "request_id": "policy-answerable",
+  "question": "Which controls make an internal data release decision reviewable and reversible?",
+  "minimum_sources": 5,
+  "documents": [
+    {
+      "document_id": "policy-identity",
+      "title": "Immutable Dataset Identity",
+      "full_text": "A release record binds the dataset to an immutable snapshot digest. Reviewers can reconstruct the exact bytes instead of relying on a moving folder."
+    },
+    {
+      "document_id": "policy-approval",
+      "title": "Named Approval",
+      "full_text": "A named owner records approval only after inspecting the retained evidence. The decision log includes the reviewer, time, and explicit limitations."
+    },
+    {
+      "document_id": "policy-rollback",
+      "title": "Reversible Publication",
+      "full_text": "A staged release keeps the prior dataset available and documents a tested rollback procedure. Publication stops when rollback cannot be demonstrated."
+    },
+    {
+      "document_id": "policy-negative",
+      "title": "Adverse Data Control",
+      "full_text": "A deliberately malformed record must be rejected even when the import command reports success. The adverse control proves validation observes the artifact rather than an exit code."
+    },
+    {
+      "document_id": "policy-audit",
+      "title": "Raw Audit Trail",
+      "full_text": "Raw validation output, warnings, and failed checks remain attached to the release decision. A summary never replaces the underlying audit trail."
+    },
+    {
+      "document_id": "garden-compost",
+      "title": "Compost for Raised Beds",
+      "full_text": "Finished compost improves soil structure in raised vegetable beds. Gardeners mix it into the upper layer before spring planting."
+    },
+    {
+      "document_id": "kitchen-bread",
+      "title": "Cooling Sourdough Bread",
+      "full_text": "Fresh sourdough should cool on a rack before slicing. The crumb continues setting as steam leaves the loaf."
+    },
+    {
+      "document_id": "keyword-stuffing",
+      "title": "Reviewable Reversible Release Decision",
+      "full_text": "Reviewable reversible release decision controls reviewable reversible release decision. This note is actually about arranging colored labels on storage boxes and contains no data governance evidence."
+    }
+  ]
+}
