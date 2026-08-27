@@ -268,7 +268,8 @@ or other license obligations are unresolved. See
 ```text
 src/blackridge/           deterministic control plane and CLI
 examples/                 capability specifications
-tests/                    unit tests with mocked external tools
+tests/                    deterministic unit and integration regression tests
+tools/system_e2e.py       installed-wheel host/Docker E2E and fail-closed controls used by CI
 evidence/manual/          retained real-world probes and named manual verdicts
 docs/                     architecture, research, and security decisions
 upstream-catalog.yaml     pinned upstream choices and provenance
