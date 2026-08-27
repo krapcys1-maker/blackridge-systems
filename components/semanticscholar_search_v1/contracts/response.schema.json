@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "blackridge://contracts/semanticscholar-search-response/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "operation", "status", "papers", "returned_count", "total", "error"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "request_id": {"type": ["string", "null"]},
+    "operation": {"type": ["string", "null"]},
+    "status": {"enum": ["ok", "error"]},
+    "papers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["paper_id", "title", "abstract", "year", "authors", "external_ids", "citation_count", "url", "venue", "publication_date", "is_open_access", "open_access_pdf"],
+        "properties": {
+          "paper_id": {"type": ["string", "null"]},
+          "title": {"type": ["string", "null"]},
+          "abstract": {"type": ["string", "null"]},
+          "year": {"type": ["integer", "null"]},
+          "authors": {"type": "array", "items": {"type": "object"}},
+          "external_ids": {"type": ["object", "null"]},
+          "citation_count": {"type": ["integer", "null"]},
+          "url": {"type": ["string", "null"]},
+          "venue": {"type": ["string", "null"]},
+          "publication_date": {"type": ["string", "null"]},
+          "is_open_access": {"type": ["boolean", "null"]},
+          "open_access_pdf": {"type": ["object", "null"]}
+        }
+      }
+    },
+    "returned_count": {"type": "integer", "minimum": 0},
+    "total": {"type": ["integer", "null"], "minimum": 0},
+    "error": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code"],
+          "properties": {
+            "code": {"enum": ["invalid-request", "dependency-missing", "rate-limited", "not-found", "upstream-failure"]}
+          }
+        }
+      ]
+    }
+  }
+}
