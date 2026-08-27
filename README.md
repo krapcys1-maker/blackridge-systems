@@ -167,6 +167,7 @@ artifacts next to the raw probe:
 ```powershell
 docker pull anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0
 docker pull ghcr.io/google/osv-scanner@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734
+python -m pip install -e ".[supply-chain]"
 blackridge probe-supply-chain examples/supply-chain-paperqa.yaml `
   --work-root .blackridge/supply-chain/paperqa `
   --artifact-dir .blackridge/evidence/paperqa-artifacts `
@@ -176,6 +177,9 @@ blackridge probe-supply-chain examples/supply-chain-paperqa.yaml `
 The probe keeps repository and direct-dependency licensing, SBOM license coverage, Scorecard
 posture, OSV findings, GitHub commit verification, and PyPI distribution provenance as separate
 observations. OSV exit 1 is retained as a finding result. A missing source remains unknown.
+The pinned `pypi-attestations` verifier distinguishes provenance availability from cryptographic
+artifact/repository verification. PyPI provenance does not by itself bind the release to the exact
+requested source commit, so that limitation remains explicit in the evidence.
 
 ### Calibrate the first A/B benchmark
 

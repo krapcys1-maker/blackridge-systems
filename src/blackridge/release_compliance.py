@@ -8,7 +8,6 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 import zipfile
 from datetime import UTC, datetime
@@ -21,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
 from blackridge.formats import load_yaml
+from blackridge.process_boundary import run_bounded
 
 RELEASE_COMPLIANCE_SOURCE = (
     "https://github.com/krapcys1-maker/blackridge-systems/"
@@ -56,13 +56,21 @@ def _run(
     cwd: Path | None = None,
     accepted: set[int] | None = None,
 ) -> dict[str, object]:
-    completed = subprocess.run(argv, cwd=cwd, capture_output=True, text=True)
+    completed = run_bounded(argv, cwd=cwd)
     result = {
         "argv": argv,
         "exit_code": completed.returncode,
         "stdout": completed.stdout,
         "stderr": completed.stderr,
+        "timed_out": completed.timed_out,
+        "output_limit_exceeded": completed.output_limit_exceeded,
+        "stdout_bytes_seen": completed.stdout_bytes_seen,
+        "stderr_bytes_seen": completed.stderr_bytes_seen,
     }
+    if completed.timed_out:
+        raise BlackridgeError(f"command timed out: {argv[0]}")
+    if completed.output_limit_exceeded:
+        raise BlackridgeError(f"command exceeded the output limit: {argv[0]}")
     if completed.returncode not in (accepted or {0}):
         raise BlackridgeError(
             f"command failed with exit {completed.returncode}: {argv[0]} {completed.stderr.strip()}"
@@ -316,6 +324,8 @@ def probe_wheel_release(
 
     wheel = wheel.resolve()
     output_dir = output_dir.resolve()
+    if output_dir.exists() and any(output_dir.iterdir()):
+        raise BlackridgeError("wheel release output directory must be empty")
     output_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="blackridge-wheel-") as temporary:
         extracted = Path(temporary)

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
-import subprocess
+import shutil
 import tomllib
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
@@ -20,12 +21,15 @@ from pydantic import BaseModel, ConfigDict, Field
 from blackridge.depsdev import DepsDevClient, PackageSystem
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
+from blackridge.git_integrity import inspect_pristine_checkout
+from blackridge.process_boundary import run_bounded
 from blackridge.quality import OpenSSFScorecardClient
 from blackridge.sandbox import inspect_local_image
 
 PYPI_INTEGRITY_DOCS = "https://docs.pypi.org/api/integrity/"
 SYFT_SOURCE = "https://github.com/anchore/syft/tree/v1.51.0"
 OSV_SCANNER_SOURCE = "https://github.com/google/osv-scanner/tree/v2.5.1"
+PYPI_ATTESTATIONS_VERSION = "0.0.30"
 
 
 class SupplyChainExperiment(BaseModel):
@@ -45,6 +49,10 @@ class SupplyChainExperiment(BaseModel):
     osv_scanner_image: str = Field(
         pattern=r"^ghcr\.io/google/osv-scanner@sha256:[a-f0-9]{64}$"
     )
+
+    def model_post_init(self, _context: object) -> None:
+        if self.package_system != PackageSystem.PYPI:
+            raise ValueError("supply-chain probe v1 currently supports only pypi packages")
 
 
 def _sha256(path: Path) -> str:
@@ -75,16 +83,23 @@ def _run(
     cwd: Path | None = None,
     accepted_exit_codes: set[int] | None = None,
 ) -> dict[str, object]:
-    started = perf_counter()
-    completed = subprocess.run(argv, cwd=cwd, capture_output=True, text=True)
+    completed = run_bounded(argv, cwd=cwd)
     accepted = accepted_exit_codes or {0}
     observation = {
         "argv": argv,
-        "duration_seconds": round(perf_counter() - started, 3),
+        "duration_seconds": completed.duration_seconds,
         "exit_code": completed.returncode,
         "stdout": completed.stdout,
         "stderr": completed.stderr,
+        "timed_out": completed.timed_out,
+        "output_limit_exceeded": completed.output_limit_exceeded,
+        "stdout_bytes_seen": completed.stdout_bytes_seen,
+        "stderr_bytes_seen": completed.stderr_bytes_seen,
     }
+    if completed.timed_out:
+        raise BlackridgeError(f"command timed out: {argv[0]}")
+    if completed.output_limit_exceeded:
+        raise BlackridgeError(f"command exceeded the output limit: {argv[0]}")
     if completed.returncode not in accepted:
         raise BlackridgeError(
             f"command failed with exit {completed.returncode}: {argv[0]} "
@@ -130,9 +145,29 @@ def _http_observation(
         }
 
 
+def _inspect_checkout(
+    source_dir: Path,
+    *,
+    expected_commit: str | None = None,
+    expected_tree: str | None = None,
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    return inspect_pristine_checkout(
+        source_dir,
+        expected_commit=expected_commit,
+        expected_tree=expected_tree,
+        context="supply-chain source checkout",
+    )
+
+
 def _ensure_exact_checkout(
     repository: str, commit: str, source_dir: Path
-) -> tuple[list[dict[str, object]], str]:
+) -> tuple[list[dict[str, object]], dict[str, object]]:
+    if (
+        source_dir.exists()
+        and not (source_dir / ".git").is_dir()
+        and any(source_dir.iterdir())
+    ):
+        raise BlackridgeError("supply-chain source directory is non-empty and is not Git")
     source_dir.mkdir(parents=True, exist_ok=True)
     commands: list[dict[str, object]] = []
     if not (source_dir / ".git").is_dir():
@@ -150,6 +185,9 @@ def _ensure_exact_checkout(
                 ]
             )
         )
+    else:
+        preflight_commands, _ = _inspect_checkout(source_dir)
+        commands.extend(preflight_commands)
     remote = _run(["git", "-C", str(source_dir), "remote", "get-url", "origin"])
     commands.append(remote)
     expected_remote = f"https://github.com/{repository}.git"
@@ -172,14 +210,23 @@ def _ensure_exact_checkout(
     commands.append(
         _run(["git", "-C", str(source_dir), "checkout", "--detach", "FETCH_HEAD"])
     )
-    identity = _run(["git", "-C", str(source_dir), "rev-parse", "HEAD"])
-    commands.append(identity)
-    observed = str(identity["stdout"]).strip()
-    if observed != commit:
-        raise BlackridgeError(
-            f"checkout identity mismatch: requested {commit}, observed {observed}"
-        )
-    return commands, observed
+    identity_commands, state = _inspect_checkout(
+        source_dir,
+        expected_commit=commit,
+    )
+    commands.extend(identity_commands)
+    return commands, state
+
+
+def _pypi_attestation_verifier() -> tuple[str | None, str | None]:
+    executable = shutil.which("pypi-attestations")
+    try:
+        version = importlib.metadata.version("pypi-attestations")
+    except importlib.metadata.PackageNotFoundError:
+        version = None
+    if executable is None or version != PYPI_ATTESTATIONS_VERSION:
+        return None, version
+    return executable, version
 
 
 def _license_summary(spdx: dict[str, object]) -> dict[str, object]:
@@ -306,7 +353,7 @@ class SupplyChainProbe:
         artifact_dir = artifact_dir.resolve()
         source_dir = work_root / "source"
         artifact_dir.mkdir(parents=True, exist_ok=True)
-        checkout_commands, observed_commit = _ensure_exact_checkout(
+        checkout_commands, checkout_before = _ensure_exact_checkout(
             experiment.repository, experiment.commit, source_dir
         )
 
@@ -410,6 +457,7 @@ class SupplyChainProbe:
         )
         pypi = _http_observation(pypi_url)
         pypi_data = _optional_object(pypi.get("data"), "PyPI release response")
+        verifier_executable, verifier_version = _pypi_attestation_verifier()
         distribution_files: list[dict[str, object]] = []
         provenance: list[dict[str, object]] = []
         pypi_urls = pypi_data.get("urls")
@@ -427,6 +475,7 @@ class SupplyChainProbe:
                     "size": item.get("size"),
                     "sha256": digests.get("sha256"),
                     "upload_time": item.get("upload_time_iso_8601"),
+                    "url": item.get("url"),
                 }
             )
             provenance_url = (
@@ -444,6 +493,22 @@ class SupplyChainProbe:
             bundles = data.get("attestation_bundles")
             if bundles is not None and not isinstance(bundles, list):
                 raise BlackridgeError("PyPI provenance attestation_bundles must be a list")
+            artifact_url = item.get("url")
+            verification_command = None
+            verified = False
+            if verifier_executable is not None and isinstance(artifact_url, str):
+                verification_command = _run(
+                    [
+                        verifier_executable,
+                        "verify",
+                        "pypi",
+                        "--repository",
+                        f"https://github.com/{experiment.repository}",
+                        artifact_url,
+                    ],
+                    accepted_exit_codes={0, 1, 2},
+                )
+                verified = verification_command["exit_code"] == 0
             provenance.append(
                 {
                     "filename": filename,
@@ -451,6 +516,10 @@ class SupplyChainProbe:
                     "available": observation["status_code"] == 200,
                     "message": data.get("message"),
                     "attestation_bundle_count": len(bundles or []),
+                    "cryptographically_verified": verified,
+                    "repository_identity_expected": experiment.repository,
+                    "source_commit_bound": False,
+                    "verification_command": verification_command,
                     "source": provenance_url,
                     "error": observation["error"],
                 }
@@ -486,7 +555,17 @@ class SupplyChainProbe:
                 "GPL" in str(value) for value in licenses
             ):
                 nonstandard_dependencies.append(item)
+        post_checkout_commands, checkout_after = _inspect_checkout(
+            source_dir,
+            expected_commit=experiment.commit,
+            expected_tree=str(checkout_before["tree"]),
+        )
         missing_provenance = [item["filename"] for item in provenance if not item["available"]]
+        unverified_provenance = [
+            item["filename"]
+            for item in provenance
+            if not item["cryptographically_verified"]
+        ]
         pypi_metadata_available = pypi["status_code"] == 200
         if not pypi_metadata_available:
             provenance_status = "unavailable"
@@ -494,8 +573,10 @@ class SupplyChainProbe:
             provenance_status = "no-distribution-files"
         elif missing_provenance:
             provenance_status = "missing"
+        elif unverified_provenance:
+            provenance_status = "available-unverified"
         else:
-            provenance_status = "available"
+            provenance_status = "verified-artifact-and-repository"
         warnings: list[str] = []
         if scorecard.status != "available":
             warnings.append("OpenSSF Scorecard is unavailable; security posture remains unknown.")
@@ -511,6 +592,19 @@ class SupplyChainProbe:
             warnings.append("PyPI release metadata contains no distribution files to verify.")
         elif missing_provenance:
             warnings.append("PyPI provenance is unavailable for at least one distribution file.")
+        elif unverified_provenance:
+            warnings.append(
+                "PyPI provenance exists but was not cryptographically verified for every file."
+            )
+        if verifier_executable is None:
+            warnings.append(
+                "Install the supply-chain extra with the pinned pypi-attestations verifier."
+            )
+        if provenance:
+            warnings.append(
+                "PyPI provenance binds artifacts and repository identity, not the requested "
+                "source commit."
+            )
         if vulnerability_summary["vulnerable_package_entry_count"]:
             warnings.append(
                 "OSV-Scanner reported known vulnerabilities in the complete lock scope."
@@ -539,8 +633,12 @@ class SupplyChainProbe:
                 "duration_seconds": round(perf_counter() - started, 3),
                 "source": {
                     "requested_commit": experiment.commit,
-                    "observed_commit": observed_commit,
+                    "observed_commit": checkout_before["commit"],
+                    "tree": checkout_before["tree"],
+                    "checkout_before_scanners": checkout_before,
+                    "checkout_after_scanners": checkout_after,
                     "checkout_commands": checkout_commands,
+                    "post_scanner_checkout_commands": post_checkout_commands,
                 },
                 "repository_license": {
                     "spdx_id": repository_license.get("spdx_id"),
@@ -613,6 +711,13 @@ class SupplyChainProbe:
                     "distribution_files": distribution_files,
                     "pypi_integrity": provenance,
                     "missing_files": missing_provenance,
+                    "unverified_files": unverified_provenance,
+                    "verifier": {
+                        "name": "pypi-attestations",
+                        "required_version": PYPI_ATTESTATIONS_VERSION,
+                        "observed_version": verifier_version,
+                        "available": verifier_executable is not None,
+                    },
                     "commit_verification": {
                         "verified": verification.get("verified"),
                         "reason": verification.get("reason"),

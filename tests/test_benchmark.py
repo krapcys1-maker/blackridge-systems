@@ -10,8 +10,10 @@ from blackridge.benchmark import (
     BenchmarkCalibrationProbe,
     BenchmarkComparisonProbe,
     BenchmarkEvaluator,
+    CandidateInvocation,
     ResearchOutput,
     load_benchmark_definition,
+    load_benchmark_run_plan,
 )
 from blackridge.errors import BlackridgeError
 
@@ -87,16 +89,30 @@ def test_green_broken_fixture_fails_artifact_checks() -> None:
     assert ("insufficient-corpus-abstention", "clean-abstention") in unmatched
 
 
-def test_public_schema_stops_deeper_checks_for_invalid_output() -> None:
+def test_public_schema_keeps_fixed_check_denominator_for_invalid_output() -> None:
     probe = BenchmarkEvaluator().evaluate(DEFINITION, SCHEMA_INVALID)
 
     for case in probe.observations["cases"]:
         checks = {check["check_id"]: check for check in case["checks"]}
+        boundary_checks = {
+            "process-completed",
+            "frozen-input-integrity",
+            "output-contract",
+        }
         assert case["exit_code"] == 0
-        assert set(checks) == {"process-completed", "output-contract"}
+        assert boundary_checks < set(checks)
         assert checks["process-completed"]["matched"] is True
+        assert checks["frozen-input-integrity"]["matched"] is True
         assert checks["output-contract"]["matched"] is False
         assert "unchecked_payload" in checks["output-contract"]["observed"]["error"]
+        blocked_checks = [
+            check for check_id, check in checks.items() if check_id not in boundary_checks
+        ]
+        assert all(check["matched"] is False for check in blocked_checks)
+        assert all(
+            check["observed"] == "blocked by invalid output contract"
+            for check in blocked_checks
+        )
 
 
 def test_calibration_retains_equal_controls_and_detected_boundaries() -> None:
@@ -111,16 +127,42 @@ def test_calibration_retains_equal_controls_and_detected_boundaries() -> None:
     assert comparison["weighted_success_score_used"] is False
 
 
-def test_controlled_comparison_retains_raw_arms_without_winner(tmp_path: Path) -> None:
+def test_harness_control_comparison_retains_raw_arms_without_winner(
+    tmp_path: Path,
+) -> None:
     baseline, blackridge = comparison_plans(tmp_path)
 
     probe = BenchmarkComparisonProbe().probe(DEFINITION, baseline, blackridge)
 
-    assert probe.observations["valid_two_arm_comparison"] is True
+    assert probe.observations["valid_two_arm_comparison"] is False
+    assert probe.observations["harness_control_only"] is True
     assert probe.observations["baseline"]["task_success"] is True
     assert probe.observations["blackridge"]["task_success"] is False
     assert probe.observations["weighted_success_score"] is None
     assert probe.observations["automatic_winner"] is None
+
+
+def test_docker_candidate_command_disables_root_and_swap(tmp_path: Path) -> None:
+    candidate = CandidateInvocation(
+        backend="docker",
+        argv=["python", "/workspace/candidate.py"],
+        cwd="/workspace",
+        workspace=str(tmp_path),
+        docker_image="sha256:" + "a" * 64,
+        memory_mib=256,
+    )
+    run = load_benchmark_run_plan(REFERENCE).model_copy(update={"candidate": candidate})
+
+    command = BenchmarkEvaluator()._candidate_command(DEFINITION, tmp_path / "run.yaml", run)
+
+    assert command.argv[
+        command.argv.index("--user") : command.argv.index("--user") + 2
+    ] == ["--user", "65534:65534"]
+    assert command.argv[
+        command.argv.index("--memory-swap") : command.argv.index("--memory-swap") + 2
+    ] == ["--memory-swap", "256m"]
+    assert "HOME=/tmp" in command.argv
+    assert "TMPDIR=/tmp" in command.argv
 
 
 def test_comparison_refuses_different_model_controls(tmp_path: Path) -> None:

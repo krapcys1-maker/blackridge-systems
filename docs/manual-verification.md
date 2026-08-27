@@ -34,6 +34,14 @@ same mechanism must first work with at least two meaningfully different real sub
 reviewer, expected behavior, concrete observations, explanatory notes, and the SHA-256 digest of
 the exact probe file that was inspected.
 
+Promoting composition evidence above L0 additionally requires a typed `EvidencePromotion`. The
+promotion binds the claimed level to a successfully completed probe, provider, subject, immutable
+revision, SPDX license, and exact component artifact or adapter-operation digest. Production
+qualification compares every binding with the subject being selected and fails closed on a missing
+or mismatched value. `review-probe` records this block only when all of
+`--promotion-level`, `--subject-type`, `--subject-revision`, `--subject-license-spdx`, and
+`--artifact-sha256` are supplied together.
+
 ## Status vocabulary
 
 - **PASS** — the retained evidence satisfies this exact scenario, not the whole component.
@@ -58,9 +66,11 @@ the exact same input and target schema and differ by the explicitly retained ope
 For supply-chain probes, inspect the requested and observed commit, repository LICENSE blob,
 direct-dependency license results, SBOM counts and hashes, unknown license coverage, scanner image
 digests and argv, Scorecard status, OSV exit/findings/scope, every distribution provenance response,
-source-tree cleanliness, and container cleanup. A valid Git commit signature is not package
-provenance. A scenario may pass because missing and adverse evidence was represented correctly
-while the inspected release itself remains blocked.
+source-tree cleanliness before and after scanners, cryptographic attestation verification, and
+container cleanup. Attestation availability is not verification, and repository identity in a
+valid PyPI attestation is not proof of the exact requested source commit. A valid Git commit
+signature is not package provenance. A scenario may pass because missing and adverse evidence was
+represented correctly while the inspected release itself remains blocked.
 
 For benchmark probes, compare the evaluator-module, definition, public-specification, input-contract,
 output-contract, model, budget, timeout, environment, and measurement-source controls. Inspect every

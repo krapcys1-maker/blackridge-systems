@@ -6,7 +6,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
@@ -18,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
+from blackridge.process_boundary import run_bounded
 
 SWEREX_VERSION = "1.4.0"
 SWEREX_SOURCE = f"https://github.com/SWE-agent/SWE-ReX/tree/v{SWEREX_VERSION}"
@@ -89,15 +89,18 @@ class WorkspaceSnapshot:
 
     @classmethod
     def capture(cls, root: Path) -> WorkspaceSnapshot:
-        completed = subprocess.run(
+        completed = run_bounded(
             ["git", "ls-files", "-co", "--exclude-standard", "-z"],
             cwd=root,
-            check=True,
-            capture_output=True,
+            timeout_seconds=30,
         )
+        if completed.returncode != 0 or completed.timed_out:
+            raise BlackridgeError(f"cannot snapshot workspace: {completed.stderr.strip()}")
+        if completed.output_limit_exceeded:
+            raise BlackridgeError("workspace file list exceeded the output limit")
         names = [
             name
-            for name in completed.stdout.decode("utf-8", errors="surrogateescape").split("\0")
+            for name in completed.stdout.split("\0")
             if name
         ]
         files: dict[str, str] = {}
@@ -121,15 +124,16 @@ def inspect_local_image(image: str) -> dict[str, object]:
     """Resolve a local image reference to immutable Docker metadata."""
 
     try:
-        completed = subprocess.run(
-            ["docker", "image", "inspect", image],
-            check=True,
-            capture_output=True,
-            text=True,
+        completed = run_bounded(
+            ["docker", "image", "inspect", image], timeout_seconds=30
         )
+        if completed.returncode != 0 or completed.timed_out:
+            raise BlackridgeError(completed.stderr.strip() or "Docker inspect failed")
+        if completed.output_limit_exceeded:
+            raise BlackridgeError("Docker image metadata exceeded the output limit")
         inspected = json.loads(completed.stdout)[0]
-    except (subprocess.CalledProcessError, json.JSONDecodeError, IndexError) as exc:
-        detail = getattr(exc, "stderr", "") or str(exc)
+    except (BlackridgeError, json.JSONDecodeError, IndexError) as exc:
+        detail = str(exc)
         raise BlackridgeError(
             f"cannot inspect local Docker image {image!r}: {detail.strip()}"
         ) from exc
@@ -153,13 +157,17 @@ def _container_exists(name: str | None) -> bool | None:
     if not name:
         return None
     try:
-        completed = subprocess.run(
+        completed = run_bounded(
             ["docker", "ps", "-a", "--filter", f"name=^{name}$", "--format", "{{.ID}}"],
-            check=True,
-            capture_output=True,
-            text=True,
+            timeout_seconds=15,
         )
-    except subprocess.CalledProcessError:
+    except OSError:
+        return None
+    if (
+        completed.returncode != 0
+        or completed.timed_out
+        or completed.output_limit_exceeded
+    ):
         return None
     return bool(completed.stdout.strip())
 
@@ -313,7 +321,7 @@ class SwerexDockerProbe:
 
     @staticmethod
     def _container_networks(container_name: str) -> dict[str, object]:
-        completed = subprocess.run(
+        completed = run_bounded(
             [
                 "docker",
                 "inspect",
@@ -321,10 +329,12 @@ class SwerexDockerProbe:
                 "{{json .NetworkSettings.Networks}}",
                 container_name,
             ],
-            check=True,
-            capture_output=True,
-            text=True,
+            timeout_seconds=15,
         )
+        if completed.returncode != 0 or completed.timed_out:
+            raise BlackridgeError(f"cannot inspect container networks: {completed.stderr}")
+        if completed.output_limit_exceeded:
+            raise BlackridgeError("container network metadata exceeded the output limit")
         value = json.loads(completed.stdout)
         if not isinstance(value, dict):
             raise BlackridgeError("Docker returned invalid container network metadata")
@@ -343,7 +353,7 @@ class SwerexDockerProbe:
                 network,
                 container_name,
             ]
-            completed = subprocess.run(argv, capture_output=True, text=True)
+            completed = run_bounded(argv, timeout_seconds=15)
             commands.append(
                 {
                     "argv": argv,
@@ -394,57 +404,37 @@ class SwerexDockerProbe:
             *[str(argument) for argument in item["argv"]],
         ]
         started = perf_counter()
-        try:
-            completed = subprocess.run(
-                argv,
-                capture_output=True,
-                text=True,
-                timeout=float(item["timeout_seconds"]) + 5,
-            )
-            duration_seconds = round(perf_counter() - started, 3)
-            timed_out = (
-                completed.returncode in {124, 137}
-                and duration_seconds >= float(item["timeout_seconds"]) * 0.9
-            )
-            return {
-                **item,
-                "executor": "docker-exec-shell-free",
-                "container_argv": argv[argv.index(container_name) + 1 :],
-                "user": "65534:65534",
-                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
-                "timeout_enforcer": "coreutils-timeout-term-then-kill",
-                "timed_out": timed_out,
-                "duration_seconds": duration_seconds,
-                "stdout": completed.stdout,
-                "stderr": completed.stderr,
-                "exit_code": completed.returncode,
-                "transport_error": None,
-            }
-        except subprocess.TimeoutExpired as exc:
-            stdout = (
-                exc.stdout.decode(errors="replace")
-                if isinstance(exc.stdout, bytes)
-                else exc.stdout
-            )
-            stderr = (
-                exc.stderr.decode(errors="replace")
-                if isinstance(exc.stderr, bytes)
-                else exc.stderr
-            )
-            return {
-                **item,
-                "executor": "docker-exec-shell-free",
-                "container_argv": argv[argv.index(container_name) + 1 :],
-                "user": "65534:65534",
-                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
-                "timeout_enforcer": "coreutils-timeout-term-then-kill",
-                "timed_out": True,
-                "duration_seconds": round(perf_counter() - started, 3),
-                "stdout": stdout or "",
-                "stderr": stderr or "",
-                "exit_code": None,
-                "transport_error": f"TimeoutExpired: exceeded {item['timeout_seconds']} seconds",
-            }
+        completed = run_bounded(
+            argv,
+            timeout_seconds=float(item["timeout_seconds"]) + 5,
+        )
+        duration_seconds = round(perf_counter() - started, 3)
+        timed_out = completed.timed_out or (
+            completed.returncode in {124, 137}
+            and duration_seconds >= float(item["timeout_seconds"]) * 0.9
+        )
+        transport_error = None
+        if completed.timed_out:
+            transport_error = f"TimeoutExpired: exceeded {item['timeout_seconds']} seconds"
+        elif completed.output_limit_exceeded:
+            transport_error = "OutputLimitExceeded: process output exceeded the retained limit"
+        return {
+            **item,
+            "executor": "docker-exec-shell-free",
+            "container_argv": argv[argv.index(container_name) + 1 :],
+            "user": "65534:65534",
+            "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
+            "timeout_enforcer": "coreutils-timeout-term-then-kill",
+            "timed_out": timed_out,
+            "output_limit_exceeded": completed.output_limit_exceeded,
+            "duration_seconds": duration_seconds,
+            "stdout": completed.stdout,
+            "stderr": completed.stderr,
+            "stdout_bytes_seen": completed.stdout_bytes_seen,
+            "stderr_bytes_seen": completed.stderr_bytes_seen,
+            "exit_code": completed.returncode,
+            "transport_error": transport_error,
+        }
 
     async def _probe(self, experiment: SandboxExperiment, host_root: Path) -> ProbeEvidence:
         DockerDeployment, Command = self._runtime_types()
@@ -553,7 +543,11 @@ class SwerexDockerProbe:
         finally:
             if deployment_started and experiment.execution_network == "none" and container_name:
                 argv = ["docker", "rm", "--force", container_name]
-                completed = subprocess.run(argv, capture_output=True, text=True)
+                completed = run_bounded(
+                    argv,
+                    timeout_seconds=15,
+                    maximum_output_bytes_per_stream=65_536,
+                )
                 force_remove = {
                     "argv": argv,
                     "exit_code": completed.returncode,
@@ -645,12 +639,4 @@ class SwerexDockerProbe:
     def probe(self, experiment: SandboxExperiment, host_root: Path) -> ProbeEvidence:
         """Run one experiment from a synchronous CLI and retain observations, not a verdict."""
 
-        try:
-            return asyncio.run(self._probe(experiment, host_root.resolve()))
-        except subprocess.CalledProcessError as exc:
-            detail = (
-                exc.stderr.decode(errors="replace")
-                if isinstance(exc.stderr, bytes)
-                else exc.stderr
-            )
-            raise BlackridgeError(f"cannot snapshot the host workspace: {detail or exc}") from exc
+        return asyncio.run(self._probe(experiment, host_root.resolve()))

@@ -10,11 +10,20 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        include:
+          - os: ubuntu-latest
+            python-version: "3.11"
+            package: false
+          - os: ubuntu-latest
+            python-version: "3.12"
+            package: true
+          - os: windows-latest
+            python-version: "3.12"
+            package: false
     steps:
       - name: Check out repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -44,8 +53,10 @@ jobs:
       - name: Enforce declared copy provenance
         run: blackridge check-provenance provenance/derived-code.yaml
       - name: Test
-        run: pytest --cov=blackridge --cov-report=term-missing
+        run: pytest --cov=blackridge --cov-report=term-missing --cov-fail-under=60
       - name: Build exact distribution artifacts
+        if: matrix.package
         run: python -m build --outdir ci-dist
       - name: Validate distribution metadata and README rendering
+        if: matrix.package
         run: twine check ci-dist/*

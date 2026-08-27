@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import shutil
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 from blackridge.errors import ExternalToolError
+from blackridge.process_boundary import run_bounded
 
 
 @dataclass(frozen=True)
@@ -31,21 +31,15 @@ class CommandRunner:
         if not argv:
             raise ValueError("argv cannot be empty")
         command = [self.resolve(argv[0]), *argv[1:]]
-        try:
-            process = subprocess.run(
-                command,
-                check=False,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=timeout_seconds,
-                shell=False,
-            )
-        except subprocess.TimeoutExpired as exc:
+        process = run_bounded(command, timeout_seconds=timeout_seconds)
+        if process.timed_out:
             raise ExternalToolError(
                 f"upstream command timed out after {timeout_seconds}s: {argv[0]}"
-            ) from exc
+            )
+        if process.output_limit_exceeded:
+            raise ExternalToolError(
+                f"upstream command exceeded the output limit: {argv[0]}"
+            )
 
         result = CommandResult(
             argv=tuple(argv),

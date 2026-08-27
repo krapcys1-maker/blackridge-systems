@@ -8,7 +8,6 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 from collections.abc import Callable, Sequence
@@ -26,10 +25,13 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from blackridge.composition_evidence import EvidenceReference
+from blackridge.composition_evidence import verify_evidence as _verify_evidence
 from blackridge.errors import BlackridgeError
-from blackridge.evidence import ManualReview, ManualVerdict, ProbeEvidence
+from blackridge.evidence import ProbeEvidence
 from blackridge.formats import load_yaml
 from blackridge.models import EvidenceLevel
+from blackridge.process_boundary import run_bounded
 
 COMPOSITION_SOURCE = (
     "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py"
@@ -50,32 +52,6 @@ class ContractDefinition(StrictModel):
         pattern=r"^[a-z0-9]+(?:[./-][a-z0-9]+)*$",
     )
     schema_definition: dict[str, object] = Field(alias="schema")
-
-
-class EvidenceReference(StrictModel):
-    """A claimed evidence level plus the exact named review supporting it."""
-
-    level: EvidenceLevel
-    review_file: str | None = None
-    review_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
-    capability_id: str | None = None
-    scenario_id: str | None = None
-    probe_subject: str | None = None
-
-    @model_validator(mode="after")
-    def review_fields_are_complete(self) -> EvidenceReference:
-        fields = [
-            self.review_file,
-            self.review_sha256,
-            self.capability_id,
-            self.scenario_id,
-            self.probe_subject,
-        ]
-        if any(value is not None for value in fields) and not all(
-            value is not None for value in fields
-        ):
-            raise ValueError("all review fields must be supplied together")
-        return self
 
 
 class ComponentLaunch(StrictModel):
@@ -255,13 +231,6 @@ def _sha256_json(value: object) -> str:
     return sha256(canonical).hexdigest()
 
 
-def _repository_root(start: Path) -> Path:
-    for candidate in [start.resolve(), *start.resolve().parents]:
-        if (candidate / ".git").exists():
-            return candidate
-    return start.resolve()
-
-
 def _is_immutable_revision(value: str) -> bool:
     normalized = value.removeprefix("sha256:")
     if len(normalized) in {40, 64}:
@@ -274,91 +243,6 @@ def _is_immutable_revision(value: str) -> bool:
         digest = value.rsplit("@sha256:", 1)[1]
         return len(digest) == 64 and all(character in "0123456789abcdef" for character in digest)
     return False
-
-
-def _verify_evidence(
-    evidence: EvidenceReference,
-    *,
-    definition_directory: Path,
-    mode: Literal["calibration", "production"],
-) -> tuple[list[str], dict[str, object]]:
-    reasons: list[str] = []
-    observations: dict[str, object] = {"claimed_level": int(evidence.level)}
-    if evidence.review_file is None:
-        observations["review_supplied"] = False
-        if mode == "production" or evidence.level > EvidenceLevel.DISCOVERED:
-            reasons.append("claimed evidence level has no named manual review")
-        return reasons, observations
-
-    review_path = (definition_directory / evidence.review_file).resolve()
-    observations.update(
-        {
-            "review_supplied": True,
-            "review_file": str(review_path),
-            "review_exists": review_path.is_file(),
-        }
-    )
-    if not review_path.is_file():
-        reasons.append("manual review file does not exist")
-        return reasons, observations
-    actual_review_hash = _sha256_file(review_path)
-    observations["review_sha256"] = actual_review_hash
-    observations["review_hash_matches"] = actual_review_hash == evidence.review_sha256
-    if actual_review_hash != evidence.review_sha256:
-        reasons.append("manual review SHA-256 does not match")
-        return reasons, observations
-    try:
-        review = ManualReview.model_validate_json(review_path.read_text(encoding="utf-8"))
-    except (ValueError, OSError) as exc:
-        reasons.append(f"manual review is invalid: {type(exc).__name__}: {exc}")
-        return reasons, observations
-
-    observations.update(
-        {
-            "review_verdict": review.verdict.value,
-            "reviewer": review.reviewer,
-            "review_capability_id": review.capability_id,
-            "review_scenario_id": review.scenario_id,
-        }
-    )
-    if review.verdict != ManualVerdict.PASS:
-        reasons.append("manual review verdict is not pass")
-    if review.capability_id != evidence.capability_id:
-        reasons.append("manual review capability does not match evidence reference")
-    if review.scenario_id != evidence.scenario_id:
-        reasons.append("manual review scenario does not match evidence reference")
-
-    repository_root = _repository_root(definition_directory)
-    probe_path = Path(review.probe_file)
-    if not probe_path.is_absolute():
-        probe_path = (repository_root / probe_path).resolve()
-    observations["probe_file"] = str(probe_path)
-    observations["probe_exists"] = probe_path.is_file()
-    if not probe_path.is_file():
-        reasons.append("probe referenced by manual review does not exist")
-    else:
-        actual_probe_hash = _sha256_file(probe_path)
-        observations["probe_sha256"] = actual_probe_hash
-        observations["probe_hash_matches_review"] = actual_probe_hash == review.probe_sha256
-        if actual_probe_hash != review.probe_sha256:
-            reasons.append("probe SHA-256 no longer matches the manual review")
-        else:
-            try:
-                probe = ProbeEvidence.model_validate_json(
-                    probe_path.read_text(encoding="utf-8")
-                )
-            except (ValueError, OSError) as exc:
-                reasons.append(f"reviewed probe is invalid: {type(exc).__name__}: {exc}")
-            else:
-                observations["probe_id"] = probe.probe_id
-                observations["probe_subject"] = probe.subject
-                observations["probe_id_matches_review"] = probe.probe_id == review.probe_id
-                observations["probe_subject_matches"] = probe.subject == evidence.probe_subject
-                if probe.probe_id != review.probe_id:
-                    reasons.append("reviewed probe id does not match the manual review")
-                if probe.subject != evidence.probe_subject:
-                    reasons.append("reviewed probe subject does not match evidence reference")
-    return reasons, observations
 
 
 def _qualify_component(
@@ -384,6 +268,12 @@ def _qualify_component(
         component.evidence,
         definition_directory=definition_directory,
         mode=definition.mode,
+        subject_type="component",
+        subject_revision=component.revision,
+        subject_license_spdx=component.license_spdx,
+        artifact_sha256=(
+            component.launch.artifact_sha256 if component.launch is not None else None
+        ),
     )
     reasons.extend(evidence_reasons)
     if component.launch is not None:
@@ -447,6 +337,10 @@ def _qualify_adapter(
         adapter.evidence,
         definition_directory=definition_directory,
         mode=definition.mode,
+        subject_type="adapter",
+        subject_revision=adapter.revision,
+        subject_license_spdx=adapter.license_spdx,
+        artifact_sha256=adapter.operations_sha256,
     )
     reasons.extend(evidence_reasons)
     operations_hash = _sha256_json(adapter.operations)
@@ -982,12 +876,6 @@ def _verify_provenance_root(provenance_file: Path, expected_sha256: str) -> str:
     return actual
 
 
-def _normalized_process_text(value: str | bytes | None) -> str:
-    if isinstance(value, bytes):
-        return value.decode("utf-8", errors="replace")
-    return value or ""
-
-
 def _host_component_process(
     _subject_id: str,
     launch: dict[str, Any],
@@ -1003,44 +891,27 @@ def _host_component_process(
         if isinstance(key, str) and key in os.environ
     }
     environment["PYTHONIOENCODING"] = "utf-8"
-    started = datetime.now(UTC)
-    try:
-        completed = subprocess.run(
-            argv,
-            input=json.dumps(artifact),
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            capture_output=True,
-            cwd=cwd,
-            env=environment,
-            timeout=float(timeout),
-            check=False,
-            shell=False,
-        )
-        return {
-            "executor": "host-shell-free",
-            "argv": argv,
-            "working_directory": cwd,
-            "environment_names": sorted(environment),
-            "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
-            "timed_out": False,
-            "exit_code": completed.returncode,
-            "stdout": completed.stdout,
-            "stderr": completed.stderr,
-        }
-    except subprocess.TimeoutExpired as exc:
-        return {
-            "executor": "host-shell-free",
-            "argv": argv,
-            "working_directory": cwd,
-            "environment_names": sorted(environment),
-            "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
-            "timed_out": True,
-            "exit_code": None,
-            "stdout": _normalized_process_text(exc.stdout),
-            "stderr": _normalized_process_text(exc.stderr),
-        }
+    completed = run_bounded(
+        argv,
+        input_text=json.dumps(artifact),
+        cwd=cwd,
+        env=environment,
+        timeout_seconds=float(timeout),
+    )
+    return {
+        "executor": "host-shell-free",
+        "argv": argv,
+        "working_directory": cwd,
+        "environment_names": sorted(environment),
+        "duration_seconds": completed.duration_seconds,
+        "timed_out": completed.timed_out,
+        "output_limit_exceeded": completed.output_limit_exceeded,
+        "exit_code": completed.returncode,
+        "stdout": completed.stdout,
+        "stderr": completed.stderr,
+        "stdout_bytes_seen": completed.stdout_bytes_seen,
+        "stderr_bytes_seen": completed.stderr_bytes_seen,
+    }
 
 
 def run_generated_system(
@@ -1234,6 +1105,7 @@ def run_generated_system(
                 "environment_names",
                 "duration_seconds",
                 "timed_out",
+                "output_limit_exceeded",
                 "exit_code",
                 "stdout",
                 "stderr",
@@ -1245,6 +1117,8 @@ def run_generated_system(
             observation["process"] = process
             if process["timed_out"]:
                 failure_reason = f"component {subject_id} timed out"
+            elif process["output_limit_exceeded"]:
+                failure_reason = f"component {subject_id} exceeded the output limit"
             elif process["exit_code"] == 0:
                 try:
                     produced = json.loads(str(process["stdout"]))
@@ -1568,55 +1442,33 @@ def run_generated_system_sandboxed(
             f"{float(launch['timeout_seconds']):g}s",
             *effective_argv,
         ]
-        started = datetime.now(UTC)
-        try:
-            completed = subprocess.run(
-                argv,
-                input=json.dumps(artifact),
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                capture_output=True,
-                timeout=float(launch["timeout_seconds"]) + 5,
-                check=False,
-                shell=False,
-            )
-            duration_seconds = (datetime.now(UTC) - started).total_seconds()
-            timed_out = (
-                completed.returncode in {124, 137}
-                and duration_seconds >= float(launch["timeout_seconds"]) * 0.9
-            )
-            return {
-                "executor": "docker-exec-shell-free",
-                "declared_argv": declared_argv,
-                "argv": effective_argv,
-                "container_argv": argv[argv.index(container_name) + 1 :],
-                "working_directory": "/workspace/components",
-                "user": "65534:65534",
-                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
-                "duration_seconds": duration_seconds,
-                "timeout_enforcer": "coreutils-timeout-term-then-kill",
-                "timed_out": timed_out,
-                "exit_code": completed.returncode,
-                "stdout": completed.stdout,
-                "stderr": completed.stderr,
-            }
-        except subprocess.TimeoutExpired as exc:
-            return {
-                "executor": "docker-exec-shell-free",
-                "declared_argv": declared_argv,
-                "argv": effective_argv,
-                "container_argv": argv[argv.index(container_name) + 1 :],
-                "working_directory": "/workspace/components",
-                "user": "65534:65534",
-                "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
-                "duration_seconds": (datetime.now(UTC) - started).total_seconds(),
-                "timeout_enforcer": "coreutils-timeout-term-then-kill",
-                "timed_out": True,
-                "exit_code": None,
-                "stdout": _normalized_process_text(exc.stdout),
-                "stderr": _normalized_process_text(exc.stderr),
-            }
+        completed = run_bounded(
+            argv,
+            input_text=json.dumps(artifact),
+            timeout_seconds=float(launch["timeout_seconds"]) + 5,
+        )
+        timed_out = completed.timed_out or (
+            completed.returncode in {124, 137}
+            and completed.duration_seconds >= float(launch["timeout_seconds"]) * 0.9
+        )
+        return {
+            "executor": "docker-exec-shell-free",
+            "declared_argv": declared_argv,
+            "argv": effective_argv,
+            "container_argv": argv[argv.index(container_name) + 1 :],
+            "working_directory": "/workspace/components",
+            "user": "65534:65534",
+            "environment_names": ["HOME", "PYTHONIOENCODING", "TMPDIR"],
+            "duration_seconds": completed.duration_seconds,
+            "timeout_enforcer": "coreutils-timeout-term-then-kill",
+            "timed_out": timed_out,
+            "output_limit_exceeded": completed.output_limit_exceeded,
+            "exit_code": completed.returncode,
+            "stdout": completed.stdout,
+            "stderr": completed.stderr,
+            "stdout_bytes_seen": completed.stdout_bytes_seen,
+            "stderr_bytes_seen": completed.stderr_bytes_seen,
+        }
 
     try:
         asyncio.run(start_and_prepare())
@@ -1627,7 +1479,7 @@ def run_generated_system_sandboxed(
             suffix = source.suffix if source.suffix.isascii() else ""
             target = f"/workspace/components/component-{index}{suffix}"
             copy_argv = ["docker", "cp", str(source), f"{container_name}:{target}"]
-            copied_process = subprocess.run(copy_argv, capture_output=True, text=True)
+            copied_process = run_bounded(copy_argv, timeout_seconds=30)
             record: dict[str, object] = {
                 "subject_id": subject_id,
                 "argv": copy_argv,
@@ -1638,10 +1490,9 @@ def run_generated_system_sandboxed(
             copied.append(record)
             if copied_process.returncode != 0:
                 raise BlackridgeError(f"component copy failed: {subject_id}")
-            hash_process = subprocess.run(
+            hash_process = run_bounded(
                 ["docker", "exec", container_name, "sha256sum", target],
-                capture_output=True,
-                text=True,
+                timeout_seconds=15,
             )
             actual_hash = hash_process.stdout.split()[0] if hash_process.returncode == 0 else None
             record["expected_sha256"] = launch["artifact_sha256"]
@@ -1669,11 +1520,9 @@ def run_generated_system_sandboxed(
             _SANDBOX_PREFLIGHT_CODE,
             container_artifacts[component_controls[0][0]],
         ]
-        preflight_process = subprocess.run(
+        preflight_process = run_bounded(
             preflight_argv,
-            capture_output=True,
-            text=True,
-            timeout=15,
+            timeout_seconds=15,
         )
         preflight = {
             "argv": preflight_argv,
@@ -1730,10 +1579,9 @@ def run_generated_system_sandboxed(
         post_execution_integrity: list[dict[str, object]] = []
         for subject_id, launch in component_controls:
             target = container_artifacts[subject_id]
-            hash_process = subprocess.run(
+            hash_process = run_bounded(
                 ["docker", "exec", container_name, "sha256sum", target],
-                capture_output=True,
-                text=True,
+                timeout_seconds=15,
             )
             actual_hash = (
                 hash_process.stdout.split()[0] if hash_process.returncode == 0 else None
@@ -1752,7 +1600,11 @@ def run_generated_system_sandboxed(
     finally:
         if container_name:
             remove_argv = ["docker", "rm", "--force", container_name]
-            removed = subprocess.run(remove_argv, capture_output=True, text=True)
+            removed = run_bounded(
+                remove_argv,
+                timeout_seconds=15,
+                maximum_output_bytes_per_stream=65_536,
+            )
             force_remove = {
                 "argv": remove_argv,
                 "exit_code": removed.returncode,
