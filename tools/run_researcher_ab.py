@@ -136,22 +136,27 @@ def eligible_component(repo: Path) -> tuple[dict[str, Any], Path, dict[str, obje
 
 
 def treatment_material(repo: Path) -> str:
-    manifest, source_path, observations = eligible_component(repo)
+    manifest, _, observations = eligible_component(repo)
+    supplemental = observations.get("supplemental_evidence")
+    if not isinstance(supplemental, dict):
+        raise RuntimeError("component supplemental evidence observations are unavailable")
     retained = {
         "gate": "eligible-at-L3-with-exact-contract-hashes",
+        "installation": "deterministic-orchestrator-exact-artifact-sha256",
         "reviewer": observations.get("reviewer"),
         "review_verdict": observations.get("review_verdict"),
         "review_hash_matches": observations.get("review_hash_matches"),
         "probe_completed": observations.get("probe_completed"),
         "probe_subject_matches": observations.get("probe_subject_matches"),
+        "supplemental_review_hash_matches": supplemental.get("review_hash_matches"),
+        "supplemental_probe_completed": supplemental.get("probe_completed"),
+        "supplemental_probe_subject_matches": supplemental.get("probe_subject_matches"),
     }
     return "\n\n".join(
         (
             "--- component.yaml ---\n" + yaml.safe_dump(manifest, sort_keys=False),
             "--- independently-verified-gate.json ---\n"
             + json.dumps(retained, indent=2, sort_keys=True),
-            f"--- {source_path.name} (exact eligible source) ---\n"
-            + source_path.read_text(encoding="utf-8"),
         )
     )
 
@@ -169,11 +174,13 @@ def builder_prompt(repo: Path, method: str) -> str:
             "Reuse source only when its retained evidence actually reaches the stated gate. "
             "Do not import or claim reuse of provisional, blocked, or merely discovered entries. "
             "The deterministic orchestrator has verified the listed component's source hash, "
-            "named L3 review, and exact public input/output contract hashes. It has therefore "
-            "preselected grounded-researcher-v1 and will install the exact retained bytes as "
-            "candidate.py. Record that selected_component_id and do not retranscribe or replace "
-            "candidate.py. Your files may contain only supporting README.md, requirements.lock, "
-            "or BUILD.json metadata.\n\nBLACKRIDGE REGISTRY MATERIAL:\n" + treatment_material(repo)
+            "both named L3 reviews, and exact public input/output contract hashes. The source "
+            "bytes are deliberately withheld from this model prompt. The orchestrator has "
+            "preselected grounded-researcher-v1 and will install the exact hash-bound retained "
+            "bytes as candidate.py after this response. Record that selected_component_id and "
+            "do not create, retranscribe, or replace candidate.py. Your files may contain only "
+            "supporting README.md, requirements.lock, or BUILD.json metadata.\n\n"
+            "BLACKRIDGE REGISTRY MATERIAL:\n" + treatment_material(repo)
         )
     return f"""You are one isolated software builder in a controlled experiment.
 

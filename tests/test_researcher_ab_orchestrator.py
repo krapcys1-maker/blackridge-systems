@@ -131,8 +131,15 @@ def test_run_plan_remains_strictly_loadable(tmp_path: Path) -> None:
 def test_prompts_keep_component_out_of_baseline() -> None:
     baseline = builder_prompt(REPOSITORY, "from-scratch")
     hybrid = builder_prompt(REPOSITORY, "blackridge-hybrid")
+    manifest, source, _ = eligible_component(REPOSITORY)
 
     assert "grounded_researcher.py (exact eligible source)" not in baseline
-    assert "grounded_researcher.py (exact eligible source)" in hybrid
+    assert "grounded_researcher.py (exact eligible source)" not in hybrid
+    assert source.read_text(encoding="utf-8") not in hybrid
     assert "preselected grounded-researcher-v1" in hybrid
+    assert "source bytes are deliberately withheld" in hybrid
+    assert manifest["artifact_sha256"] in hybrid
+    assert f"physical_source_lines: {manifest['physical_source_lines']}" in hybrid
+    assert '"supplemental_review_hash_matches": true' in hybrid
     assert "physical_source_lines as reused_source_lines" in hybrid
+    assert len(hybrid) < 12_000
