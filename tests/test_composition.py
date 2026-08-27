@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from copy import deepcopy
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -192,6 +193,43 @@ def test_runtime_rejects_tampered_generated_artifact(tmp_path: Path) -> None:
             INPUT,
             expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
         )
+
+
+def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path) -> None:
+    examples = tmp_path / "examples"
+    shutil.copytree(ROOT / "examples", examples)
+    definition_file = examples / "composition-linear-calibration.yaml"
+    definition = load_composition_definition(definition_file)
+    plan = solve_composition(definition, definition_file=definition_file)
+    bundle = tmp_path / "generated"
+    generated = generate_system(
+        definition,
+        plan,
+        definition_file=definition_file,
+        output_directory=bundle,
+    )
+    sink = examples / "fixtures" / "report_sink.py"
+    sink.write_text(sink.read_text(encoding="utf-8") + "# tampered\n", encoding="utf-8")
+
+    def unexpected_process(*_args, **_kwargs):
+        raise AssertionError("no component may execute after a preflight hash mismatch")
+
+    probe = run_generated_system(
+        bundle,
+        INPUT,
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        _component_process=unexpected_process,
+    )
+
+    assert probe.observations["all_steps_completed"] is False
+    assert probe.observations["failure_reason"] == (
+        "component fixture-report-sink launch artifact failed integrity"
+    )
+    assert [step["status"] for step in probe.observations["steps"]] == [
+        "skipped",
+        "skipped",
+        "failed",
+    ]
 
 
 def _rewrite_runtime_and_relock(bundle: Path, mutate) -> str:

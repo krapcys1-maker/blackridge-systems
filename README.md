@@ -235,6 +235,10 @@ sandbox in a later runtime backend.
 The SHA-256 printed by `compose-generate` is an external trust root. Saved bundles cannot execute
 by merely rewriting `runtime.yaml` and updating the hashes inside their own `provenance.json`;
 `compose-run` and `compose-run-sandbox` require that independently retained digest.
+Both runtimes retain failure evidence but publish the normal `--output` artifact only after every
+step and output contract completes successfully. Host calibration also verifies every component
+launch hash before executing the first step, so a known-bad later component cannot cause a partial
+pipeline run.
 
 ### Audit source provenance and release artifacts
 

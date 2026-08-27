@@ -86,6 +86,20 @@ app = typer.Typer(
 console = Console()
 
 
+def _publish_completed_artifact(probe: ProbeEvidence, output: Path) -> bool:
+    """Publish the normal output channel only for a completed system run."""
+
+    if probe.observations.get("all_steps_completed") is not True:
+        return False
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return True
+
+
 @app.command()
 def doctor() -> None:
     """Check the local MVP prerequisites and upcoming sandbox tools."""
@@ -691,12 +705,7 @@ def compose_run(
             expected_provenance_sha256=provenance_sha256,
         )
         write_probe(probe, evidence)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(
-            json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+        output_published = _publish_completed_artifact(probe, output)
     except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
         failure = ProbeEvidence.failure(
             provider="blackridge-generated-linear-runtime/1",
@@ -715,7 +724,10 @@ def compose_run(
         raise typer.Exit(code=2) from exc
     complete = probe.observations["all_steps_completed"]
     console.print(f"All generated steps completed: {complete}")
-    console.print(f"Output artifact written to {output}")
+    if output_published:
+        console.print(f"Output artifact written to {output}")
+    else:
+        console.print("[yellow]Output artifact not published after failed execution.[/yellow]")
     console.print(f"Raw evidence written to {evidence}")
     console.print("[yellow]No manual PASS/FAIL was assigned.[/yellow]")
     if not complete:
@@ -746,12 +758,7 @@ def compose_run_sandbox(
             image_ref=image,
         )
         write_probe(probe, evidence)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(
-            json.dumps(probe.observations["final_artifact"], indent=2) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+        output_published = _publish_completed_artifact(probe, output)
     except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
         failure = ProbeEvidence.failure(
             provider="blackridge-generated-sandbox-runtime/1",
@@ -777,7 +784,10 @@ def compose_run_sandbox(
         "Container remaining after cleanup: "
         f"{sandbox['cleanup']['container_exists_after']}"
     )
-    console.print(f"Output artifact written to {output}")
+    if output_published:
+        console.print(f"Output artifact written to {output}")
+    else:
+        console.print("[yellow]Output artifact not published after failed execution.[/yellow]")
     console.print(f"Raw evidence written to {evidence}")
     console.print(
         "[yellow]Calibration only; no production or release verdict was assigned.[/yellow]"

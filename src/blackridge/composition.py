@@ -976,17 +976,12 @@ def run_generated_system(
         Draft202012Validator.check_schema(schema)
         schemas[contract_id] = schema
 
-    current_contract = runtime.get("external_input")
-    required_output = runtime.get("required_output")
-    if not isinstance(current_contract, str) or not isinstance(required_output, str):
-        raise BlackridgeError("generated runtime contract endpoints are invalid")
-    artifact = input_artifact
-    initial_errors = _validation_errors(schemas[current_contract], artifact)
-    step_observations: list[dict[str, object]] = []
-    failed = bool(initial_errors)
-    failure_reason = "initial artifact violates its public contract" if failed else None
-
-    for raw_step in steps:
+    validated_steps: list[tuple[dict[str, Any], str, str, str, str]] = []
+    component_controls: dict[
+        int, tuple[dict[str, Any], Path, str, dict[str, object]]
+    ] = {}
+    component_integrity_failures: dict[int, str] = {}
+    for step_index, raw_step in enumerate(steps):
         if not isinstance(raw_step, dict):
             raise BlackridgeError("generated runtime step is not an object")
         subject_id = raw_step.get("subject_id")
@@ -1000,6 +995,96 @@ def run_generated_system(
             and isinstance(output_contract, str)
         ):
             raise BlackridgeError("generated runtime step fields are invalid")
+        validated_steps.append(
+            (raw_step, subject_id, step_type, input_contract, output_contract)
+        )
+        if step_type != "component":
+            continue
+        launch = raw_step.get("launch")
+        if not isinstance(launch, dict):
+            raise BlackridgeError(f"component step has no launch control: {subject_id}")
+        argv = launch.get("argv")
+        cwd = launch.get("working_directory")
+        timeout = launch.get("timeout_seconds")
+        allowlist = launch.get("environment_allowlist", [])
+        artifact_file = launch.get("artifact_file")
+        artifact_hash = launch.get("artifact_sha256")
+        if (
+            not isinstance(argv, list)
+            or not argv
+            or not all(isinstance(value, str) for value in argv)
+            or not isinstance(cwd, str)
+            or not isinstance(timeout, (int, float))
+            or not isinstance(allowlist, list)
+            or not isinstance(artifact_file, str)
+            or not isinstance(artifact_hash, str)
+        ):
+            raise BlackridgeError(f"component launch control is invalid: {subject_id}")
+        launch_artifact = Path(artifact_file).resolve()
+        actual_artifact_hash = (
+            _sha256_file(launch_artifact) if launch_artifact.is_file() else None
+        )
+        integrity: dict[str, object] = {
+            "file": str(launch_artifact),
+            "exists": launch_artifact.is_file(),
+            "expected_sha256": artifact_hash,
+            "actual_sha256": actual_artifact_hash,
+            "matches": actual_artifact_hash == artifact_hash,
+        }
+        component_controls[step_index] = (
+            launch,
+            launch_artifact,
+            artifact_hash,
+            integrity,
+        )
+        if actual_artifact_hash != artifact_hash:
+            component_integrity_failures[step_index] = (
+                f"component {subject_id} launch artifact failed integrity"
+            )
+
+    current_contract = runtime.get("external_input")
+    required_output = runtime.get("required_output")
+    if not isinstance(current_contract, str) or not isinstance(required_output, str):
+        raise BlackridgeError("generated runtime contract endpoints are invalid")
+    artifact = input_artifact
+    initial_errors = _validation_errors(schemas[current_contract], artifact)
+    step_observations: list[dict[str, object]] = []
+    failed = bool(initial_errors) or bool(component_integrity_failures)
+    if component_integrity_failures:
+        failure_reason = next(iter(component_integrity_failures.values()))
+    elif initial_errors:
+        failure_reason = "initial artifact violates its public contract"
+    else:
+        failure_reason = None
+
+    for step_index, (
+        raw_step,
+        subject_id,
+        step_type,
+        input_contract,
+        output_contract,
+    ) in enumerate(validated_steps):
+        if component_integrity_failures:
+            if step_index in component_integrity_failures:
+                step_observations.append(
+                    {
+                        "subject_id": subject_id,
+                        "step_type": step_type,
+                        "status": "failed",
+                        "artifact_integrity": component_controls[step_index][3],
+                        "reason": component_integrity_failures[step_index],
+                    }
+                )
+            else:
+                step_observations.append(
+                    {
+                        "subject_id": subject_id,
+                        "step_type": step_type,
+                        "status": "skipped",
+                        "reason": "component launch artifact preflight failed",
+                    }
+                )
+            continue
         if failed:
             step_observations.append(
                 {
@@ -1061,43 +1146,10 @@ def run_generated_system(
                 observation["patch_error"] = f"{type(exc).__name__}: {exc}"
                 failure_reason = f"adapter {subject_id} failed"
         elif step_type == "component":
-            launch = raw_step.get("launch")
-            if not isinstance(launch, dict):
-                raise BlackridgeError(f"component step has no launch control: {subject_id}")
-            argv = launch.get("argv")
-            cwd = launch.get("working_directory")
-            timeout = launch.get("timeout_seconds")
-            allowlist = launch.get("environment_allowlist", [])
-            artifact_file = launch.get("artifact_file")
-            artifact_hash = launch.get("artifact_sha256")
-            if (
-                not isinstance(argv, list)
-                or not argv
-                or not all(isinstance(value, str) for value in argv)
-                or not isinstance(cwd, str)
-                or not isinstance(timeout, (int, float))
-                or not isinstance(allowlist, list)
-                or not isinstance(artifact_file, str)
-                or not isinstance(artifact_hash, str)
-            ):
-                raise BlackridgeError(f"component launch control is invalid: {subject_id}")
-            launch_artifact = Path(artifact_file).resolve()
-            actual_artifact_hash = (
-                _sha256_file(launch_artifact) if launch_artifact.is_file() else None
-            )
-            observation["artifact_integrity"] = {
-                "file": str(launch_artifact),
-                "exists": launch_artifact.is_file(),
-                "expected_sha256": artifact_hash,
-                "actual_sha256": actual_artifact_hash,
-                "matches": actual_artifact_hash == artifact_hash,
-            }
-            if actual_artifact_hash != artifact_hash:
-                failure_reason = f"component {subject_id} launch artifact failed integrity"
-                observation["reason"] = failure_reason
-                failed = True
-                step_observations.append(observation)
-                continue
+            launch, launch_artifact, artifact_hash, integrity = component_controls[
+                step_index
+            ]
+            observation["artifact_integrity"] = dict(integrity)
             process = _component_process(subject_id, launch, artifact)
             required_process_fields = {
                 "argv",
