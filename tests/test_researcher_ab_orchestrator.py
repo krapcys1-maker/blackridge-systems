@@ -75,7 +75,7 @@ def test_hybrid_deterministically_replaces_builder_candidate_with_component(
             },
         ],
         "candidate_command": ["python", "/workspace/candidate.py"],
-        "selected_component_id": None,
+        "selected_component_id": "grounded-researcher-v1",
         "reused_source_lines": 0,
     }
 
@@ -91,6 +91,18 @@ def test_hybrid_deterministically_replaces_builder_candidate_with_component(
         source.read_text(encoding="utf-8").splitlines()
     )
     assert measurement["builder_claim_matches_measurement"] is False
+
+
+def test_hybrid_requires_builder_to_confirm_preselected_component(tmp_path: Path) -> None:
+    bundle = {
+        "files": [],
+        "candidate_command": ["python", "/workspace/candidate.py"],
+        "selected_component_id": None,
+        "reused_source_lines": 0,
+    }
+
+    with pytest.raises(RuntimeError, match="did not confirm the preselected component"):
+        validate_and_write_bundle(REPOSITORY, tmp_path, bundle, "blackridge-hybrid")
 
 
 def test_from_scratch_cannot_select_retained_component(tmp_path: Path) -> None:
@@ -136,10 +148,12 @@ def test_prompts_keep_component_out_of_baseline() -> None:
     assert "grounded_researcher.py (exact eligible source)" not in baseline
     assert "grounded_researcher.py (exact eligible source)" not in hybrid
     assert source.read_text(encoding="utf-8") not in hybrid
-    assert "preselected grounded-researcher-v1" in hybrid
-    assert "source bytes are deliberately withheld" in hybrid
+    assert '"selected_component_id": "grounded-researcher-v1"' in hybrid
+    assert "reproduce source code" in hybrid
     assert manifest["artifact_sha256"] in hybrid
     assert f"physical_source_lines: {manifest['physical_source_lines']}" in hybrid
     assert '"supplemental_review_hash_matches": true' in hybrid
-    assert "physical_source_lines as reused_source_lines" in hybrid
-    assert len(hybrid) < 12_000
+    assert "Do not implement the public task" in hybrid
+    assert "PUBLIC TASK AND CONTRACTS" not in hybrid
+    assert f'"reused_source_lines": {manifest["physical_source_lines"]}' in hybrid
+    assert len(hybrid) < 8_000

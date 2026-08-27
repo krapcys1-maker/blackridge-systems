@@ -162,26 +162,60 @@ def treatment_material(repo: Path) -> str:
 
 
 def builder_prompt(repo: Path, method: str) -> str:
-    treatment = ""
-    if method == "from-scratch":
-        treatment = (
-            "Build the implementation from scratch. You have no Blackridge catalog, retained "
-            "component evidence, or reuse workflow."
-        )
-    else:
-        treatment = (
-            "Use the Blackridge reuse-first policy represented by the registry material below. "
-            "Reuse source only when its retained evidence actually reaches the stated gate. "
-            "Do not import or claim reuse of provisional, blocked, or merely discovered entries. "
-            "The deterministic orchestrator has verified the listed component's source hash, "
-            "both named L3 reviews, and exact public input/output contract hashes. The source "
-            "bytes are deliberately withheld from this model prompt. The orchestrator has "
-            "preselected grounded-researcher-v1 and will install the exact hash-bound retained "
-            "bytes as candidate.py after this response. Record that selected_component_id and "
-            "do not create, retranscribe, or replace candidate.py. Your files may contain only "
-            "supporting README.md, requirements.lock, or BUILD.json metadata.\n\n"
-            "BLACKRIDGE REGISTRY MATERIAL:\n" + treatment_material(repo)
-        )
+    if method == "blackridge-hybrid":
+        manifest, _, _ = eligible_component(repo)
+        component_id = manifest["component_id"]
+        artifact_hash = manifest["artifact_sha256"]
+        reused_lines = manifest["physical_source_lines"]
+        review_file = manifest["evidence"]["review_file"]
+        supplemental_review = manifest["supplemental_evidence"]["review_file"]
+        bundle = {
+            "files": [
+                {
+                    "path": "requirements.lock",
+                    "content": "# No third-party runtime dependencies.\n",
+                },
+                {
+                    "path": "BUILD.json",
+                    "content": json.dumps(
+                        {
+                            "selected_component_id": component_id,
+                            "artifact_sha256": artifact_hash,
+                            "installation": "deterministic-orchestrator",
+                        },
+                        indent=2,
+                    )
+                    + "\n",
+                },
+            ],
+            "candidate_command": ["python", "/workspace/candidate.py"],
+            "selected_component_id": component_id,
+            "architecture_notes": [
+                "The hash-bound retained component is installed by the orchestrator."
+            ],
+            "reused_source_lines": reused_lines,
+            "reuse_evidence": [review_file, supplemental_review, artifact_hash],
+        }
+        return f"""You are the metadata recorder for one isolated controlled experiment.
+
+The deterministic Blackridge orchestrator has already selected and independently verified one
+component. Do not implement the public task, create candidate.py, reproduce source code, add
+files, or alter any value. Return exactly the JSON object under EXPECTED RESPONSE, without
+Markdown fences. The orchestrator will independently revalidate the registry and install the
+exact artifact bytes after your response.
+
+VERIFIED REGISTRY MATERIAL:
+{treatment_material(repo)}
+
+EXPECTED RESPONSE:
+{json.dumps(bundle, indent=2)}
+"""
+    if method != "from-scratch":
+        raise ValueError(f"unsupported builder method: {method}")
+    treatment = (
+        "Build the implementation from scratch. You have no Blackridge catalog, retained "
+        "component evidence, or reuse workflow."
+    )
     return f"""You are one isolated software builder in a controlled experiment.
 
 {treatment}
@@ -287,6 +321,8 @@ def validate_and_write_bundle(
     selected_source: Path | None = None
     if method == "blackridge-hybrid":
         selected, selected_source, _ = eligible_component(repo)
+        if selected_id != selected["component_id"]:
+            raise RuntimeError("Blackridge builder did not confirm the preselected component")
     elif selected_id is not None:
         raise RuntimeError("from-scratch builder attempted component reuse")
     seen: set[str] = set()
