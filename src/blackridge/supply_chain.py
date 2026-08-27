@@ -56,6 +56,32 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _canonical_json(value: object) -> str:
+    """Serialize JSON data with mapping and collection ordering removed."""
+
+    normalized: object
+    if isinstance(value, dict):
+        normalized = {key: json.loads(_canonical_json(item)) for key, item in value.items()}
+    elif isinstance(value, list):
+        items = [json.loads(_canonical_json(item)) for item in value]
+        normalized = sorted(
+            items,
+            key=lambda item: json.dumps(item, sort_keys=True, separators=(",", ":")),
+        )
+    else:
+        normalized = value
+    return json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def _inventory_sha256(document: dict[str, object], sections: tuple[str, ...]) -> str:
+    """Hash the stable package graph while excluding generator timestamps and UUIDs."""
+
+    inventory = {
+        section: _object_list(document.get(section), f"SBOM {section}") for section in sections
+    }
+    return hashlib.sha256(_canonical_json(inventory).encode()).hexdigest()
+
+
 def _object_list(value: object, context: str, *, required: bool = True) -> list[dict[str, Any]]:
     if value is None and not required:
         return []
@@ -656,6 +682,7 @@ class SupplyChainProbe:
                     "spdx": {
                         "filename": spdx_path.name,
                         "sha256": _sha256(spdx_path),
+                        "inventory_sha256": _inventory_sha256(spdx, ("packages", "relationships")),
                         "size": spdx_path.stat().st_size,
                         "package_count": len(_object_list(spdx.get("packages"), "SPDX packages")),
                         "relationship_count": len(
@@ -666,6 +693,7 @@ class SupplyChainProbe:
                     "cyclonedx": {
                         "filename": cdx_path.name,
                         "sha256": _sha256(cdx_path),
+                        "inventory_sha256": _inventory_sha256(cdx, ("components", "dependencies")),
                         "size": cdx_path.stat().st_size,
                         "component_count": len(
                             _object_list(cdx.get("components"), "CycloneDX components")

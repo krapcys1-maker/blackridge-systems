@@ -20,6 +20,7 @@ from blackridge.supply_chain import (
     SupplyChainProbe,
     _http_observation,
     _inspect_checkout,
+    _inventory_sha256,
     _json_command,
     _license_summary,
     _object_list,
@@ -95,6 +96,25 @@ def test_sbom_unknown_licenses_remain_explicit() -> None:
     assert summary["package_count"] == 2
     assert summary["without_declared_license_count"] == 1
     assert summary["all_license_fields_unknown"] is False
+
+
+def test_sbom_inventory_hash_ignores_volatile_metadata_and_collection_order() -> None:
+    first = {
+        "creationInfo": {"created": "2026-08-27T10:00:00Z"},
+        "documentNamespace": "https://example.test/first",
+        "packages": [{"name": "b", "licenses": ["MIT", "Apache-2.0"]}, {"name": "a"}],
+        "relationships": [{"relatedSpdxElement": "b", "spdxElementId": "a"}],
+    }
+    second = {
+        "creationInfo": {"created": "2026-08-27T10:01:00Z"},
+        "documentNamespace": "https://example.test/second",
+        "packages": [{"name": "a"}, {"licenses": ["Apache-2.0", "MIT"], "name": "b"}],
+        "relationships": [{"spdxElementId": "a", "relatedSpdxElement": "b"}],
+    }
+
+    assert _inventory_sha256(first, ("packages", "relationships")) == _inventory_sha256(
+        second, ("packages", "relationships")
+    )
 
 
 def test_vulnerability_summary_keeps_scope_and_severity_separate() -> None:
