@@ -58,17 +58,13 @@ def write_run(run: DiscoveryRun, path: Path) -> None:
 def write_blueprint(blueprint: SystemBlueprint, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     primitive = json.loads(blueprint.model_dump_json())
-    path.write_text(
-        yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8", newline="\n"
-    )
+    path.write_text(yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8", newline="\n")
 
 
 def write_composition_plan(plan: CompositionPlan, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     primitive = json.loads(plan.model_dump_json())
-    path.write_text(
-        yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8", newline="\n"
-    )
+    path.write_text(yaml.safe_dump(primitive, sort_keys=False), encoding="utf-8", newline="\n")
 
 
 def write_probe(probe: ProbeEvidence, path: Path) -> None:

@@ -94,9 +94,7 @@ def rank_candidate(
     else:
         license_confidence = 0.0
 
-    security_posture = (
-        5.0 if metadata.security_score is None else 20 * metadata.security_score / 10
-    )
+    security_posture = 5.0 if metadata.security_score is None else 20 * metadata.security_score / 10
 
     values = {
         "search_fit": _round(search_fit),

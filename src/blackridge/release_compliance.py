@@ -718,9 +718,7 @@ def _verify_python_license_review(
                 "name": item.name,
                 "version": item.version,
                 "concluded_license_spdx": item.concluded_license_spdx,
-                "requires_public_distribution_review": (
-                    item.requires_public_distribution_review
-                ),
+                "requires_public_distribution_review": (item.requires_public_distribution_review),
                 "valid": not entry_issues,
                 "issues": entry_issues,
                 "sources": item.sources,
@@ -737,9 +735,7 @@ def _verify_python_license_review(
         item for item in unknown if _canonical_package_name(item.get("name")) not in valid
     ]
     reciprocal = [
-        item
-        for item in python_packages
-        if _REVIEW_LICENSE.search(str(item.get("license") or ""))
+        item for item in python_packages if _REVIEW_LICENSE.search(str(item.get("license") or ""))
     ]
     reciprocal_without_valid_review = [
         item for item in reciprocal if _canonical_package_name(item.get("name")) not in valid
@@ -867,12 +863,11 @@ def probe_image_release(
         blockers.append("Python packages have unknown license metadata")
     if analysis["python_without_extracted_license_text"]:
         blockers.append("Python packages are missing extracted license/notice text")
-    if review_analysis["reciprocal_license_packages"] and not review_analysis[
-        "public_distribution_ready"
-    ]:
-        blockers.append(
-            "Reciprocal-license packages require qualified public-distribution review"
-        )
+    if (
+        review_analysis["reciprocal_license_packages"]
+        and not review_analysis["public_distribution_ready"]
+    ):
+        blockers.append("Reciprocal-license packages require qualified public-distribution review")
     if analysis["os_without_extracted_copyright_file"]:
         blockers.append("Debian packages are missing extracted copyright files")
     blockers.append(

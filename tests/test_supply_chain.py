@@ -46,9 +46,7 @@ def test_supply_chain_rejects_an_unsupported_package_ecosystem() -> None:
 
 def test_checkout_inspection_rejects_tracked_and_ignored_residue(tmp_path) -> None:
     subprocess.run(["git", "init", "--quiet"], cwd=tmp_path, check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.test"], cwd=tmp_path, check=True
-    )
+    subprocess.run(["git", "config", "user.email", "test@example.test"], cwd=tmp_path, check=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, check=True)
     tracked = tmp_path / "tracked.txt"
     tracked.write_text("clean\n", encoding="utf-8")

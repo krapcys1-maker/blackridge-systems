@@ -676,10 +676,7 @@ def compose_generate(
     console.print(f"Generated system written to {generated.output_directory}")
     console.print(f"Execution ready: {generated.execution_ready}")
     console.print(f"Release ready: {generated.release_ready}")
-    console.print(
-        "Trusted provenance SHA-256: "
-        f"{generated.artifact_sha256['provenance.json']}"
-    )
+    console.print(f"Trusted provenance SHA-256: {generated.artifact_sha256['provenance.json']}")
     console.print("[yellow]Generation completeness is not an L4 verdict.[/yellow]")
 
 
@@ -781,8 +778,7 @@ def compose_run_sandbox(
     console.print(f"All generated steps completed: {complete}")
     console.print(f"Resolved image: {sandbox['image']['resolved_id']}")
     console.print(
-        "Container remaining after cleanup: "
-        f"{sandbox['cleanup']['container_exists_after']}"
+        f"Container remaining after cleanup: {sandbox['cleanup']['container_exists_after']}"
     )
     if output_published:
         console.print(f"Output artifact written to {output}")
@@ -1013,9 +1009,7 @@ def review_probe(
     promotion_level: Annotated[int | None, typer.Option("--promotion-level")] = None,
     subject_type: Annotated[str | None, typer.Option("--subject-type")] = None,
     subject_revision: Annotated[str | None, typer.Option("--subject-revision")] = None,
-    subject_license_spdx: Annotated[
-        str | None, typer.Option("--subject-license-spdx")
-    ] = None,
+    subject_license_spdx: Annotated[str | None, typer.Option("--subject-license-spdx")] = None,
     artifact_sha256: Annotated[str | None, typer.Option("--artifact-sha256")] = None,
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/evidence/manual-review.json"

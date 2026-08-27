@@ -156,9 +156,7 @@ def test_network_isolation_fails_closed_when_a_network_remains(monkeypatch) -> N
     result = SwerexDockerProbe._isolate_execution_network("exact-container")
 
     assert result["applied"] is False
-    assert result["error"] == (
-        "container network isolation did not remove every attached network"
-    )
+    assert result["error"] == ("container network isolation did not remove every attached network")
     assert result["networks_after"] == network
 
 

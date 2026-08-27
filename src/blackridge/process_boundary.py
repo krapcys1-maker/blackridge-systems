@@ -149,9 +149,7 @@ def run_bounded(
 
     command = [str(value) for value in argv]
     creationflags = (
-        int(getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
-        if os.name == "nt"
-        else 0
+        int(getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)) if os.name == "nt" else 0
     )
     started = perf_counter()
     process = subprocess.Popen(

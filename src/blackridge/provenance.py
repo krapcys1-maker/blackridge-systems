@@ -124,11 +124,7 @@ def _checkout_state(
 def _exact_checkout(reference: UpstreamReference, root: Path) -> tuple[Path, dict[str, object]]:
     destination = root / reference.id
     destination.parent.mkdir(parents=True, exist_ok=True)
-    if (
-        destination.exists()
-        and not (destination / ".git").is_dir()
-        and any(destination.iterdir())
-    ):
+    if destination.exists() and not (destination / ".git").is_dir() and any(destination.iterdir()):
         raise BlackridgeError(f"non-empty audit directory is not Git: {destination}")
     if not (destination / ".git").is_dir():
         _run(["git", "init", str(destination)])
@@ -429,9 +425,7 @@ def provenance_gate(manifest: ProvenanceManifest, *, repo_root: Path) -> ProbeEv
     marker_rows: list[dict[str, object]] = []
     for marker_path in sorted((repo_root / "src" / "blackridge").glob("*.py")):
         relative = marker_path.relative_to(repo_root).as_posix()
-        for line_number, line in enumerate(
-            marker_path.read_text(encoding="utf-8").splitlines(), 1
-        ):
+        for line_number, line in enumerate(marker_path.read_text(encoding="utf-8").splitlines(), 1):
             if _DERIVED_MARKER.search(line):
                 marker = {
                     "file": relative,

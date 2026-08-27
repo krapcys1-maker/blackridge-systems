@@ -48,9 +48,7 @@ def test_incomplete_copy_record_retains_each_missing_control(tmp_path: Path) -> 
 
 def test_upstream_checkout_state_rejects_ignored_residue(tmp_path: Path) -> None:
     subprocess.run(["git", "init", "--quiet"], cwd=tmp_path, check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.test"], cwd=tmp_path, check=True
-    )
+    subprocess.run(["git", "config", "user.email", "test@example.test"], cwd=tmp_path, check=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, check=True)
     (tmp_path / ".gitignore").write_text("ignored.txt\n", encoding="utf-8")
     (tmp_path / "source.py").write_text("VALUE = 1\n", encoding="utf-8")

@@ -364,9 +364,9 @@ def _route_combination(
 ) -> CombinationObservation:
     selected = {component.component_id: component for component in components}
     required_ids = frozenset(selected)
-    queue: list[
-        tuple[int, int, tuple[str, ...], str, frozenset[str], tuple[PlanStep, ...]]
-    ] = [(0, 0, (), definition.external_input, frozenset(), ())]
+    queue: list[tuple[int, int, tuple[str, ...], str, frozenset[str], tuple[PlanStep, ...]]] = [
+        (0, 0, (), definition.external_input, frozenset(), ())
+    ]
     visited: dict[tuple[str, frozenset[str]], tuple[int, int, tuple[str, ...]]] = {}
     furthest: tuple[str, frozenset[str], tuple[PlanStep, ...]] = (
         definition.external_input,
@@ -395,9 +395,7 @@ def _route_combination(
                 terminal_contract=current,
             )
 
-        actions: list[
-            tuple[Literal["component", "adapter"], str, str, str]
-        ] = []
+        actions: list[tuple[Literal["component", "adapter"], str, str, str]] = []
         for component in components:
             if component.component_id not in executed and component.accepts[0] == current:
                 actions.append(
@@ -447,10 +445,7 @@ def _route_combination(
             )
 
     unresolved = sorted(
-        {
-            selected[component_id].capability_id
-            for component_id in required_ids - furthest[1]
-        }
+        {selected[component_id].capability_id for component_id in required_ids - furthest[1]}
     )
     return CombinationObservation(
         component_ids=sorted(selected),
@@ -533,9 +528,7 @@ def solve_composition(
         )
 
     eligible_adapters = [
-        adapter
-        for adapter in definition.adapters
-        if adapter_status[adapter.adapter_id].eligible
+        adapter for adapter in definition.adapters if adapter_status[adapter.adapter_id].eligible
     ]
     evaluated = [
         _route_combination(definition, combination, eligible_adapters)
@@ -574,12 +567,9 @@ def solve_composition(
 
     def objective(item: CombinationObservation) -> tuple[object, ...]:
         priority = sum(
-            component_by_id[component_id].selection_priority
-            for component_id in item.component_ids
+            component_by_id[component_id].selection_priority for component_id in item.component_ids
         )
-        adapter_ids = tuple(
-            step.subject_id for step in item.steps if step.step_type == "adapter"
-        )
+        adapter_ids = tuple(step.subject_id for step in item.steps if step.step_type == "adapter")
         return item.adapter_count, priority, tuple(item.component_ids), adapter_ids
 
     chosen = min(complete, key=objective)
@@ -673,9 +663,7 @@ def generate_system(
         selected_components = [
             component_by_id[component_id] for component_id in plan.selected_component_ids
         ]
-        selected_adapters = [
-            adapter_by_id[adapter_id] for adapter_id in plan.selected_adapter_ids
-        ]
+        selected_adapters = [adapter_by_id[adapter_id] for adapter_id in plan.selected_adapter_ids]
         component_locks = [_primitive(component) for component in selected_components]
         _write_yaml(
             temporary / "components.lock.yaml",
@@ -886,9 +874,7 @@ def _host_component_process(
     allowlist = launch.get("environment_allowlist", [])
     timeout = launch["timeout_seconds"]
     environment = {
-        key: os.environ[key]
-        for key in allowlist
-        if isinstance(key, str) and key in os.environ
+        key: os.environ[key] for key in allowlist if isinstance(key, str) and key in os.environ
     }
     environment["PYTHONIOENCODING"] = "utf-8"
     completed = run_bounded(
@@ -933,9 +919,7 @@ def run_generated_system(
         provenance_file, expected_provenance_sha256
     )
     provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
-    if not isinstance(provenance, dict) or not isinstance(
-        provenance.get("artifact_sha256"), dict
-    ):
+    if not isinstance(provenance, dict) or not isinstance(provenance.get("artifact_sha256"), dict):
         raise BlackridgeError("generated provenance manifest is invalid")
     integrity_mismatches: list[dict[str, Any]] = []
     for relative, expected_hash in provenance["artifact_sha256"].items():
@@ -959,9 +943,7 @@ def run_generated_system(
     runtime_file = _resolve_bundle_file(bundle, "runtime.yaml")
     runtime = _load_yaml_mapping(runtime_file)
     if runtime.get("mode") != _runtime_mode:
-        raise BlackridgeError(
-            "generated runtime mode is not enabled by this execution backend"
-        )
+        raise BlackridgeError("generated runtime mode is not enabled by this execution backend")
     contract_files = runtime.get("contract_files")
     steps = runtime.get("steps")
     if not isinstance(contract_files, dict) or not isinstance(steps, list):
@@ -977,9 +959,7 @@ def run_generated_system(
         schemas[contract_id] = schema
 
     validated_steps: list[tuple[dict[str, Any], str, str, str, str]] = []
-    component_controls: dict[
-        int, tuple[dict[str, Any], Path, str, dict[str, object]]
-    ] = {}
+    component_controls: dict[int, tuple[dict[str, Any], Path, str, dict[str, object]]] = {}
     component_integrity_failures: dict[int, str] = {}
     for step_index, raw_step in enumerate(steps):
         if not isinstance(raw_step, dict):
@@ -995,9 +975,7 @@ def run_generated_system(
             and isinstance(output_contract, str)
         ):
             raise BlackridgeError("generated runtime step fields are invalid")
-        validated_steps.append(
-            (raw_step, subject_id, step_type, input_contract, output_contract)
-        )
+        validated_steps.append((raw_step, subject_id, step_type, input_contract, output_contract))
         if step_type != "component":
             continue
         launch = raw_step.get("launch")
@@ -1021,9 +999,7 @@ def run_generated_system(
         ):
             raise BlackridgeError(f"component launch control is invalid: {subject_id}")
         launch_artifact = Path(artifact_file).resolve()
-        actual_artifact_hash = (
-            _sha256_file(launch_artifact) if launch_artifact.is_file() else None
-        )
+        actual_artifact_hash = _sha256_file(launch_artifact) if launch_artifact.is_file() else None
         integrity: dict[str, object] = {
             "file": str(launch_artifact),
             "exists": launch_artifact.is_file(),
@@ -1138,17 +1114,13 @@ def run_generated_system(
             operations = raw_step.get("operations")
             observation["operations"] = deepcopy(operations)
             try:
-                produced = jsonpatch.JsonPatch(deepcopy(operations)).apply(
-                    artifact, in_place=False
-                )
+                produced = jsonpatch.JsonPatch(deepcopy(operations)).apply(artifact, in_place=False)
                 observation["patch_error"] = None
             except (jsonpatch.JsonPatchException, TypeError) as exc:
                 observation["patch_error"] = f"{type(exc).__name__}: {exc}"
                 failure_reason = f"adapter {subject_id} failed"
         elif step_type == "component":
-            launch, launch_artifact, artifact_hash, integrity = component_controls[
-                step_index
-            ]
+            launch, launch_artifact, artifact_hash, integrity = component_controls[step_index]
             observation["artifact_integrity"] = dict(integrity)
             process = _component_process(subject_id, launch, artifact)
             required_process_fields = {
@@ -1372,9 +1344,7 @@ def run_generated_system_sandboxed(
     provenance_file = _resolve_bundle_file(bundle, "provenance.json")
     _verify_provenance_root(provenance_file, expected_provenance_sha256)
     provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
-    if not isinstance(provenance, dict) or not isinstance(
-        provenance.get("artifact_sha256"), dict
-    ):
+    if not isinstance(provenance, dict) or not isinstance(provenance.get("artifact_sha256"), dict):
         raise BlackridgeError("generated provenance manifest is invalid")
     for relative, expected_hash in provenance["artifact_sha256"].items():
         if not isinstance(relative, str) or not isinstance(expected_hash, str):
@@ -1582,9 +1552,7 @@ def run_generated_system_sandboxed(
             "stdout": preflight_process.stdout,
             "stderr": preflight_process.stderr,
             "result": (
-                json.loads(preflight_process.stdout)
-                if preflight_process.returncode == 0
-                else None
+                json.loads(preflight_process.stdout) if preflight_process.returncode == 0 else None
             ),
         }
         preflight_result = preflight["result"]
@@ -1595,15 +1563,12 @@ def run_generated_system_sandboxed(
         etc_write = preflight_result.get("etc_write")
         scratch_write = preflight_result.get("scratch_write")
         preflight_checks = {
-            "non_root_user": preflight_result.get("uid") != 0
-            and preflight_result.get("gid") != 0,
-            "no_effective_capabilities": preflight_result.get("cap_eff")
-            == "0000000000000000",
+            "non_root_user": preflight_result.get("uid") != 0 and preflight_result.get("gid") != 0,
+            "no_effective_capabilities": preflight_result.get("cap_eff") == "0000000000000000",
             "no_new_privileges": preflight_result.get("no_new_privs") == "1",
             "component_write_denied": isinstance(component_write, dict)
             and component_write.get("allowed") is False,
-            "etc_write_denied": isinstance(etc_write, dict)
-            and etc_write.get("allowed") is False,
+            "etc_write_denied": isinstance(etc_write, dict) and etc_write.get("allowed") is False,
             "scratch_write_allowed": isinstance(scratch_write, dict)
             and scratch_write.get("allowed") is True,
             "direct_egress_denied": preflight_result.get("direct") is False,
@@ -1635,9 +1600,7 @@ def run_generated_system_sandboxed(
                 ["docker", "exec", container_name, "sha256sum", target],
                 timeout_seconds=15,
             )
-            actual_hash = (
-                hash_process.stdout.split()[0] if hash_process.returncode == 0 else None
-            )
+            actual_hash = hash_process.stdout.split()[0] if hash_process.returncode == 0 else None
             post_execution_integrity.append(
                 {
                     "subject_id": subject_id,
@@ -1733,9 +1696,7 @@ class CompositionSystemProbe:
                 runtime_probe = run_generated_system(
                     output_directory,
                     input_artifact,
-                    expected_provenance_sha256=generation.artifact_sha256[
-                        "provenance.json"
-                    ],
+                    expected_provenance_sha256=generation.artifact_sha256["provenance.json"],
                 )
                 warnings.extend(runtime_probe.warnings)
             else:

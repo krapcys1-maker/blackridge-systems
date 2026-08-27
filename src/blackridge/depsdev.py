@@ -152,9 +152,7 @@ class DepsDevClient:
                 "deprecated_reason": version_data.get("deprecatedReason"),
                 "licenses": licenses,
                 "advisories": [
-                    advisory.get("id")
-                    for advisory in advisory_keys
-                    if isinstance(advisory, dict)
+                    advisory.get("id") for advisory in advisory_keys if isinstance(advisory, dict)
                 ],
                 "related_projects": self._related_projects(version_data),
                 "registries": registries,

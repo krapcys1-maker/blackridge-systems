@@ -14,6 +14,4 @@ def test_github_rejects_non_object_and_invalid_repository_metadata() -> None:
         GitHubCli(execute=lambda _argv: "[]").enrich(current)
 
     with pytest.raises(ExternalToolError, match="invalid repository metadata"):
-        GitHubCli(
-            execute=lambda _argv: '{"stargazers_count": -1, "license": null}'
-        ).enrich(current)
+        GitHubCli(execute=lambda _argv: '{"stargazers_count": -1, "license": null}').enrich(current)

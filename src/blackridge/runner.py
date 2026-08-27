@@ -37,9 +37,7 @@ class CommandRunner:
                 f"upstream command timed out after {timeout_seconds}s: {argv[0]}"
             )
         if process.output_limit_exceeded:
-            raise ExternalToolError(
-                f"upstream command exceeded the output limit: {argv[0]}"
-            )
+            raise ExternalToolError(f"upstream command exceeded the output limit: {argv[0]}")
 
         result = CommandResult(
             argv=tuple(argv),

@@ -181,9 +181,7 @@ class CompositionPairProbe:
                 removed.append(operation)
         return removed, remaining
 
-    def probe(
-        self, working: AdapterExperiment, broken: AdapterExperiment
-    ) -> ProbeEvidence:
+    def probe(self, working: AdapterExperiment, broken: AdapterExperiment) -> ProbeEvidence:
         comparable = {
             "source_contract": working.source_contract == broken.source_contract,
             "target_contract": working.target_contract == broken.target_contract,
@@ -236,12 +234,8 @@ class CompositionPairProbe:
                         working_observations["patch"]["error"] is None
                         and broken_observations["patch"]["error"] is None
                     ),
-                    "working_target_contract_valid": working_after[
-                        "target_contract_valid"
-                    ],
-                    "negative_target_contract_valid": broken_after[
-                        "target_contract_valid"
-                    ],
+                    "working_target_contract_valid": working_after["target_contract_valid"],
+                    "negative_target_contract_valid": broken_after["target_contract_valid"],
                     "working_output": working_after["instance"],
                     "negative_output": broken_after["instance"],
                     "negative_validation_errors": broken_after["validation_errors"],

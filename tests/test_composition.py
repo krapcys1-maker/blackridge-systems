@@ -56,9 +56,7 @@ def test_solver_rejects_blocked_option_and_selects_one_adapter() -> None:
     assert plan.selected_component_ids == ["fixture-report-sink", "fixture-research-source"]
     assert plan.selected_adapter_ids == ["paper-title-to-document-name"]
     assert [step.step_type for step in plan.steps] == ["component", "adapter", "component"]
-    blocked = next(
-        item for item in plan.qualifications if item.subject_id == "blocked-report-sink"
-    )
+    blocked = next(item for item in plan.qualifications if item.subject_id == "blocked-report-sink")
     assert blocked.eligible is False
     assert blocked.reasons == ["deliberate policy-blocked alternative"]
 
@@ -140,12 +138,8 @@ def test_generator_writes_locked_layout_and_runtime_completes(tmp_path: Path) ->
         "title": "Evidence for evidence-driven composition",
         "based_on": "fixture-paper-001",
     }
-    assert all(
-        step.get("output_contract_valid") is True for step in probe.observations["steps"]
-    )
-    adapter = next(
-        step for step in probe.observations["steps"] if step["step_type"] == "adapter"
-    )
+    assert all(step.get("output_contract_valid") is True for step in probe.observations["steps"])
+    adapter = next(step for step in probe.observations["steps"] if step["step_type"] == "adapter")
     assert adapter["operations"][0] == {"op": "add", "path": "/document", "value": {}}
     assert "verdict" not in probe.model_dump()
 
@@ -239,9 +233,7 @@ def _rewrite_runtime_and_relock(bundle: Path, mutate) -> str:
     runtime_file.write_text(yaml.safe_dump(runtime, sort_keys=False), encoding="utf-8")
     provenance_file = bundle / "provenance.json"
     provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
-    provenance["artifact_sha256"]["runtime.yaml"] = sha256(
-        runtime_file.read_bytes()
-    ).hexdigest()
+    provenance["artifact_sha256"]["runtime.yaml"] = sha256(runtime_file.read_bytes()).hexdigest()
     provenance_file.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
     return sha256(provenance_file.read_bytes()).hexdigest()
 

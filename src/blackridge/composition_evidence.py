@@ -164,9 +164,7 @@ def verify_evidence(
             reasons.append("probe SHA-256 no longer matches the manual review")
         else:
             try:
-                probe = ProbeEvidence.model_validate_json(
-                    probe_path.read_text(encoding="utf-8")
-                )
+                probe = ProbeEvidence.model_validate_json(probe_path.read_text(encoding="utf-8"))
             except (ValueError, OSError) as exc:
                 reasons.append(f"reviewed probe is invalid: {type(exc).__name__}: {exc}")
             else:

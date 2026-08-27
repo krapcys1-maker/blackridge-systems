@@ -143,8 +143,6 @@ class OctocodeDiscovery:
                     topics=repository.get("topics") or [],
                 )
             except (KeyError, TypeError, ValueError) as exc:
-                raise ExternalToolError(
-                    "Octocode returned malformed repository metadata"
-                ) from exc
+                raise ExternalToolError("Octocode returned malformed repository metadata") from exc
             normalized.append(metadata)
         return normalized

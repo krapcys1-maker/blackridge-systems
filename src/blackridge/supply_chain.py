@@ -45,9 +45,7 @@ class SupplyChainExperiment(BaseModel):
     package_name: str = Field(min_length=1)
     package_version: str = Field(min_length=1)
     syft_image: str = Field(pattern=r"^anchore/syft@sha256:[a-f0-9]{64}$")
-    osv_scanner_image: str = Field(
-        pattern=r"^ghcr\.io/google/osv-scanner@sha256:[a-f0-9]{64}$"
-    )
+    osv_scanner_image: str = Field(pattern=r"^ghcr\.io/google/osv-scanner@sha256:[a-f0-9]{64}$")
 
     def model_post_init(self, _context: object) -> None:
         if self.package_system != PackageSystem.PYPI:
@@ -58,9 +56,7 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _object_list(
-    value: object, context: str, *, required: bool = True
-) -> list[dict[str, Any]]:
+def _object_list(value: object, context: str, *, required: bool = True) -> list[dict[str, Any]]:
     if value is None and not required:
         return []
     if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
@@ -101,8 +97,7 @@ def _run(
         raise BlackridgeError(f"command exceeded the output limit: {argv[0]}")
     if completed.returncode not in accepted:
         raise BlackridgeError(
-            f"command failed with exit {completed.returncode}: {argv[0]} "
-            f"{completed.stderr.strip()}"
+            f"command failed with exit {completed.returncode}: {argv[0]} {completed.stderr.strip()}"
         )
     return observation
 
@@ -118,9 +113,7 @@ def _json_command(argv: list[str]) -> tuple[dict[str, object], dict[str, object]
     return data, command
 
 
-def _http_observation(
-    url: str, *, headers: dict[str, str] | None = None
-) -> dict[str, object]:
+def _http_observation(url: str, *, headers: dict[str, str] | None = None) -> dict[str, object]:
     try:
         response = httpx.get(url, headers=headers, timeout=30, follow_redirects=True)
         try:
@@ -161,11 +154,7 @@ def _inspect_checkout(
 def _ensure_exact_checkout(
     repository: str, commit: str, source_dir: Path
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
-    if (
-        source_dir.exists()
-        and not (source_dir / ".git").is_dir()
-        and any(source_dir.iterdir())
-    ):
+    if source_dir.exists() and not (source_dir / ".git").is_dir() and any(source_dir.iterdir()):
         raise BlackridgeError("supply-chain source directory is non-empty and is not Git")
     source_dir.mkdir(parents=True, exist_ok=True)
     commands: list[dict[str, object]] = []
@@ -206,9 +195,7 @@ def _ensure_exact_checkout(
             ]
         )
     )
-    commands.append(
-        _run(["git", "-C", str(source_dir), "checkout", "--detach", "FETCH_HEAD"])
-    )
+    commands.append(_run(["git", "-C", str(source_dir), "checkout", "--detach", "FETCH_HEAD"]))
     identity_commands, state = _inspect_checkout(
         source_dir,
         expected_commit=commit,
@@ -329,9 +316,7 @@ class SupplyChainProbe:
                 "status_code": response["status_code"],
                 "licenses": licenses,
                 "advisories": [
-                    item.get("id")
-                    for item in advisories or []
-                    if isinstance(item, dict)
+                    item.get("id") for item in advisories or [] if isinstance(item, dict)
                 ],
                 "source": url,
                 "error": response["error"],
@@ -486,9 +471,7 @@ class SupplyChainProbe:
                 provenance_url,
                 headers={"Accept": "application/vnd.pypi.integrity.v1+json"},
             )
-            data = _optional_object(
-                observation.get("data"), "PyPI provenance response"
-            )
+            data = _optional_object(observation.get("data"), "PyPI provenance response")
             bundles = data.get("attestation_bundles")
             if bundles is not None and not isinstance(bundles, list):
                 raise BlackridgeError("PyPI provenance attestation_bundles must be a list")
@@ -539,9 +522,7 @@ class SupplyChainProbe:
             repo_license.get("license"), "GitHub repository license"
         )
         commit = _optional_object(commit_data.get("commit"), "GitHub commit")
-        verification = _optional_object(
-            commit.get("verification"), "GitHub commit verification"
-        )
+        verification = _optional_object(commit.get("verification"), "GitHub commit verification")
         license_summary = _license_summary(spdx)
         vulnerability_summary = _vulnerability_summary(osv)
         nonstandard_dependencies: list[dict[str, object]] = []
@@ -550,8 +531,10 @@ class SupplyChainProbe:
             if not isinstance(licenses, list):
                 nonstandard_dependencies.append(item)
                 continue
-            if not licenses or "non-standard" in licenses or any(
-                "GPL" in str(value) for value in licenses
+            if (
+                not licenses
+                or "non-standard" in licenses
+                or any("GPL" in str(value) for value in licenses)
             ):
                 nonstandard_dependencies.append(item)
         post_checkout_commands, checkout_after = _inspect_checkout(
@@ -561,9 +544,7 @@ class SupplyChainProbe:
         )
         missing_provenance = [item["filename"] for item in provenance if not item["available"]]
         unverified_provenance = [
-            item["filename"]
-            for item in provenance
-            if not item["cryptographically_verified"]
+            item["filename"] for item in provenance if not item["cryptographically_verified"]
         ]
         pypi_metadata_available = pypi["status_code"] == 200
         if not pypi_metadata_available:
