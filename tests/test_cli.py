@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 
+from typer.main import get_command
 from typer.testing import CliRunner
 
 from blackridge.cli import app
@@ -20,15 +21,13 @@ def test_cli_help_is_runnable() -> None:
 
 
 def test_review_probe_help_is_runnable() -> None:
-    result = runner.invoke(
-        app,
-        ["review-probe", "--help"],
-        color=False,
-        terminal_width=160,
-    )
+    result = runner.invoke(app, ["review-probe", "--help"])
 
     assert result.exit_code == 0
-    assert "--subject-type" in result.stdout
+    root_command = get_command(app)
+    assert hasattr(root_command, "commands")
+    review_command = root_command.commands["review-probe"]
+    assert any("--subject-type" in parameter.opts for parameter in review_command.params)
 
 
 def test_doctor_exits_nonzero_for_a_nonfunctional_required_tool(monkeypatch) -> None:
