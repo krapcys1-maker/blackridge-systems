@@ -38,6 +38,28 @@ FIXTURES = COMPONENT / "fixtures"
             },
             {"recipe-soup", "fitness-recovery"},
         ),
+        (
+            "museum-loan-answerable.json",
+            {
+                "loan-identity",
+                "loan-approval",
+                "loan-condition",
+                "loan-custody",
+                "loan-environment",
+                "loan-packaging",
+                "loan-insurance",
+                "loan-incident",
+                "loan-return",
+                "loan-audit",
+            },
+            {
+                "garden-tomato",
+                "garden-compost",
+                "garden-pollinator",
+                "garden-path",
+                "garden-seed",
+            },
+        ),
     ],
 )
 def test_component_selects_grounded_topic_cluster(

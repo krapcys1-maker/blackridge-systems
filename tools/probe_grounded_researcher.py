@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from jsonschema import Draft202012Validator
+
 from blackridge.evidence import ProbeEvidence
 from blackridge.io import write_probe
 from blackridge.process_boundary import run_bounded
@@ -27,6 +29,18 @@ EXPECTED_SOURCES = {
         "backup-restore",
         "backup-offsite",
         "backup-review",
+    },
+    "museum-loan-answerable.json": {
+        "loan-identity",
+        "loan-approval",
+        "loan-condition",
+        "loan-custody",
+        "loan-environment",
+        "loan-packaging",
+        "loan-insurance",
+        "loan-incident",
+        "loan-return",
+        "loan-audit",
     },
     "astronomy-insufficient.json": set(),
 }
@@ -109,7 +123,11 @@ def _invoke(
 
 
 def _checks(
-    request: dict[str, Any], output: dict[str, Any] | None, expected: set[str]
+    request: dict[str, Any],
+    output: dict[str, Any] | None,
+    expected: set[str],
+    input_validator: Draft202012Validator,
+    output_validator: Draft202012Validator,
 ) -> list[dict[str, Any]]:
     documents = {item["document_id"]: item for item in request["documents"]}
     checks: list[dict[str, Any]] = []
@@ -117,9 +135,13 @@ def _checks(
     def add(name: str, matched: bool, observed: object) -> None:
         checks.append({"check": name, "matched": matched, "observed": observed})
 
+    input_errors = sorted(error.message for error in input_validator.iter_errors(request))
+    add("public-input-contract", not input_errors, input_errors)
     add("output-object", output is not None, output is not None)
     if output is None:
         return checks
+    output_errors = sorted(error.message for error in output_validator.iter_errors(output))
+    add("public-output-contract", not output_errors, output_errors)
     status = output.get("status")
     expected_status = "answered" if expected else "insufficient-evidence"
     add("expected-status", status == expected_status, status)
@@ -165,6 +187,11 @@ def main() -> int:
     fixtures = component_root / "fixtures"
     candidate = component_root / "grounded_researcher.py"
     broken = fixtures / "broken_grounded_researcher.py"
+    public_root = repository / "benchmarks" / "scientific-researcher-v1" / "public"
+    input_contract = public_root / "research-input.schema.json"
+    output_contract = public_root / "research-output.schema.json"
+    input_validator = Draft202012Validator(json.loads(input_contract.read_text(encoding="utf-8")))
+    output_validator = Draft202012Validator(json.loads(output_contract.read_text(encoding="utf-8")))
 
     observations: list[dict[str, Any]] = []
     for fixture_name, expected in EXPECTED_SOURCES.items():
@@ -182,8 +209,20 @@ def main() -> int:
             script="fixtures/broken_grounded_researcher.py",
             request=request,
         )
-        candidate_checks = _checks(request, candidate_run["parsed_output"], expected)
-        broken_checks = _checks(request, broken_run["parsed_output"], expected)
+        candidate_checks = _checks(
+            request,
+            candidate_run["parsed_output"],
+            expected,
+            input_validator,
+            output_validator,
+        )
+        broken_checks = _checks(
+            request,
+            broken_run["parsed_output"],
+            expected,
+            input_validator,
+            output_validator,
+        )
         observations.append(
             {
                 "fixture": fixture_name,
@@ -214,6 +253,10 @@ def main() -> int:
             "component_sha256": _sha256(candidate),
             "broken_control_file": str(broken),
             "broken_control_sha256": _sha256(broken),
+            "input_contract_file": str(input_contract),
+            "input_contract_sha256": _sha256(input_contract),
+            "output_contract_file": str(output_contract),
+            "output_contract_sha256": _sha256(output_contract),
             "image": args.image,
         },
         observations={
@@ -232,7 +275,7 @@ def main() -> int:
         },
         sources=["blackridge://components/grounded-researcher-v1"],
         warnings=[
-            "The probe covers two independent answerable domains and one unrelated corpus; "
+            "The probe covers three independent answerable domains and one unrelated corpus; "
             "it is not a universal relevance claim.",
             "A named review is required before evidence promotion.",
         ],

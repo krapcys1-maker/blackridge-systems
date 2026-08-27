@@ -13,74 +13,12 @@ from dataclasses import dataclass
 _TOKEN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)?")
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 _STOPWORDS = frozenset(
-    {
-        "a",
-        "after",
-        "an",
-        "and",
-        "are",
-        "as",
-        "at",
-        "be",
-        "been",
-        "before",
-        "being",
-        "by",
-        "can",
-        "could",
-        "did",
-        "do",
-        "does",
-        "for",
-        "from",
-        "had",
-        "has",
-        "have",
-        "how",
-        "if",
-        "in",
-        "into",
-        "is",
-        "it",
-        "its",
-        "may",
-        "might",
-        "must",
-        "no",
-        "not",
-        "of",
-        "on",
-        "or",
-        "our",
-        "should",
-        "than",
-        "that",
-        "the",
-        "their",
-        "then",
-        "there",
-        "these",
-        "they",
-        "this",
-        "those",
-        "through",
-        "to",
-        "under",
-        "was",
-        "we",
-        "were",
-        "what",
-        "when",
-        "where",
-        "which",
-        "who",
-        "why",
-        "will",
-        "with",
-        "would",
-        "you",
-        "your",
-    }
+    """
+    a across after all an and are as at be been before being by can could did do does
+    during every for from had has have how if in into is it its may might must no not of
+    on only or other our same should than that the their then there these they this those
+    through to under was we were what when where which who why will with would you your
+    """.split()  # noqa: SIM905 - compact, reviewable fixed vocabulary
 )
 
 
@@ -133,6 +71,40 @@ def _mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
+def _query_aligned_group(
+    documents: list[Document],
+    document_tokens: dict[str, list[str]],
+    direct: dict[str, float],
+    minimum_sources: int,
+) -> list[Document]:
+    """Choose a sufficiently large lexical community that the query actually reaches."""
+
+    token_sets = {identifier: set(tokens) for identifier, tokens in document_tokens.items()}
+    remaining = {document.document_id for document in documents}
+    groups: list[set[str]] = []
+    while remaining:
+        pending = [remaining.pop()]
+        group: set[str] = set()
+        while pending:
+            identifier = pending.pop()
+            if identifier in group:
+                continue
+            group.add(identifier)
+            neighbors = {other for other in remaining if token_sets[identifier] & token_sets[other]}
+            remaining.difference_update(neighbors)
+            pending.extend(neighbors)
+        groups.append(group)
+    eligible = [
+        group
+        for group in groups
+        if len(group) >= minimum_sources and any(direct[item] > 0 for item in group)
+    ]
+    if not eligible:
+        return []
+    chosen = max(eligible, key=lambda group: (sum(direct[item] for item in group), len(group)))
+    return [document for document in documents if document.document_id in chosen]
+
+
 def _rank_documents(
     question: str, documents: list[Document], minimum_sources: int
 ) -> tuple[list[Document], dict[str, float], list[str]]:
@@ -150,6 +122,10 @@ def _rank_documents(
         document.document_id: _tokens(f"{document.title} {document.full_text}")
         for document in documents
     }
+    aligned = _query_aligned_group(documents, document_tokens, direct, minimum_sources)
+    if not aligned:
+        return [], {}, []
+    aligned_ids = {document.document_id for document in aligned}
     seed_ids = {document.document_id for document in documents if direct[document.document_id] > 0}
     feedback_frequency: Counter[str] = Counter(
         token for identifier in seed_ids for token in set(document_tokens[identifier])
@@ -198,9 +174,9 @@ def _rank_documents(
             0.35 * direct[identifier] + 0.50 * feedback_coverage + 0.15 * centrality
         )
 
-    ranked = sorted(documents, key=lambda item: scores[item.document_id], reverse=True)
+    ranked = sorted(aligned, key=lambda item: scores[item.document_id], reverse=True)
     selected = ranked[:minimum_sources]
-    if not seed_ids or max(direct.values(), default=0.0) == 0:
+    if not seed_ids & aligned_ids or max(direct.values(), default=0.0) == 0:
         return [], scores, feedback_terms
     if _mean([scores[item.document_id] for item in selected]) <= 0:
         return [], scores, feedback_terms

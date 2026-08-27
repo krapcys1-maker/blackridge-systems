@@ -17,15 +17,16 @@ capabilities:
       - keywords: [offline, grounded, research, citations]
     acceptance:
       - id: independent-domains-and-negative-control
-        description: Answer two unrelated domains exactly and reject an unsupported third domain.
+        description: Answer three unrelated domains exactly and reject an unsupported fourth domain.
         given: >-
-          Frozen policy, backup, and astronomy fixtures containing relevant documents,
-          plausible distractors, keyword stuffing, and an unrelated corpus.
+          Frozen policy, backup, museum-loan, and astronomy fixtures containing relevant
+          documents, plausible distractors, keyword stuffing, and an unrelated corpus.
         when: >-
           The immutable component and a green-exit broken control run with identical stdin
           inside a pinned networkless read-only non-root container.
         then:
-          - The component exits zero and returns the exact expected source set for both answerable domains.
+          - The component exits zero and returns the exact expected source set for all three answerable domains.
+          - Every request and response satisfies the frozen public JSON Schema contracts.
           - Every emitted citation quote occurs verbatim in its identified input document.
           - The component returns insufficient-evidence with no claims or sources for the unrelated corpus.
           - The green-exit broken control is rejected by semantic checks despite exiting zero.
