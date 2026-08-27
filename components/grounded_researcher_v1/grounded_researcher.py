@@ -20,6 +20,10 @@ _STOPWORDS = frozenset(
     through to under was we were what when where which who why will with would you your
     """.split()  # noqa: SIM905 - compact, reviewable fixed vocabulary
 )
+_DISCLAIMERS = frozenset(
+    "contain no|contains no|does not contain|do not contain|must not be used|"  # noqa: SIM905
+    "not evidence for".split("|")
+)
 
 
 @dataclass(frozen=True)
@@ -76,33 +80,44 @@ def _query_aligned_group(
     document_tokens: dict[str, list[str]],
     direct: dict[str, float],
     minimum_sources: int,
-) -> list[Document]:
-    """Choose a sufficiently large lexical community that the query actually reaches."""
+) -> tuple[list[Document], set[str]]:
+    """Expand only from strong query seeds over corpus-discriminative lexical links."""
 
-    token_sets = {identifier: set(tokens) for identifier, tokens in document_tokens.items()}
-    remaining = {document.document_id for document in documents}
-    groups: list[set[str]] = []
-    while remaining:
-        pending = [remaining.pop()]
-        group: set[str] = set()
-        while pending:
-            identifier = pending.pop()
-            if identifier in group:
-                continue
-            group.add(identifier)
-            neighbors = {other for other in remaining if token_sets[identifier] & token_sets[other]}
-            remaining.difference_update(neighbors)
-            pending.extend(neighbors)
-        groups.append(group)
-    eligible = [
-        group
-        for group in groups
-        if len(group) >= minimum_sources and any(direct[item] > 0 for item in group)
-    ]
-    if not eligible:
-        return []
-    chosen = max(eligible, key=lambda group: (sum(direct[item] for item in group), len(group)))
-    return [document for document in documents if document.document_id in chosen]
+    active = {
+        document.document_id
+        for document in documents
+        if not (
+            direct[document.document_id] > 0
+            and any(marker in document.full_text.casefold() for marker in _DISCLAIMERS)
+        )
+    }
+    peak = max((direct[identifier] for identifier in active), default=0.0)
+    if peak <= 0:
+        return [], set()
+    strong = {identifier for identifier in active if direct[identifier] >= max(peak * 0.25, 1e-12)}
+    token_sets = {identifier: set(document_tokens[identifier]) for identifier in active}
+    frequencies: Counter[str] = Counter(token for tokens in token_sets.values() for token in tokens)
+    maximum_link_frequency = max(2, math.ceil(len(active) * 0.5))
+    link_tokens = {
+        token for token, frequency in frequencies.items() if frequency <= maximum_link_frequency
+    }
+    reachable = set(strong)
+    pending = list(strong)
+    while pending:
+        identifier = pending.pop()
+        neighbors = {
+            other
+            for other in active - reachable
+            if token_sets[identifier] & token_sets[other] & link_tokens
+        }
+        reachable.update(neighbors)
+        pending.extend(neighbors)
+    if len(reachable) < minimum_sources:
+        return [], strong
+    return (
+        [document for document in documents if document.document_id in reachable],
+        strong,
+    )
 
 
 def _rank_documents(
@@ -122,11 +137,15 @@ def _rank_documents(
         document.document_id: _tokens(f"{document.title} {document.full_text}")
         for document in documents
     }
-    aligned = _query_aligned_group(documents, document_tokens, direct, minimum_sources)
+    aligned, seed_ids = _query_aligned_group(
+        documents,
+        document_tokens,
+        direct,
+        minimum_sources,
+    )
     if not aligned:
         return [], {}, []
     aligned_ids = {document.document_id for document in aligned}
-    seed_ids = {document.document_id for document in documents if direct[document.document_id] > 0}
     feedback_frequency: Counter[str] = Counter(
         token for identifier in seed_ids for token in set(document_tokens[identifier])
     )
@@ -144,13 +163,13 @@ def _rank_documents(
     total_feedback_weight = sum(feedback_weight[token] for token in feedback_terms)
 
     scores: dict[str, float] = {}
-    neighbor_count = max(1, min(minimum_sources - 1, len(documents) - 1))
+    neighbor_count = max(1, min(minimum_sources - 1, len(aligned) - 1))
     for document in documents:
         identifier = document.document_id
         other_similarities = sorted(
             (
                 _cosine(vectors[identifier], vectors[other.document_id])
-                for other in documents
+                for other in aligned
                 if other.document_id != identifier
             ),
             reverse=True,
@@ -220,6 +239,7 @@ def synthesize(request: dict[str, object]) -> dict[str, object]:
         not isinstance(request_id, str)
         or not isinstance(question, str)
         or not isinstance(minimum_sources, int)
+        or isinstance(minimum_sources, bool)
         or minimum_sources < 1
         or not isinstance(raw_documents, list)
     ):
@@ -229,6 +249,7 @@ def synthesize(request: dict[str, object]) -> dict[str, object]:
         )
 
     documents: list[Document] = []
+    document_ids: set[str] = set()
     for item in raw_documents:
         if not isinstance(item, dict):
             continue
@@ -236,6 +257,11 @@ def synthesize(request: dict[str, object]) -> dict[str, object]:
         title = item.get("title")
         text = item.get("full_text")
         if isinstance(identifier, str) and isinstance(title, str) and isinstance(text, str):
+            if identifier in document_ids:
+                return _abstention(
+                    request_id, "The request contains duplicate document identities."
+                )
+            document_ids.add(identifier)
             documents.append(Document(identifier, title, text))
     if len(documents) < minimum_sources:
         return _abstention(

@@ -15,6 +15,7 @@ from uuid import uuid4
 
 from jsonschema import Draft202012Validator
 
+from blackridge.benchmark import ResearchRequest
 from blackridge.evidence import ProbeEvidence
 from blackridge.io import write_probe
 from blackridge.process_boundary import run_bounded
@@ -361,8 +362,15 @@ def _inspect(
         checks.append({"check": check, "matched": matched, "observed": observed})
 
     input_errors = sorted(error.message for error in input_validator.iter_errors(case.request))
-    expected_input_valid = not case.case_id.startswith("invalid-")
-    add("input-validity-classification", (not input_errors) == expected_input_valid, input_errors)
+    expected_schema_valid = case.case_id != "invalid-boolean-minimum"
+    add("public-input-schema", (not input_errors) == expected_schema_valid, input_errors)
+    try:
+        ResearchRequest.model_validate(case.request)
+        typed_input_valid = True
+    except ValueError:
+        typed_input_valid = False
+    expected_typed_valid = not case.case_id.startswith("invalid-")
+    add("typed-input-contract", typed_input_valid == expected_typed_valid, typed_input_valid)
     add("process-exit", execution["exit_code"] == 0, execution["exit_code"])
     add("no-timeout", execution["timed_out"] is False, execution["timed_out"])
     add(
