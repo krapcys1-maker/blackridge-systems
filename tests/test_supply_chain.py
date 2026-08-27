@@ -18,6 +18,7 @@ from blackridge.supply_chain import (
     PYPI_ATTESTATIONS_VERSION,
     SupplyChainExperiment,
     SupplyChainProbe,
+    _dependency_input_summary,
     _http_observation,
     _inspect_checkout,
     _inventory_sha256,
@@ -25,6 +26,7 @@ from blackridge.supply_chain import (
     _license_summary,
     _object_list,
     _optional_object,
+    _packaging_metadata,
     _pypi_attestation_verifier,
     _run,
     _vulnerability_summary,
@@ -98,6 +100,46 @@ def test_sbom_unknown_licenses_remain_explicit() -> None:
     assert summary["all_license_fields_unknown"] is False
 
 
+def test_packaging_metadata_statically_reads_legacy_setup_without_execution(tmp_path) -> None:
+    (tmp_path / "setup.py").write_text(
+        "from pathlib import Path\n"
+        "Path('executed').write_text('unsafe')\n"
+        "setup(name='fixture', version='1.0', license='MIT', "
+        "install_requires=['httpx', 'tenacity'])\n",
+        encoding="utf-8",
+    )
+
+    metadata, source = _packaging_metadata(tmp_path)
+
+    assert source == "setup.py (static AST)"
+    assert metadata == {
+        "name": "fixture",
+        "version": "1.0",
+        "license": "MIT",
+        "dependencies": ["httpx", "tenacity"],
+    }
+    assert not (tmp_path / "executed").exists()
+
+
+def test_dependency_input_summary_distinguishes_manifest_from_exact_lock(tmp_path) -> None:
+    (tmp_path / "setup.py").write_text("setup()\n", encoding="utf-8")
+    (tmp_path / "requirements.txt").write_text("httpx\n", encoding="utf-8")
+
+    unlocked = _dependency_input_summary(tmp_path)
+    (tmp_path / "requirements.lock").write_text(
+        "httpx==0.28.1 --hash=sha256:fixture\n", encoding="utf-8"
+    )
+    locked = _dependency_input_summary(tmp_path)
+
+    assert unlocked == {
+        "manifest_files": ["requirements.txt", "setup.py"],
+        "lockfiles": [],
+        "exact_lock_present": False,
+    }
+    assert locked["lockfiles"] == ["requirements.lock"]
+    assert locked["exact_lock_present"] is True
+
+
 def test_sbom_inventory_hash_ignores_volatile_metadata_and_collection_order() -> None:
     first = {
         "creationInfo": {"created": "2026-08-27T10:00:00Z"},
@@ -114,6 +156,15 @@ def test_sbom_inventory_hash_ignores_volatile_metadata_and_collection_order() ->
 
     assert _inventory_sha256(first, ("packages", "relationships")) == _inventory_sha256(
         second, ("packages", "relationships")
+    )
+
+
+def test_sbom_inventory_hash_accepts_omitted_empty_edge_collection() -> None:
+    without_edges = {"components": [{"name": "fixture"}]}
+    with_edges = {"components": [{"name": "fixture"}], "dependencies": []}
+
+    assert _inventory_sha256(without_edges, ("components", "dependencies")) == _inventory_sha256(
+        with_edges, ("components", "dependencies")
     )
 
 

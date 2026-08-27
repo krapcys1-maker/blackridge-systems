@@ -1,0 +1,12 @@
+schema_version: "1"
+name: semanticscholar-0-12-0-supply-chain
+description: >-
+  Inspect the exact semanticscholar release commit with separate repository/license,
+  dependency-license, Scorecard, SBOM, OSV, and provenance observations.
+repository: danielnsilva/semanticscholar
+commit: 3189ecb80bd985b6cd9b4a56fb410b05515f0f15
+package_system: pypi
+package_name: semanticscholar
+package_version: 0.12.0
+syft_image: anchore/syft@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0
+osv_scanner_image: ghcr.io/google/osv-scanner@sha256:8108ae94eadea5a02c9bec6e646909d5b790b44bd62d7f5b7f0b1d6d0ffc7734

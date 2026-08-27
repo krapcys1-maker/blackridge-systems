@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ast
+import configparser
 import hashlib
 import importlib.metadata
 import json
@@ -29,6 +31,7 @@ PYPI_INTEGRITY_DOCS = "https://docs.pypi.org/api/integrity/"
 SYFT_SOURCE = "https://github.com/anchore/syft/tree/v1.51.0"
 OSV_SCANNER_SOURCE = "https://github.com/google/osv-scanner/tree/v2.5.1"
 PYPI_ATTESTATIONS_VERSION = "0.0.30"
+EXACT_LOCK_FILENAMES = ("Pipfile.lock", "pdm.lock", "poetry.lock", "requirements.lock", "uv.lock")
 
 
 class SupplyChainExperiment(BaseModel):
@@ -77,7 +80,12 @@ def _inventory_sha256(document: dict[str, object], sections: tuple[str, ...]) ->
     """Hash the stable package graph while excluding generator timestamps and UUIDs."""
 
     inventory = {
-        section: _object_list(document.get(section), f"SBOM {section}") for section in sections
+        section: _object_list(
+            document.get(section),
+            f"SBOM {section}",
+            required=section in {"packages", "components"},
+        )
+        for section in sections
     }
     return hashlib.sha256(_canonical_json(inventory).encode()).hexdigest()
 
@@ -96,6 +104,81 @@ def _optional_object(value: object, context: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise BlackridgeError(f"{context} must be a JSON object")
     return value
+
+
+def _packaging_metadata(source_dir: Path) -> tuple[dict[str, Any], str | None]:
+    """Read packaging metadata without importing or executing untrusted project code."""
+
+    pyproject_path = source_dir / "pyproject.toml"
+    if pyproject_path.is_file():
+        try:
+            pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+        except (OSError, tomllib.TOMLDecodeError) as exc:
+            raise BlackridgeError(f"cannot parse pyproject.toml: {exc}") from exc
+        project = pyproject.get("project")
+        return (project if isinstance(project, dict) else {}), "pyproject.toml"
+
+    setup_cfg_path = source_dir / "setup.cfg"
+    if setup_cfg_path.is_file():
+        parser = configparser.ConfigParser(interpolation=None)
+        try:
+            parser.read(setup_cfg_path, encoding="utf-8")
+        except (OSError, configparser.Error) as exc:
+            raise BlackridgeError(f"cannot parse setup.cfg: {exc}") from exc
+        metadata: dict[str, Any] = {}
+        if parser.has_option("metadata", "license"):
+            metadata["license"] = parser.get("metadata", "license")
+        if parser.has_option("options", "install_requires"):
+            metadata["dependencies"] = [
+                value.strip()
+                for value in parser.get("options", "install_requires").splitlines()
+                if value.strip()
+            ]
+        return metadata, "setup.cfg"
+
+    setup_py_path = source_dir / "setup.py"
+    if setup_py_path.is_file():
+        try:
+            tree = ast.parse(setup_py_path.read_text(encoding="utf-8"), filename="setup.py")
+        except (OSError, SyntaxError) as exc:
+            raise BlackridgeError(f"cannot statically parse setup.py: {exc}") from exc
+        calls = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and (
+                (isinstance(node.func, ast.Name) and node.func.id == "setup")
+                or (isinstance(node.func, ast.Attribute) and node.func.attr == "setup")
+            )
+        ]
+        metadata = {}
+        if calls:
+            for keyword in calls[0].keywords:
+                target = "dependencies" if keyword.arg == "install_requires" else keyword.arg
+                if target not in {"name", "version", "license", "dependencies"}:
+                    continue
+                try:
+                    metadata[target] = ast.literal_eval(keyword.value)
+                except (TypeError, ValueError):
+                    continue
+        return metadata, "setup.py (static AST)"
+
+    return {}, None
+
+
+def _dependency_input_summary(source_dir: Path) -> dict[str, object]:
+    manifests = {
+        name
+        for name in ("Pipfile", "pyproject.toml", "setup.cfg", "setup.py")
+        if (source_dir / name).is_file()
+    }
+    manifests.update(path.name for path in source_dir.glob("requirements*.txt") if path.is_file())
+    lockfiles = [name for name in EXACT_LOCK_FILENAMES if (source_dir / name).is_file()]
+    return {
+        "manifest_files": sorted(manifests),
+        "lockfiles": lockfiles,
+        "exact_lock_present": bool(lockfiles),
+    }
 
 
 def _run(
@@ -534,11 +617,8 @@ class SupplyChainProbe:
                 }
             )
 
-        pyproject_path = source_dir / "pyproject.toml"
-        pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
-        project_metadata = pyproject.get("project")
-        if not isinstance(project_metadata, dict):
-            project_metadata = {}
+        project_metadata, packaging_metadata_source = _packaging_metadata(source_dir)
+        dependency_inputs = _dependency_input_summary(source_dir)
         repo_license_path = repo_license.get("path")
         if not isinstance(repo_license_path, str) or not repo_license_path:
             raise BlackridgeError("GitHub license response does not identify a repository path")
@@ -592,6 +672,18 @@ class SupplyChainProbe:
         if nonstandard_dependencies:
             warnings.append(
                 "Direct dependency licenses include unknown, non-standard, or GPL-family results."
+            )
+        if not dependency_inputs["exact_lock_present"]:
+            warnings.append(
+                "No recognized exact dependency lockfile is present; resolved-version evidence "
+                "is not a reproducible runtime closure."
+            )
+        cdx_dependencies = _object_list(
+            cdx.get("dependencies"), "CycloneDX dependencies", required=False
+        )
+        if not cdx_dependencies:
+            warnings.append(
+                "The CycloneDX SBOM contains no dependency edges; reachability remains unknown."
             )
         if not pypi_metadata_available:
             warnings.append("PyPI release metadata is unavailable; provenance remains unknown.")
@@ -655,6 +747,8 @@ class SupplyChainProbe:
                     "html_url": repo_license.get("html_url"),
                     "local_sha256": _sha256(local_license_path),
                     "pyproject_license": project_metadata.get("license"),
+                    "packaging_metadata_license": project_metadata.get("license"),
+                    "packaging_metadata_source": packaging_metadata_source,
                     "github_command": license_command,
                 },
                 "dependency_licenses": {
@@ -662,6 +756,7 @@ class SupplyChainProbe:
                     "packages": dependency_licenses,
                     "concern_count": len(nonstandard_dependencies),
                     "concerns": nonstandard_dependencies,
+                    "dependency_inputs": dependency_inputs,
                     "sbom_license_coverage": license_summary,
                 },
                 "security_posture": {
@@ -686,7 +781,11 @@ class SupplyChainProbe:
                         "size": spdx_path.stat().st_size,
                         "package_count": len(_object_list(spdx.get("packages"), "SPDX packages")),
                         "relationship_count": len(
-                            _object_list(spdx.get("relationships"), "SPDX relationships")
+                            _object_list(
+                                spdx.get("relationships"),
+                                "SPDX relationships",
+                                required=False,
+                            )
                         ),
                         "document_name": spdx.get("name"),
                     },
@@ -698,9 +797,7 @@ class SupplyChainProbe:
                         "component_count": len(
                             _object_list(cdx.get("components"), "CycloneDX components")
                         ),
-                        "dependency_count": len(
-                            _object_list(cdx.get("dependencies"), "CycloneDX dependencies")
-                        ),
+                        "dependency_count": len(cdx_dependencies),
                     },
                 },
                 "vulnerability_artifact": {
