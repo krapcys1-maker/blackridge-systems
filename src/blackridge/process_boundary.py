@@ -140,7 +140,11 @@ def run_bounded(
         raise ValueError("maximum_output_bytes_per_stream must be positive")
 
     command = [str(value) for value in argv]
-    creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
+    creationflags = (
+        int(getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
+        if os.name == "nt"
+        else 0
+    )
     started = perf_counter()
     process = subprocess.Popen(
         command,
