@@ -118,27 +118,31 @@ def audit(payload: dict[str, Any], engine: MultiVerSInference) -> dict[str, Any]
         or request["claim"] != retrieval["claim"]
     ):
         raise ValueError("request identity does not match retrieval identity")
-    candidates = retrieval["candidates"][:3]
-    sources = [
-        {"document_id": candidate["document_id"], "title": candidate["title"]}
-        for candidate in candidates
-    ]
+    candidates = retrieval["candidates"][:6]
+    sources = []
     documents = []
-    for candidate in candidates:
-        prediction = engine.predict(request["claim"], candidate)
-        if prediction["label"] == "neutral" or not prediction["rationales"]:
-            continue
-        documents.append(
-            {
-                "document_id": candidate["document_id"],
-                "title": candidate["title"],
-                "verdict": prediction["label"],
-                "rationales": [
-                    {"sentence_index": index, "quote": candidate["abstract"][index]}
-                    for index in prediction["rationales"]
-                ],
-            }
+    for position, candidate in enumerate(candidates, start=1):
+        sources.append(
+            {"document_id": candidate["document_id"], "title": candidate["title"]}
         )
+        prediction = engine.predict(request["claim"], candidate)
+        if prediction["label"] != "neutral" and prediction["rationales"]:
+            documents.append(
+                {
+                    "document_id": candidate["document_id"],
+                    "title": candidate["title"],
+                    "verdict": prediction["label"],
+                    "rationales": [
+                        {"sentence_index": index, "quote": candidate["abstract"][index]}
+                        for index in prediction["rationales"]
+                    ],
+                }
+            )
+        if (
+            position >= 3
+            and len(documents) >= request["minimum_evidence_documents"]
+        ):
+            break
     if len(documents) < request["minimum_evidence_documents"]:
         documents = []
     verdicts = {document["verdict"] for document in documents}

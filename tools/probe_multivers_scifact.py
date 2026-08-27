@@ -35,19 +35,28 @@ def _jsonl(path: Path) -> list[dict[str, Any]]:
 
 def _cases(args: argparse.Namespace) -> list[dict[str, Any]]:
     if args.cases is not None:
-        return _jsonl(args.cases)
-    preparer = _load_module("multivers_scifact_preparer", args.preparer)
-    corpus = {document["doc_id"]: document for document in _jsonl(args.corpus)}
-    excluded = {
-        case["upstream_claim_id"] for case in _jsonl(args.exclude_cases)
-    } if args.exclude_cases is not None else set()
-    cases = []
-    for claim in _jsonl(args.development):
-        if claim["id"] in excluded:
-            continue
-        normalized = dict(claim)
-        normalized["cited_doc_ids"] = list(dict.fromkeys(claim["cited_doc_ids"]))
-        cases.append(preparer._make_case(normalized, corpus))
+        cases = _jsonl(args.cases)
+    else:
+        preparer = _load_module("multivers_scifact_preparer", args.preparer)
+        corpus = {document["doc_id"]: document for document in _jsonl(args.corpus)}
+        excluded = (
+            {case["upstream_claim_id"] for case in _jsonl(args.exclude_cases)}
+            if args.exclude_cases is not None
+            else set()
+        )
+        cases = []
+        for claim in _jsonl(args.development):
+            if claim["id"] in excluded:
+                continue
+            normalized = dict(claim)
+            normalized["cited_doc_ids"] = list(dict.fromkeys(claim["cited_doc_ids"]))
+            cases.append(preparer._make_case(normalized, corpus))
+    if args.include_claim_ids is not None:
+        included = set(json.loads(args.include_claim_ids.read_text(encoding="utf-8")))
+        cases = [case for case in cases if case["upstream_claim_id"] in included]
+        observed = {case["upstream_claim_id"] for case in cases}
+        if observed != included:
+            raise ValueError(f"requested claim IDs are absent: {sorted(included - observed)}")
     return cases
 
 
@@ -157,29 +166,36 @@ def _audit_case(
     engine: MultiVerSInference,
     request: dict[str, Any],
     candidates: dict[str, Any],
+    candidate_policy: str,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     traces = []
     documents = []
-    for candidate in candidates["candidates"][:3]:
+    considered = []
+    limit = {"top3": 3, "cascade5": 5, "cascade6": 6, "cascade10": 10}[
+        candidate_policy
+    ]
+    for position, candidate in enumerate(candidates["candidates"][:limit], start=1):
+        considered.append(candidate)
         started = time.perf_counter()
         prediction = engine.predict(request["claim"], candidate)
         prediction["document_id"] = candidate["document_id"]
         prediction["duration_seconds"] = round(time.perf_counter() - started, 3)
         traces.append(prediction)
-        if prediction["label"] == "NEI" or not prediction["rationales"]:
-            continue
-        verdict = "support" if prediction["label"] == "SUPPORT" else "contradict"
-        documents.append(
-            {
-                "document_id": candidate["document_id"],
-                "title": candidate["title"],
-                "verdict": verdict,
-                "rationales": [
-                    {"sentence_index": index, "quote": candidate["abstract"][index]}
-                    for index in prediction["rationales"]
-                ],
-            }
-        )
+        if prediction["label"] != "NEI" and prediction["rationales"]:
+            verdict = "support" if prediction["label"] == "SUPPORT" else "contradict"
+            documents.append(
+                {
+                    "document_id": candidate["document_id"],
+                    "title": candidate["title"],
+                    "verdict": verdict,
+                    "rationales": [
+                        {"sentence_index": index, "quote": candidate["abstract"][index]}
+                        for index in prediction["rationales"]
+                    ],
+                }
+            )
+        if candidate_policy != "top3" and position >= 3 and documents:
+            break
     labels = {document["verdict"] for document in documents}
     if labels == {"support", "contradict"}:
         status = "mixed"
@@ -191,7 +207,7 @@ def _audit_case(
         status = "insufficient-evidence"
     sources = [
         {"document_id": item["document_id"], "title": item["title"]}
-        for item in candidates["candidates"][:3]
+        for item in considered
     ]
     audit = {
         "schema_version": "1",
@@ -214,7 +230,9 @@ def probe(args: argparse.Namespace) -> dict[str, Any]:
     cases = _cases(args)
     for position, case in enumerate(cases, start=1):
         candidates = index.retrieve(case["request"])
-        audit, traces = _audit_case(engine, case["request"], candidates)
+        audit, traces = _audit_case(
+            engine, case["request"], candidates, args.candidate_policy
+        )
         expected = case["expected_audit"]
         expected_documents = sorted(
             (item["document_id"], item["verdict"])
@@ -262,6 +280,7 @@ def probe(args: argparse.Namespace) -> dict[str, Any]:
             print(f"completed {position}/{len(cases)} cases", file=sys.stderr, flush=True)
     return {
         "schema_version": "1",
+        "candidate_policy": args.candidate_policy,
         "model_load_seconds": model_load_seconds,
         "summary": {
             "cases": len(observations),
@@ -285,6 +304,12 @@ def main() -> None:
     source.add_argument("--cases", type=Path)
     source.add_argument("--development", type=Path)
     parser.add_argument("--exclude-cases", type=Path)
+    parser.add_argument("--include-claim-ids", type=Path)
+    parser.add_argument(
+        "--candidate-policy",
+        choices=("top3", "cascade5", "cascade6", "cascade10"),
+        default="top3",
+    )
     parser.add_argument(
         "--preparer",
         type=Path,

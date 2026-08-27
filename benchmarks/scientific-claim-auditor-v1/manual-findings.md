@@ -48,6 +48,21 @@ recall@10 `0.927778`, and MRR@10 `0.77125` over 180 evidence-bearing development
 SHA-256 is `006ac4e2543dad437a5adc63291e6329c54f43e00a8870bff339f189a4114607`.
 Adding titles to the indexed text was tested and rejected because recall@3 fell to `0.811111`.
 
+A bounded cascade was then evaluated: inspect three candidates normally and extend one at a time to
+rank 6 only when the required evidence count is still unmet. On the 32 original status failures it
+recovered 11 statuses, including eight exact document/rationale sets; three further status matches
+had a wrong or incomplete document set. On all 105 previously correct holdout NEI cases it produced
+zero new evidence documents. The hard-case and NEI report SHA-256 values are respectively
+`c1b38eaa727bd62921bbcd7953e51e0b5faea2993e59f4ab1560eaba85c59787` and
+`93d7590467fc78f588edaa8fd11084c53a57a2a20d4b32cd80fd2bc869a0bc09`.
+
+Replaying those exact traces into the official 300-case evaluator increased abstract label F1 from
+`0.8385417` to `0.8607595` and sentence label/selection F1 from `0.8391813` to `0.8514286`.
+Abstract precision changed from `0.92` to `0.9139785`, while recall increased from `0.7703349` to
+`0.8133971`. The official metric report SHA-256 is
+`bb571e2363c2e83e8203e165b6f1a257e71070bec8c5b6e8f4a3bee539fca9f1`. The bounded cascade was
+adopted; the rank-10 variant was not.
+
 ## Generated-system observations
 
 Host runs were inspected for one support (`dev-3`), one contradiction (`dev-42`), and one
@@ -71,6 +86,19 @@ the locked image without an external override and returned the exact `dev-42` co
 thirteen hostile-control checks passed, copied artifacts matched before and after execution, and
 the container was confirmed absent after cleanup. Evidence SHA-256:
 `f9d624969ed4d19a44cd2f6bfc8a67aa5371729c22d4fdf73cecdec00e660f00`.
+
+After adopting the rank-6 cascade and the stricter status/document contract, final bundle `v5` was
+generated with external provenance root
+`381c76ef8ef7940dc8af30c3d3c7bfa90665ef9f1286b155056a2a58a3ede194`. A host run recovered
+`dev-636` at rank 4 as document `24294572`, support, rationale sentence 4; a separate `dev-1` run
+remained insufficient-evidence after six candidates. The corresponding evidence SHA-256 values are
+`51b4ebc19266b7510ed2da1d6470c436d668f303408225ff229c1436564b871b` and
+`4db9e8b79f63cc542b99a89a028d5e963f126e57d7d534de7dd9c7b621f7c168`.
+
+The same recovered `dev-636` case passed the full locked-image sandbox: every hostile-control check
+passed, the output remained document `24294572` / sentence 4, and the container was absent after
+cleanup. Evidence SHA-256:
+`489c8abdb3fbe6ee47d21ec91b8f4c5ba3bec9aea3e5f7f9d97b5b5490f0f6c6`.
 
 ## What this does not prove
 
