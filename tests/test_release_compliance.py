@@ -239,3 +239,11 @@ def test_ci_enforces_format_components_and_seventy_percent_coverage() -> None:
     assert "ruff format --check src tests tools components" in workflow
     assert "python -m compileall -q src tests tools components" in workflow
     assert "--cov-fail-under=70" in workflow
+
+
+def test_distribution_license_files_use_checkout_independent_line_endings() -> None:
+    attributes = Path(".gitattributes").read_text(encoding="utf-8").splitlines()
+
+    assert "LICENSE text eol=lf" in attributes
+    assert "NOTICE text eol=lf" in attributes
+    assert "THIRD_PARTY_NOTICES.md text eol=lf" in attributes
