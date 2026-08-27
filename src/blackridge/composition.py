@@ -61,6 +61,7 @@ class ComponentResource(StrictModel):
     license_spdx: str = Field(min_length=2)
     artifact_file: str = Field(min_length=1)
     artifact_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    copy_timeout_seconds: int = Field(default=300, ge=5, le=1800)
 
 
 class ComponentLaunch(StrictModel):
@@ -139,6 +140,15 @@ class SandboxResources(StrictModel):
     pids: int = Field(default=256, ge=32, le=4096)
 
 
+class SandboxImage(StrictModel):
+    """Immutable dependency image identity carried by a generated system."""
+
+    reference: str = Field(
+        pattern=r"^(?:sha256:[a-f0-9]{64}|[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64})$"
+    )
+    expected_id: str = Field(pattern=r"^sha256:[a-f0-9]{64}$")
+
+
 class CompositionDefinition(StrictModel):
     """A frozen contract-graph composition problem and all permitted choices."""
 
@@ -154,6 +164,7 @@ class CompositionDefinition(StrictModel):
     minimum_evidence_level: EvidenceLevel = EvidenceLevel.CONTRACT_TESTED
     max_combinations: int = Field(default=10_000, ge=1, le=100_000)
     sandbox_resources: SandboxResources = Field(default_factory=SandboxResources)
+    sandbox_image: SandboxImage | None = None
     contracts: list[ContractDefinition] = Field(min_length=2)
     components: list[ComponentOption] = Field(min_length=1)
     adapters: list[AdapterOption] = Field(default_factory=list)
@@ -916,6 +927,7 @@ def generate_system(
                             "license_spdx": resource.license_spdx,
                             "artifact_file": component_resources[resource.resource_id][1],
                             "artifact_sha256": resource.artifact_sha256,
+                            "copy_timeout_seconds": resource.copy_timeout_seconds,
                         }
                         for resource in component.launch.resources
                     ],
@@ -929,6 +941,9 @@ def generate_system(
             "system_name": definition.name,
             "mode": definition.mode,
             "sandbox_resources": _primitive(definition.sandbox_resources),
+            "sandbox_image": (
+                _primitive(definition.sandbox_image) if definition.sandbox_image else None
+            ),
             "external_input": definition.external_input,
             "required_output": definition.required_output,
             "contract_files": contract_files,
@@ -1204,6 +1219,8 @@ def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None
         raise BlackridgeError(
             "generated runtime disagrees with its definition: sandbox_resources"
         )
+    if runtime.get("sandbox_image") != definition.get("sandbox_image"):
+        raise BlackridgeError("generated runtime disagrees with its definition: sandbox_image")
     if runtime.get("system_name") != plan_value.get("system_name") or runtime.get(
         "mode"
     ) != plan_value.get("mode"):
@@ -1323,6 +1340,7 @@ def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None
                 "revision",
                 "license_spdx",
                 "artifact_sha256",
+                "copy_timeout_seconds",
             }
             locked_resource_controls = [
                 {field: resource.get(field) for field in resource_fields}
@@ -1919,7 +1937,7 @@ def run_generated_system_sandboxed(
     input_artifact: object,
     *,
     expected_provenance_sha256: str,
-    image_ref: str = "blackridge/swerex-runtime:1.4.0",
+    image_ref: str | None = None,
 ) -> ProbeEvidence:
     """Run a calibration bundle with copied components and a networkless Docker workload."""
 
@@ -1953,6 +1971,18 @@ def run_generated_system_sandboxed(
         sandbox_resources = SandboxResources.model_validate(runtime.get("sandbox_resources"))
     except ValueError as exc:
         raise BlackridgeError("generated sandbox resource control is invalid") from exc
+    locked_image_value = runtime.get("sandbox_image")
+    locked_image: SandboxImage | None = None
+    if locked_image_value is not None:
+        try:
+            locked_image = SandboxImage.model_validate(locked_image_value)
+        except ValueError as exc:
+            raise BlackridgeError("generated sandbox image control is invalid") from exc
+        if image_ref is not None and image_ref != locked_image.reference:
+            raise BlackridgeError("requested sandbox image disagrees with the generated image lock")
+        effective_image_ref = locked_image.reference
+    else:
+        effective_image_ref = image_ref or "blackridge/swerex-runtime:1.4.0"
     memory_flag = f"{sandbox_resources.memory_mb}m"
     cpu_flag = f"{sandbox_resources.cpus:g}"
     expected_memory_bytes = str(sandbox_resources.memory_mb * 1024 * 1024)
@@ -1987,7 +2017,9 @@ def run_generated_system_sandboxed(
 
     adapter = SwerexDockerProbe()
     DockerDeployment, Command = adapter._runtime_types()
-    image = inspect_local_image(image_ref)
+    image = inspect_local_image(effective_image_ref)
+    if locked_image is not None and image["resolved_id"] != locked_image.expected_id:
+        raise BlackridgeError("resolved sandbox image ID disagrees with the generated image lock")
     deployment = DockerDeployment(
         image=image["resolved_id"],
         pull="never",
@@ -2135,10 +2167,14 @@ def run_generated_system_sandboxed(
                 resource_id = resource.get("resource_id")
                 resource_file = resource.get("artifact_file")
                 resource_hash = resource.get("artifact_sha256")
+                resource_copy_timeout = resource.get("copy_timeout_seconds")
                 if (
                     not isinstance(resource_id, str)
                     or not isinstance(resource_file, str)
                     or not isinstance(resource_hash, str)
+                    or not isinstance(resource_copy_timeout, int)
+                    or isinstance(resource_copy_timeout, bool)
+                    or not 5 <= resource_copy_timeout <= 1800
                 ):
                     raise BlackridgeError(f"component resource is invalid: {subject_id}")
                 resource_source = Path(resource_file).resolve()
@@ -2152,7 +2188,10 @@ def run_generated_system_sandboxed(
                     str(resource_source),
                     f"{container_name}:{resource_target}",
                 ]
-                resource_copy = run_bounded(resource_copy_argv, timeout_seconds=30)
+                resource_copy = run_bounded(
+                    resource_copy_argv,
+                    timeout_seconds=float(resource_copy_timeout),
+                )
                 resource_record: dict[str, object] = {
                     "subject_id": subject_id,
                     "resource_id": resource_id,
@@ -2161,6 +2200,7 @@ def run_generated_system_sandboxed(
                     "stderr": resource_copy.stderr,
                     "target": resource_target,
                     "expected_sha256": resource_hash,
+                    "timeout_seconds": resource_copy_timeout,
                 }
                 copied.append(resource_record)
                 if resource_copy.returncode != 0:
@@ -2347,7 +2387,7 @@ def run_generated_system_sandboxed(
     observations = dict(runtime_probe.observations)
     observations["sandbox"] = sandbox_observation
     request = dict(runtime_probe.request)
-    request["image_ref"] = image_ref
+    request["image_ref"] = effective_image_ref
     request["resolved_image_id"] = image["resolved_id"]
     sources = list(runtime_probe.sources)
     if SWEREX_SOURCE not in sources:

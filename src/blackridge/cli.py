@@ -732,7 +732,7 @@ def compose_run_sandbox(
     bundle_directory: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
     input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     provenance_sha256: Annotated[str, typer.Option("--provenance-sha256")],
-    image: Annotated[str, typer.Option("--image")] = "blackridge/swerex-runtime:1.4.0",
+    image: Annotated[str | None, typer.Option("--image")] = None,
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/composition-sandbox-output.json"
     ),

@@ -331,6 +331,11 @@ def test_bundled_resource_runs_without_source_tree_and_tampering_is_blocked(
         definition_file=definition_file,
         output_directory=bundle,
     )
+    runtime = yaml.safe_load((bundle / "runtime.yaml").read_text(encoding="utf-8"))
+    resource_step = next(
+        step for step in runtime["steps"] if step["subject_id"] == "fixture-resource-calculator"
+    )
+    assert resource_step["launch"]["resources"][0]["copy_timeout_seconds"] == 300
     shutil.rmtree(examples)
 
     probe = run_generated_system(
@@ -485,6 +490,10 @@ def test_generated_runtime_locks_explicit_sandbox_resources(tmp_path: Path) -> N
         "cpus": 3.5,
         "pids": 512,
     }
+    definition_value["sandbox_image"] = {
+        "reference": "example.invalid/runtime@sha256:" + "a" * 64,
+        "expected_id": "sha256:" + "b" * 64,
+    }
     definition_file.write_text(
         yaml.safe_dump(definition_value, sort_keys=False), encoding="utf-8"
     )
@@ -505,6 +514,19 @@ def test_generated_runtime_locks_explicit_sandbox_resources(tmp_path: Path) -> N
         "cpus": 3.5,
         "pids": 512,
     }
+    assert runtime["sandbox_image"] == {
+        "reference": "example.invalid/runtime@sha256:" + "a" * 64,
+        "expected_id": "sha256:" + "b" * 64,
+    }
+    with pytest.raises(BlackridgeError, match="disagrees with the generated image lock"):
+        run_generated_system_sandboxed(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=sha256(
+                (bundle / "provenance.json").read_bytes()
+            ).hexdigest(),
+            image_ref="sha256:" + "c" * 64,
+        )
 
 
 def test_runtime_rejects_resigned_adapter_operations_that_disagree_with_lock(

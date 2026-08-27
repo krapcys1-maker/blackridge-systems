@@ -241,9 +241,17 @@ runtime, provenance hashes, an SBOM gate, and an explicit `release_ready: false`
 Definitions may set bounded `sandbox_resources` (`memory_mb`, `cpus`, and `pids`). The selected
 values are copied into `runtime.yaml`, covered by provenance, applied to Docker, and checked against
 the live cgroup before any component executes. Defaults remain 1024 MiB, 2 CPUs, and 256 processes.
+Definitions may also lock a `sandbox_image` with an immutable image reference and expected local
+image ID. When present, the sandbox rejects a caller-supplied alternative or a resolved ID mismatch
+before creating a container.
 Host execution is calibration-only. A component-specific dependency image and its distribution
 evidence are still separate release surfaces; generated code and data do not imply that an
 arbitrary host Python already contains the component's dependencies.
+
+Large bundled resources also carry an explicit `copy_timeout_seconds` control (300 seconds by
+default, configurable from 5 to 1800). The value is copied into both the component lock and
+`runtime.yaml`; the sandbox rejects an invalid or relocked value instead of relying on a hidden
+global transfer timeout.
 
 The SHA-256 printed by `compose-generate` is an external trust root. Saved bundles cannot execute
 by merely rewriting `runtime.yaml` and updating the hashes inside their own `provenance.json`;

@@ -94,3 +94,10 @@ For sandbox runs, compare the declared `sandbox_resources` in the frozen definit
 and the process must run as the declared non-root user with no effective capabilities. A larger
 limit is not evidence of success; it only makes the resource boundary honest for workloads that
 cannot execute under the default 1024 MiB ceiling.
+
+If the definition declares `sandbox_image`, verify both the immutable reference and expected image
+ID against the resolved Docker metadata. Supplying another image must fail before container start.
+
+For each large model or dataset, also compare its declared `copy_timeout_seconds` with the value
+recorded in `runtime.yaml` and the retained `docker cp` observation. A transfer timeout is a failed
+sandbox preparation, not a model-quality failure.
