@@ -96,8 +96,9 @@ def _run(
     if completed.output_limit_exceeded:
         raise BlackridgeError(f"command exceeded the output limit: {argv[0]}")
     if completed.returncode not in accepted:
+        detail = completed.stderr.strip() or completed.stdout.strip() or "no output"
         raise BlackridgeError(
-            f"command failed with exit {completed.returncode}: {argv[0]} {completed.stderr.strip()}"
+            f"command failed with exit {completed.returncode}: {argv[0]} {detail[:1000]}"
         )
     return observation
 
