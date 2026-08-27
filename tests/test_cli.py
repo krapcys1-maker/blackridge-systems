@@ -176,8 +176,11 @@ def test_report_and_blueprint_handle_a_capability_without_candidates(tmp_path) -
 
     assert report_result.exit_code == 0
     assert "fixture-system" in report_result.stdout
+    assert "fixture-system - Build a deterministic" in report_result.stdout
     assert "first-capability" in report_result.stdout
     assert "no candidates" in report_result.stdout
+    assert "\ufffd" not in report_result.stdout
+    assert "—" not in report_result.stdout
     assert blueprint_result.exit_code == 0
     blueprint = yaml.safe_load(blueprint_file.read_text(encoding="utf-8"))
     assert [item["status"] for item in blueprint["components"]] == [

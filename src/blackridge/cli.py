@@ -172,14 +172,14 @@ def report(
         console.print(f"[red]Cannot read discovery run:[/red] {exc}")
         raise typer.Exit(code=2) from exc
 
-    console.print(f"[bold]{run.request.name}[/bold] — {run.request.goal}")
+    console.print(f"[bold]{run.request.name}[/bold] - {run.request.goal}")
     for result in run.results:
         table = Table(title=f"Capability: {result.capability.id}")
-        table.add_column("Repository")
+        table.add_column("Repository", overflow="fold")
         table.add_column("Score", justify="right")
         table.add_column("License")
         table.add_column("Evidence")
-        table.add_column("Decision")
+        table.add_column("Decision", overflow="fold")
         for candidate in result.candidates[:top]:
             table.add_row(
                 candidate.metadata.full_name,
@@ -189,7 +189,7 @@ def report(
                 candidate.decision,
             )
         if not result.candidates:
-            table.add_row("—", "—", "—", "—", "no candidates")
+            table.add_row("-", "-", "-", "-", "no candidates")
         console.print(table)
 
 
