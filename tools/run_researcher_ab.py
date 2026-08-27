@@ -286,7 +286,8 @@ def validate_and_write_bundle(
     if selected is None and "candidate.py" not in seen:
         raise RuntimeError("builder omitted candidate.py")
     if selected is not None:
-        assert selected_source is not None
+        if selected_source is None:  # Defensive guard for the selected component boundary.
+            raise RuntimeError("selected component source is unavailable")
         shutil.copyfile(selected_source, workspace / "candidate.py")
     return selected
 
