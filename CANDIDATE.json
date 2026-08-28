@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-a-v1-2",
+  "origin": "A",
+  "architecture_line": "v1.2",
+  "package_version": "0.1.2",
+  "parent_candidate_id": "champion-v1-1",
+  "parent_snapshot_commit": "0bdfd5ac055118fcd38f157522a88f460d6ba64e",
+  "parent_source_archive_sha256": "196551749cb767b75e31302f55a7e17e10178bfe86994ab2a295330ce10bb58e",
+  "builder_id": "codex:evolution-control-builder",
+  "scope": "Incremental champion-line candidate adding frozen champion selection, isolated challenger proposals, retained schema failures, hash-bound review feedback, and deterministic interface-only repair provenance.",
+  "changed_product_files": [
+    "src/blackridge/evolution.py",
+    "src/blackridge/io.py",
+    "src/blackridge/cli.py",
+    "pyproject.toml",
+    "src/blackridge/__init__.py"
+  ],
+  "changed_test_files": ["tests/test_evolution.py"],
+  "benchmark_status": "not-evaluated",
+  "promotion_status": "candidate-only"
+}

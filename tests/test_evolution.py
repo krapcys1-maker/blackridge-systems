@@ -1,9 +1,18 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 from pydantic import ValidationError
 
-from blackridge.evolution import EvolutionRoundEvaluation, select_champion
+from blackridge.evolution import (
+    ChallengerProposalRejected,
+    EvolutionRoundEvaluation,
+    propose_challenger_architecture,
+    repair_challenger_interfaces,
+    select_champion,
+)
+from blackridge.operator import AgentCompletion, AgentUsage
 
 SHA = "a" * 64
 EVIDENCE = "b" * 64
@@ -134,3 +143,197 @@ def test_builder_cannot_be_its_own_evaluator() -> None:
     value["evaluator_id"] = "builder:candidate-a"
     with pytest.raises(ValidationError, match="evaluator must be independent"):
         EvolutionRoundEvaluation.model_validate(value)
+
+
+class _ArchitectureBackend:
+    identity = "fixture:architecture-builder"
+
+    def complete_json(self, **_: object) -> AgentCompletion:
+        components = []
+        for component_id, zone, accepts, produces in (
+            (
+                "policy-ledger",
+                "control-plane",
+                ["request/v1"],
+                ["authorized-build/v1"],
+            ),
+            (
+                "builder-cell",
+                "untrusted-builder",
+                ["authorized-build/v1"],
+                ["candidate-bundle/v1"],
+            ),
+            (
+                "execution-cell",
+                "sandbox",
+                ["candidate-bundle/v1"],
+                ["evaluation-evidence/v1"],
+            ),
+            (
+                "verdict-engine",
+                "evaluator",
+                ["evaluation-evidence/v1"],
+                ["verdict/v1"],
+            ),
+        ):
+            components.append(
+                {
+                    "id": component_id,
+                    "responsibility": (
+                        f"Own the isolated {zone} responsibility through a stable boundary."
+                    ),
+                    "boundary": "api",
+                    "trust_zone": zone,
+                    "source_policy": "reuse-first",
+                    "accepts": accepts,
+                    "produces": produces,
+                }
+            )
+        content = {
+            "schema_version": "1",
+            "architecture_line": "v2",
+            "thesis": (
+                "Use an append-only event ledger and isolated capability cells so builders never "
+                "own orchestration state or evaluation authority, while retaining reproducibility."
+            ),
+            "design_principles": [
+                "append-only state",
+                "capability cells",
+                "independent verdict authority",
+            ],
+            "components": components,
+            "flows": [
+                {
+                    "source_component": "policy-ledger",
+                    "target_component": "builder-cell",
+                    "contract": "authorized-build/v1",
+                },
+                {
+                    "source_component": "builder-cell",
+                    "target_component": "execution-cell",
+                    "contract": "candidate-bundle/v1",
+                },
+                {
+                    "source_component": "execution-cell",
+                    "target_component": "verdict-engine",
+                    "contract": "evaluation-evidence/v1",
+                },
+            ],
+            "public_champion_strengths_to_preserve": [
+                "fail-closed gates",
+                "exact artifact hashes",
+                "independent evaluation",
+            ],
+            "intentional_differences": [
+                "event-sourced orchestration",
+                "isolated capability cells",
+            ],
+            "first_vertical_slice": [
+                "record one request",
+                "build one isolated candidate",
+                "evaluate one immutable artifact",
+            ],
+            "evaluator_experiments": [
+                "tamper ledger ordering",
+                "deny builder evaluator access",
+                "replay one frozen event stream",
+            ],
+            "risks": [
+                "event schema migration",
+                "cell startup overhead",
+                "distributed trace complexity",
+            ],
+            "non_goals": ["complete arbitrary production-system autonomy"],
+        }
+        return AgentCompletion(
+            provider="fixture",
+            model="architecture",
+            finish_reason="stop",
+            content=content,
+            content_sha256=SHA,
+            usage=AgentUsage(),
+        )
+
+
+def test_fresh_challenger_proposal_records_that_champion_source_was_not_provided() -> None:
+    proposal, record = propose_challenger_architecture(
+        "A public product brief that describes an evidence-driven reuse-first foundry " * 3,
+        "A public benchmark with critical gates, fixed metrics, and independent evaluation " * 3,
+        backend=_ArchitectureBackend(),
+    )
+    assert proposal.architecture_line == "v2"
+    assert record.champion_source_provided is False
+    assert record.proposal_sha256
+
+
+def test_challenger_retry_binds_validator_feedback_without_champion_source() -> None:
+    feedback = "Attempt 001 used unsupported boundary sandbox; use api for that component."
+    proposal, record = propose_challenger_architecture(
+        "A public product brief that describes an evidence-driven reuse-first foundry " * 3,
+        "A public benchmark with critical gates, fixed metrics, and independent evaluation " * 3,
+        backend=_ArchitectureBackend(),
+        review_feedback=feedback,
+    )
+    assert proposal.architecture_line == "v2"
+    assert record.review_feedback_sha256 is not None
+    assert record.champion_source_provided is False
+
+
+def test_invalid_challenger_completion_is_retained() -> None:
+    class _InvalidArchitectureBackend(_ArchitectureBackend):
+        def complete_json(self, **kwargs: object) -> AgentCompletion:
+            completion = super().complete_json(**kwargs)
+            completion.content["components"] = completion.content["components"][:3]
+            return completion
+
+    with pytest.raises(ChallengerProposalRejected) as caught:
+        propose_challenger_architecture(
+            "A public product brief that describes an evidence-driven reuse-first foundry " * 3,
+            "A public benchmark with critical gates, fixed metrics, and independent evaluation "
+            * 3,
+            backend=_InvalidArchitectureBackend(),
+        )
+    assert caught.value.record.status == "schema-rejected"
+    assert caught.value.record.champion_source_provided is False
+
+
+def test_challenger_flow_contract_must_match_both_component_interfaces() -> None:
+    class _MismatchedFlowBackend(_ArchitectureBackend):
+        def complete_json(self, **kwargs: object) -> AgentCompletion:
+            completion = super().complete_json(**kwargs)
+            flows = completion.content["flows"]
+            assert isinstance(flows, list)
+            first = flows[0]
+            assert isinstance(first, dict)
+            first["contract"] = "undeclared-contract/v1"
+            return completion
+
+    with pytest.raises(ChallengerProposalRejected, match="schema validation") as caught:
+        propose_challenger_architecture(
+            "A public product brief that describes an evidence-driven reuse-first foundry " * 3,
+            "A public benchmark with critical gates, fixed metrics, and independent evaluation "
+            * 3,
+            backend=_MismatchedFlowBackend(),
+        )
+    serialized = json.loads(caught.value.record.model_dump_json())
+    assert serialized["validation_errors"][0]["type"] == "value_error"
+
+    proposal, repair = repair_challenger_interfaces(
+        caught.value.record,
+        approved_completion_sha256=SHA,
+    )
+    assert proposal.architecture_line == "v2"
+    assert repair.parent_completion_sha256 == SHA
+    assert repair.champion_source_provided is False
+    assert [item.model_dump() for item in repair.actions] == [
+        {
+            "component_id": "policy-ledger",
+            "interface": "produces",
+            "contract": "undeclared-contract/v1",
+        },
+        {
+            "component_id": "builder-cell",
+            "interface": "accepts",
+            "contract": "undeclared-contract/v1",
+        },
+    ]

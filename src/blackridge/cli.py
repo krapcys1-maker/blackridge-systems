@@ -42,7 +42,12 @@ from blackridge.evidence import (
     ManualVerdict,
     ProbeEvidence,
 )
-from blackridge.evolution import select_champion
+from blackridge.evolution import (
+    ChallengerProposalRejected,
+    propose_challenger_architecture,
+    repair_challenger_interfaces,
+    select_champion,
+)
 from blackridge.generation import (
     GenerationProposalRejected,
     materialize_proposal,
@@ -52,6 +57,7 @@ from blackridge.github import GitHubCli, GitHubSearchDiscovery
 from blackridge.holdout import verify_sealed_holdout
 from blackridge.io import (
     load_adapter_experiment,
+    load_challenger_rejection,
     load_composition_definition,
     load_composition_plan,
     load_evolution_round,
@@ -63,6 +69,10 @@ from blackridge.io import (
     load_supply_chain_experiment,
     load_verified_components,
     write_blueprint,
+    write_challenger_interface_repair,
+    write_challenger_proposal,
+    write_challenger_proposal_record,
+    write_challenger_rejection,
     write_champion_selection,
     write_composition_plan,
     write_generated_proposal,
@@ -137,6 +147,90 @@ def select_evolution_champion(
         f"({selection.selected_architecture_line}).[/green]"
     )
     console.print(f"Selection evidence written to {output}")
+
+
+@app.command("propose-challenger")
+def propose_evolution_challenger(
+    public_brief_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    public_benchmark_file: Annotated[
+        Path, typer.Option("--benchmark", exists=True, dir_okay=False, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evolution/challenger-v2-proposal.json"
+    ),
+    evidence: Annotated[Path, typer.Option("--evidence")] = Path(
+        ".blackridge/evolution/challenger-v2-evidence.json"
+    ),
+    rejection_evidence: Annotated[Path, typer.Option("--rejection-evidence")] = Path(
+        ".blackridge/evolution/challenger-v2-rejection.json"
+    ),
+    review_feedback_file: Annotated[
+        Path | None,
+        typer.Option("--review-feedback", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    env_file: Annotated[Path, typer.Option("--env-file")] = Path(".env"),
+    model: Annotated[str, typer.Option()] = "deepseek-v4-flash",
+    max_cost_usd: Annotated[float, typer.Option(min=0.02, max=10.0)] = 2.0,
+) -> None:
+    """Propose fresh architecture B from public inputs, without champion source."""
+
+    try:
+        backend = DeepSeekBackend(
+            api_key=load_secret("DEEPSEEK_API_KEY", env_file=env_file),
+            model=model,
+            max_total_cost_usd=max_cost_usd,
+        )
+        proposal, record = propose_challenger_architecture(
+            public_brief_file.read_text(encoding="utf-8"),
+            public_benchmark_file.read_text(encoding="utf-8"),
+            backend=backend,
+            review_feedback=(
+                review_feedback_file.read_text(encoding="utf-8")
+                if review_feedback_file is not None
+                else None
+            ),
+        )
+        write_challenger_proposal(proposal, output)
+        write_challenger_proposal_record(record, evidence)
+    except ChallengerProposalRejected as exc:
+        try:
+            write_challenger_rejection(exc.record, rejection_evidence)
+        except OSError as write_error:
+            console.print(f"[red]Cannot retain rejected challenger:[/red] {write_error}")
+            raise typer.Exit(code=2) from write_error
+        console.print(f"[red]Challenger proposal failed:[/red] {exc}")
+        console.print(f"Rejected completion retained at {rejection_evidence}")
+        raise typer.Exit(code=2) from exc
+    except (BlackridgeError, ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Challenger proposal failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Fresh v2 architecture proposal written to {output}[/green]")
+    console.print(f"Proposal evidence written to {evidence}")
+    console.print(f"Manual review required for SHA-256: {record.proposal_sha256}")
+
+
+@app.command("repair-challenger-interfaces")
+def repair_evolution_challenger_interfaces(
+    rejection_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    approved_completion_sha256: Annotated[str, typer.Option("--approved-completion-sha256")],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    evidence: Annotated[Path, typer.Option("--evidence")],
+) -> None:
+    """Repair only flow-interface declarations in an exact rejected challenger."""
+
+    try:
+        proposal, record = repair_challenger_interfaces(
+            load_challenger_rejection(rejection_file),
+            approved_completion_sha256=approved_completion_sha256,
+        )
+        write_challenger_proposal(proposal, output)
+        write_challenger_interface_repair(record, evidence)
+    except (ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Challenger interface repair failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Mechanically repaired challenger written to {output}[/green]")
+    console.print(f"Repair evidence written to {evidence}")
+    console.print(f"Manual review required for SHA-256: {record.proposal_sha256}")
 
 
 @app.command("plan")
