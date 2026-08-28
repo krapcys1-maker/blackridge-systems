@@ -11,6 +11,7 @@ from blackridge.generation import (
     GeneratedSystemProposal,
     GenerationProposalRejected,
     VerifiedComponent,
+    compose_with_locked_files,
     materialize_proposal,
     normalize_completion_content,
     proposal_sha256,
@@ -334,3 +335,43 @@ def test_normalization_keeps_wrong_types_for_strict_schema_rejection() -> None:
     normalized, ignored = normalize_completion_content({"files": "not-a-list", "note": True})
     assert normalized == {"files": "not-a-list"}
     assert ignored == ["note"]
+
+
+def test_composition_keeps_passing_program_bytes_and_accepts_repaired_tests() -> None:
+    prior, _ = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=_Backend(),
+    )
+    next_value = prior.model_dump(mode="json")
+    next_value["files"][0]["content"] = "print('regressed program')\n"
+    next_value["files"][1]["content"] = "# repaired executable tests\n"
+    next_proposal = GeneratedSystemProposal.model_validate(next_value)
+
+    composed, record = compose_with_locked_files(
+        prior, next_proposal, locked_paths=["dupfinder.py"]
+    )
+
+    assert composed.files[0].content == "print('proposal')\n"
+    assert composed.files[1].content == "# repaired executable tests\n"
+    assert record.prior_proposal_sha256 == proposal_sha256(prior)
+    assert record.next_proposal_sha256 == proposal_sha256(next_proposal)
+    assert record.composed_proposal_sha256 == proposal_sha256(composed)
+    assert set(record.locked_file_sha256) == {"dupfinder.py"}
+
+
+def test_composition_rejects_a_locked_file_removed_by_next_proposal() -> None:
+    prior, _ = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=_Backend(),
+    )
+    value = prior.model_dump(mode="json")
+    value["files"] = value["files"][1:]
+    value["acceptance_coverage"][0]["test_file"] = "tests/test_dupfinder.py"
+    next_proposal = GeneratedSystemProposal.model_validate(value)
+
+    with pytest.raises(ValueError, match="must exist in both proposals"):
+        compose_with_locked_files(prior, next_proposal, locked_paths=["dupfinder.py"])

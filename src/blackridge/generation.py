@@ -161,6 +161,14 @@ class GenerationRejectionRecord(StrictGenerationModel):
     proposal_status: Literal["schema-rejected"] = "schema-rejected"
 
 
+class ProposalCompositionRecord(StrictGenerationModel):
+    schema_version: Literal["1"] = "1"
+    prior_proposal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    next_proposal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    composed_proposal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    locked_file_sha256: dict[str, str]
+
+
 class GenerationProposalRejected(ValueError):
     """A provider completion that was retained but rejected by the local schema."""
 
@@ -240,6 +248,49 @@ def normalize_completion_content(content: dict[str, Any]) -> tuple[dict[str, Any
             projected.append({key: nested for key, nested in item.items() if key in allowed})
         normalized[collection] = projected
     return normalized, sorted(ignored)
+
+
+def compose_with_locked_files(
+    prior: GeneratedSystemProposal,
+    next_proposal: GeneratedSystemProposal,
+    *,
+    locked_paths: list[str],
+) -> tuple[GeneratedSystemProposal, ProposalCompositionRecord]:
+    """Keep independently passing files byte-exact while accepting the next proposal elsewhere."""
+
+    if not locked_paths:
+        raise ValueError("at least one generated file must be locked")
+    canonical_paths = [validate_generated_path(path) for path in locked_paths]
+    if len(canonical_paths) != len(set(canonical_paths)):
+        raise ValueError("locked generated paths must be unique")
+    prior_index = {validate_generated_path(item.path): item for item in prior.files}
+    next_index = {validate_generated_path(item.path): item for item in next_proposal.files}
+    missing_prior = sorted(set(canonical_paths) - set(prior_index))
+    missing_next = sorted(set(canonical_paths) - set(next_index))
+    if missing_prior or missing_next:
+        raise ValueError(
+            "locked generated files must exist in both proposals: "
+            f"missing_prior={missing_prior!r}, missing_next={missing_next!r}"
+        )
+    locked = set(canonical_paths)
+    composed_files = [
+        prior_index[key] if key in locked else item
+        for item in next_proposal.files
+        for key in [validate_generated_path(item.path)]
+    ]
+    value = next_proposal.model_dump(mode="json")
+    value["files"] = [item.model_dump(mode="json") for item in composed_files]
+    composed = GeneratedSystemProposal.model_validate(value)
+    record = ProposalCompositionRecord(
+        prior_proposal_sha256=proposal_sha256(prior),
+        next_proposal_sha256=proposal_sha256(next_proposal),
+        composed_proposal_sha256=proposal_sha256(composed),
+        locked_file_sha256={
+            prior_index[key].path: sha256(prior_index[key].content.encode("utf-8")).hexdigest()
+            for key in canonical_paths
+        },
+    )
+    return composed, record
 
 
 def _generation_prompt(
