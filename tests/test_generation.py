@@ -9,6 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from blackridge.generation import (
+    GeneratedFile,
     GeneratedSystemProposal,
     GenerationProposalRejected,
     VerifiedComponent,
@@ -22,6 +23,9 @@ from blackridge.generation import (
 )
 from blackridge.generation import (
     TestRepairProposalRejected as RepairProposalRejected,
+)
+from blackridge.generation import (
+    test_suite_sha256 as _test_suite_sha256,
 )
 from blackridge.models import (
     AcceptanceScenario,
@@ -70,7 +74,10 @@ class _Backend:
             "schema_version": "1",
             "files": [
                 {"path": "dupfinder.py", "content": "print('proposal')\n"},
-                {"path": "tests/test_dupfinder.py", "content": "# executable fixture\n"},
+                {
+                    "path": "tests/test_dupfinder.py",
+                    "content": "def test_detect_duplicates():\n    assert 1 == 1\n",
+                },
             ],
             "run_command": ["python", "dupfinder.py"],
             "component_decisions": [
@@ -355,6 +362,26 @@ def test_acceptance_coverage_must_reference_a_generated_test_file() -> None:
     )
 
 
+def test_acceptance_coverage_must_reference_a_concrete_test_function() -> None:
+    completion = _Backend().complete_json()
+    completion.content["acceptance_coverage"][0]["test_name"] = "test_missing"
+
+    class _MissingFunctionBackend(_Backend):
+        def complete_json(self, **_: object) -> AgentCompletion:
+            return completion
+
+    with pytest.raises(GenerationProposalRejected) as caught:
+        propose_gap_system(
+            "Build a deterministic duplicate finder that never modifies input files.",
+            request=REQUEST,
+            discovery=DISCOVERY,
+            backend=_MissingFunctionBackend(),
+        )
+    serialized = json.loads(caught.value.record.model_dump_json())
+    assert serialized["validation_errors"][0]["type"] == "value_error"
+    assert "missing concrete test" in serialized["validation_errors"][0]["ctx"]["error"]
+
+
 def test_benign_provider_metadata_is_ignored_but_retained_as_an_audit_path() -> None:
     completion = _Backend().complete_json()
     completion.content["files"][0]["executable"] = True
@@ -389,7 +416,7 @@ def test_composition_keeps_passing_program_bytes_and_accepts_repaired_tests() ->
     )
     next_value = prior.model_dump(mode="json")
     next_value["files"][0]["content"] = "print('regressed program')\n"
-    next_value["files"][1]["content"] = "# repaired executable tests\n"
+    next_value["files"][1]["content"] = "def test_detect_duplicates():\n    assert 'repaired'\n"
     next_proposal = GeneratedSystemProposal.model_validate(next_value)
 
     composed, record = compose_with_locked_files(
@@ -397,7 +424,7 @@ def test_composition_keeps_passing_program_bytes_and_accepts_repaired_tests() ->
     )
 
     assert composed.files[0].content == "print('proposal')\n"
-    assert composed.files[1].content == "# repaired executable tests\n"
+    assert composed.files[1].content == ("def test_detect_duplicates():\n    assert 'repaired'\n")
     assert record.prior_proposal_sha256 == proposal_sha256(prior)
     assert record.next_proposal_sha256 == proposal_sha256(next_proposal)
     assert record.composed_proposal_sha256 == proposal_sha256(composed)
@@ -473,6 +500,7 @@ def test_test_only_repair_keeps_product_and_control_fields_byte_exact() -> None:
         "dupfinder.py": sha256(prior.files[0].content.encode()).hexdigest()
     }
     assert record.ignored_provider_fields == ["provider_note"]
+    assert record.prior_test_suite_sha256 != record.repaired_test_suite_sha256
     assert "immutable product" in backend.user.casefold()
     assert "authoritative evaluator" in backend.user
 
@@ -517,6 +545,58 @@ def test_test_only_repair_rejects_product_files_and_missing_test_functions() -> 
     assert serialized["repair_status"] == "schema-rejected"
     assert serialized["validation_errors"][0]["type"] == "value_error"
     assert serialized["locked_file_sha256"]
+
+
+def test_test_only_repair_rejects_byte_identical_and_previously_rejected_suites() -> None:
+    prior, _ = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=_Backend(),
+    )
+    prior_test_hash = _test_suite_sha256(prior.files)
+    completion = _Backend().complete_json()
+    completion.content = {
+        "schema_version": "1",
+        "files": [item.model_dump(mode="json") for item in prior.files if "tests" in item.path],
+        "acceptance_coverage": [item.model_dump(mode="json") for item in prior.acceptance_coverage],
+        "limitations": [],
+    }
+
+    class _RepeatedRepairBackend(_Backend):
+        user = ""
+
+        def complete_json(self, **kwargs: object) -> AgentCompletion:
+            self.user = str(kwargs["user"])
+            return completion
+
+    backend = _RepeatedRepairBackend()
+    with pytest.raises(RepairProposalRejected) as caught:
+        propose_test_only_repair(
+            prior,
+            request=REQUEST,
+            public_evaluator_contract="def test_public_contract():\n    assert True\n",
+            failure_feedback="Generated tests failed.",
+            backend=backend,
+            rejected_test_suite_sha256s=["a" * 64],
+        )
+
+    record = json.loads(caught.value.record.model_dump_json())
+    assert record["candidate_test_suite_sha256"] == prior_test_hash
+    assert record["prior_test_suite_sha256"] == prior_test_hash
+    assert record["rejected_test_suite_sha256s"] == ["a" * 64]
+    assert record["validation_errors"][0]["type"] == "value_error.test-repair-repeat"
+    assert prior_test_hash in backend.user
+    assert "a" * 64 in backend.user
+
+
+def test_test_suite_hash_is_stable_across_order_and_path_case() -> None:
+    files = [
+        GeneratedFile(path="tests/test_b.py", content="def test_b():\n    assert True\n"),
+        GeneratedFile(path="Tests/test_a.py", content="def test_a():\n    assert True\n"),
+    ]
+
+    assert _test_suite_sha256(files) == _test_suite_sha256(list(reversed(files)))
 
 
 def test_generation_prompt_requires_black_box_portable_tests() -> None:
