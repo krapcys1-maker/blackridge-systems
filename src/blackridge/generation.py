@@ -45,7 +45,7 @@ class AcceptanceTestEvidence(StrictGenerationModel):
     acceptance_id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     test_file: str = Field(min_length=1, max_length=240)
     test_name: str = Field(min_length=3, max_length=240)
-    rationale: str = Field(min_length=20, max_length=2_000)
+    rationale: str = Field(min_length=10, max_length=2_000)
 
 
 class ComponentDecision(StrictGenerationModel):
@@ -54,7 +54,7 @@ class ComponentDecision(StrictGenerationModel):
     identity: str = Field(min_length=3, max_length=240)
     immutable_revision: str | None = Field(default=None, max_length=240)
     evidence_level: int = Field(ge=0, le=4)
-    rationale: str = Field(min_length=20, max_length=2_000)
+    rationale: str = Field(min_length=10, max_length=2_000)
 
     @model_validator(mode="after")
     def source_is_honest(self) -> ComponentDecision:
@@ -143,6 +143,7 @@ class GenerationRecord(StrictGenerationModel):
     discovery_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     review_feedback_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     completion: AgentCompletion
+    ignored_provider_fields: list[str] = Field(default_factory=list)
     proposal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     proposal_status: Literal["manual-review-required"] = "manual-review-required"
 
@@ -155,6 +156,7 @@ class GenerationRejectionRecord(StrictGenerationModel):
     discovery_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     review_feedback_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     completion: AgentCompletion
+    ignored_provider_fields: list[str] = Field(default_factory=list)
     validation_errors: list[dict[str, Any]] = Field(min_length=1)
     proposal_status: Literal["schema-rejected"] = "schema-rejected"
 
@@ -190,6 +192,54 @@ def validate_generated_path(value: str) -> str:
 def proposal_sha256(proposal: GeneratedSystemProposal) -> str:
     canonical = proposal.model_dump_json(exclude_none=False)
     return sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def normalize_completion_content(content: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
+    """Project recognized proposal fields while retaining every ignored JSON path."""
+
+    allowed_top = {
+        "schema_version",
+        "files",
+        "run_command",
+        "component_decisions",
+        "tests",
+        "acceptance_coverage",
+        "limitations",
+    }
+    ignored = [key for key in content if key not in allowed_top]
+    normalized = {key: value for key, value in content.items() if key in allowed_top}
+    nested_fields = {
+        "files": {"path", "content"},
+        "component_decisions": {
+            "capability_id",
+            "source",
+            "identity",
+            "immutable_revision",
+            "evidence_level",
+            "rationale",
+        },
+        "acceptance_coverage": {
+            "acceptance_id",
+            "test_file",
+            "test_name",
+            "rationale",
+        },
+    }
+    for collection, allowed in nested_fields.items():
+        value = normalized.get(collection)
+        if not isinstance(value, list):
+            continue
+        projected: list[object] = []
+        for index, item in enumerate(value):
+            if not isinstance(item, dict):
+                projected.append(item)
+                continue
+            for key in item:
+                if key not in allowed:
+                    ignored.append(f"{collection}[{index}].{key}")
+            projected.append({key: nested for key, nested in item.items() if key in allowed})
+        normalized[collection] = projected
+    return normalized, sorted(ignored)
 
 
 def _generation_prompt(
@@ -253,7 +303,8 @@ def _generation_prompt(
         "interpreter revision.\n"
         "- Otherwise use generated-gap at L0; never relabel a search result as verified.\n"
         "- Paths must be portable relative paths and run_command must be an argv list.\n"
-        "- Include executable tests and never modify user input data.\n"
+        "- Include at least 9 meaningful executable test functions and never modify user input "
+        "data. The generated tests themselves must be valid and pass.\n"
         "- Map every acceptance id exactly once in acceptance_coverage to a generated file under "
         "a test or tests directory; name the concrete executable test and explain the assertion.\n"
         "- Treat every Given/When/Then acceptance statement as a required behavior, including "
@@ -309,8 +360,9 @@ def propose_gap_system(
         else None
     )
     completion = backend.complete_json(system=system, user=user, max_tokens=16_384)
+    normalized_content, ignored_provider_fields = normalize_completion_content(completion.content)
     try:
-        proposal = GeneratedSystemProposal.model_validate(completion.content)
+        proposal = GeneratedSystemProposal.model_validate(normalized_content)
     except ValidationError as exc:
         raise GenerationProposalRejected(
             GenerationRejectionRecord(
@@ -320,6 +372,7 @@ def propose_gap_system(
                 discovery_sha256=sha256(discovery_json.encode("utf-8")).hexdigest(),
                 review_feedback_sha256=feedback_sha256,
                 completion=completion,
+                ignored_provider_fields=ignored_provider_fields,
                 validation_errors=[
                     dict(item) for item in exc.errors(include_url=False, include_input=False)
                 ],
@@ -363,6 +416,7 @@ def propose_gap_system(
         discovery_sha256=sha256(discovery_json.encode("utf-8")).hexdigest(),
         review_feedback_sha256=feedback_sha256,
         completion=completion,
+        ignored_provider_fields=ignored_provider_fields,
         proposal_sha256=proposal_sha256(proposal),
     )
     return proposal, record
