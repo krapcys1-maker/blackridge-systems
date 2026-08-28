@@ -34,6 +34,7 @@
     "public_benchmark_sha256": "77495687a7fb65a3fc4e90691093443924a20292a9f42a9f9ce2704d84a827f9",
     "hidden_holdout_sha256": "04cd24be9e9ae39327f146bb76ed299b4fd42be42a0c3f1615a18716a178b86e",
     "candidate_a_snapshot_commit": "ee72dd6b39f3e98ab4384cb708e7df98a81a6111",
+    "candidate_a_remote_branch": "evolution/candidate-a-v1.2-round-001",
     "candidate_a_source_archive_sha256": "530ca9477984e858e2a198d35e2d90f08df60ddadc51f918be12b6405cd2dcc5",
     "candidate_b_attempts": 10,
     "candidate_b_status": "architecture-rejected-before-build",

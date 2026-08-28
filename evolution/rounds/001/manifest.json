@@ -37,6 +37,7 @@
   ],
   "candidate_a": {
     "snapshot_path": "../blackridge-evolution-round-001/candidate-a-v1.2",
+    "remote_branch": "evolution/candidate-a-v1.2-round-001",
     "snapshot_commit": "ee72dd6b39f3e98ab4384cb708e7df98a81a6111",
     "source_archive_path": "../blackridge-evolution-evaluator/candidate-a-v1.2-round-001.tar",
     "source_archive_sha256": "530ca9477984e858e2a198d35e2d90f08df60ddadc51f918be12b6405cd2dcc5",

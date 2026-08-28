@@ -47,6 +47,7 @@ artifacts remain immutable evidence under `benchmarks/blackridge-self-hosting-v2
   `04cd24be9e9ae39327f146bb76ed299b4fd42be42a0c3f1615a18716a178b86e`
 - Candidate A snapshot: `D:\Skladacz aplikacji\blackridge-evolution-round-001\candidate-a-v1.2`
 - Candidate A snapshot commit: `ee72dd6b39f3e98ab4384cb708e7df98a81a6111`
+- Candidate A GitHub branch: `evolution/candidate-a-v1.2-round-001`
 - Candidate A source archive:
   `D:\Skladacz aplikacji\blackridge-evolution-evaluator\candidate-a-v1.2-round-001.tar`
 - Candidate A source archive SHA-256:
