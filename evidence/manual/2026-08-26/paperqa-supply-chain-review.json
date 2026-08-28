@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T18:11:45.060702Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "supply-chain-evaluation",
+  "scenario_id": "known-repository-review",
+  "scenario_description": "A known repository receives separate legal and security observations.",
+  "expected": [
+    "Missing evidence remains unknown and is never silently converted to a passing result.",
+    "License evidence identifies both repository and dependency licensing concerns.",
+    "Security posture and known vulnerability evidence remain separate observations."
+  ],
+  "observed": [
+    "Requested and observed repository identities both equal exact commit 57e89f7223b0960d5ee5ea048c69e3c47e088572; the checkout was clean and its LICENSE Git blob matched GitHub 7d89c6e2d7dea1388df7efe33222068cdd784f8b.",
+    "Repository licensing remained Apache-2.0 while 7 of 16 direct dependencies had empty, non-standard, or GPL-family results; all 305 SPDX package licenseDeclared fields remained explicit NOASSERTION rather than passing.",
+    "Security posture remained a separate, current repository-level Scorecard not-found observation while OSV-Scanner exited 1 and reported 23 vulnerable package entries, 223 primary advisories, and maximum severity 9.8 across the complete source/lock scope.",
+    "PyPI release metadata returned HTTP 200, but both distribution provenance endpoints returned HTTP 404 with zero attestation bundles; the exact GitHub commit signature was valid but was not treated as package provenance.",
+    "The three retained artifact hashes and counts matched independent reads; the source checkout stayed clean and no scanner containers remained."
+  ],
+  "probe_id": "1df722a797a44aa0a472b5fad1a56052",
+  "probe_file": "evidence\\manual\\2026-08-26\\paperqa-supply-chain-probe.json",
+  "probe_sha256": "9d4a7d38221e423a050a66fe5ed3b4d340ade3d5e931547ef6df74b251a3b5de",
+  "notes": "PASS applies only to the acceptance scenario: Blackridge kept legal, posture, known-vulnerability, SBOM, and provenance observations independent and preserved missing evidence as unknown. The PaperQA release candidate itself is BLOCKED pending dependency-license resolution, production-scope vulnerability triage, and release provenance."
+}

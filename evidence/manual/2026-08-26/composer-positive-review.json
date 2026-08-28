@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:24:52.651558Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "compatibility-composition",
+  "scenario_id": "compatible-route-generates-and-runs",
+  "scenario_description": "A compatible graph generates and runs through every validated boundary.",
+  "expected": [
+    "The blocked alternative is rejected and the two eligible components are selected.",
+    "Exactly one adapter bridges paper-record/v1 to document-record/v1.",
+    "Every generated artifact is hashed and the complete runtime output satisfies research-report/v1.",
+    "Generation remains explicitly not release-ready without L4 review."
+  ],
+  "observed": [
+    "The solver module hash matched the final source, rejected blocked-report-sink with its exact policy reason, selected fixture-research-source and fixture-report-sink, and did not promote either calibration fixture beyond L0.",
+    "The retained three-step route executed source, the single RFC 6902 adapter from paper-record/v1 to document-record/v1, and sink in that order; the adapter's canonical operation hash matched its separate operations lock.",
+    "Both command artifacts were the files referenced by argv, matched their separate locked SHA-256 values before and after execution, exited zero, and each output passed its exact Draft 2020-12 contract.",
+    "Independent recomputation matched all 15 files named by provenance.json, including exact definition and plan copies; the outer generation record also hashes provenance.json, while execution_ready is calibration-only and release_ready remains false."
+  ],
+  "probe_id": "5963e7c68e534ca584bb9670941f4eee",
+  "probe_file": "evidence\\manual\\2026-08-26\\composer-positive-probe.json",
+  "probe_sha256": "5ab51701feef1a142c661086a9bf9ecbb60ae95004a419ca70198bec20305bd3",
+  "notes": "PASS applies only to the explicit calibration scenario and generated manifest/runtime boundaries. The fixtures are Blackridge-owned L0 controls, host execution is restricted to calibration mode, and no production or L4 claim is made."
+}

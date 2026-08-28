@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "id": "blackridge-evolution-v1",
+  "critical_gates": [
+    {"id":"no-data-loss","description":"Protected input bytes and required filesystem metadata remain unchanged."},
+    {"id":"security-boundary","description":"Sandbox, secret, network, process, path and resource controls fail closed."},
+    {"id":"license-provenance","description":"Every reused or derived artifact has compatible licensing and exact provenance."},
+    {"id":"benchmark-integrity","description":"Candidate code cannot read or modify evaluator-owned tests, holdouts or verdicts."},
+    {"id":"functional-minimum","description":"The candidate completes every required public acceptance scenario."},
+    {"id":"reproducibility","description":"The evaluated artifact, dependencies, commands and environment are reproducibly identified."},
+    {"id":"evidence-completeness","description":"Failures, outputs, costs, timings, identities and hashes are retained without secrets."}
+  ],
+  "metrics": [
+    {"id":"effectiveness","description":"Share of evaluator-owned task outcomes satisfied.","direction":"maximize","weight":0.18,"lower_bound":0,"upper_bound":100},
+    {"id":"system-quality","description":"Correctness, robustness and usability of produced systems.","direction":"maximize","weight":0.12,"lower_bound":0,"upper_bound":100},
+    {"id":"actual-reuse","description":"Measured useful reuse behind stable verified boundaries.","direction":"maximize","weight":0.10,"lower_bound":0,"upper_bound":100},
+    {"id":"security","description":"Measured resistance to evaluator-owned security controls.","direction":"maximize","weight":0.12,"lower_bound":0,"upper_bound":100},
+    {"id":"license-provenance-quality","description":"Completeness and correctness of license and provenance evidence.","direction":"maximize","weight":0.10,"lower_bound":0,"upper_bound":100},
+    {"id":"autonomy","description":"Share of valid progress completed without manual correction.","direction":"maximize","weight":0.08,"lower_bound":0,"upper_bound":100},
+    {"id":"manual-interventions","description":"Normalized manual interventions required to reach the verdict.","direction":"minimize","weight":0.08,"lower_bound":0,"upper_bound":100},
+    {"id":"cost","description":"Normalized total operator, compute and external-service cost.","direction":"minimize","weight":0.06,"lower_bound":0,"upper_bound":100},
+    {"id":"duration","description":"Normalized wall-clock duration for the complete frozen workload.","direction":"minimize","weight":0.05,"lower_bound":0,"upper_bound":100},
+    {"id":"maintainability","description":"Independent assessment of clarity, modularity and change safety.","direction":"maximize","weight":0.07,"lower_bound":0,"upper_bound":100},
+    {"id":"complexity-debt","description":"Normalized implementation complexity and technical debt burden.","direction":"minimize","weight":0.04,"lower_bound":0,"upper_bound":100}
+  ],
+  "selection_policy": {
+    "critical_gates_before_metrics": true,
+    "first_tiebreak": "fewer manual interventions",
+    "final_tiebreak": "retain incumbent"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T22:09:09.507632Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "production-network-and-secret-boundary",
+  "scenario_description": "Preparation keeps network access, but the production workload runs without egress or host secrets.",
+  "expected": [
+    "Repository preparation succeeds before isolation and the real workload still passes after isolation.",
+    "Direct IP and DNS egress both fail during the workload.",
+    "Every workload command runs as UID/GID 65534 through an in-container TERM-to-KILL timeout.",
+    "No sensitive host environment name is forwarded, the host stays unchanged, and the container is removed."
+  ],
+  "observed": [
+    "Preparation completed through SWE-ReX before every Docker network was detached; unittest and add_one(41)=42 then passed.",
+    "All four workload commands used docker-exec shell-free as UID/GID 65534 with fixed environment values and the verbose in-container TERM-to-KILL timeout.",
+    "Direct and DNS egress were false, sensitive host environment names were absent, memory swap max was recorded, the host snapshot matched, and exact cleanup removed the container."
+  ],
+  "probe_id": "be5a198b0d6f4dbaa3da91f91074cc66",
+  "probe_file": "evidence\\manual\\2026-08-27\\production-sandbox-positive-probe.json",
+  "probe_sha256": "bea46e45bf45fe3a5cf872e2ad3fe5572d4a4eed463131e2ebaaae888f131b40",
+  "notes": "PASS covers this pinned repository and hardened two-phase primitive; it is not a public-image or multi-tenant production verdict."
+}

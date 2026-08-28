@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T20:08:58.274979Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "exact-source-history",
+  "scenario_description": "Every tracked source file is tied to Git history and frozen upstream scans.",
+  "expected": [
+    "Every tracked Blackridge Python source file has a hash and first-add history.",
+    "Every upstream checkout resolves to the requested immutable commit.",
+    "Exact matches are reported with file locations; zero matches is not called proof."
+  ],
+  "observed": [
+    "Inspected all 22 file rows: each has SHA-256, line count, and a concrete Git first-add commit.",
+    "Verified four observed checkout commits equal the frozen requested commits and together cover 1133 upstream source files.",
+    "The normalized six-line scan reported zero matches and its evidence explicitly retains three limitations instead of asserting originality."
+  ],
+  "probe_id": "95eaa57abf8e40d09ed249e268471beb",
+  "probe_file": "evidence\\manual\\2026-08-26\\source-provenance-probe.json",
+  "probe_sha256": "add14b7794030cfc3095d61e1d38b44a79e57ec40c471e1aa2d63f6208ef7dc3",
+  "notes": "Manual file-by-file and upstream-scope inspection satisfied the evidence contract after the isolated scanner temp-space fix; this is not a legal originality opinion."
+}

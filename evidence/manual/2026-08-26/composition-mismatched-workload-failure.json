@@ -1,0 +1,137 @@
+{
+  "schema_version": "1",
+  "probe_id": "df7a7bdeb4a14d7ab20bbc4e5d29de58",
+  "observed_at": "2026-08-26T17:51:33.227283Z",
+  "provider": "blackridge-composition-pair/jsonpatch+jsonschema",
+  "subject": "paper-title-to-document-name::vs::paper-title-different-target-workload",
+  "request": {
+    "working": {
+      "schema_version": "1",
+      "name": "paper-title-to-document-name",
+      "description": "Bridge a source component that emits paper.title to a consumer that requires document.name while preserving the complete source payload.",
+      "source_contract": "paper-record/v1",
+      "target_contract": "document-record/v1",
+      "source_fixture": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        }
+      },
+      "target_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": [
+          "document"
+        ],
+        "properties": {
+          "document": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "patch": [
+        {
+          "op": "test",
+          "path": "/paper/title",
+          "value": "Evidence-Driven System Composition"
+        },
+        {
+          "op": "add",
+          "path": "/document",
+          "value": {}
+        },
+        {
+          "op": "copy",
+          "from": "/paper/title",
+          "path": "/document/name"
+        }
+      ]
+    },
+    "deliberate_negative": {
+      "schema_version": "1",
+      "name": "paper-title-different-target-workload",
+      "description": "Deliberately change the target contract so the paired verifier must reject an invalid apples-to-oranges negative comparison before drawing conclusions.",
+      "source_contract": "paper-record/v1",
+      "target_contract": "different-document-record/v1",
+      "source_fixture": {
+        "paper": {
+          "title": "Evidence-Driven System Composition",
+          "authors": [
+            "Ada Example",
+            "Lin Example"
+          ]
+        },
+        "metadata": {
+          "id": "paper-001",
+          "year": 2026
+        },
+        "trace": {
+          "request_id": "manual-adapter-001"
+        }
+      },
+      "target_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": [
+          "document"
+        ],
+        "properties": {
+          "document": {
+            "type": "object",
+            "required": [
+              "label"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "patch": [
+        {
+          "op": "add",
+          "path": "/document",
+          "value": {}
+        }
+      ]
+    }
+  },
+  "observations": {
+    "probe_completed": false,
+    "error_type": "BlackridgeError",
+    "error": "composition fixtures do not run the same workload: target_contract, target_schema"
+  },
+  "sources": [
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0"
+  ],
+  "warnings": [
+    "The probe failed; requested observations were not collected."
+  ]
+}

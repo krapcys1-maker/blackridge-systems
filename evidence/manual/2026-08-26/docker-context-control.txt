@@ -1,0 +1,30 @@
+Manual Docker context control — 2026-08-26
+
+Repository:
+D:\Skladacz aplikacji\blackridge-systems
+
+Command:
+docker build --tag blackridge/swerex-runtime:dockerignore-control --file docker/swerex-runtime.Dockerfile .
+
+Observed BuildKit boundaries:
+- .dockerignore transferred: 84 bytes
+- build context transferred: 97 bytes
+- the allowlist contains only LICENSE, NOTICE, and THIRD_PARTY_NOTICES.md
+- .env, .git, source, evidence, and the rest of the workspace are outside the context
+- base image resolved to sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17
+- apt and Python installation layers were reused from cache
+- final COPY of the three legal files succeeded
+- final local immutable image ID:
+  sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07
+
+Independent runtime command:
+docker run --rm --network none sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07 sh -c '<three nonempty legal-file checks; swerex-remote --version; aiohttp version>'
+
+Observed runtime output and status:
+- SWE-ReX: 1.4.0
+- aiohttp: 3.14.3
+- exit: 0
+
+This proves the context allowlist and functional/runtime observations only. The separate exact-image
+compliance probe exited 1 and blocks publication because legal and reproducibility obligations
+remain unresolved.

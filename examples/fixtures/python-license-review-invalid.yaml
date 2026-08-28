@@ -1,0 +1,19 @@
+schema_version: "1"
+reviewer: Deliberately invalid control
+review_scope: This fixture claims MIT but carries a deliberately incorrect license-file digest.
+public_distribution_approved: false
+packages:
+  - name: markdown-it-py
+    version: "4.2.0"
+    observed_metadata: NOASSERTION
+    concluded_license_spdx: MIT
+    requires_public_distribution_review: false
+    license_files:
+      - path: markdown_it_py-4.2.0.dist-info/licenses/LICENSE
+        sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+    sources:
+      - https://pypi.org/pypi/markdown-it-py/4.2.0/json
+    source_archive:
+      filename: markdown_it_py-4.2.0.tar.gz
+      url: https://files.pythonhosted.org/markdown_it_py-4.2.0.tar.gz
+      sha256: 04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49

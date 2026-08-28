@@ -1,0 +1,38 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-27T15:38:57.325024Z",
+  "reviewer": "Codex /root manual artifact reviewer",
+  "verdict": "pass",
+  "capability_id": "grounded-research-synthesis",
+  "scenario_id": "independent-domains-and-negative-control",
+  "scenario_description": "Answer three unrelated domains exactly and reject an unsupported fourth domain.",
+  "expected": [
+    "The component exits zero and returns the exact expected source set for all three answerable domains.",
+    "Every request and response satisfies the frozen public JSON Schema contracts.",
+    "Every emitted citation quote occurs verbatim in its identified input document.",
+    "The component returns insufficient-evidence with no claims or sources for the unrelated corpus.",
+    "The green-exit broken control is rejected by semantic checks despite exiting zero.",
+    "All probe containers are removed after execution."
+  ],
+  "observed": [
+    "Policy, backup, and museum-loan fixtures returned exactly 5, 4, and 10 expected sources; all 19 citation quotes occur verbatim in their identified documents.",
+    "Astronomy fixture returned insufficient-evidence with zero claims and zero sources.",
+    "All four requests and candidate responses satisfied the frozen public JSON Schema contracts.",
+    "Broken green-exit control exited zero in all four cases but failed ten semantic checks.",
+    "All candidate and broken-control cleanup commands exited zero; independent docker ps inspection found no probe containers."
+  ],
+  "probe_id": "4cd6bdeb2fb04b579f2af3b208a2b5d0",
+  "probe_file": "evidence\\manual\\2026-08-27\\grounded-researcher-component-l3-v2-probe.json",
+  "probe_sha256": "20a56229321de84f8efaebd172cf8369cab132759760416faed23244bf8f4fb9",
+  "promotion": {
+    "target_level": 3,
+    "subject_type": "component",
+    "probe_provider": "blackridge-grounded-researcher-probe/1",
+    "probe_subject": "grounded-researcher-v1@c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+    "probe_completed": true,
+    "subject_revision": "fc3b7705f620132f5c5ad866b75a66ab5cc9c775",
+    "subject_license_spdx": "Apache-2.0",
+    "artifact_sha256": "c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d"
+  },
+  "notes": "Manual comparison covered complete stdout, parsed artifacts, exact source identities, exact quote substrings, public contract validation, process limits, and cleanup. This is updated L3 contract evidence for the immutable adversarially hardened artifact, not an L4 system verdict."
+}

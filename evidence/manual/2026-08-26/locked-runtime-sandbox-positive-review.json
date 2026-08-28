@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T20:50:17.445146Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "python-repository-clean-boot",
+  "scenario_description": "A pinned Python repository builds and runs without touching the host workspace.",
+  "expected": [
+    "Build commands, image identity, duration, exit status, stdout, and stderr are retained.",
+    "The host source tree is unchanged after execution.",
+    "The checked-out commit and behavior-bearing artifact match the requested experiment."
+  ],
+  "observed": [
+    "Exact image ID is sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5.",
+    "Pinned commit 621e4974ca25ce531773def586ba3ed8e736b3fc was fetched and checked out exactly.",
+    "The real repository unittest passed and add_one(41) produced the inspected JSON value 42.",
+    "CapEff was zero, NoNewPrivs was 1, memory/pids/CPU limits were observed, the host snapshot was unchanged, and no container remained."
+  ],
+  "probe_id": "952ba6c1ae30486ba809dcb933bcda86",
+  "probe_file": "evidence\\manual\\2026-08-26\\locked-runtime-sandbox-positive-probe.json",
+  "probe_sha256": "1089c978b581add9b501f46b62a0279183c12b75a2049e571a7afc7b818fe6ca",
+  "notes": "PASS applies to this frozen internal-runtime experiment only; it is not public-image release approval."
+}

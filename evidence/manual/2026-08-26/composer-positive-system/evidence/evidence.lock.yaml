@@ -1,0 +1,27 @@
+schema_version: '1'
+components:
+- component_id: fixture-report-sink
+  evidence:
+    level: 0
+    review_file: null
+    review_sha256: null
+    capability_id: null
+    scenario_id: null
+    probe_subject: null
+- component_id: fixture-research-source
+  evidence:
+    level: 0
+    review_file: null
+    review_sha256: null
+    capability_id: null
+    scenario_id: null
+    probe_subject: null
+adapters:
+- adapter_id: paper-title-to-document-name
+  evidence:
+    level: 0
+    review_file: null
+    review_sha256: null
+    capability_id: null
+    scenario_id: null
+    probe_subject: null

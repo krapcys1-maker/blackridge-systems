@@ -1,0 +1,32 @@
+Blackridge packaging negative observation — 2026-08-26
+
+Command segment:
+  .venv\Scripts\python.exe -m build --wheel
+
+Observed result:
+  exit code 1
+  D:\Skladacz aplikacji\blackridge-systems\.venv\Scripts\python.exe: No module named build
+
+Interpretation:
+  Ruff, 21 behavior tests, coverage collection, and pip check had completed, but the release wheel
+  could not be constructed from the declared developer environment. Those earlier green results did
+  not prove package buildability.
+
+Correction:
+  Declare build>=1,<2 in the dev extra, install that declared extra, rerun the wheel build, and
+  inspect the resulting ZIP contents for blackridge/supply_chain.py before accepting the segment.
+
+Corrected observations:
+  - the isolated PEP 517 wheel build completed;
+  - the wheel contains blackridge/cli.py, blackridge/io.py, blackridge/supply_chain.py, METADATA,
+    and RECORD;
+  - loading examples/supply-chain-paperqa.yaml through the wheel returned the exact experiment
+    name, 40-character commit, and package version;
+  - a smoke venv inheriting old global packages failed CLI help with
+    "TyperArgument.make_metavar() takes 1 positional argument but 2 were given";
+  - a fresh venv installing the wheel and its declared dependencies selected Typer 0.27.1, loaded
+    the exact experiment, displayed all supply-chain CLI options, and passed pip check.
+
+Manual verdict:
+  PASS for a clean installation from the built wheel. The polluted system-site failure is retained
+  as an environment warning rather than being hidden by the successful clean control.

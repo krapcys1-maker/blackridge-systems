@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "probe_id": "ec6fba2f4960479baa4befe2ea31eb95",
+  "observed_at": "2026-08-26T18:50:24.754458Z",
+  "provider": "blackridge-benchmark-comparison/1",
+  "subject": "benchmarks\\scientific-researcher-v1\\comparison-baseline-control.yaml::vs::benchmarks\\scientific-researcher-v1\\comparison-blackridge-model-mismatch.yaml",
+  "request": {
+    "definition_file": "benchmarks\\scientific-researcher-v1\\evaluator\\benchmark.yaml",
+    "baseline_plan_file": "benchmarks\\scientific-researcher-v1\\comparison-baseline-control.yaml",
+    "blackridge_plan_file": "benchmarks\\scientific-researcher-v1\\comparison-blackridge-model-mismatch.yaml"
+  },
+  "observations": {
+    "probe_completed": false,
+    "error_type": "BlackridgeError",
+    "error": "A/B controls differ before execution: model_identifier"
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/benchmarks/scientific-researcher-v1"
+  ],
+  "warnings": [
+    "The probe failed; requested observations were not collected."
+  ]
+}

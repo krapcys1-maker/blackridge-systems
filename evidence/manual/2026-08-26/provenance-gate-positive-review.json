@@ -1,0 +1,22 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:52:30.304477Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "empty-copy-registry",
+  "scenario_description": "A reviewed empty copy registry remains open when no markers or records exist.",
+  "expected": [
+    "The gate finds no unresolved record or marker.",
+    "The result states that undeclared copies without markers need similarity scanning."
+  ],
+  "observed": [
+    "The current registry contains zero copied/adapted records and the source tree contains zero derived-code attribution markers.",
+    "The gate reported issue_count 0 and gate_allows_copy true for the no-copy baseline.",
+    "The probe retained its warning that marker-free undeclared copying still requires the separate similarity scan."
+  ],
+  "probe_id": "d837a52e8dee41aaa1486c8eb1b2e607",
+  "probe_file": "evidence\\manual\\2026-08-26\\provenance-gate-positive-probe.json",
+  "probe_sha256": "471174a2853b6b934ef2e8d6fc6b33e1ad5d3e61b9ac2d563bca54f29d0d85bf",
+  "notes": "Manual positive-control review confirms that an intentionally empty registry is not rejected when the audited tree has no declared copies."
+}

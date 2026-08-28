@@ -1,0 +1,62 @@
+schema_version: "1"
+name: linear-research-no-adapter
+goal: >-
+  Demonstrate that generation stops when two eligible components have no compatible contract edge.
+mode: calibration
+external_input: research-query/v1
+required_output: research-report/v1
+required_capabilities: [research-source, report-sink]
+allowed_licenses: [Apache-2.0]
+allowed_integrations: [command-json]
+minimum_evidence_level: 0
+contracts:
+  - contract_id: research-query/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [topic]
+      properties: {topic: {type: string, minLength: 3}}
+  - contract_id: paper-record/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      required: [query, paper, trace]
+  - contract_id: document-record/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      required: [query, paper, trace, document]
+  - contract_id: research-report/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      required: [report, trace]
+components:
+  - component_id: fixture-research-source
+    capability_id: research-source
+    source_uri: blackridge://calibration/research-source
+    revision: sha256:8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [research-query/v1]
+    produces: [paper-record/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/research_source.py"]
+      artifact_file: "{definition_dir}/fixtures/research_source.py"
+      artifact_sha256: 8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c
+    evidence: {level: 0}
+  - component_id: fixture-report-sink
+    capability_id: report-sink
+    source_uri: blackridge://calibration/report-sink
+    revision: sha256:6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [document-record/v1]
+    produces: [research-report/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/report_sink.py"]
+      artifact_file: "{definition_dir}/fixtures/report_sink.py"
+      artifact_sha256: 6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493
+    evidence: {level: 0}
+adapters: []

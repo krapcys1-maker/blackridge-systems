@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "probe_id": "66c46c0e35c54555ad439c8c5a957839",
+  "observed_at": "2026-08-26T17:21:19.839607Z",
+  "provider": "deps.dev-v3",
+  "subject": "maven:org.grobid:grobid-core@0.9.1",
+  "request": {
+    "system": "maven",
+    "name": "org.grobid:grobid-core",
+    "version": "0.9.1"
+  },
+  "observations": {
+    "probe_completed": false,
+    "error_type": "ConfigurationError",
+    "error": "requested package version is not available: 0.9.1"
+  },
+  "sources": [
+    "https://api.deps.dev/v3/systems/maven/packages/org.grobid%3Agrobid-core",
+    "https://api.deps.dev/v3/systems/maven/packages/org.grobid%3Agrobid-core/versions/0.9.1"
+  ],
+  "warnings": [
+    "The probe failed; no package facts were collected."
+  ]
+}

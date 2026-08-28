@@ -1,0 +1,58 @@
+{
+  "schema_version": "1",
+  "artifact": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\dist-locked-runtime-final\\blackridge_systems-0.1.0-py3-none-any.whl",
+  "sha256": "836bcaadd07cf7a02103d8ee3f365fb674b90434df353db40599ad1f3f8135e4",
+  "size": 86056,
+  "member_count": 29,
+  "embedded_license_files": [
+    "blackridge_systems-0.1.0.dist-info/licenses/LICENSE",
+    "blackridge_systems-0.1.0.dist-info/licenses/NOTICE",
+    "blackridge_systems-0.1.0.dist-info/licenses/THIRD_PARTY_NOTICES.md"
+  ],
+  "requires_dist": [
+    "httpx<1,>=0.27",
+    "jsonpatch==1.33",
+    "jsonschema==4.26.0",
+    "pydantic<3,>=2.10",
+    "pyyaml<7,>=6",
+    "rich<15,>=13.9",
+    "typer<1,>=0.15",
+    "pydantic-ai<3,>=1; extra == 'ai'",
+    "build<2,>=1; extra == 'dev'",
+    "pytest-cov<8,>=6; extra == 'dev'",
+    "pytest<9,>=8; extra == 'dev'",
+    "ruff<1,>=0.12; extra == 'dev'",
+    "aiohttp<4,>=3.10; extra == 'sandbox'",
+    "swe-rex==1.4.0; extra == 'sandbox'"
+  ],
+  "runtime_requires_dist": [
+    "httpx<1,>=0.27",
+    "jsonpatch==1.33",
+    "jsonschema==4.26.0",
+    "pydantic<3,>=2.10",
+    "pyyaml<7,>=6",
+    "rich<15,>=13.9",
+    "typer<1,>=0.15"
+  ],
+  "optional_requires_dist": [
+    "pydantic-ai<3,>=1; extra == 'ai'",
+    "build<2,>=1; extra == 'dev'",
+    "pytest-cov<8,>=6; extra == 'dev'",
+    "pytest<9,>=8; extra == 'dev'",
+    "ruff<1,>=0.12; extra == 'dev'",
+    "aiohttp<4,>=3.10; extra == 'sandbox'",
+    "swe-rex==1.4.0; extra == 'sandbox'"
+  ],
+  "declared_dependency_names": [
+    "httpx",
+    "jsonpatch",
+    "jsonschema",
+    "pydantic",
+    "pyyaml",
+    "rich",
+    "typer"
+  ],
+  "missing_declared_dependencies": [],
+  "unexpected_declared_dependencies": [],
+  "sbom_package_count": 2
+}

@@ -1,0 +1,41 @@
+Manual upstream integration probe — 2026-08-26
+Environment: fresh Python 3.12 virtual environment on Windows
+Subject: PyPI swe-rex==1.4.0
+
+Command:
+  python -m pip install --quiet "swe-rex==1.4.0"
+Result:
+  exit 0
+
+Command:
+  python -m pip check
+Result:
+  exit 0
+  No broken requirements found.
+
+Command:
+  python -c "from swerex.deployment.docker import DockerDeployment; print(DockerDeployment)"
+Result:
+  exit 1
+  File "swerex/runtime/remote.py", line 12, in <module>
+    import aiohttp
+  ModuleNotFoundError: No module named 'aiohttp'
+
+Independent metadata inspection:
+  swe_rex-1.4.0.dist-info/METADATA contains Requires-Dist entries for fastapi, uvicorn,
+  requests, pydantic, pexpect, bashlex, python-multipart, and rich. It contains no aiohttp
+  requirement.
+
+Source inspection of DockerDeployment._get_swerex_start_cmd in the installed v1.4.0 wheel:
+  when swerex-remote is absent from the image, the generated startup command uses
+  "pipx run swe-rex" without a package version constraint.
+
+Blackridge mitigation exercised manually:
+  - the optional sandbox dependencies add aiohttp>=3.10,<4 beside swe-rex==1.4.0;
+  - docker/swerex-runtime.Dockerfile installs swe-rex==1.4.0 in the image;
+  - the runtime-identity command returned 1.4.0;
+  - the probe resolved the built image to immutable local ID
+    sha256:a75280f048abf533285cef78502df34118195fa678fc7a3ee2272356b7ddf4a6.
+
+This is an upstream integration finding, not a functional PASS/FAIL verdict for SWE-ReX as a
+whole.

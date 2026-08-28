@@ -1,0 +1,185 @@
+{
+  "schema_version": "1",
+  "requested_image": "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07",
+  "observed_image_id": "sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07",
+  "repo_digests": [
+    "blackridge/swerex-runtime@sha256:4dfc8c21086e7abdd7d9f02dba0347e1e39fc9059e9d5cb66163f9a619051a07"
+  ],
+  "created": "2026-08-26T19:56:23.642012848Z",
+  "base_image": {
+    "id": "python-slim-base",
+    "name": "Python slim OCI base",
+    "package_name": null,
+    "version": "sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17",
+    "license_spdx": "LicenseRef-MultiLicense-Image",
+    "upstream": "https://github.com/docker-library/python",
+    "license_source": "generated exact-image license-bundle.zip",
+    "usage": "Base operating system and CPython runtime for the SWE-ReX image.",
+    "boundary": "docker-base",
+    "distributed_in": [
+      "SWE-ReX runtime image"
+    ]
+  },
+  "license_analysis": {
+    "sbom_package_count": 161,
+    "sbom_without_declared_license_count": 23,
+    "sbom_without_declared_license": [
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "Simple Launcher",
+        "version": "1.1.0.14"
+      },
+      {
+        "name": "debian-archive-keyring",
+        "version": "2025.1"
+      },
+      {
+        "name": "gcc-14-base",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libcrypt1",
+        "version": "1:4.4.38-1"
+      },
+      {
+        "name": "libgcc-s1",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libgnutls30t64",
+        "version": "3.8.9-3+deb13u4"
+      },
+      {
+        "name": "libgssapi-krb5-2",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libk5crypto3",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libkrb5-3",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "libkrb5support0",
+        "version": "1.21.3-5+deb13u1"
+      },
+      {
+        "name": "librtmp1",
+        "version": "2.4+20151223.gitfa8646d.1-2+b5"
+      },
+      {
+        "name": "libstdc++6",
+        "version": "14.2.0-19"
+      },
+      {
+        "name": "libtasn1-6",
+        "version": "4.20.0-2+deb13u1"
+      },
+      {
+        "name": "markdown-it-py",
+        "version": "4.2.0"
+      },
+      {
+        "name": "mdurl",
+        "version": "0.1.2"
+      },
+      {
+        "name": "python",
+        "version": "3.12.14"
+      },
+      {
+        "name": "swe-rex",
+        "version": "1.4.0"
+      },
+      {
+        "name": "/scan/image.tar",
+        "version": "sha256:87af5fca75b9d5e4fbd2e6fd555caf930ed3ad075e0e2d5cc61868883d4b0082"
+      }
+    ],
+    "python_package_count": 35,
+    "python_unknown_license_metadata": [
+      {
+        "name": "markdown-it-py",
+        "version": "4.2.0",
+        "license": "NOASSERTION",
+        "license_files": [
+          "markdown_it_py-4.2.0.dist-info/licenses/LICENSE",
+          "markdown_it_py-4.2.0.dist-info/licenses/LICENSE.markdown-it"
+        ]
+      },
+      {
+        "name": "mdurl",
+        "version": "0.1.2",
+        "license": "NOASSERTION",
+        "license_files": [
+          "mdurl-0.1.2.dist-info/LICENSE"
+        ]
+      },
+      {
+        "name": "ptyprocess",
+        "version": "0.7.0",
+        "license": "UNKNOWN",
+        "license_files": [
+          "ptyprocess-0.7.0.dist-info/LICENSE"
+        ]
+      },
+      {
+        "name": "swe-rex",
+        "version": "1.4.0",
+        "license": "NOASSERTION",
+        "license_files": [
+          "swe_rex-1.4.0.dist-info/licenses/LICENSE.txt"
+        ]
+      }
+    ],
+    "python_without_extracted_license_text": [],
+    "python_review_license_packages": [
+      {
+        "name": "bashlex",
+        "version": "0.18",
+        "license": "GPLv3+",
+        "license_files": [
+          "bashlex-0.18.dist-info/LICENSE"
+        ]
+      },
+      {
+        "name": "certifi",
+        "version": "2026.7.22",
+        "license": "MPL-2.0",
+        "license_files": [
+          "certifi-2026.7.22.dist-info/licenses/LICENSE"
+        ]
+      }
+    ],
+    "os_package_count": 118,
+    "os_without_extracted_copyright_file": []
+  },
+  "release_blockers": [
+    "Python packages have unknown license metadata",
+    "Python packages use licenses that require an explicit distribution review",
+    "Corresponding source archives or a reviewed source-offer mechanism are not bundled",
+    "Dockerfile apt and transitive Python package resolution are not completely locked"
+  ],
+  "release_gate_open": false
+}

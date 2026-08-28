@@ -1,0 +1,141 @@
+{
+  "schema_version": "1",
+  "generated_at": "2026-08-26T19:24:27.997013Z",
+  "definition_sha256": "cd442466de2cca1c35bba18c51c26b3c9e898ec08e51f9071ecb98e0c28fbbb3",
+  "solver_module_sha256": "880ada300801d58c2ec829d52caaa92f1dd4e88f843b7a38a888cebc23fd0736",
+  "system_name": "linear-research-composition",
+  "mode": "calibration",
+  "complete": true,
+  "release_ready": false,
+  "selected_component_ids": [
+    "fixture-report-sink",
+    "fixture-research-source"
+  ],
+  "selected_adapter_ids": [
+    "paper-title-to-document-name"
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "step_type": "component",
+      "subject_id": "fixture-research-source",
+      "input_contract": "research-query/v1",
+      "output_contract": "paper-record/v1"
+    },
+    {
+      "index": 2,
+      "step_type": "adapter",
+      "subject_id": "paper-title-to-document-name",
+      "input_contract": "paper-record/v1",
+      "output_contract": "document-record/v1"
+    },
+    {
+      "index": 3,
+      "step_type": "component",
+      "subject_id": "fixture-report-sink",
+      "input_contract": "document-record/v1",
+      "output_contract": "research-report/v1"
+    }
+  ],
+  "unresolved_capabilities": [],
+  "qualifications": [
+    {
+      "subject_type": "component",
+      "subject_id": "fixture-research-source",
+      "eligible": true,
+      "reasons": [],
+      "evidence_observations": {
+        "claimed_level": 0,
+        "review_supplied": false,
+        "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+        "launch_artifact_exists": true,
+        "launch_artifact_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+        "launch_artifact_hash_matches": true,
+        "launch_artifact_referenced_by_argv": true
+      }
+    },
+    {
+      "subject_type": "component",
+      "subject_id": "blocked-report-sink",
+      "eligible": false,
+      "reasons": [
+        "deliberate policy-blocked alternative"
+      ],
+      "evidence_observations": {
+        "claimed_level": 0,
+        "review_supplied": false,
+        "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+        "launch_artifact_exists": true,
+        "launch_artifact_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+        "launch_artifact_hash_matches": true,
+        "launch_artifact_referenced_by_argv": true
+      }
+    },
+    {
+      "subject_type": "component",
+      "subject_id": "fixture-report-sink",
+      "eligible": true,
+      "reasons": [],
+      "evidence_observations": {
+        "claimed_level": 0,
+        "review_supplied": false,
+        "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+        "launch_artifact_exists": true,
+        "launch_artifact_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+        "launch_artifact_hash_matches": true,
+        "launch_artifact_referenced_by_argv": true
+      }
+    },
+    {
+      "subject_type": "adapter",
+      "subject_id": "paper-title-to-document-name",
+      "eligible": true,
+      "reasons": [],
+      "evidence_observations": {
+        "claimed_level": 0,
+        "review_supplied": false,
+        "operations_sha256": "a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9",
+        "operations_hash_matches": true
+      }
+    }
+  ],
+  "evaluated_combinations": [
+    {
+      "component_ids": [
+        "fixture-report-sink",
+        "fixture-research-source"
+      ],
+      "complete": true,
+      "adapter_count": 1,
+      "steps": [
+        {
+          "index": 1,
+          "step_type": "component",
+          "subject_id": "fixture-research-source",
+          "input_contract": "research-query/v1",
+          "output_contract": "paper-record/v1"
+        },
+        {
+          "index": 2,
+          "step_type": "adapter",
+          "subject_id": "paper-title-to-document-name",
+          "input_contract": "paper-record/v1",
+          "output_contract": "document-record/v1"
+        },
+        {
+          "index": 3,
+          "step_type": "component",
+          "subject_id": "fixture-report-sink",
+          "input_contract": "document-record/v1",
+          "output_contract": "research-report/v1"
+        }
+      ],
+      "unresolved_capabilities": [],
+      "terminal_contract": "research-report/v1"
+    }
+  ],
+  "warnings": [
+    "A complete solver plan is generation evidence, not an L4 system-verification verdict.",
+    "Calibration mode may use L0 fixtures without manual promotion and is never release-ready."
+  ]
+}

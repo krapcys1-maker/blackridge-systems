@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:52:30.710257Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "release-compliance",
+  "scenario_id": "incomplete-copy-control",
+  "scenario_description": "A deliberately incomplete copied-code record is rejected with concrete causes.",
+  "expected": [
+    "The command exits nonzero.",
+    "Missing source paths, immutable commit, license, attribution, and review are retained.",
+    "The copy is not allowed."
+  ],
+  "observed": [
+    "The command exited 1 and recorded 11 independent issues for the deliberately incomplete copy.",
+    "Observed failures include mutable commit main, missing upstream paths, unknown license, absent license text, attribution, modifications, and manual review.",
+    "gate_allows_copy is false and the nonexistent destination is reported rather than ignored."
+  ],
+  "probe_id": "24115bc8f1ec4d698f53dbb6c554628f",
+  "probe_file": "evidence\\manual\\2026-08-26\\provenance-gate-incomplete-copy-probe.json",
+  "probe_sha256": "234b21eb02b14e50f9ea4bc9fa9bb13544f0d679b7c3628a94e9a960f9af9289",
+  "notes": "Manual negative-control review confirms that a syntactically parseable but unsafe copy proposal is blocked for the intended reasons."
+}

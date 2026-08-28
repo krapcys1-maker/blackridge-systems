@@ -1,0 +1,26 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T18:50:52.043988Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "benchmark-calibration",
+  "scenario_id": "green-broken-artifact-detected",
+  "scenario_description": "A green process cannot pass when its scientific artifact is fabricated.",
+  "expected": [
+    "Evaluator, definition, public specification, both contracts, model, and budget match.",
+    "The reference fixture satisfies every critical check.",
+    "Every broken process exits zero but the broken artifact fails critical checks.",
+    "Detected failures identify concrete artifact boundaries rather than a weighted score."
+  ],
+  "observed": [
+    "The evaluator module, definition, public specification, input contract, output contract, deterministic model identity and configuration, and 60-second builder budget matched byte-for-byte across both calibration runs.",
+    "The reference fixture matched all 19 critical checks; an independent corpus comparison confirmed exactly 10 unique support sources, zero distractor sources, 10 cited claims, zero title mismatches, zero ungrounded quotes, and a 1615-character answer below the hidden bound.",
+    "Both deliberately broken candidate processes exited zero and emitted schema-valid JSON, yet only 9 of 19 critical checks matched.",
+    "The harness identified ten concrete artifact failures: fabricated or irrelevant source identity, insufficient unique sources, uncited claims, ungrounded quotes, missing evidence coverage and concepts, wrong abstention status, and invented claims and sources for the insufficient corpus.",
+    "The raw calibration evidence contains no verdict and no weighted success score; this named review supplies the scenario verdict after inspecting complete stdout and case observations."
+  ],
+  "probe_id": "798e9d8f7e614c2eb7554186fc36930b",
+  "probe_file": "evidence\\manual\\2026-08-26\\benchmark-calibration-probe.json",
+  "probe_sha256": "3d7068b555df1f832fdf1b9820ae079dde04d1380d31f5ecfb81fb6c3f3fa5a6",
+  "notes": "PASS applies only to calibration of the frozen evaluator. No from-scratch or Blackridge builder has run, so this result makes no comparative product claim. Hidden smoke cases remain procedurally isolated in the same repository and must move behind separate permissions before publication."
+}

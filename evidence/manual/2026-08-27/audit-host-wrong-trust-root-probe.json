@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "probe_id": "0e1bd6aad5ac41ea9d89a1be2ae4942e",
+  "observed_at": "2026-08-26T22:36:42.054239Z",
+  "provider": "blackridge-generated-linear-runtime/1",
+  "subject": ".blackridge\\audit\\manual-cli-fixed-46480\\bundle",
+  "request": {
+    "bundle_directory": ".blackridge\\audit\\manual-cli-fixed-46480\\bundle",
+    "input_file": "examples\\composition-input.json",
+    "expected_provenance_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "observations": {
+    "probe_completed": false,
+    "error_type": "BlackridgeError",
+    "error": "generated provenance root hash does not match the externally supplied SHA-256"
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py"
+  ],
+  "warnings": [
+    "The probe failed; requested observations were not collected."
+  ]
+}

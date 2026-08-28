@@ -1,0 +1,118 @@
+{
+  "schema_version": "1",
+  "probe_id": "8911d89af2a84354b29d419a66768d7c",
+  "observed_at": "2026-08-26T19:24:28.613265Z",
+  "provider": "blackridge-composition-system-probe/1",
+  "subject": "linear-research-no-adapter",
+  "request": {
+    "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\composition-linear-no-adapter.yaml",
+    "definition_sha256": "fcedd28e07ac8d688653442317e2922aaf5deeacb456c6a0d79a271703da044a",
+    "output_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\composer-no-adapter-system",
+    "input_artifact": {
+      "topic": "evidence-driven composition"
+    }
+  },
+  "observations": {
+    "probe_completed": true,
+    "plan": {
+      "schema_version": "1",
+      "generated_at": "2026-08-26T19:24:28.612764Z",
+      "definition_sha256": "fcedd28e07ac8d688653442317e2922aaf5deeacb456c6a0d79a271703da044a",
+      "solver_module_sha256": "880ada300801d58c2ec829d52caaa92f1dd4e88f843b7a38a888cebc23fd0736",
+      "system_name": "linear-research-no-adapter",
+      "mode": "calibration",
+      "complete": false,
+      "release_ready": false,
+      "selected_component_ids": [
+        "fixture-report-sink",
+        "fixture-research-source"
+      ],
+      "selected_adapter_ids": [],
+      "steps": [
+        {
+          "index": 1,
+          "step_type": "component",
+          "subject_id": "fixture-research-source",
+          "input_contract": "research-query/v1",
+          "output_contract": "paper-record/v1"
+        }
+      ],
+      "unresolved_capabilities": [
+        "report-sink"
+      ],
+      "qualifications": [
+        {
+          "subject_type": "component",
+          "subject_id": "fixture-research-source",
+          "eligible": true,
+          "reasons": [],
+          "evidence_observations": {
+            "claimed_level": 0,
+            "review_supplied": false,
+            "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+            "launch_artifact_exists": true,
+            "launch_artifact_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+            "launch_artifact_hash_matches": true,
+            "launch_artifact_referenced_by_argv": true
+          }
+        },
+        {
+          "subject_type": "component",
+          "subject_id": "fixture-report-sink",
+          "eligible": true,
+          "reasons": [],
+          "evidence_observations": {
+            "claimed_level": 0,
+            "review_supplied": false,
+            "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+            "launch_artifact_exists": true,
+            "launch_artifact_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+            "launch_artifact_hash_matches": true,
+            "launch_artifact_referenced_by_argv": true
+          }
+        }
+      ],
+      "evaluated_combinations": [
+        {
+          "component_ids": [
+            "fixture-report-sink",
+            "fixture-research-source"
+          ],
+          "complete": false,
+          "adapter_count": 0,
+          "steps": [
+            {
+              "index": 1,
+              "step_type": "component",
+              "subject_id": "fixture-research-source",
+              "input_contract": "research-query/v1",
+              "output_contract": "paper-record/v1"
+            }
+          ],
+          "unresolved_capabilities": [
+            "report-sink"
+          ],
+          "terminal_contract": "paper-record/v1"
+        }
+      ],
+      "warnings": [
+        "A complete solver plan is generation evidence, not an L4 system-verification verdict.",
+        "Calibration mode may use L0 fixtures without manual promotion and is never release-ready.",
+        "Eligible components exist, but no complete contract route was found."
+      ]
+    },
+    "generation": null,
+    "runtime": null
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py",
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0"
+  ],
+  "warnings": [
+    "A complete solver plan is generation evidence, not an L4 system-verification verdict.",
+    "Calibration mode may use L0 fixtures without manual promotion and is never release-ready.",
+    "Eligible components exist, but no complete contract route was found.",
+    "Generation and execution were not attempted for an incomplete plan."
+  ]
+}

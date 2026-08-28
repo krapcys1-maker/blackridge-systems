@@ -1,0 +1,90 @@
+{
+  "schema_version": "1",
+  "comparison_rule": {
+    "name": "strict-additive-pareto",
+    "requirements": [
+      "every v1 passing capability remains passing",
+      "no v1 capability regresses",
+      "at least one capability absent from v1 passes with retained evidence"
+    ]
+  },
+  "baseline": {
+    "name": "Blackridge 0.1.0 plus isolated-v2-r4 evidence",
+    "repository_commit": "cf12a4542a45c01b6e89c35a1d50041f4b9ef37a",
+    "isolated_v2_verdict": "not-better-overall",
+    "manifest": "baseline-manifest.json"
+  },
+  "candidate": {
+    "name": "Blackridge enhanced v1 champion",
+    "architectural_line": "v1.1",
+    "package_version": "0.1.1",
+    "clean_e2e_snapshot_commit": "257dfc3c25950226c9f8561b7cd9b4015256706b",
+    "representative_proposal_sha256": "2f79f13f849c6ed7585aab471386c02b1831d047c841a1e1aee8186ef703f764"
+  },
+  "raw_checks": [
+    {"capability":"schema-validated capability plan","v1":true,"v1_1":true},
+    {"capability":"live GitHub discovery","v1":true,"v1_1":true},
+    {"capability":"metadata ranking and OpenSSF enrichment","v1":true,"v1_1":true},
+    {"capability":"import exact component behind a stable boundary","v1":true,"v1_1":true},
+    {"capability":"pin exact upstream revision","v1":true,"v1_1":true},
+    {"capability":"license and supply-chain gates","v1":true,"v1_1":true},
+    {"capability":"component sandbox probes","v1":true,"v1_1":true},
+    {"capability":"contract graph and adapters","v1":true,"v1_1":true},
+    {"capability":"provenance-locked generated bundle","v1":true,"v1_1":true},
+    {"capability":"release compliance and notices","v1":true,"v1_1":true},
+    {"capability":"plain-language brief planning","v1":false,"v1_1":true},
+    {"capability":"official GitHub search with exact query budget","v1":false,"v1_1":true},
+    {"capability":"case-insensitive denied-repository policy","v1":false,"v1_1":true},
+    {"capability":"propose new program files from a fresh brief","v1":false,"v1_1":true},
+    {"capability":"cross-platform generated-path rejection","v1":false,"v1_1":true},
+    {"capability":"exact-SHA manual materialization gate","v1":false,"v1_1":true},
+    {"capability":"hash-bound review feedback for repair","v1":false,"v1_1":true},
+    {"capability":"retain schema-rejected provider completion","v1":false,"v1_1":true},
+    {"capability":"representative generated program passes independent workload","v1":"not-run-on-this-task","v1_1":true},
+    {"capability":"automatic unattended configure-adapt-repair-replace loop","v1":false,"v1_1":false},
+    {"capability":"complete universal autonomous foundry","v1":false,"v1_1":false}
+  ],
+  "quality_gates": {
+    "repository_tests": {"passed":222,"skipped":3,"coverage_percent":71.62},
+    "lint_format_mypy_compile": "pass",
+    "bandit_medium_high": "pass",
+    "dependency_audit": "pass",
+    "dependency_consistency": "pass",
+    "notices": "pass",
+    "copy_provenance": "pass",
+    "wheel_and_sdist": "pass",
+    "system_e2e_and_negative_controls": "pass",
+    "generated_tests": {"passed":9,"failed":0},
+    "independent_adversarial_tests": {"passed":7,"failed":0}
+  },
+  "live_experiment": {
+    "foundry_plan_capabilities": 8,
+    "foundry_discovery_candidates": 23,
+    "representative_plan_capabilities": 8,
+    "representative_discovery_candidates": 22,
+    "generation_attempts": 10,
+    "successful_attempt": 10,
+    "denied_repository_present_in_generation_context": false,
+    "selected_reuse_boundary": "python-standard-library in pinned OCI runtime",
+    "external_repository_source_lines_imported_for_representative_task": 0,
+    "reason_no_external_import_was_required": "The verified standard-library boundary satisfied the small task without adding supply-chain risk."
+  },
+  "evidence": [
+    {"artifact":"planning.json","sha256":"4efe80cb2e7fba9e8b0ff8ae1d05e626b0351b234ebd7fe7c1827790aee19f61"},
+    {"artifact":"discovery.json","sha256":"b2634b872a920dc8b6f28a65ffac2530b2c9224400358abdc1b7e4e9a57af32b"},
+    {"artifact":"representative-planning.json","sha256":"3051e3c59cf518a5d50eefd68488ab38b2289ed6334d8e033b054b31793c0476"},
+    {"artifact":"representative-discovery.json","sha256":"f70c4c075c7d99c61aaaa3b780b0b3b16616d9243406873c7c9dfd60027735ce"},
+    {"artifact":"generation-attempt-10.json","sha256":"c5073b5d0133921722f8119dfd64f41739125c3544b3fde9ac54df7d15baf8f7"},
+    {"artifact":"sandbox-evaluation-attempt-10.json","sha256":"e0f0f9f1024fdd60c2e2bb97ee302868d77d8c81308a243ce5baae9ad11e32bb"},
+    {"artifact":"system-e2e-summary.json","sha256":"25457e41ca62a11084bf8041a3b88e7f12acb43f6ac7c3626607a5810bb1a446"}
+  ],
+  "verdict": {
+    "all_v1_passes_retained": true,
+    "v1_regressions": 0,
+    "additive_v2_passes": 9,
+    "v1_1_is_better_than_v1": true,
+    "selected_architecture": "v1.1",
+    "selected_package_version": "0.1.1",
+    "universal_foundry_complete": false
+  }
+}

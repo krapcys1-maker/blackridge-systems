@@ -1,0 +1,135 @@
+{
+  "schema_version": "1",
+  "probe_id": "dedb8a4335044f84ab4bda68d4c99fec",
+  "observed_at": "2026-08-26T22:52:01.425980Z",
+  "provider": "codex-manual-audit/1",
+  "subject": "blackridge-systems-audit-remediation",
+  "request": {
+    "repository": "krapcys1-maker/blackridge-systems",
+    "starting_commit": "6877cc0",
+    "audit_scope": [
+      "production source and control-file boundaries",
+      "CLI behavior and generated-system trust root",
+      "Python 3.11 and 3.12 clean environments",
+      "wheel and runtime image supply chain",
+      "host and Docker sandbox behavior under hostile controls"
+    ],
+    "exact_runtime_image": "sha256:38de6ac1db8d82217f6d3d7268bde4a742afcee431e6dc17b66b5fb279b6d904"
+  },
+  "observations": {
+    "probe_completed": true,
+    "fixed_findings": [
+      "Malformed YAML and malformed upstream JSON now become controlled Blackridge errors without tracebacks.",
+      "Unknown control-file fields are rejected instead of being silently ignored.",
+      "Contract identifiers and provenance globs can no longer escape their declared repository roots.",
+      "Generated systems require an externally retained provenance SHA-256; changing artifacts and recomputing every internal lock is rejected against the original root.",
+      "Unsafe repository, deps.dev, PyPI, OSV, Scorecard, wheel, and image response shapes are validated before use.",
+      "The vulnerable pytest range, runtime pip, and Python 3.11 bootstrap setuptools were replaced with audited versions.",
+      "Static type checking, dependency auditing, source scanning, artifact building, and metadata validation are permanent CI gates on Python 3.11 and 3.12."
+    ],
+    "clean_environment_gates": {
+      "python_versions": ["3.11.13", "3.12.10"],
+      "tests_each": 73,
+      "coverage_percent": 59,
+      "mypy_source_files": 23,
+      "mypy_errors": 0,
+      "ruff_errors": 0,
+      "bandit_medium": 0,
+      "bandit_high": 0,
+      "pip_check_errors": 0,
+      "known_vulnerabilities_after_bootstrap_fix": 0,
+      "provenance_issues": 0,
+      "third_party_notices_match": true
+    },
+    "source_provenance": {
+      "tracked_source_files": 23,
+      "untracked_source_files": [],
+      "exact_fragment_matches_against_pinned_upstreams": 0,
+      "interpretation": "No exact matches were found; this is supporting evidence, not proof of originality."
+    },
+    "runtime_image_supply_chain": {
+      "image_id": "sha256:38de6ac1db8d82217f6d3d7268bde4a742afcee431e6dc17b66b5fb279b6d904",
+      "pip_before": "25.0.1",
+      "pip_before_advisory_entries": 7,
+      "pip_after": "26.2.1",
+      "pip_after_advisory_entries": 0,
+      "osv_package_entries": 160,
+      "osv_vulnerable_entries": 0,
+      "sbom_package_count": 161,
+      "python_package_count": 35,
+      "os_package_count": 118,
+      "runtime_locks_complete": true,
+      "license_review_issues": [],
+      "public_release_gate_open": false,
+      "expected_public_release_blockers": [
+        "Reciprocal-license packages require qualified public-distribution review",
+        "Corresponding source archives or a reviewed source-offer mechanism are not bundled"
+      ]
+    },
+    "wheel_release": {
+      "filename": "blackridge_systems-0.1.0-py3-none-any.whl",
+      "size_bytes": 95091,
+      "sha256": "9c3039d15c2a5bcd760369f4fd8f60c59a2844da87850cd69f3cf7f35cfc88eb",
+      "metadata_version": "2.5",
+      "wheel_file_count": 30,
+      "requires_dist_count": 20,
+      "license_files": ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"],
+      "forbidden_test_or_env_files": [],
+      "twine_check_passed": true,
+      "clean_noneditable_install_passed": true,
+      "clean_import_path": ".blackridge/final-wheel-install/Lib/site-packages/blackridge/__init__.py",
+      "clean_cli_help_passed": true,
+      "clean_pip_check_errors": 0,
+      "clean_known_vulnerabilities": 0
+    },
+    "manual_behavior": {
+      "host_positive_completed": true,
+      "host_final_contract": "research-report/v1",
+      "trusted_provenance_sha256": "7a9ff4b1b1c40ffd300985bbaa5bd92246c5fcb6d387e372cd5d7bfd893e1cb8",
+      "wrong_trust_root_rejected": true,
+      "fully_relocked_attack_rejected_against_original_root": true,
+      "sandbox_positive_completed": true,
+      "sandbox_preflight_checks_passed": 13,
+      "sandbox_component_hashes_unchanged": [true, true],
+      "sandbox_container_exists_after_cleanup": false,
+      "green_exit_invalid_output_rejected": true,
+      "invalid_output_paths": ["/report", "/trace"],
+      "term_ignoring_component_exit_code": 137,
+      "term_ignoring_component_timed_out": true,
+      "memory_pressure_exit_code": 137,
+      "memory_pressure_mislabeled_as_timeout": false,
+      "memory_max_bytes": 1073741824,
+      "memory_swap_max_bytes": 0,
+      "pid_limit": 256,
+      "pid_attempt_blocked": true,
+      "pid_spawned_before_refusal": 252,
+      "pid_refusal_errno": 11
+    },
+    "retained_raw_evidence_sha256": {
+      "audit-host-positive-probe.json": "3b18a000af169f41b6bce18f43bc3197db7c177c24db1875446fb858cdfd9ed8",
+      "audit-host-relocked-attack-probe.json": "60d3da5f9dd04ff4837c752f4b1205f616dd6037c61ac5fcc8fc103e354b607c",
+      "audit-host-wrong-trust-root-probe.json": "e5a2e4be4e7f265569a0014f25c4ad80c63179f23b9244b6599d8a8f2903ede0",
+      "audit-image-osv-fixed.json": "d15a0d9c92cc59f586105b7581a34a254eb7a6732ef6640c29b3067f1904d3f4",
+      "audit-image-release-fixed-probe.json": "5a425a78e8e229ede90d3b2ec53f57e44047c105838054e5fddd0823b5d21058",
+      "audit-runtime-pip-after.json": "bc85e105be2b3780ef0e6d8fd4b19eea620ecdc7414a161dbcf85f5b50749d71",
+      "audit-runtime-pip-before.json": "e680ec0378a28fc3ec78c83c8e00a8829b6f29666272cfa984ac8154676625af",
+      "audit-sandbox-broken-output-fixed-image-probe.json": "ec8a27d2632ab3c6e7943259e713bcbd9e5c6c38e24942ba2c105078c8a6ff0f",
+      "audit-sandbox-memory-fixed-image-probe.json": "40cd15094cf72ff970e1b86571f980234f9004f7bdd9927d8f138ecc7d04fe20",
+      "audit-sandbox-pids-fixed-image-probe.json": "fad1596f4493a817398d28c832562c8490544b43e0134d9aba5c3d290cd2fd82",
+      "audit-sandbox-positive-fixed-image-probe.json": "50973c988f551ba04b1ac002b84613e729cf6f0c5c0d56c0b02b1284674b7654",
+      "audit-sandbox-timeout-fixed-image-probe.json": "a866db19bdfb36d7eeb6646b947a3667dbd050ef77fae4e246224a0e12635a10",
+      "audit-source-provenance-final.json": "02b5dbc6e3f33f3bbbf0ba1c618fb3841b96516e3b3c86882a2012a379e40cea"
+    }
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems",
+    "https://github.com/pypa/pip-audit",
+    "https://github.com/google/osv-scanner",
+    "https://github.com/PyCQA/bandit",
+    "https://github.com/python/mypy"
+  ],
+  "warnings": [
+    "Docker Scout was not treated as evidence because the available CLI required an authenticated Docker session; the exact image was independently scanned with pip-audit and OSV-Scanner.",
+    "The internal runtime image remains intentionally blocked from public distribution until qualified reciprocal-license review and corresponding-source obligations are completed."
+  ]
+}

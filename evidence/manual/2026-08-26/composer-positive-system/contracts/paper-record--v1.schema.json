@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query",
+    "paper",
+    "trace"
+  ],
+  "properties": {
+    "query": {
+      "type": "object"
+    },
+    "paper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "identifier"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "trace": {
+      "type": "object"
+    }
+  }
+}

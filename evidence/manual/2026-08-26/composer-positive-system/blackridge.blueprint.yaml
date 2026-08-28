@@ -1,0 +1,29 @@
+schema_version: '1'
+system_name: linear-research-composition
+goal: Assemble and execute a provenance-locked research source, a contract adapter,
+  and a report sink.
+mode: calibration
+generation_ready: true
+execution_ready: true
+release_ready: false
+external_input: research-query/v1
+required_output: research-report/v1
+steps:
+- index: 1
+  step_type: component
+  subject_id: fixture-research-source
+  input_contract: research-query/v1
+  output_contract: paper-record/v1
+- index: 2
+  step_type: adapter
+  subject_id: paper-title-to-document-name
+  input_contract: paper-record/v1
+  output_contract: document-record/v1
+- index: 3
+  step_type: component
+  subject_id: fixture-report-sink
+  input_contract: document-record/v1
+  output_contract: research-report/v1
+warnings:
+- A complete solver plan is generation evidence, not an L4 system-verification verdict.
+- Calibration mode may use L0 fixtures without manual promotion and is never release-ready.

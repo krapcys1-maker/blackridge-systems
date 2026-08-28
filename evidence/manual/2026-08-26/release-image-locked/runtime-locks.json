@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "python": {
+    "path": "/usr/share/blackridge/locks/python-requirements.lock",
+    "sha256": "0a639e1d25089567275afbfb1825ca2b5ff2ab206d810e0e0b25004268999613",
+    "locked_count": 35,
+    "actual_count": 35,
+    "parse_errors": [],
+    "missing": [],
+    "unexpected": [],
+    "version_mismatches": [],
+    "matches": true
+  },
+  "os": {
+    "path": "/usr/share/blackridge/locks/os-packages.lock.tsv",
+    "sha256": "a9c8e6d0c370f69e85671e5944cbca98c865332c61ca83c5a1f5c1c5a3feb5b7",
+    "locked_count": 118,
+    "actual_count": 118,
+    "first_difference": null,
+    "matches": true
+  },
+  "apt_sources": {
+    "path": "/etc/apt/sources.list.d/debian.sources",
+    "sha256": "5a6fc0d7c4664ee4b8fd18e8757b6db9fda15acf2245308ad118120d902c2616",
+    "snapshot": "20260824T000000Z",
+    "matches": true
+  },
+  "complete": true
+}

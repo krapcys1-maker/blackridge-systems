@@ -1,0 +1,38 @@
+schema_version: "1"
+name: paper-title-adapter-missing-copy
+description: >-
+  Deliberately omit the required title copy to prove that a successful patch
+  application is not confused with target-contract success.
+source_contract: paper-record/v1
+target_contract: document-record/v1
+source_fixture:
+  paper:
+    title: Evidence-Driven System Composition
+    authors: [Ada Example, Lin Example]
+  metadata:
+    id: paper-001
+    year: 2026
+  trace:
+    request_id: manual-adapter-001
+target_schema:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  type: object
+  required: [document]
+  properties:
+    document:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+    metadata:
+      type: object
+  additionalProperties: true
+patch:
+  - op: test
+    path: /paper/title
+    value: Evidence-Driven System Composition
+  - op: add
+    path: /document
+    value: {}

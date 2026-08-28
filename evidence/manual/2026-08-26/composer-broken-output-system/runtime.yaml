@@ -1,0 +1,51 @@
+schema_version: '1'
+system_name: linear-research-broken-output
+mode: calibration
+external_input: research-query/v1
+required_output: research-report/v1
+contract_files:
+  document-record/v1: contracts/document-record--v1.schema.json
+  paper-record/v1: contracts/paper-record--v1.schema.json
+  research-query/v1: contracts/research-query--v1.schema.json
+  research-report/v1: contracts/research-report--v1.schema.json
+steps:
+- index: 1
+  step_type: component
+  subject_id: fixture-research-source
+  input_contract: research-query/v1
+  output_contract: paper-record/v1
+  launch:
+    argv:
+    - D:\Skladacz aplikacji\blackridge-systems\.venv\Scripts\python.exe
+    - D:\Skladacz aplikacji\blackridge-systems\examples/fixtures/research_source.py
+    working_directory: D:\Skladacz aplikacji\blackridge-systems\examples
+    artifact_file: D:\Skladacz aplikacji\blackridge-systems\examples/fixtures/research_source.py
+    artifact_sha256: 8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c
+    timeout_seconds: 30
+    environment_allowlist: []
+- index: 2
+  step_type: adapter
+  subject_id: paper-title-to-document-name
+  input_contract: paper-record/v1
+  output_contract: document-record/v1
+  operations:
+  - op: add
+    path: /document
+    value: {}
+  - op: copy
+    from: /paper/title
+    path: /document/name
+- index: 3
+  step_type: component
+  subject_id: broken-green-exit-report-sink
+  input_contract: document-record/v1
+  output_contract: research-report/v1
+  launch:
+    argv:
+    - D:\Skladacz aplikacji\blackridge-systems\.venv\Scripts\python.exe
+    - D:\Skladacz aplikacji\blackridge-systems\examples/fixtures/report_sink_broken.py
+    working_directory: D:\Skladacz aplikacji\blackridge-systems\examples
+    artifact_file: D:\Skladacz aplikacji\blackridge-systems\examples/fixtures/report_sink_broken.py
+    artifact_sha256: a6b447ca4013e0d7e23f3d2a9b789558a3c6f4a21a0074717e6b66d64aebe03c
+    timeout_seconds: 30
+    environment_allowlist: []

@@ -1,0 +1,6 @@
+**
+!LICENSE
+!NOTICE
+!THIRD_PARTY_NOTICES.md
+!docker/python-requirements.lock
+!docker/os-packages.lock.tsv

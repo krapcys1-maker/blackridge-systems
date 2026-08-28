@@ -1,0 +1,35 @@
+schema_version: "1"
+artifact: blackridge-swerex-runtime
+dockerfile: docker/swerex-runtime.Dockerfile
+base_image: python:3.12-slim@sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17
+distribution_mode: internal-build-only
+public_image_publication: prohibited
+debian_snapshot: "20260824T000000Z"
+declared_installs:
+  apt:
+    direct:
+      - ca-certificates==20250419
+      - git==1:2.47.3-0+deb13u1
+    lock_file: docker/os-packages.lock.tsv
+    locked_binary_package_count: 118
+  python:
+    lock_file: docker/python-requirements.lock
+    locked_distribution_count: 35
+release_outputs:
+  - image-components.json
+  - python-packages.json
+  - os-packages.tsv
+  - os-source-manifest.json
+  - runtime-locks.json
+  - python-requirements.lock
+  - os-packages.lock.tsv
+  - python-license-review.yaml
+  - sbom.spdx.json
+  - sbom.cdx.json
+  - license-bundle.zip
+release_rule: >-
+  This declaration is not the complete inventory. Build the image, resolve its immutable
+  sha256 ID or repository digest, and run probe-image-release. The v1 image is an internal
+  test runtime and must not be published. Future public publication remains blocked while any
+  generated release_blockers are unresolved and requires a reviewed corresponding-source
+  delivery mechanism.

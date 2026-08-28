@@ -1,0 +1,396 @@
+{
+  "schema_version": "1",
+  "probe_id": "5963e7c68e534ca584bb9670941f4eee",
+  "observed_at": "2026-08-26T19:24:28.146760Z",
+  "provider": "blackridge-composition-system-probe/1",
+  "subject": "linear-research-composition",
+  "request": {
+    "definition_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\composition-linear-calibration.yaml",
+    "definition_sha256": "cd442466de2cca1c35bba18c51c26b3c9e898ec08e51f9071ecb98e0c28fbbb3",
+    "output_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\composer-positive-system",
+    "input_artifact": {
+      "topic": "evidence-driven composition"
+    }
+  },
+  "observations": {
+    "probe_completed": true,
+    "plan": {
+      "schema_version": "1",
+      "generated_at": "2026-08-26T19:24:27.997013Z",
+      "definition_sha256": "cd442466de2cca1c35bba18c51c26b3c9e898ec08e51f9071ecb98e0c28fbbb3",
+      "solver_module_sha256": "880ada300801d58c2ec829d52caaa92f1dd4e88f843b7a38a888cebc23fd0736",
+      "system_name": "linear-research-composition",
+      "mode": "calibration",
+      "complete": true,
+      "release_ready": false,
+      "selected_component_ids": [
+        "fixture-report-sink",
+        "fixture-research-source"
+      ],
+      "selected_adapter_ids": [
+        "paper-title-to-document-name"
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "step_type": "component",
+          "subject_id": "fixture-research-source",
+          "input_contract": "research-query/v1",
+          "output_contract": "paper-record/v1"
+        },
+        {
+          "index": 2,
+          "step_type": "adapter",
+          "subject_id": "paper-title-to-document-name",
+          "input_contract": "paper-record/v1",
+          "output_contract": "document-record/v1"
+        },
+        {
+          "index": 3,
+          "step_type": "component",
+          "subject_id": "fixture-report-sink",
+          "input_contract": "document-record/v1",
+          "output_contract": "research-report/v1"
+        }
+      ],
+      "unresolved_capabilities": [],
+      "qualifications": [
+        {
+          "subject_type": "component",
+          "subject_id": "fixture-research-source",
+          "eligible": true,
+          "reasons": [],
+          "evidence_observations": {
+            "claimed_level": 0,
+            "review_supplied": false,
+            "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+            "launch_artifact_exists": true,
+            "launch_artifact_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+            "launch_artifact_hash_matches": true,
+            "launch_artifact_referenced_by_argv": true
+          }
+        },
+        {
+          "subject_type": "component",
+          "subject_id": "blocked-report-sink",
+          "eligible": false,
+          "reasons": [
+            "deliberate policy-blocked alternative"
+          ],
+          "evidence_observations": {
+            "claimed_level": 0,
+            "review_supplied": false,
+            "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+            "launch_artifact_exists": true,
+            "launch_artifact_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+            "launch_artifact_hash_matches": true,
+            "launch_artifact_referenced_by_argv": true
+          }
+        },
+        {
+          "subject_type": "component",
+          "subject_id": "fixture-report-sink",
+          "eligible": true,
+          "reasons": [],
+          "evidence_observations": {
+            "claimed_level": 0,
+            "review_supplied": false,
+            "launch_artifact_file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+            "launch_artifact_exists": true,
+            "launch_artifact_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+            "launch_artifact_hash_matches": true,
+            "launch_artifact_referenced_by_argv": true
+          }
+        },
+        {
+          "subject_type": "adapter",
+          "subject_id": "paper-title-to-document-name",
+          "eligible": true,
+          "reasons": [],
+          "evidence_observations": {
+            "claimed_level": 0,
+            "review_supplied": false,
+            "operations_sha256": "a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9",
+            "operations_hash_matches": true
+          }
+        }
+      ],
+      "evaluated_combinations": [
+        {
+          "component_ids": [
+            "fixture-report-sink",
+            "fixture-research-source"
+          ],
+          "complete": true,
+          "adapter_count": 1,
+          "steps": [
+            {
+              "index": 1,
+              "step_type": "component",
+              "subject_id": "fixture-research-source",
+              "input_contract": "research-query/v1",
+              "output_contract": "paper-record/v1"
+            },
+            {
+              "index": 2,
+              "step_type": "adapter",
+              "subject_id": "paper-title-to-document-name",
+              "input_contract": "paper-record/v1",
+              "output_contract": "document-record/v1"
+            },
+            {
+              "index": 3,
+              "step_type": "component",
+              "subject_id": "fixture-report-sink",
+              "input_contract": "document-record/v1",
+              "output_contract": "research-report/v1"
+            }
+          ],
+          "unresolved_capabilities": [],
+          "terminal_contract": "research-report/v1"
+        }
+      ],
+      "warnings": [
+        "A complete solver plan is generation evidence, not an L4 system-verification verdict.",
+        "Calibration mode may use L0 fixtures without manual promotion and is never release-ready."
+      ]
+    },
+    "generation": {
+      "output_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\composer-positive-system",
+      "definition_sha256": "cd442466de2cca1c35bba18c51c26b3c9e898ec08e51f9071ecb98e0c28fbbb3",
+      "plan_sha256": "c6e68b2f2e77372f6db107fc4769c7d666499059ec7d097dd93673ad96b98e09",
+      "execution_ready": true,
+      "release_ready": false,
+      "artifact_sha256": {
+        "adapters/paper-title-to-document-name.yaml": "298d4bdc7a9830ba46de56bd0281d72d83ac4087ab3ae1d839f8e13cc1abf37a",
+        "blackridge.blueprint.yaml": "9bd72924050d0441829b0d197954840946b1ed1ef717e2bf2c8508768226b15f",
+        "components.lock.yaml": "f6b6496f3a19a4c6913aa82de3cfd8f4b8d3bcdba4bd0b9dd89527eb3a5e47ca",
+        "compose.yaml": "3a598461525ddfdcfacd45ec3e7d976c9adc2814ab1e24315b8b4a1b79129c6b",
+        "composition.definition.yaml": "cd442466de2cca1c35bba18c51c26b3c9e898ec08e51f9071ecb98e0c28fbbb3",
+        "composition.plan.json": "c6e68b2f2e77372f6db107fc4769c7d666499059ec7d097dd93673ad96b98e09",
+        "contracts/document-record--v1.schema.json": "910e5c84fc5d36070a27f55d4af092eb94a3f709a2b7ff8efec80ab1dd4e09ae",
+        "contracts/paper-record--v1.schema.json": "a5e1e57f2c1fba0a3be9d57226be53d372028d13460c329fd70e7ae3056d7367",
+        "contracts/research-query--v1.schema.json": "39605cc8f0d5a4fc46d213bbeef93269019ec9dc5ff9376e945ee95dbddacf7b",
+        "contracts/research-report--v1.schema.json": "9a7d9ea3d633ef6de9399dd39092d94a67efc89eee9cfe1efa9da10f7c202b83",
+        "evidence/evidence.lock.yaml": "97ab04fcf4d8f2e2afe7daeb36b3d8e4ca45fd9cbe705070e3f54afdb3842123",
+        "README.md": "54044ee73756079122d860c41367b61f9398399f445a74e58225b79b31cc198a",
+        "runtime.yaml": "2e90ca9ec2a37b61791a7062673765329bf03183e8a2f6432c44fca0a8c655dc",
+        "sbom/README.md": "19c740118931f2f23192e45c378fe4a4a7c90f6b94b9a7fe65dddbfb5751084a",
+        "tests/README.md": "3a7545576e626a7cd28efd50e65266a0ec9c69e872a2b1c3ed2bcddc31b89b9b",
+        "provenance.json": "7359789a302ac228f2f08c38ab50a5a620bf5287ca7313bca147857a38edb5ed"
+      }
+    },
+    "runtime": {
+      "schema_version": "1",
+      "probe_id": "2cc3961c7b7d46269acbe5aff9cc4609",
+      "observed_at": "2026-08-26T19:24:28.146760Z",
+      "provider": "blackridge-generated-linear-runtime/1",
+      "subject": "linear-research-composition",
+      "request": {
+        "bundle_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\composer-positive-system",
+        "runtime_sha256": "2e90ca9ec2a37b61791a7062673765329bf03183e8a2f6432c44fca0a8c655dc",
+        "runtime_module_sha256": "880ada300801d58c2ec829d52caaa92f1dd4e88f843b7a38a888cebc23fd0736",
+        "provenance_sha256": "7359789a302ac228f2f08c38ab50a5a620bf5287ca7313bca147857a38edb5ed",
+        "bundle_integrity_mismatches": [],
+        "input_artifact": {
+          "topic": "evidence-driven composition"
+        }
+      },
+      "observations": {
+        "probe_completed": true,
+        "runtime_mode": "calibration",
+        "initial_contract": "research-query/v1",
+        "initial_validation_errors": [],
+        "steps": [
+          {
+            "subject_id": "fixture-research-source",
+            "step_type": "component",
+            "status": "completed",
+            "input_contract": "research-query/v1",
+            "output_contract": "paper-record/v1",
+            "input_artifact": {
+              "topic": "evidence-driven composition"
+            },
+            "artifact_integrity": {
+              "file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+              "exists": true,
+              "expected_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+              "actual_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+              "matches": true,
+              "after_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+              "unchanged_after_execution": true
+            },
+            "process": {
+              "argv": [
+                "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+                "D:\\Skladacz aplikacji\\blackridge-systems\\examples/fixtures/research_source.py"
+              ],
+              "working_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\examples",
+              "environment_names": [
+                "PYTHONIOENCODING"
+              ],
+              "duration_seconds": 0.047213,
+              "timed_out": false,
+              "exit_code": 0,
+              "stdout": "{\"query\": {\"topic\": \"evidence-driven composition\"}, \"paper\": {\"title\": \"Evidence for evidence-driven composition\", \"identifier\": \"fixture-paper-001\"}, \"trace\": {\"source\": \"research-source-calibration\"}}",
+              "stderr": ""
+            },
+            "output_artifact": {
+              "query": {
+                "topic": "evidence-driven composition"
+              },
+              "paper": {
+                "title": "Evidence for evidence-driven composition",
+                "identifier": "fixture-paper-001"
+              },
+              "trace": {
+                "source": "research-source-calibration"
+              }
+            },
+            "output_validation_errors": [],
+            "output_contract_valid": true
+          },
+          {
+            "subject_id": "paper-title-to-document-name",
+            "step_type": "adapter",
+            "status": "completed",
+            "input_contract": "paper-record/v1",
+            "output_contract": "document-record/v1",
+            "input_artifact": {
+              "query": {
+                "topic": "evidence-driven composition"
+              },
+              "paper": {
+                "title": "Evidence for evidence-driven composition",
+                "identifier": "fixture-paper-001"
+              },
+              "trace": {
+                "source": "research-source-calibration"
+              }
+            },
+            "operations": [
+              {
+                "op": "add",
+                "path": "/document",
+                "value": {
+                  "name": "Evidence for evidence-driven composition"
+                }
+              },
+              {
+                "op": "copy",
+                "from": "/paper/title",
+                "path": "/document/name"
+              }
+            ],
+            "patch_error": null,
+            "output_artifact": {
+              "query": {
+                "topic": "evidence-driven composition"
+              },
+              "paper": {
+                "title": "Evidence for evidence-driven composition",
+                "identifier": "fixture-paper-001"
+              },
+              "trace": {
+                "source": "research-source-calibration"
+              },
+              "document": {
+                "name": "Evidence for evidence-driven composition"
+              }
+            },
+            "output_validation_errors": [],
+            "output_contract_valid": true
+          },
+          {
+            "subject_id": "fixture-report-sink",
+            "step_type": "component",
+            "status": "completed",
+            "input_contract": "document-record/v1",
+            "output_contract": "research-report/v1",
+            "input_artifact": {
+              "query": {
+                "topic": "evidence-driven composition"
+              },
+              "paper": {
+                "title": "Evidence for evidence-driven composition",
+                "identifier": "fixture-paper-001"
+              },
+              "trace": {
+                "source": "research-source-calibration"
+              },
+              "document": {
+                "name": "Evidence for evidence-driven composition"
+              }
+            },
+            "artifact_integrity": {
+              "file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+              "exists": true,
+              "expected_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+              "actual_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+              "matches": true,
+              "after_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+              "unchanged_after_execution": true
+            },
+            "process": {
+              "argv": [
+                "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+                "D:\\Skladacz aplikacji\\blackridge-systems\\examples/fixtures/report_sink.py"
+              ],
+              "working_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\examples",
+              "environment_names": [
+                "PYTHONIOENCODING"
+              ],
+              "duration_seconds": 0.044555,
+              "timed_out": false,
+              "exit_code": 0,
+              "stdout": "{\"report\": {\"title\": \"Evidence for evidence-driven composition\", \"based_on\": \"fixture-paper-001\"}, \"trace\": {\"source\": \"research-source-calibration\", \"sink\": \"report-sink-calibration\"}}",
+              "stderr": ""
+            },
+            "output_artifact": {
+              "report": {
+                "title": "Evidence for evidence-driven composition",
+                "based_on": "fixture-paper-001"
+              },
+              "trace": {
+                "source": "research-source-calibration",
+                "sink": "report-sink-calibration"
+              }
+            },
+            "output_validation_errors": [],
+            "output_contract_valid": true
+          }
+        ],
+        "all_steps_completed": true,
+        "failure_reason": null,
+        "final_contract": "research-report/v1",
+        "required_output": "research-report/v1",
+        "final_artifact": {
+          "report": {
+            "title": "Evidence for evidence-driven composition",
+            "based_on": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration",
+            "sink": "report-sink-calibration"
+          }
+        },
+        "final_validation_errors": []
+      },
+      "sources": [
+        "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py",
+        "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+        "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0"
+      ],
+      "warnings": []
+    }
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py",
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0"
+  ],
+  "warnings": [
+    "A complete solver plan is generation evidence, not an L4 system-verification verdict.",
+    "Calibration mode may use L0 fixtures without manual promotion and is never release-ready."
+  ]
+}

@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling==1.32.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "blackridge-systems"
+version = "0.1.1"
+description = "Evidence-driven, reuse-first composition of software systems from proven open-source components."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]
+authors = [{ name = "Blackridge Systems contributors" }]
+keywords = ["agents", "code-reuse", "github", "software-composition", "open-source"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "httpx>=0.27,<1",
+  "jsonpatch==1.33",
+  "jsonschema==4.26.0",
+  "pydantic>=2.10,<3",
+  "PyYAML>=6,<7",
+  "rich>=13.9,<15",
+  "typer>=0.15,<1",
+]
+
+[project.optional-dependencies]
+ai = ["pydantic-ai>=1,<3"]
+sandbox = [
+  # swe-rex 1.4.0 imports aiohttp in its Docker client but does not declare it.
+  "aiohttp>=3.10,<4",
+  "swe-rex==1.4.0",
+]
+supply-chain = ["pypi-attestations==0.0.30"]
+scientific-auditor = [
+  "numpy==2.4.2",
+  "safetensors==0.7.0",
+  "tokenizers==0.22.2",
+  "torch==2.10.0",
+  "transformers==5.1.0",
+]
+dev = [
+  "bandit==1.9.4",
+  "build>=1,<2",
+  "mypy==2.3.1",
+  "pip-audit==2.10.0",
+  "pytest>=9.0.3,<10",
+  "pytest-cov>=6,<8",
+  "ruff>=0.12,<1",
+  "twine==7.0.0",
+  "types-jsonschema==4.26.0.20260518",
+  "types-PyYAML==6.0.12.20260815",
+]
+
+[project.scripts]
+blackridge = "blackridge.cli:app"
+
+[project.urls]
+Repository = "https://github.com/krapcys1-maker/blackridge-systems"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/blackridge"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/evidence", "/.blackridge", "/dist", "/build"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+  "jsonpatch",
+  "numpy",
+  "numpy.*",
+  "safetensors",
+  "safetensors.*",
+  "swerex.*",
+  "tokenizers",
+  "tokenizers.*",
+  "torch",
+  "torch.*",
+  "transformers",
+  "transformers.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"

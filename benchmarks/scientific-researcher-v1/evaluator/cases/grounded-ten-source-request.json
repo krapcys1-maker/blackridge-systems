@@ -1,0 +1,83 @@
+{
+  "schema_version": "1",
+  "request_id": "grounded-controls",
+  "question": "Which operational controls reduce false confidence in automated software composition?",
+  "minimum_sources": 10,
+  "documents": [
+    {
+      "document_id": "evidence-01",
+      "title": "Immutable Inputs for Reproducible Integration",
+      "full_text": "An exact commit prevents a moving branch from silently changing the component under evaluation. The observed checkout identity must equal the requested revision."
+    },
+    {
+      "document_id": "evidence-02",
+      "title": "Negative Controls in Software Experiments",
+      "full_text": "A negative control should be deliberately broken at a known boundary. A useful evaluator must reject it even when the surrounding command exits successfully."
+    },
+    {
+      "document_id": "evidence-03",
+      "title": "Human Oversight of Machine Evidence",
+      "full_text": "Manual review compares retained observations with expectations written before execution. The reviewer records concrete reasons instead of trusting a green badge."
+    },
+    {
+      "document_id": "evidence-04",
+      "title": "Separating Security Signals",
+      "full_text": "Independent evidence keeps repository posture separate from known vulnerability results. Missing posture data remains unknown rather than becoming a passing score."
+    },
+    {
+      "document_id": "evidence-05",
+      "title": "Release Attestations and Provenance",
+      "full_text": "Package provenance requires a distribution attestation or equivalent release evidence. A valid source commit signature alone does not attest the published package file."
+    },
+    {
+      "document_id": "evidence-06",
+      "title": "Artifact Validation Beyond Exit Codes",
+      "full_text": "Process success shows only that execution completed. Functional confidence requires inspecting the produced artifact against the consumer contract."
+    },
+    {
+      "document_id": "evidence-07",
+      "title": "License Evidence Across Dependency Graphs",
+      "full_text": "A repository license does not clear every dependency license. Unknown, non-standard, and policy-sensitive dependency results must remain visible to reviewers."
+    },
+    {
+      "document_id": "evidence-08",
+      "title": "Disposable Environments for Candidate Code",
+      "full_text": "Candidate code should run at an immutable revision inside a disposable bounded environment. Host integrity and container cleanup are separate observations."
+    },
+    {
+      "document_id": "evidence-09",
+      "title": "Contract Tests at Component Boundaries",
+      "full_text": "Compatibility is demonstrated by applying the same workload to working and broken connections. Schema validation can expose a missing edge that raised no runtime exception."
+    },
+    {
+      "document_id": "evidence-10",
+      "title": "Raw Metrics for Agent Benchmarks",
+      "full_text": "Task success rate, wall time, cost, repair iterations, change success, and generated code should remain visible as raw metrics. A weighted score must not hide them."
+    },
+    {
+      "document_id": "distractor-01",
+      "title": "Tomato Irrigation in Summer",
+      "full_text": "Tomato plants benefit from consistent soil moisture and good drainage during warm summer growth."
+    },
+    {
+      "document_id": "distractor-02",
+      "title": "Carbon Balance in Leaf Compost",
+      "full_text": "Shredded autumn leaves provide carbon-rich material for a balanced household compost pile."
+    },
+    {
+      "document_id": "distractor-03",
+      "title": "Seasonal Pollinator Borders",
+      "full_text": "A pollinator border combines flowering plants with staggered bloom periods across the growing season."
+    },
+    {
+      "document_id": "distractor-04",
+      "title": "Clay Soil Path Construction",
+      "full_text": "Compacted stone and careful grading can improve the durability and drainage of garden paths on clay soil."
+    },
+    {
+      "document_id": "distractor-05",
+      "title": "Winter Storage of Root Vegetables",
+      "full_text": "Cool humid storage can slow moisture loss in harvested carrots and other root vegetables during winter."
+    }
+  ]
+}

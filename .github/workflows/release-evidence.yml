@@ -1,0 +1,100 @@
+name: release-evidence
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  artifact-compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install release tooling
+        run: |
+          python -m pip install --upgrade "pip==26.2.1" "setuptools==84.0.0"
+          python -m pip install -e ".[dev]"
+      - name: Verify generated notices
+        run: blackridge compliance-notices --check
+      - name: Build wheel and source distribution
+        run: python -m build
+      - name: Validate distribution metadata and README rendering
+        run: twine check dist/*
+      - name: Inspect exact wheel bytes
+        run: >-
+          blackridge probe-wheel-release
+          "$(find dist -maxdepth 1 -type f -name '*.whl' -print -quit)"
+          --output-directory release-evidence/wheel
+      - name: Build the declared runtime image
+        run: >-
+          docker build
+          --tag blackridge/swerex-runtime:release-candidate
+          --file docker/swerex-runtime.Dockerfile .
+      - name: Resolve immutable local image ID
+        id: image
+        run: echo "id=$(docker image inspect --format '{{.Id}}' blackridge/swerex-runtime:release-candidate)" >> "$GITHUB_OUTPUT"
+      - name: Inspect exact image bytes
+        id: image_probe
+        run: |
+          set +e
+          blackridge probe-image-release \
+            "${{ steps.image.outputs.id }}" \
+            --output-directory release-evidence/image
+          status=$?
+          set -e
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+      - name: Upload compliance artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: blackridge-release-evidence-${{ github.sha }}
+          path: release-evidence/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce v1 internal-only image policy
+        run: |
+          if [ "${{ steps.image_probe.outputs.exit_code }}" = "0" ]; then
+            echo "The image gate opened unexpectedly while v1 publication policy is prohibited."
+            exit 1
+          fi
+          if [ "${{ steps.image_probe.outputs.exit_code }}" != "1" ]; then
+            echo "Image compliance failed operationally with exit ${{ steps.image_probe.outputs.exit_code }}."
+            echo "Partial evidence was uploaded, but no policy conclusion is valid."
+            exit "${{ steps.image_probe.outputs.exit_code }}"
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          probe = json.loads(Path("release-evidence/image/probe.json").read_text())
+          observed = probe["observations"]
+          manifest = observed["image_manifest"]
+          review = manifest["python_license_review"]
+          expected_blockers = [
+              "Reciprocal-license packages require qualified public-distribution review",
+              "Corresponding source archives or a reviewed source-offer mechanism are not bundled",
+          ]
+          assertions = {
+              "probe completed": observed["probe_completed"] is True,
+              "runtime locks complete": manifest["runtime_locks"]["complete"] is True,
+              "six license reviews valid": review["valid_entry_count"] == 6,
+              "license review has no issues": review["issues"] == [],
+              "unknown metadata resolved": review["unresolved_unknown_metadata"] == [],
+              "public gate remains closed": observed["release_gate_open"] is False,
+              "only expected public blockers remain": observed["release_blockers"] == expected_blockers,
+          }
+          failed = [name for name, passed in assertions.items() if not passed]
+          if failed:
+              raise SystemExit("Unexpected internal image evidence: " + ", ".join(failed))
+          print("Internal runtime evidence is complete; public publication remains blocked as required.")
+          PY

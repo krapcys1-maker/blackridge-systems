@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T19:24:53.601181Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "compatibility-composition",
+  "scenario_id": "green-exit-invalid-artifact-stops-runtime",
+  "scenario_description": "A zero-exit component cannot pass when its JSON artifact violates its output contract.",
+  "expected": [
+    "Source and adapter steps complete against their exact contracts.",
+    "The broken sink exits zero and its complete stdout is retained.",
+    "Draft 2020-12 validation rejects the sink artifact and all_steps_completed remains false."
+  ],
+  "observed": [
+    "The final solver module hash was retained; the source and paper-title-to-document-name adapter completed first and their artifacts passed paper-record/v1 and document-record/v1.",
+    "The deliberately broken sink was the file referenced by argv, matched its separate lock before and after execution, exited zero, and retained stdout omitting report.title and trace.source.",
+    "Draft 2020-12 validation retained two concrete errors at /report and /trace, marked the sink step failed, kept all_steps_completed false, and assigned no raw verdict despite the green process exit."
+  ],
+  "probe_id": "222b7eba246a46eba15036168657cc6c",
+  "probe_file": "evidence\\manual\\2026-08-26\\composer-broken-output-probe.json",
+  "probe_sha256": "b5a3d2ef487e05d834c827d5d3304a71b0300e817b5a8a8bfc3f9c75bea02c11",
+  "notes": "PASS applies to detection of the deliberate artifact defect. It is not a passing verdict for the broken sink or a production-readiness claim for the generated calibration bundle."
+}

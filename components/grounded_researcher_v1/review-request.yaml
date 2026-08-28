@@ -1,0 +1,50 @@
+schema_version: "1"
+name: grounded-researcher-component-review
+goal: >-
+  Verify that the offline grounded researcher selects relevant evidence, emits exact
+  document-backed citations, rejects distractors, and abstains when evidence is absent.
+constraints:
+  execution: isolated-pinned-container
+  network: disabled
+  review: named-manual-review
+capabilities:
+  - id: grounded-research-synthesis
+    description: Produce a concise answer with exact corpus-backed claims or abstain cleanly.
+    accepts: [grounded-research-request/v1]
+    produces: [grounded-research-response/v1]
+    seeds: []
+    searches:
+      - keywords: [offline, grounded, research, citations]
+    acceptance:
+      - id: independent-domains-and-negative-control
+        description: Answer three unrelated domains exactly and reject an unsupported fourth domain.
+        given: >-
+          Frozen policy, backup, museum-loan, and astronomy fixtures containing relevant
+          documents, plausible distractors, keyword stuffing, and an unrelated corpus.
+        when: >-
+          The immutable component and a green-exit broken control run with identical stdin
+          inside a pinned networkless read-only non-root container.
+        then:
+          - The component exits zero and returns the exact expected source set for all three answerable domains.
+          - Every request and response satisfies the frozen public JSON Schema contracts.
+          - Every emitted citation quote occurs verbatim in its identified input document.
+          - The component returns insufficient-evidence with no claims or sources for the unrelated corpus.
+          - The green-exit broken control is rejected by semantic checks despite exiting zero.
+          - All probe containers are removed after execution.
+      - id: adversarial-order-bridges-and-scale
+        description: Resist order changes, lexical bridges, invalid minima, and large distractor corpora.
+        given: >-
+          Frozen deterministic cases containing document permutations, a lexical bridge,
+          a negated near-duplicate, varying source minima, invalid inputs, partial evidence,
+          and a 200-document resource case.
+        when: >-
+          The immutable component runs each case in the same pinned networkless read-only
+          non-root container with bounded processes, memory, CPU, output, and time.
+        then:
+          - Reordering the same corpus does not change the exact selected source set.
+          - Bridge and negated distractors are excluded from every answered source set.
+          - Partial or contract-invalid requests produce clean abstention without claims or sources.
+          - Source minima of one, three, and six select only the permitted evidence community.
+          - The 200-document case selects twenty permitted sources within eight seconds.
+          - Every output satisfies the public contract and every citation quote is exactly grounded.
+          - Every container cleanup command succeeds and no probe container remains.

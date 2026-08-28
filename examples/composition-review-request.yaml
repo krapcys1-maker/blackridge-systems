@@ -1,0 +1,49 @@
+schema_version: "1"
+name: compatibility-composer-calibration
+goal: >-
+  Verify compatibility solving, locked generation, and artifact-first execution with negative controls.
+constraints:
+  execution: calibration-fixtures-only
+  verdict: named-manual-review
+capabilities:
+  - id: compatibility-composition
+    description: Select compatible components and generate a provenance-locked runnable system.
+    accepts: [composition-definition/v1]
+    produces: [generated-system/v1]
+    seeds: []
+    searches:
+      - keywords: [software, component, compatibility, solver]
+    acceptance:
+      - id: compatible-route-generates-and-runs
+        description: A compatible graph generates and runs through every validated boundary.
+        given: Two command components, one required adapter, and one policy-blocked alternative.
+        when: The composer solves, generates, and executes the frozen input.
+        then:
+          - The blocked alternative is rejected and the two eligible components are selected.
+          - Exactly one adapter bridges paper-record/v1 to document-record/v1.
+          - Every generated artifact is hashed and the complete runtime output satisfies research-report/v1.
+          - Generation remains explicitly not release-ready without L4 review.
+      - id: missing-edge-stops-generation
+        description: Eligible components cannot be generated when their contracts have no connecting edge.
+        given: The same source and sink with the only adapter removed.
+        when: Compatibility solving is requested.
+        then:
+          - The plan remains incomplete with report-sink unresolved.
+          - Generation and component execution are not attempted.
+          - No output directory or release verdict is fabricated.
+      - id: green-exit-invalid-artifact-stops-runtime
+        description: A zero-exit component cannot pass when its JSON artifact violates its output contract.
+        given: A complete route whose final sink deliberately omits required report fields.
+        when: The generated runtime executes the same frozen input.
+        then:
+          - Source and adapter steps complete against their exact contracts.
+          - The broken sink exits zero and its complete stdout is retained.
+          - Draft 2020-12 validation rejects the sink artifact and all_steps_completed remains false.
+      - id: unreviewed-production-evidence-refused
+        description: A production component cannot self-declare L3 without a named matching review.
+        given: An immutable command artifact whose definition claims L3 but supplies no review.
+        when: Production compatibility solving is requested.
+        then:
+          - The component artifact hash may match while its evidence qualification still fails.
+          - The reason explicitly states that the claimed level has no named manual review.
+          - Generation and host execution are not attempted.

@@ -1,0 +1,96 @@
+schema_version: "1"
+name: fanin-contract-graph-calibration
+goal: >-
+  Prove that independent branches can consume one input and join their contract-keyed artifacts.
+mode: calibration
+external_input: seed/v1
+required_output: joined/v1
+required_capabilities: [uppercase-branch, length-branch, join-branches]
+allowed_licenses: [Apache-2.0]
+allowed_integrations: [command-json]
+minimum_evidence_level: 0
+contracts:
+  - contract_id: seed/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [text]
+      properties:
+        text: {type: string, minLength: 1}
+  - contract_id: uppercase/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [uppercase]
+      properties:
+        uppercase: {type: string, minLength: 1}
+  - contract_id: length/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [length]
+      properties:
+        length: {type: integer, minimum: 1}
+  - contract_id: joined/v1
+    schema:
+      $schema: https://json-schema.org/draft/2020-12/schema
+      type: object
+      additionalProperties: false
+      required: [summary, observed_contracts]
+      properties:
+        summary: {type: string, minLength: 3}
+        observed_contracts:
+          type: array
+          const: [length/v1, uppercase/v1]
+components:
+  - component_id: fixture-uppercase-branch
+    capability_id: uppercase-branch
+    source_uri: blackridge://calibration/fanout-uppercase
+    revision: sha256:7cd12103069dee925eac5ffaedb3a8de468d55869fd4a8e91e5ae13bbf22630b
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [seed/v1]
+    produces: [uppercase/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/fanout_uppercase.py"]
+      artifact_file: "{definition_dir}/fixtures/fanout_uppercase.py"
+      artifact_sha256: 7cd12103069dee925eac5ffaedb3a8de468d55869fd4a8e91e5ae13bbf22630b
+      working_directory: "{definition_dir}"
+      timeout_seconds: 10
+      environment_allowlist: []
+    evidence: {level: 0}
+  - component_id: fixture-length-branch
+    capability_id: length-branch
+    source_uri: blackridge://calibration/fanout-length
+    revision: sha256:aae4d06c9dbc48396bc0a83d9a79434cfae6d71a42f87ba7aa0f3b42cba8ec62
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [seed/v1]
+    produces: [length/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/fanout_length.py"]
+      artifact_file: "{definition_dir}/fixtures/fanout_length.py"
+      artifact_sha256: aae4d06c9dbc48396bc0a83d9a79434cfae6d71a42f87ba7aa0f3b42cba8ec62
+      working_directory: "{definition_dir}"
+      timeout_seconds: 10
+      environment_allowlist: []
+    evidence: {level: 0}
+  - component_id: fixture-join-branches
+    capability_id: join-branches
+    source_uri: blackridge://calibration/fanin-join
+    revision: sha256:8177438cbe6a29ddb113d8c9c5bb71f52e961c7de5afb14eaa70d1dc2082a636
+    license_spdx: Apache-2.0
+    integration: command-json
+    accepts: [uppercase/v1, length/v1]
+    produces: [joined/v1]
+    launch:
+      argv: ["{python}", "{definition_dir}/fixtures/fanin_join.py"]
+      artifact_file: "{definition_dir}/fixtures/fanin_join.py"
+      artifact_sha256: 8177438cbe6a29ddb113d8c9c5bb71f52e961c7de5afb14eaa70d1dc2082a636
+      working_directory: "{definition_dir}"
+      timeout_seconds: 10
+      environment_allowlist: []
+    evidence: {level: 0}

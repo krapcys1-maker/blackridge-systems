@@ -1,0 +1,24 @@
+schema_version: "1"
+source_glob: src/blackridge/*.py
+exact_window_lines: 6
+upstreams:
+  - id: python-json-patch-1-33
+    repository: stefankoegl/python-json-patch
+    commit: 0b0520328504050ee09d835d4df294838e055c38
+    version: v1.33
+    license_spdx: BSD-3-Clause
+  - id: jsonschema-4-26-0
+    repository: python-jsonschema/jsonschema
+    commit: a7277432b0f7bcd0551f6e589d30457017125df4
+    version: v4.26.0
+    license_spdx: MIT
+  - id: swe-rex-1-4-0
+    repository: SWE-agent/SWE-ReX
+    commit: f802b3e14d82aa4c13291d2fda5bd4fd48f36f91
+    version: v1.4.0
+    license_spdx: MIT
+  - id: octocode-18-3-0
+    repository: bgauryy/octocode
+    commit: af20f667fd2536c9502f69d99fe6bdedfcc839cb
+    version: npm:octocode@18.3.0
+    license_spdx: MIT

@@ -1,0 +1,363 @@
+{
+  "schema_version": "1",
+  "probe_id": "80dff3f225f64bf088e32b4a7ce970c6",
+  "observed_at": "2026-08-26T23:01:02.779305Z",
+  "provider": "blackridge-source-provenance-audit/1",
+  "subject": "D:\\Skladacz aplikacji\\blackridge-systems@dfccfcaf34aafb659d8a41701ea20a5068e348b2",
+  "request": {
+    "schema_version": "1",
+    "source_glob": "src/blackridge/*.py",
+    "exact_window_lines": 6,
+    "upstreams": [
+      {
+        "id": "python-json-patch-1-33",
+        "repository": "stefankoegl/python-json-patch",
+        "commit": "0b0520328504050ee09d835d4df294838e055c38",
+        "version": "v1.33",
+        "license_spdx": "BSD-3-Clause"
+      },
+      {
+        "id": "jsonschema-4-26-0",
+        "repository": "python-jsonschema/jsonschema",
+        "commit": "a7277432b0f7bcd0551f6e589d30457017125df4",
+        "version": "v4.26.0",
+        "license_spdx": "MIT"
+      },
+      {
+        "id": "swe-rex-1-4-0",
+        "repository": "SWE-agent/SWE-ReX",
+        "commit": "f802b3e14d82aa4c13291d2fda5bd4fd48f36f91",
+        "version": "v1.4.0",
+        "license_spdx": "MIT"
+      },
+      {
+        "id": "octocode-18-3-0",
+        "repository": "bgauryy/octocode",
+        "commit": "af20f667fd2536c9502f69d99fe6bdedfcc839cb",
+        "version": "npm:octocode@18.3.0",
+        "license_spdx": "MIT"
+      }
+    ]
+  },
+  "observations": {
+    "probe_completed": true,
+    "tracked_source_file_count": 23,
+    "untracked_source_files": [],
+    "files": [
+      {
+        "path": "src/blackridge/__init__.py",
+        "sha256": "7d5f491d4565f9ffbbffbe2e53fadd526b1e64047ff114c79f94f6d2161221e4",
+        "line_count": 3,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/adaptation.py",
+        "sha256": "aba351a294b06e014d1c8deee7e68610df89f5e76d25d5361e734477eebf0b66",
+        "line_count": 252,
+        "first_add": {
+          "commit": "70dccc87afe9a4053478bef1fae356b4bfcbfafa",
+          "authored_at": "2026-08-26T20:52:45+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: add declarative contract adaptation evidence"
+        }
+      },
+      {
+        "path": "src/blackridge/benchmark.py",
+        "sha256": "ef7e1d4638247a5d592676133a8e5b2955289fc018b3d8bf897d8a5410be66d3",
+        "line_count": 939,
+        "first_add": {
+          "commit": "840b37f73f69892e960542fd07524996c76dea06",
+          "authored_at": "2026-08-26T21:53:28+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: add calibrated A/B benchmark harness"
+        }
+      },
+      {
+        "path": "src/blackridge/blueprint.py",
+        "sha256": "0e1c2f0bebd5ce72a4da373224a5c35cb1bb69bd0efb77fc94c3ba2a92003378",
+        "line_count": 50,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/cli.py",
+        "sha256": "c1e75bba62ece77e64451a8280afe1739198a60f52d92e5892078e05cacefb64",
+        "line_count": 1042,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/composition.py",
+        "sha256": "40562875681c2c1416805b607c914984f0c4412949e8fc1e5528235c5271ba85",
+        "line_count": 1862,
+        "first_add": {
+          "commit": "5d432bd9b798af29902f8575273527bf10921a79",
+          "authored_at": "2026-08-26T22:26:45+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: add evidence-gated compatibility composer"
+        }
+      },
+      {
+        "path": "src/blackridge/depsdev.py",
+        "sha256": "c28e29654909367b24e2355e453b78bd1c7ab167d1eea6277e772319e4769d54",
+        "line_count": 261,
+        "first_add": {
+          "commit": "384bdfbf40e24e83cc4698922532d351d354e7b7",
+          "authored_at": "2026-08-26T20:22:53+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: add manual evidence-driven package inspection"
+        }
+      },
+      {
+        "path": "src/blackridge/doctor.py",
+        "sha256": "aa3b32a666b4895936bd699e693c9493348fc365d82f6e2f1e82712f04ea5964",
+        "line_count": 39,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/errors.py",
+        "sha256": "5739a6dd2db87ea76308c2ee53d47a630eabcf8c890639930bdda7e26a9dd775",
+        "line_count": 13,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/evidence.py",
+        "sha256": "9eb14a0e348a8a4ced0e401a46cc8e66c95f985ff33379a260012bc8e8d96469",
+        "line_count": 84,
+        "first_add": {
+          "commit": "384bdfbf40e24e83cc4698922532d351d354e7b7",
+          "authored_at": "2026-08-26T20:22:53+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: add manual evidence-driven package inspection"
+        }
+      },
+      {
+        "path": "src/blackridge/formats.py",
+        "sha256": "bc4a55435e730c098a8fcefdcde3941a355400912a3ff42bb541930116f8cecc",
+        "line_count": 18,
+        "first_add": {
+          "commit": "dfccfcaf34aafb659d8a41701ea20a5068e348b2",
+          "authored_at": "2026-08-27T02:00:48+03:00",
+          "author": "krapcys1-maker",
+          "subject": "Harden audit boundaries and retain hostile evidence"
+        }
+      },
+      {
+        "path": "src/blackridge/github.py",
+        "sha256": "46cea7ef421ff602b97c2e357115a0639a16959c60140dd7a0ae74ffc3ad30aa",
+        "line_count": 74,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/io.py",
+        "sha256": "e9cdad75296cbae85723e9da677006cf09851970a84bc64bc333dacf4cb9682f",
+        "line_count": 85,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/models.py",
+        "sha256": "4fb2bfd5b95b117e23e739b202acc5bc7ba5d88d5e2be739019676808be6a672",
+        "line_count": 198,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/octocode.py",
+        "sha256": "e4d9cd540640735f8c16492d4ef2525dfbd006ba706f86d5661a56130c25dde9",
+        "line_count": 150,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/provenance.py",
+        "sha256": "06e7d8220da2b86063cd3265b2130da4f79e9101c72fcc005cf21b4d7ca72625",
+        "line_count": 434,
+        "first_add": {
+          "commit": "15319595de4363e70c45b575447d2a78efae6df8",
+          "authored_at": "2026-08-26T22:45:25+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: gate source and release provenance"
+        }
+      },
+      {
+        "path": "src/blackridge/quality.py",
+        "sha256": "c87af1a17bcf9b1827e605f916a27ba946f949f190b34bd7d1d210e26f66e894",
+        "line_count": 84,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/ranking.py",
+        "sha256": "a0687b9f5b7f0396a6ba7becd34264ea06c6aec1ec6433e57ebdbbb3b4786618",
+        "line_count": 145,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/release_compliance.py",
+        "sha256": "1a83c7f46994dad5966fbcde544cdcb1628076c462d3b4f32a32e3dcf2bfc60d",
+        "line_count": 932,
+        "first_add": {
+          "commit": "15319595de4363e70c45b575447d2a78efae6df8",
+          "authored_at": "2026-08-26T22:45:25+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: gate source and release provenance"
+        }
+      },
+      {
+        "path": "src/blackridge/runner.py",
+        "sha256": "df7f09584011d05d80d98028825b700e2a9eef9301f982821f2b08c04e8463c4",
+        "line_count": 59,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      },
+      {
+        "path": "src/blackridge/sandbox.py",
+        "sha256": "51b63c39bf9e2582d678c4cc466c33b21408742aab1bda47a33a064de75ca432",
+        "line_count": 656,
+        "first_add": {
+          "commit": "0b5bbc916c21a3ce44399ddf8769174bc7148cfe",
+          "authored_at": "2026-08-26T20:39:55+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: add evidence-driven sandbox experiments"
+        }
+      },
+      {
+        "path": "src/blackridge/supply_chain.py",
+        "sha256": "cd5186564ce8f38090efa5a3518f429bf8a0a104d0f61aa786859744bc2c46b7",
+        "line_count": 627,
+        "first_add": {
+          "commit": "bf211d2f6f93700da8bc6c7366cc44d7dd61333d",
+          "authored_at": "2026-08-26T21:16:32+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: add exact release supply-chain evidence"
+        }
+      },
+      {
+        "path": "src/blackridge/workflow.py",
+        "sha256": "52bf576a9f8027460a75ca766fb2acbc3eddafc301f3eb201104077f3373cf04",
+        "line_count": 83,
+        "first_add": {
+          "commit": "a16a61a848ae5c8b938d791fe5e8fcfda42dd37a",
+          "authored_at": "2026-08-26T19:39:31+03:00",
+          "author": "krapcys1-maker",
+          "subject": "feat: bootstrap reuse-first system foundry"
+        }
+      }
+    ],
+    "derived_attribution_markers": [],
+    "exact_window_lines": 6,
+    "upstreams": [
+      {
+        "id": "python-json-patch-1-33",
+        "repository": "stefankoegl/python-json-patch",
+        "commit": "0b0520328504050ee09d835d4df294838e055c38",
+        "version": "v1.33",
+        "license_spdx": "BSD-3-Clause",
+        "checkout": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\audit\\source-upstreams-final\\python-json-patch-1-33",
+        "observed_commit": "0b0520328504050ee09d835d4df294838e055c38",
+        "scanned_files": 6
+      },
+      {
+        "id": "jsonschema-4-26-0",
+        "repository": "python-jsonschema/jsonschema",
+        "commit": "a7277432b0f7bcd0551f6e589d30457017125df4",
+        "version": "v4.26.0",
+        "license_spdx": "MIT",
+        "checkout": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\audit\\source-upstreams-final\\jsonschema-4-26-0",
+        "observed_commit": "a7277432b0f7bcd0551f6e589d30457017125df4",
+        "scanned_files": 40
+      },
+      {
+        "id": "swe-rex-1-4-0",
+        "repository": "SWE-agent/SWE-ReX",
+        "commit": "f802b3e14d82aa4c13291d2fda5bd4fd48f36f91",
+        "version": "v1.4.0",
+        "license_spdx": "MIT",
+        "checkout": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\audit\\source-upstreams-final\\swe-rex-1-4-0",
+        "observed_commit": "f802b3e14d82aa4c13291d2fda5bd4fd48f36f91",
+        "scanned_files": 44
+      },
+      {
+        "id": "octocode-18-3-0",
+        "repository": "bgauryy/octocode",
+        "commit": "af20f667fd2536c9502f69d99fe6bdedfcc839cb",
+        "version": "npm:octocode@18.3.0",
+        "license_spdx": "MIT",
+        "checkout": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\audit\\source-upstreams-final\\octocode-18-3-0",
+        "observed_commit": "af20f667fd2536c9502f69d99fe6bdedfcc839cb",
+        "scanned_files": 1043
+      }
+    ],
+    "exact_fragment_match_count": 0,
+    "exact_fragment_matches": [],
+    "limitations": [
+      "An exact normalized-line scan does not detect renamed, reordered, translated, or heavily edited copies.",
+      "Git history proves when content entered this repository, not who originally authored similar ideas.",
+      "A zero-match result is evidence within this frozen scope, not a legal originality guarantee."
+    ]
+  },
+  "sources": [
+    "https://github.com/stefankoegl/python-json-patch/commit/0b0520328504050ee09d835d4df294838e055c38",
+    "https://github.com/python-jsonschema/jsonschema/commit/a7277432b0f7bcd0551f6e589d30457017125df4",
+    "https://github.com/SWE-agent/SWE-ReX/commit/f802b3e14d82aa4c13291d2fda5bd4fd48f36f91",
+    "https://github.com/bgauryy/octocode/commit/af20f667fd2536c9502f69d99fe6bdedfcc839cb",
+    "https://github.com/krapcys1-maker/blackridge-systems/blob/main/src/blackridge/provenance.py"
+  ],
+  "warnings": [
+    "This probe assigns no legal or release verdict; inspect matches and limitations manually."
+  ]
+}

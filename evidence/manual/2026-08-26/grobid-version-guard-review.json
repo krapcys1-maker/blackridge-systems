@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T17:21:37.930242Z",
+  "reviewer": "Codex manual inspection",
+  "verdict": "pass",
+  "capability_id": "ecosystem-intelligence",
+  "scenario_id": "exact-version-not-substituted",
+  "scenario_description": "A missing exact package version is retained as failure, never replaced silently.",
+  "expected": [
+    "The probe exits unsuccessfully and retains the requested coordinate and error.",
+    "An older default version is not substituted for the requested version.",
+    "No package approval or functional verdict is created from the failed lookup."
+  ],
+  "observed": [
+    "The exact 0.9.1 probe exited with code 2 and retained a ConfigurationError evidence artifact containing the requested coordinate.",
+    "No 0.3.4 package facts or approval verdict appear in the exact-version failure artifact.",
+    "A separate unpinned probe selected 0.3.4, confirming why explicit versions must never be replaced by the provider default."
+  ],
+  "probe_id": "66c46c0e35c54555ad439c8c5a957839",
+  "probe_file": "evidence\\manual\\2026-08-26\\grobid-0.9.1-unavailable-probe.json",
+  "probe_sha256": "9d2f13a29efdb6f8e4723f15b839497d6bccd6704a03da1d843dc263c927b1ea",
+  "notes": "PASS applies to Blackridge's exact-version guard. deps.dev itself FAILS as a source for GROBID 0.9.1 because its Maven coverage contains only 0.3.4."
+}

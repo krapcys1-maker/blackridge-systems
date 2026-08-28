@@ -1,0 +1,26 @@
+{
+  "schema_version": "1",
+  "baseline_name": "isolated-v2-r4-before-v1-integration",
+  "repository_commit": "cf12a4542a45c01b6e89c35a1d50041f4b9ef37a",
+  "captured_at": "2026-08-28T08:09:58+03:00",
+  "status": "superseded-prototype-evidence",
+  "artifacts": [
+    {
+      "path": "../blackridge-experiments/self-hosting-v2-20260828-r4/comparison-v1-v2.json",
+      "sha256": "35a5cec247be36050ce1fe48fad82ddf62c71d1ec65e56875708a42a1cf2b5be"
+    },
+    {
+      "path": "../blackridge-experiments/self-hosting-v2-20260828-r4/manual-verification.json",
+      "sha256": "f32e5c2cc159b163ef3f2bac87fbb855fcc2e0e72c4ac87057abbf3f946b5a4e"
+    },
+    {
+      "path": "../blackridge-experiments/self-hosting-v2-20260828-r4/manifest.json",
+      "sha256": "1a577694f4f7571acf1fd305ac2328826bbe6757c69829af07096e7c421b0658"
+    }
+  ],
+  "verdict": {
+    "v2_better_overall": false,
+    "reason": "The isolated prototype generated a functional program but did not retain the v1 verification, supply-chain, sandbox, composition, or provenance gates.",
+    "replacement_rule": "A successor passes only when every v1 capability remains true, no v1 capability regresses, and at least one additive v2 capability passes."
+  }
+}

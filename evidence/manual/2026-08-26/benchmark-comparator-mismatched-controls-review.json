@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T18:50:52.445531Z",
+  "reviewer": "Codex manual review",
+  "verdict": "pass",
+  "capability_id": "benchmark-calibration",
+  "scenario_id": "mismatched-comparison-controls-refused",
+  "scenario_description": "A two-arm comparison cannot run when its model control differs.",
+  "expected": [
+    "The command exits unsuccessfully before evaluating either candidate.",
+    "Failure evidence names model_identifier as the mismatched control.",
+    "No comparative task result or automatic winner is fabricated."
+  ],
+  "observed": [
+    "The comparison command returned a nonzero process status when the Blackridge control changed from deterministic-protocol-fixture to deliberately-different-model while model configuration stayed identical.",
+    "Retained failure evidence has probe_completed false, error_type BlackridgeError, and explicitly names model_identifier as the differing pre-execution control.",
+    "The failed evidence contains only the error boundary: it has no candidate case observations, comparative task success, weighted score, or automatic winner.",
+    "A separate plumbing control with matching task, model and configuration, attempt, time budget, case timeout, environment allowlist, measurement source, evaluator, definition, public specification, and both contracts executed both arms while still leaving automatic_winner null."
+  ],
+  "probe_id": "ec6fba2f4960479baa4befe2ea31eb95",
+  "probe_file": "evidence\\manual\\2026-08-26\\benchmark-comparator-mismatched-controls-failure.json",
+  "probe_sha256": "ff221bd20f364085aeabd2ebe6788f87d567132a5d51ecd221fa9c47d9830bd9",
+  "notes": "PASS applies to the comparison-control guard, not to either builder method. The comparator plumbing candidates are deterministic fixtures and must never be reported as a real A/B experiment."
+}

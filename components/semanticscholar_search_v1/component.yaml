@@ -1,0 +1,44 @@
+schema_version: "1"
+component_id: semanticscholar-search-v1
+capability_id: literature-search-adapter
+description: >-
+  Strict JSON-in/JSON-out adapter over the exact semanticscholar 0.12.0 client,
+  with bounded search, fixed fields, normalized paper records, and safe errors.
+source_uri: blackridge://components/semanticscholar-search-v1
+source_file: semanticscholar_adapter.py
+revision: 0fff162c803a20fc818fc267d8e5beb0b1d898d6
+license_spdx: Apache-2.0
+integration: command-json
+accepts: semanticscholar-search-request/v1
+produces: semanticscholar-search-response/v1
+candidate_command: [python, /workspace/semanticscholar_adapter.py]
+artifact_sha256: abd382538346c5a29a5ce9dd5da932616291075565071c2dca78f289d32a7556
+physical_source_lines: 207
+input_contract_sha256: a5547fbf7ccd1f2cf25454d1c2bda477baacd378dc21c99dc58dae0007a336c1
+output_contract_sha256: 04178e21846ff52defa1e0c77a7b08f2396e712b6e168be8a2e48172f05aceb1
+dependency_lock: requirements.lock
+dependency_lock_sha256: caa2aff26ba07590be982cbc96aaebbb8b466c170afb0d05e1fcf8c5a8f6a842
+upstream:
+  repository: danielnsilva/semanticscholar
+  commit: 3189ecb80bd985b6cd9b4a56fb410b05515f0f15
+  tag: v0.12.0
+  package: semanticscholar==0.12.0
+  license_spdx: MIT
+evidence:
+  level: 2
+  review_file: ../../evidence/manual/2026-08-27/semanticscholar-adapter-l2-review.json
+  review_sha256: c9889e65a3e1161190226e2aab73a0fe1273eb2f3eb9588bb601b5a17132ec61
+  capability_id: literature-search-adapter
+  scenario_id: networkless-boot-and-replay
+  probe_subject: semanticscholar-search-v1@abd382538346c5a29a5ce9dd5da932616291075565071c2dca78f289d32a7556
+scope:
+  - Exact hash-pinned offline dependency installation in the pinned runtime image.
+  - Two-page search, empty search, and exact paper retrieval through the real client.
+  - Stable not-found, rate-limit, malformed-response, and invalid-request handling.
+  - Public IP and DNS denial with functional loopback replay.
+limitations:
+  - L2 boot evidence is not L3 contract promotion or L4 end-system verification.
+  - Public API contents, availability, ranking, and rate limits can change independently.
+  - Upstream PyPI provenance and OpenSSF Scorecard coverage remain unavailable.
+  - The upstream repository has no exact dependency lock; this component supplies an evaluation lock.
+  - No claim is made that abstracts or open-access PDFs are present for every paper.

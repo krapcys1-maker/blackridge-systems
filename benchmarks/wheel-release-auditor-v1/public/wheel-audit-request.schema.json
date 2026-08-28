@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "wheel-audit-request/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "expected_wheel_sha256",
+    "expected_project_name",
+    "expected_version",
+    "allowed_project_licenses",
+    "required_license_kinds",
+    "forbidden_dependency_names"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "request_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "expected_wheel_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "expected_project_name": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+    "expected_version": {"type": "string", "minLength": 1, "maxLength": 100},
+    "allowed_project_licenses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "required_license_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES"]}
+    },
+    "forbidden_dependency_names": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"}
+    }
+  }
+}

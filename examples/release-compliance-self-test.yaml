@@ -1,0 +1,74 @@
+schema_version: "1"
+name: release-compliance-self-test
+goal: >-
+  Demonstrate that source provenance and release compliance probes inspect real artifacts,
+  preserve uncertainty, and block deliberately incomplete or unresolved cases.
+constraints:
+  approval: named-manual-review
+  publication: blocked-until-all-obligations-resolved
+capabilities:
+  - id: release-compliance
+    description: Audit source provenance and exact wheel and image distribution surfaces.
+    accepts: [git-tree/v1, wheel/v1, oci-image/v1]
+    produces: [provenance-evidence/v1, release-evidence/v1]
+    seeds:
+      - anchore/syft
+    searches:
+      - keywords: [software, bill, materials, license]
+    acceptance:
+      - id: exact-source-history
+        description: Every tracked source file is tied to Git history and frozen upstream scans.
+        given: The committed Blackridge source tree and four exact upstream commits.
+        when: Git first-add history and normalized six-line windows are inspected.
+        then:
+          - Every tracked Blackridge Python source file has a hash and first-add history.
+          - Every upstream checkout resolves to the requested immutable commit.
+          - Exact matches are reported with file locations; zero matches is not called proof.
+      - id: empty-copy-registry
+        description: A reviewed empty copy registry remains open when no markers or records exist.
+        given: The current source tree and the reviewed empty derived-code registry.
+        when: The provenance gate validates registered copies and attribution markers.
+        then:
+          - The gate finds no unresolved record or marker.
+          - The result states that undeclared copies without markers need similarity scanning.
+      - id: incomplete-copy-control
+        description: A deliberately incomplete copied-code record is rejected with concrete causes.
+        given: A copy record with a mutable revision and missing license and review evidence.
+        when: The same provenance gate evaluates the record.
+        then:
+          - The command exits nonzero.
+          - Missing source paths, immutable commit, license, attribution, and review are retained.
+          - The copy is not allowed.
+      - id: exact-wheel-bundle
+        description: A cleanly built wheel yields byte-specific inventory and license artifacts.
+        given: A wheel built in an isolated Python build environment.
+        when: The exact wheel bytes are extracted and scanned with pinned Syft.
+        then:
+          - Wheel metadata declares exactly the seven runtime dependencies in the manifest.
+          - LICENSE, NOTICE, and THIRD_PARTY_NOTICES are physically present in the wheel.
+          - SPDX, CycloneDX, checksums, and a readable license bundle are retained.
+      - id: exact-image-block
+        description: A real runtime image remains blocked while obligations are unresolved.
+        given: The locally built SWE-ReX runtime resolved to an immutable SHA-256 image ID.
+        when: Every Python and Debian package is inventoried and its license files are extracted.
+        then:
+          - The image runs SWE-ReX and contains Blackridge license and notice files.
+          - Unknown metadata and review-required licenses remain explicit.
+          - Missing corresponding-source handling and incomplete dependency locks block publication.
+      - id: exact-locked-internal-image
+        description: The locked v1 runtime works internally while public image release stays closed.
+        given: The no-cache runtime build uses the pinned base, Debian snapshot, and embedded locks.
+        when: The exact image is inventoried and its technical license review is hash-verified.
+        then:
+          - All 35 Python distributions and 118 Debian packages match their embedded locks.
+          - All six exact Python license-review entries match extracted license-file hashes.
+          - Unknown Python license metadata is reduced to zero without claiming legal approval.
+          - GPL/MPL review and complete corresponding-source delivery still block public publication.
+      - id: invalid-image-license-review-control
+        description: A wrong extracted-license hash invalidates the technical review instead of hiding uncertainty.
+        given: The same exact runtime image and a review fixture with one deliberately false SHA-256 value.
+        when: The image evidence is evaluated against the invalid review fixture.
+        then:
+          - The mismatched license file and expected and actual hashes are retained.
+          - The affected package is not counted as validly reviewed.
+          - Unknown metadata returns and the public release gate remains closed.

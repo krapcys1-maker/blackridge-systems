@@ -1,0 +1,438 @@
+{
+  "schema_version": "1",
+  "probe_id": "a142e18c4179411b9e580037411ca397",
+  "observed_at": "2026-08-26T22:08:12.566012Z",
+  "provider": "blackridge-generated-sandbox-runtime/1",
+  "subject": "linear-research-composition",
+  "request": {
+    "bundle_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\evidence\\manual\\2026-08-26\\composer-positive-system",
+    "runtime_sha256": "2e90ca9ec2a37b61791a7062673765329bf03183e8a2f6432c44fca0a8c655dc",
+    "runtime_module_sha256": "76de21fe14458967258f8805ecb88a98837ecd8086e58dc2a702a78504d57b6b",
+    "provenance_sha256": "7359789a302ac228f2f08c38ab50a5a620bf5287ca7313bca147857a38edb5ed",
+    "bundle_integrity_mismatches": [],
+    "input_artifact": {
+      "topic": "evidence-driven composition"
+    },
+    "image_ref": "blackridge/swerex-runtime:1.4.0",
+    "resolved_image_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+  },
+  "observations": {
+    "probe_completed": true,
+    "runtime_mode": "calibration",
+    "initial_contract": "research-query/v1",
+    "initial_validation_errors": [],
+    "steps": [
+      {
+        "subject_id": "fixture-research-source",
+        "step_type": "component",
+        "status": "completed",
+        "input_contract": "research-query/v1",
+        "output_contract": "paper-record/v1",
+        "input_artifact": {
+          "topic": "evidence-driven composition"
+        },
+        "artifact_integrity": {
+          "file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+          "exists": true,
+          "expected_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "actual_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "matches": true,
+          "after_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "unchanged_after_execution": true
+        },
+        "process": {
+          "executor": "docker-exec-shell-free",
+          "declared_argv": [
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples/fixtures/research_source.py"
+          ],
+          "argv": [
+            "python",
+            "/workspace/components/component-1.py"
+          ],
+          "container_argv": [
+            "timeout",
+            "--verbose",
+            "--signal=TERM",
+            "--kill-after=1s",
+            "10s",
+            "python",
+            "/workspace/components/component-1.py"
+          ],
+          "working_directory": "/workspace/components",
+          "user": "65534:65534",
+          "environment_names": [
+            "HOME",
+            "PYTHONIOENCODING",
+            "TMPDIR"
+          ],
+          "duration_seconds": 0.129882,
+          "timeout_enforcer": "coreutils-timeout-term-then-kill",
+          "timed_out": false,
+          "exit_code": 0,
+          "stdout": "{\"query\": {\"topic\": \"evidence-driven composition\"}, \"paper\": {\"title\": \"Evidence for evidence-driven composition\", \"identifier\": \"fixture-paper-001\"}, \"trace\": {\"source\": \"research-source-calibration\"}}",
+          "stderr": ""
+        },
+        "output_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          }
+        },
+        "output_validation_errors": [],
+        "output_contract_valid": true
+      },
+      {
+        "subject_id": "paper-title-to-document-name",
+        "step_type": "adapter",
+        "status": "completed",
+        "input_contract": "paper-record/v1",
+        "output_contract": "document-record/v1",
+        "input_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          }
+        },
+        "operations": [
+          {
+            "op": "add",
+            "path": "/document",
+            "value": {}
+          },
+          {
+            "op": "copy",
+            "from": "/paper/title",
+            "path": "/document/name"
+          }
+        ],
+        "patch_error": null,
+        "output_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          },
+          "document": {
+            "name": "Evidence for evidence-driven composition"
+          }
+        },
+        "output_validation_errors": [],
+        "output_contract_valid": true
+      },
+      {
+        "subject_id": "fixture-report-sink",
+        "step_type": "component",
+        "status": "completed",
+        "input_contract": "document-record/v1",
+        "output_contract": "research-report/v1",
+        "input_artifact": {
+          "query": {
+            "topic": "evidence-driven composition"
+          },
+          "paper": {
+            "title": "Evidence for evidence-driven composition",
+            "identifier": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration"
+          },
+          "document": {
+            "name": "Evidence for evidence-driven composition"
+          }
+        },
+        "artifact_integrity": {
+          "file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+          "exists": true,
+          "expected_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "actual_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "matches": true,
+          "after_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "unchanged_after_execution": true
+        },
+        "process": {
+          "executor": "docker-exec-shell-free",
+          "declared_argv": [
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples/fixtures/report_sink.py"
+          ],
+          "argv": [
+            "python",
+            "/workspace/components/component-2.py"
+          ],
+          "container_argv": [
+            "timeout",
+            "--verbose",
+            "--signal=TERM",
+            "--kill-after=1s",
+            "10s",
+            "python",
+            "/workspace/components/component-2.py"
+          ],
+          "working_directory": "/workspace/components",
+          "user": "65534:65534",
+          "environment_names": [
+            "HOME",
+            "PYTHONIOENCODING",
+            "TMPDIR"
+          ],
+          "duration_seconds": 0.128464,
+          "timeout_enforcer": "coreutils-timeout-term-then-kill",
+          "timed_out": false,
+          "exit_code": 0,
+          "stdout": "{\"report\": {\"title\": \"Evidence for evidence-driven composition\", \"based_on\": \"fixture-paper-001\"}, \"trace\": {\"source\": \"research-source-calibration\", \"sink\": \"report-sink-calibration\"}}",
+          "stderr": ""
+        },
+        "output_artifact": {
+          "report": {
+            "title": "Evidence for evidence-driven composition",
+            "based_on": "fixture-paper-001"
+          },
+          "trace": {
+            "source": "research-source-calibration",
+            "sink": "report-sink-calibration"
+          }
+        },
+        "output_validation_errors": [],
+        "output_contract_valid": true
+      }
+    ],
+    "all_steps_completed": true,
+    "failure_reason": null,
+    "final_contract": "research-report/v1",
+    "required_output": "research-report/v1",
+    "final_artifact": {
+      "report": {
+        "title": "Evidence for evidence-driven composition",
+        "based_on": "fixture-paper-001"
+      },
+      "trace": {
+        "source": "research-source-calibration",
+        "sink": "report-sink-calibration"
+      }
+    },
+    "final_validation_errors": [],
+    "sandbox": {
+      "image": {
+        "requested_reference": "blackridge/swerex-runtime:1.4.0",
+        "resolved_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
+        "repo_digests": [
+          "blackridge/swerex-runtime@sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+        ],
+        "created": "2026-08-26T20:46:11.627496934Z",
+        "os": "linux",
+        "architecture": "amd64",
+        "labels": {
+          "org.opencontainers.image.base.digest": "sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17",
+          "org.opencontainers.image.base.name": "python:3.12-slim",
+          "org.opencontainers.image.licenses": "Apache-2.0 AND LicenseRef-Third-Party",
+          "org.opencontainers.image.source": "https://github.com/krapcys1-maker/blackridge-systems",
+          "org.opencontainers.image.title": "Blackridge pinned SWE-ReX runtime",
+          "systems.blackridge.debian.snapshot": "20260824T000000Z",
+          "systems.blackridge.swerex.version": "1.4.0"
+        }
+      },
+      "container_name": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-d99df60d-0190-4f8a-a03f-94b05751bc46",
+      "security_options": [
+        "cap-drop=ALL",
+        "no-new-privileges",
+        "pids-limit=256",
+        "memory=1g",
+        "memory-swap=1g",
+        "cpus=2",
+        "workload-user=65534:65534"
+      ],
+      "copied_components": [
+        {
+          "subject_id": "fixture-research-source",
+          "argv": [
+            "docker",
+            "cp",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\research_source.py",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-d99df60d-0190-4f8a-a03f-94b05751bc46:/workspace/components/component-1.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "target": "/workspace/components/component-1.py",
+          "expected_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "container_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "hash_matches": true
+        },
+        {
+          "subject_id": "fixture-report-sink",
+          "argv": [
+            "docker",
+            "cp",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\report_sink.py",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-d99df60d-0190-4f8a-a03f-94b05751bc46:/workspace/components/component-2.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "target": "/workspace/components/component-2.py",
+          "expected_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "container_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "hash_matches": true
+        }
+      ],
+      "post_execution_component_integrity": [
+        {
+          "subject_id": "fixture-research-source",
+          "target": "/workspace/components/component-1.py",
+          "expected_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "actual_sha256": "8c058204a334939aa8083d3863f31a06a7e129d0888952a99d1654018de1806c",
+          "matches": true
+        },
+        {
+          "subject_id": "fixture-report-sink",
+          "target": "/workspace/components/component-2.py",
+          "expected_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "actual_sha256": "6957529ddf10e87202312be75d07ec915d3d8d2edf3dfcf284d5579abcd9b493",
+          "matches": true
+        }
+      ],
+      "execution_boundary": {
+        "requested": "none",
+        "applied": true,
+        "error": null,
+        "networks_before": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "08d69a408df90cfdfb482955dd596b13b9d670b48a8e77cdfef5e6359752c07d",
+            "EndpointID": "7ec6b02e985484fc0d54c36f9c25b5fe5b442daadd39413b532ffb26dc54a367",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.2",
+            "MacAddress": "5e:68:0b:03:d2:a2",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": null
+          }
+        },
+        "disconnect_commands": [
+          {
+            "argv": [
+              "docker",
+              "network",
+              "disconnect",
+              "--force",
+              "bridge",
+              "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-d99df60d-0190-4f8a-a03f-94b05751bc46"
+            ],
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "networks_after": {},
+        "workload_executor": "docker-exec-shell-free-non-root",
+        "host_environment_forwarded": []
+      },
+      "preflight": {
+        "argv": [
+          "docker",
+          "exec",
+          "--user",
+          "65534:65534",
+          "--env",
+          "HOME=/tmp",
+          "--env",
+          "TMPDIR=/tmp",
+          "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-d99df60d-0190-4f8a-a03f-94b05751bc46",
+          "python",
+          "-c",
+          "import json\nimport os\nimport pathlib\nimport socket\nimport sys\n\n\ndef write_probe(path, payload):\n    try:\n        with path.open(\"a\", encoding=\"utf-8\") as stream:\n            stream.write(payload)\n        return {\"allowed\": True, \"errno\": None}\n    except OSError as exc:\n        return {\"allowed\": False, \"errno\": exc.errno}\n\n\ndef connect_probe(target):\n    try:\n        connection = socket.create_connection(target, timeout=2)\n        connection.close()\n        return True\n    except OSError:\n        return False\n\n\nstatus = dict(\n    line.split(\":\", 1)\n    for line in pathlib.Path(\"/proc/self/status\").read_text(encoding=\"utf-8\").splitlines()\n    if \":\" in line\n)\ncgroup_paths = {\n    \"memory_max\": \"/sys/fs/cgroup/memory.max\",\n    \"memory_swap_max\": \"/sys/fs/cgroup/memory.swap.max\",\n    \"pids_max\": \"/sys/fs/cgroup/pids.max\",\n    \"cpu_max\": \"/sys/fs/cgroup/cpu.max\",\n}\nscratch = pathlib.Path(\"/tmp/blackridge-preflight-write\")\netc_probe = pathlib.Path(\"/etc/blackridge-preflight-write\")\nresult = {\n    \"uid\": os.getuid(),\n    \"gid\": os.getgid(),\n    \"cap_eff\": status.get(\"CapEff\", \"\").strip(),\n    \"no_new_privs\": status.get(\"NoNewPrivs\", \"\").strip(),\n    \"component_write\": write_probe(pathlib.Path(sys.argv[1]), \"\"),\n    \"etc_write\": write_probe(etc_probe, \"x\"),\n    \"scratch_write\": write_probe(scratch, \"x\"),\n    \"direct\": connect_probe((\"1.1.1.1\", 443)),\n    \"dns\": connect_probe((\"pypi.org\", 443)),\n    \"sensitive_environment_names\": sorted(\n        key\n        for key in os.environ\n        if any(\n            needle in key.upper()\n            for needle in (\"DEEPSEEK\", \"GITHUB\", \"OPENAI\", \"TOKEN\", \"SECRET\", \"API_KEY\")\n        )\n    ),\n    \"cgroup\": {\n        name: pathlib.Path(path).read_text(encoding=\"utf-8\").strip()\n        if pathlib.Path(path).is_file()\n        else \"unavailable\"\n        for name, path in cgroup_paths.items()\n    },\n}\nfor path in (scratch, etc_probe):\n    try:\n        path.unlink()\n    except OSError:\n        pass\nprint(json.dumps(result, sort_keys=True))\n",
+          "/workspace/components/component-1.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"cap_eff\": \"0000000000000000\", \"cgroup\": {\"cpu_max\": \"200000 100000\", \"memory_max\": \"1073741824\", \"memory_swap_max\": \"0\", \"pids_max\": \"256\"}, \"component_write\": {\"allowed\": false, \"errno\": 13}, \"direct\": false, \"dns\": false, \"etc_write\": {\"allowed\": false, \"errno\": 13}, \"gid\": 65534, \"no_new_privs\": \"1\", \"scratch_write\": {\"allowed\": true, \"errno\": null}, \"sensitive_environment_names\": [], \"uid\": 65534}\n",
+        "stderr": "",
+        "result": {
+          "cap_eff": "0000000000000000",
+          "cgroup": {
+            "cpu_max": "200000 100000",
+            "memory_max": "1073741824",
+            "memory_swap_max": "0",
+            "pids_max": "256"
+          },
+          "component_write": {
+            "allowed": false,
+            "errno": 13
+          },
+          "direct": false,
+          "dns": false,
+          "etc_write": {
+            "allowed": false,
+            "errno": 13
+          },
+          "gid": 65534,
+          "no_new_privs": "1",
+          "scratch_write": {
+            "allowed": true,
+            "errno": null
+          },
+          "sensitive_environment_names": [],
+          "uid": 65534
+        },
+        "checks": {
+          "non_root_user": true,
+          "no_effective_capabilities": true,
+          "no_new_privileges": true,
+          "component_write_denied": true,
+          "etc_write_denied": true,
+          "scratch_write_allowed": true,
+          "direct_egress_denied": true,
+          "dns_egress_denied": true,
+          "sensitive_names_absent": true,
+          "memory_limit_exact": true,
+          "memory_swap_disabled": true,
+          "pids_limit_exact": true,
+          "cpu_limit_exact": true
+        },
+        "passed": true
+      },
+      "cleanup": {
+        "force_remove": {
+          "argv": [
+            "docker",
+            "rm",
+            "--force",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-d99df60d-0190-4f8a-a03f-94b05751bc46"
+          ],
+          "exit_code": 0,
+          "stdout": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-d99df60d-0190-4f8a-a03f-94b05751bc46\n",
+          "stderr": ""
+        },
+        "container_exists_after": false
+      }
+    }
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py",
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0",
+    "https://github.com/SWE-agent/SWE-ReX/tree/v1.4.0"
+  ],
+  "warnings": []
+}

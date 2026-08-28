@@ -1,0 +1,313 @@
+Blackridge production sandbox boundary — manual experiment record — 2026-08-27
+
+Objective
+---------
+Reuse SWE-ReX and Docker to prepare an exact repository with network access, then run
+the behavior-bearing workload without container networking or inherited host secrets.
+Do not integrate the boundary into the production composer until paired real controls pass.
+
+Calibration 1: internal network from container start — rejected
+---------------------------------------------------------------
+An exact SWE-ReX 1.4.0 deployment was started on a newly created Docker --internal
+network. The deployment did not become ready because the same network restriction also
+blocked the SWE-ReX host-to-container control channel. No workload result was produced,
+so this attempt was not counted as a product PASS or FAIL.
+
+After interruption, read-only inspection found exactly:
+  network f29936fa4028 / blackridge-calibration-fcc8ba4b8e39
+  container 129265bc4782 attached only to that network
+Both exact objects were removed. Follow-up inspection reported:
+  CONTAINER_REMAINING=False
+  NETWORK_REMAINING=False
+
+Calibration 2: prepare, detach, docker exec — boundary passed; cleanup design failed
+-------------------------------------------------------------------------------
+SWE-ReX started normally on bridge and returned version 1.4.0. The bridge network was
+then detached and Docker inspection returned an empty network map. Shell-free docker
+exec remained available and produced:
+  workload control: exit 0, docker-exec-control
+  direct 1.1.1.1:443: OSError [Errno 101] Network is unreachable
+  pypi.org:443: gaierror [Errno -3] Temporary failure in name resolution
+  sensitive environment names: []
+
+SWE-ReX deployment.stop then returned ServerDisconnectedError because its server was
+intentionally unreachable, and container 09c609155d3a remained. The exact container was
+removed manually and follow-up inspection reported CONTAINER_REMAINING=False. This
+attempt validated the split control plane but rejected SWE-ReX stop as the isolated
+cleanup mechanism. The implementation now uses an exact recorded docker rm --force for
+networkless executions and verifies that no container remains.
+
+Frozen paired inputs
+--------------------
+Image ID:
+  sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+Repository:
+  https://github.com/pypa/sampleproject
+Commit:
+  621e4974ca25ce531773def586ba3ed8e736b3fc
+Preparation argv:
+  python -m pip install --disable-pip-version-check .
+Workload argv lists:
+  baseline-unittest
+  behavior-artifact
+  network-and-secret-boundary
+  boundary-sentinel
+
+The retained request objects were compared after both runs. Image, commit, preparation
+argv, and all four workload argv lists are identical. Only the declared execution
+profile/network and descriptive metadata differ.
+
+Positive production-boundary run
+--------------------------------
+Profile/network:
+  production / none
+Preparation:
+  SWE-ReX fetched only the pinned commit and installed the exact checkout; exit 0.
+Boundary evidence:
+  networks before: bridge
+  disconnect command exit: 0
+  networks after: {}
+  host environment forwarded by adapter: []
+  workload executor: docker-exec-shell-free
+Workload:
+  repository unittest: exit 0, one test passed
+  behavior artifact: {"actual": 42, "expected": 42, "input": 41}
+  hostile boundary: {"direct_egress": false, "dns_egress": false,
+                     "sensitive_environment_names": []}
+  boundary sentinel: exit 0, production-boundary-complete
+Host and cleanup:
+  before/after host digest matched
+  exact docker rm --force exit 0
+  container remaining: false
+  warnings: 0
+
+Deliberately unisolated paired control
+--------------------------------------
+Profile/network:
+  calibration / inherit
+Baseline repository unittest and behavior artifact matched the positive run. The exact
+hostile command then printed:
+  {"direct_egress": true, "dns_egress": true,
+   "sensitive_environment_names": []}
+and exited 1 on the expected assertion. boundary-sentinel was explicitly retained as
+not run. The host digest matched, SWE-ReX cleanup completed, and no container remained.
+
+Fail-closed policy control
+--------------------------
+The positive production request was modified in memory only to request inherited
+networking. Pydantic rejected it with the named cause:
+  production sandbox experiments require execution_network=none
+The set of matching Docker containers was identical before and after validation.
+
+Regression and remote verification
+----------------------------------
+Local checks:
+  ruff: pass
+  generated third-party notices: match
+  declared-copy provenance issues: 0
+  pytest: 57 passed
+  evidence JSON parsing: pass
+  retained checksum comparison: pass
+  local Markdown links: 0 missing
+Implementation commit:
+  48739d66679ec152ca9443c24ff657112be09cd0
+GitHub Ubuntu CI (success):
+  https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33015018237
+The GitHub job independently installed the project, linted it, verified notices and
+copy provenance, and ran the regression suite. The Docker A/B remains the retained
+manual evidence above; ordinary CI does not claim to replace that experiment.
+
+Verdict and boundary
+--------------------
+PASS for the two-phase primitive on this frozen repository and image. The paired control
+shows that the hostile check distinguishes isolated from inherited networking while
+baseline behavior stays equal. This is not yet a production composer backend or a
+hardened multi-tenant claim: preparation still has network access, the ephemeral
+container filesystem is writable, the process runs as root inside the container
+namespace, and Docker remains a trusted host boundary.
+
+Generated-system sandbox experiment
+-----------------------------------
+The preserved `composer-positive-system` was selected before a general backend was
+written. A one-off Docker experiment copied only `research_source.py` and
+`report_sink.py` into the exact image without a host mount. Both in-container hashes
+matched their locks, bridge was detached, each component consumed/emitted JSON through
+stdin/stdout, the trusted host applied the locked adapter and all four schemas, and the
+final report exactly matched the prior host calibration. Direct and DNS egress were
+false; exact cleanup exited zero.
+
+That first experiment exposed an existing host-runner evidence defect. python-json-patch
+1.33 mutated the empty object held by the adapter's `add` operation when the later copy
+wrote `/document/name`. The retained 2026-08-26 composer probe therefore showed a name
+inside `operations[0].value`, while the locked generated adapter file still contained
+`value: {}`. The runner now records one deep copy and applies a separate deep copy.
+A real host rerun preserved `value: {}`, completed all steps, and returned the unchanged
+final report.
+
+Final `compose-run-sandbox` positive observation:
+  provider: blackridge-generated-sandbox-runtime/1
+  resolved image: sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+  copied component hashes: 2/2 match
+  networks before/after: bridge / {}
+  preflight: direct=false, dns=false, sensitive_environment_names=[]
+  source and sink executor: docker-exec-shell-free
+  source, adapter, and sink output contracts: valid
+  adapter retained add value: {}
+  final artifact: exact match with host calibration
+  cleanup exit: 0; container remaining: false; warnings: 0
+
+Paired generated broken-output control:
+  source and adapter completed
+  broken sink process exit: 0
+  output contract valid: false
+  exact retained error paths: /report and /trace
+  all_steps_completed: false
+  preflight still passed
+  cleanup exit: 0; container remaining: false
+
+The backend remains calibration-only. Regression controls rewrite a temporary generated
+runtime and its lock, then prove that `mode: production` and a nonempty environment
+allowlist containing `DEEPSEEK_API_KEY` are rejected before Docker runtime types are
+requested. A first CLI-help text assertion missed the Rich line wrap; direct help output
+showed the command and the corrected whitespace-aware assertion passed. That harness
+mistake was not counted as a backend failure.
+
+Final artifact portability experiment
+-------------------------------------
+An initial attempt to invoke pytest through the unrelated global Python could not import
+Blackridge. The repository venv then collected and passed the targeted composition suite;
+the failed global collection was treated as an environment-selection error, not a product
+verdict.
+
+The first newly built wheel exposed a real portability defect that the editable checkout
+did not expose. It was installed with the sandbox extra in a fresh venv and passed
+`pip check`, but the generated bundle still declared the Python path captured from the
+repository venv. The wheel venv had a different `sys.executable`; the backend rejected
+that old absolute interpreter path and the real CLI run exited 2 before a component ran.
+Cleanup still removed the prepared container.
+
+The correction maps only argv position zero whose basename is `python`, `python.exe`,
+`python3`, or `python3.exe` to the trusted container interpreter. The locked component
+path is mapped separately, and any other absolute argv path still fails closed. A paired
+regression maps a prior-venv Python path and rejects an extra unlocked absolute path.
+
+A second clean wheel was built and installed in another new venv:
+  wheel SHA-256: ff58425b672e3e6288f0e90074d7b418905821dc6270589a07af0063e361787a
+  installed module: fresh venv site-packages, not the repository source tree
+  pip check: no broken requirements
+  real sandboxed generated-system CLI exit: 0
+  effective component argv: python /workspace/components/component-1.py and component-2.py
+  preflight: direct=false, dns=false, sensitive_environment_names=[]
+  cleanup exit: 0; container remaining: false
+
+The canonical positive and green-exit-invalid runs were then repeated once more against
+the final source. Their exits were 0 and 1 respectively, both retained exact cleanup, and
+their named manual reviews were regenerated against the new probe hashes. The inspection
+harness initially queried `output_contract_errors` and a nonexistent top-level host
+artifact path; inspecting the raw shape corrected those selectors to
+`output_validation_errors` and `observations.runtime.observations.final_artifact`.
+The corrected comparisons passed and the selector mistakes changed no product result.
+
+Final local regression after the portability correction:
+  ruff: pass
+  generated third-party notices: match
+  declared-copy provenance issues: 0
+  pytest: 60 passed
+
+Hostile filesystem, timeout, signal, memory, and PID calibration
+----------------------------------------------------------------
+The next controls started from attacks on the existing runtime rather than assumed Docker
+configuration. The first harness attempt used Bash `<<<` syntax under PowerShell and was
+rejected by the parser before any container existed. A corrected run then completed the
+filesystem, inner-timeout, memory, and PID arms, but its host-timeout Python one-liner had
+invalid quoting and the image did not contain `pgrep` or `pkill`. The exact containers were
+still removed. A file-backed host probe and `/proc/*/cmdline` inspection replaced those
+invalid harness pieces; neither harness error was counted as product evidence.
+
+The calibrated before/after observations were:
+  image: sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+  host-only timeout: TimeoutExpired after 1 second; exact workload PID 19 still running;
+                     no TERM marker
+  in-container timeout: TERM marker present; KILL escalation exit 137; no exact workload
+                        process remained while the container was still available
+  UID 0, CapEff=0: copied component write=true; /etc write=true
+  UID/GID 65534, CapEff=0, NoNewPrivs=1: component write=false (EACCES),
+                        /etc write=false (EACCES), /tmp scratch write=true
+  default --memory=1g: memory.swap.max=1073741824; touched 1.2 GiB allocation exit 0
+  --memory=1g --memory-swap=1g: memory.swap.max=0; same allocation exit 137;
+                        container remained available for inspection
+  --pids-limit=256: process creation refused with errno 11 after 253 children;
+                    fixture terminated and waited for every child
+  all three named calibration containers remaining after cleanup: false
+
+The first `/proc` scanner also matched its own command text. Exact argv distinguished
+`python timeout_ignore_term.py` from `python -c <scanner>`; the final inner-timeout arm
+contained only the scanner match, not the exact hostile workload. This selector correction
+is retained in `sandbox-hostile-controls-calibration.json`.
+
+Hardened generated-system controls
+----------------------------------
+The generated-system backend was changed only after those observations. Docker now disables
+memory swap, and every workload runs as UID/GID 65534 through coreutils `timeout` with TERM
+at the declared deadline and KILL one second later. Before the component pipeline, a real
+non-root process checks UID/GID, CapEff, NoNewPrivs, component and /etc write denial, /tmp
+scratch write, direct and DNS egress, sensitive environment names, and live memory, swap,
+PID, and CPU cgroups. Every copied component is hashed again after execution.
+
+Final positive composition:
+  all 13 hostile preflight checks: true
+  uid/gid: 65534/65534; CapEff: 0000000000000000; NoNewPrivs: 1
+  component and /etc writes: EACCES; /tmp scratch: allowed
+  cgroup: memory.max=1073741824, memory.swap.max=0, pids.max=256,
+          cpu.max="200000 100000"
+  direct=false, dns=false, sensitive_environment_names=[]
+  two workload users: 65534:65534; two in-container timeout wrappers; exits 0
+  component hashes before and after: 2/2 match
+  final artifact: exact prior host-calibration report
+  cleanup exit 0; container remaining false
+
+Generated hostile controls:
+  ignores-SIGTERM component: declared timeout 1 second; duration 2.117699 seconds;
+      verbose stderr records both TERM and KILL; exit 137; timed_out=true;
+      pipeline incomplete; hash match; cleanup pass
+  1.2 GiB component: live swap max 0; duration 0.730686 seconds; exit 137;
+      timed_out=false; pipeline incomplete; hash match; cleanup pass
+  400-process component: live pids.max 256; 252 children; errno 11; all children waited;
+      exit 0; blocked=true contract valid; hash match; cleanup pass
+  green-exit invalid sink: exit 0; exact /report and /trace errors retained;
+      pipeline incomplete; all post-execution hashes and cleanup pass
+
+Hardened generic SWE-ReX A/B
+----------------------------
+The generic runner was aligned with the composer so a weaker alternate path did not remain.
+The exact sampleproject A/B was repeated. Both arms used the same non-root Docker-exec and
+in-container-timeout workload boundary. Both unittest and 41 -> 42 baselines passed. The
+isolated arm again observed direct=false and dns=false and ran the sentinel. The inherited
+arm observed direct=true and dns=true, exited 1 at the hostile assertion, and did not run
+the sentinel. Both host snapshots matched and no container remained.
+
+Remaining boundary
+------------------
+These are bounded PASS results, not production enablement. Preparation still has network
+access and runs as root. The root filesystem is not mounted read-only, /tmp is deliberately
+writable, no measured per-run disk quota exists, and Docker remains a trusted host boundary.
+Production generated-runtime mode remains rejected until read-only-root/scratch and disk
+exhaustion controls pass and the wider threat model is reviewed.
+
+Final hardened wheel and regression
+-----------------------------------
+A new wheel containing both the generated backend and generic SWE-ReX controls was built
+after the final code changes and installed with the sandbox extra in another empty venv:
+  wheel SHA-256: 787ccd385934b3be5f881be9f3b076f37a09e4ce0ea7e8e32e085aafc052110a
+  imported composition and sandbox modules: fresh venv site-packages
+  pip check: no broken requirements
+  positive generated-system run: exit 0; complete=true; component exits [0,0]
+  ignores-SIGTERM run: exit 1; complete=false; component exit 137; timed_out=true;
+      verbose stderr retains TERM and KILL
+  both runs: 13/13 preflight, matching post-execution hashes, cleanup confirmed
+
+Final local checks after the hostile-control changes:
+  ruff: pass
+  generated third-party notices: match
+  declared-copy provenance issues: 0
+  pytest: 63 passed

@@ -1,0 +1,273 @@
+{
+  "schema_version": "1",
+  "probe_id": "a6712db22d334949935e964a23ce254d",
+  "observed_at": "2026-08-26T22:08:19.857981Z",
+  "provider": "blackridge-generated-sandbox-runtime/1",
+  "subject": "timeout-signal-calibration",
+  "request": {
+    "bundle_directory": "D:\\Skladacz aplikacji\\blackridge-systems\\.blackridge\\hostile-controls\\timeout-system",
+    "runtime_sha256": "12d2837323f6cf84a116849ac2af03b03cfe43d612a2c8a84851f346c041d57d",
+    "runtime_module_sha256": "76de21fe14458967258f8805ecb88a98837ecd8086e58dc2a702a78504d57b6b",
+    "provenance_sha256": "53459ec6d13c53486b2c3c0d88a0a24f89dc281bb226cff5377bd87b1a128b1c",
+    "bundle_integrity_mismatches": [],
+    "input_artifact": {
+      "case": "ignores-sigterm"
+    },
+    "image_ref": "blackridge/swerex-runtime:1.4.0",
+    "resolved_image_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+  },
+  "observations": {
+    "probe_completed": true,
+    "runtime_mode": "calibration",
+    "initial_contract": "hostile-request/v1",
+    "initial_validation_errors": [],
+    "steps": [
+      {
+        "subject_id": "hostile-timeout-component",
+        "step_type": "component",
+        "status": "failed",
+        "input_contract": "hostile-request/v1",
+        "output_contract": "hostile-response/v1",
+        "input_artifact": {
+          "case": "ignores-sigterm"
+        },
+        "artifact_integrity": {
+          "file": "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\hanging_component.py",
+          "exists": true,
+          "expected_sha256": "0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74",
+          "actual_sha256": "0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74",
+          "matches": true,
+          "after_sha256": "0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74",
+          "unchanged_after_execution": true
+        },
+        "process": {
+          "executor": "docker-exec-shell-free",
+          "declared_argv": [
+            "D:\\Skladacz aplikacji\\blackridge-systems\\.venv\\Scripts\\python.exe",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples/fixtures/hanging_component.py"
+          ],
+          "argv": [
+            "python",
+            "/workspace/components/component-1.py"
+          ],
+          "container_argv": [
+            "timeout",
+            "--verbose",
+            "--signal=TERM",
+            "--kill-after=1s",
+            "1s",
+            "python",
+            "/workspace/components/component-1.py"
+          ],
+          "working_directory": "/workspace/components",
+          "user": "65534:65534",
+          "environment_names": [
+            "HOME",
+            "PYTHONIOENCODING",
+            "TMPDIR"
+          ],
+          "duration_seconds": 2.117699,
+          "timeout_enforcer": "coreutils-timeout-term-then-kill",
+          "timed_out": true,
+          "exit_code": 137,
+          "stdout": "",
+          "stderr": "timeout: sending signal TERM to command ‘python’\ntimeout: sending signal KILL to command ‘python’\n"
+        },
+        "reason": "component hostile-timeout-component timed out"
+      }
+    ],
+    "all_steps_completed": false,
+    "failure_reason": "component hostile-timeout-component timed out",
+    "final_contract": "hostile-request/v1",
+    "required_output": "hostile-response/v1",
+    "final_artifact": {
+      "case": "ignores-sigterm"
+    },
+    "final_validation_errors": [],
+    "sandbox": {
+      "image": {
+        "requested_reference": "blackridge/swerex-runtime:1.4.0",
+        "resolved_id": "sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5",
+        "repo_digests": [
+          "blackridge/swerex-runtime@sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5"
+        ],
+        "created": "2026-08-26T20:46:11.627496934Z",
+        "os": "linux",
+        "architecture": "amd64",
+        "labels": {
+          "org.opencontainers.image.base.digest": "sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17",
+          "org.opencontainers.image.base.name": "python:3.12-slim",
+          "org.opencontainers.image.licenses": "Apache-2.0 AND LicenseRef-Third-Party",
+          "org.opencontainers.image.source": "https://github.com/krapcys1-maker/blackridge-systems",
+          "org.opencontainers.image.title": "Blackridge pinned SWE-ReX runtime",
+          "systems.blackridge.debian.snapshot": "20260824T000000Z",
+          "systems.blackridge.swerex.version": "1.4.0"
+        }
+      },
+      "container_name": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-4f863aa5-9890-4186-8c85-865826fd9257",
+      "security_options": [
+        "cap-drop=ALL",
+        "no-new-privileges",
+        "pids-limit=256",
+        "memory=1g",
+        "memory-swap=1g",
+        "cpus=2",
+        "workload-user=65534:65534"
+      ],
+      "copied_components": [
+        {
+          "subject_id": "hostile-timeout-component",
+          "argv": [
+            "docker",
+            "cp",
+            "D:\\Skladacz aplikacji\\blackridge-systems\\examples\\fixtures\\hanging_component.py",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-4f863aa5-9890-4186-8c85-865826fd9257:/workspace/components/component-1.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "target": "/workspace/components/component-1.py",
+          "expected_sha256": "0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74",
+          "container_sha256": "0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74",
+          "hash_matches": true
+        }
+      ],
+      "post_execution_component_integrity": [
+        {
+          "subject_id": "hostile-timeout-component",
+          "target": "/workspace/components/component-1.py",
+          "expected_sha256": "0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74",
+          "actual_sha256": "0c9c08401188f044c313a5e0305733704e2b305e5bfead475b0ee23f3c264b74",
+          "matches": true
+        }
+      ],
+      "execution_boundary": {
+        "requested": "none",
+        "applied": true,
+        "error": null,
+        "networks_before": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "08d69a408df90cfdfb482955dd596b13b9d670b48a8e77cdfef5e6359752c07d",
+            "EndpointID": "6482bb83f379b1380aae254f845eddda85bb38fde4f0faa0df6c4721d9ebb01b",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.2",
+            "MacAddress": "2e:d5:b2:59:1a:d1",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": null
+          }
+        },
+        "disconnect_commands": [
+          {
+            "argv": [
+              "docker",
+              "network",
+              "disconnect",
+              "--force",
+              "bridge",
+              "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-4f863aa5-9890-4186-8c85-865826fd9257"
+            ],
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          }
+        ],
+        "networks_after": {},
+        "workload_executor": "docker-exec-shell-free-non-root",
+        "host_environment_forwarded": []
+      },
+      "preflight": {
+        "argv": [
+          "docker",
+          "exec",
+          "--user",
+          "65534:65534",
+          "--env",
+          "HOME=/tmp",
+          "--env",
+          "TMPDIR=/tmp",
+          "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-4f863aa5-9890-4186-8c85-865826fd9257",
+          "python",
+          "-c",
+          "import json\nimport os\nimport pathlib\nimport socket\nimport sys\n\n\ndef write_probe(path, payload):\n    try:\n        with path.open(\"a\", encoding=\"utf-8\") as stream:\n            stream.write(payload)\n        return {\"allowed\": True, \"errno\": None}\n    except OSError as exc:\n        return {\"allowed\": False, \"errno\": exc.errno}\n\n\ndef connect_probe(target):\n    try:\n        connection = socket.create_connection(target, timeout=2)\n        connection.close()\n        return True\n    except OSError:\n        return False\n\n\nstatus = dict(\n    line.split(\":\", 1)\n    for line in pathlib.Path(\"/proc/self/status\").read_text(encoding=\"utf-8\").splitlines()\n    if \":\" in line\n)\ncgroup_paths = {\n    \"memory_max\": \"/sys/fs/cgroup/memory.max\",\n    \"memory_swap_max\": \"/sys/fs/cgroup/memory.swap.max\",\n    \"pids_max\": \"/sys/fs/cgroup/pids.max\",\n    \"cpu_max\": \"/sys/fs/cgroup/cpu.max\",\n}\nscratch = pathlib.Path(\"/tmp/blackridge-preflight-write\")\netc_probe = pathlib.Path(\"/etc/blackridge-preflight-write\")\nresult = {\n    \"uid\": os.getuid(),\n    \"gid\": os.getgid(),\n    \"cap_eff\": status.get(\"CapEff\", \"\").strip(),\n    \"no_new_privs\": status.get(\"NoNewPrivs\", \"\").strip(),\n    \"component_write\": write_probe(pathlib.Path(sys.argv[1]), \"\"),\n    \"etc_write\": write_probe(etc_probe, \"x\"),\n    \"scratch_write\": write_probe(scratch, \"x\"),\n    \"direct\": connect_probe((\"1.1.1.1\", 443)),\n    \"dns\": connect_probe((\"pypi.org\", 443)),\n    \"sensitive_environment_names\": sorted(\n        key\n        for key in os.environ\n        if any(\n            needle in key.upper()\n            for needle in (\"DEEPSEEK\", \"GITHUB\", \"OPENAI\", \"TOKEN\", \"SECRET\", \"API_KEY\")\n        )\n    ),\n    \"cgroup\": {\n        name: pathlib.Path(path).read_text(encoding=\"utf-8\").strip()\n        if pathlib.Path(path).is_file()\n        else \"unavailable\"\n        for name, path in cgroup_paths.items()\n    },\n}\nfor path in (scratch, etc_probe):\n    try:\n        path.unlink()\n    except OSError:\n        pass\nprint(json.dumps(result, sort_keys=True))\n",
+          "/workspace/components/component-1.py"
+        ],
+        "exit_code": 0,
+        "stdout": "{\"cap_eff\": \"0000000000000000\", \"cgroup\": {\"cpu_max\": \"200000 100000\", \"memory_max\": \"1073741824\", \"memory_swap_max\": \"0\", \"pids_max\": \"256\"}, \"component_write\": {\"allowed\": false, \"errno\": 13}, \"direct\": false, \"dns\": false, \"etc_write\": {\"allowed\": false, \"errno\": 13}, \"gid\": 65534, \"no_new_privs\": \"1\", \"scratch_write\": {\"allowed\": true, \"errno\": null}, \"sensitive_environment_names\": [], \"uid\": 65534}\n",
+        "stderr": "",
+        "result": {
+          "cap_eff": "0000000000000000",
+          "cgroup": {
+            "cpu_max": "200000 100000",
+            "memory_max": "1073741824",
+            "memory_swap_max": "0",
+            "pids_max": "256"
+          },
+          "component_write": {
+            "allowed": false,
+            "errno": 13
+          },
+          "direct": false,
+          "dns": false,
+          "etc_write": {
+            "allowed": false,
+            "errno": 13
+          },
+          "gid": 65534,
+          "no_new_privs": "1",
+          "scratch_write": {
+            "allowed": true,
+            "errno": null
+          },
+          "sensitive_environment_names": [],
+          "uid": 65534
+        },
+        "checks": {
+          "non_root_user": true,
+          "no_effective_capabilities": true,
+          "no_new_privileges": true,
+          "component_write_denied": true,
+          "etc_write_denied": true,
+          "scratch_write_allowed": true,
+          "direct_egress_denied": true,
+          "dns_egress_denied": true,
+          "sensitive_names_absent": true,
+          "memory_limit_exact": true,
+          "memory_swap_disabled": true,
+          "pids_limit_exact": true,
+          "cpu_limit_exact": true
+        },
+        "passed": true
+      },
+      "cleanup": {
+        "force_remove": {
+          "argv": [
+            "docker",
+            "rm",
+            "--force",
+            "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-4f863aa5-9890-4186-8c85-865826fd9257"
+          ],
+          "exit_code": 0,
+          "stdout": "sha256b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5-4f863aa5-9890-4186-8c85-865826fd9257\n",
+          "stderr": ""
+        },
+        "container_exists_after": false
+      }
+    }
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/tree/main/src/blackridge/composition.py",
+    "https://github.com/stefankoegl/python-json-patch/tree/v1.33",
+    "https://github.com/python-jsonschema/jsonschema/tree/v4.26.0",
+    "https://github.com/SWE-agent/SWE-ReX/tree/v1.4.0"
+  ],
+  "warnings": [
+    "The generated system did not produce a valid required output artifact."
+  ]
+}

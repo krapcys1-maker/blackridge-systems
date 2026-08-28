@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-26T22:09:09.963712Z",
+  "reviewer": "Codex manual reviewer",
+  "verdict": "pass",
+  "capability_id": "environment-construction",
+  "scenario_id": "unisolated-boundary-control",
+  "scenario_description": "The identical hostile workload rejects a deliberately inherited network boundary.",
+  "expected": [
+    "Baseline behavior still passes, isolating the difference to the execution boundary.",
+    "The unsafe arm uses the same non-root Docker-exec workload boundary as the isolated arm.",
+    "At least one egress attempt succeeds and the hostile assertion exits nonzero.",
+    "The following sentinel is not run and cleanup is still confirmed."
+  ],
+  "observed": [
+    "The same unittest and add_one(41)=42 baseline passed through the same non-root Docker-exec timeout boundary and fixed environment.",
+    "With inherited networking, direct and DNS egress became true and the exact hostile assertion exited one.",
+    "The following sentinel was not run, the host snapshot matched, and SWE-ReX cleanup left no container."
+  ],
+  "probe_id": "081bae67c74c421cb2fe4bbd29a56e59",
+  "probe_file": "evidence\\manual\\2026-08-27\\production-sandbox-unisolated-control-probe.json",
+  "probe_sha256": "6e152b73831dec7906c7a20e0bb2896c2d27a337e24735e7388ee3f347fb3e04",
+  "notes": "PASS means the control detected the deliberately unsafe network; the unsafe workload itself failed as designed."
+}

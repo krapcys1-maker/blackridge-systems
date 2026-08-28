@@ -1,0 +1,11 @@
+{
+  "schema_version": "1",
+  "artifact": "blackridge_systems-0.1.0-py3-none-any.whl",
+  "sha256": "5836e84abb7ebd9131a7673022959d907f8ded78283288dc1deba335a5ce72af",
+  "size": 117083,
+  "source_commit": "ebf5261",
+  "limitations": [
+    "The artifact is a local calibration build and is not a published release.",
+    "A wheel policy pass is not legal approval or a vulnerability verdict."
+  ]
+}

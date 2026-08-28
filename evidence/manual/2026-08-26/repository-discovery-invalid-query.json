@@ -1,0 +1,534 @@
+{
+  "schema_version": "1",
+  "created_at": "2026-08-26T17:14:56.723759Z",
+  "provider": "octocode-cli:octocode@18.3.0",
+  "request": {
+    "schema_version": "1",
+    "name": "blackridge-self-hosting",
+    "goal": "Assemble and verify Blackridge itself from proven upstream discovery, inspection, execution, adaptation, and evaluation components.",
+    "constraints": {
+      "execution": "sandbox-only",
+      "provenance": "required",
+      "approval": "manual-evidence-review",
+      "write_new_code": "only-when-no-upstream-component-or-small-adapter-exists"
+    },
+    "capabilities": [
+      {
+        "id": "repository-discovery",
+        "description": "Find source repositories that implement a requested software capability.",
+        "accepts": [
+          "capability-query/v1"
+        ],
+        "produces": [
+          "repository-candidate-set/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          }
+        ],
+        "seeds": [
+          "bgauryy/octocode",
+          "github/github-mcp-server"
+        ],
+        "acceptance": [
+          {
+            "id": "known-sandbox-query",
+            "description": "A concrete sandbox query returns relevant and auditable repositories.",
+            "given": "The query \"sandboxed code execution for AI agents\" with a limit of five results.",
+            "when": "Repository discovery and GitHub metadata enrichment are executed.",
+            "then": [
+              "At least one result explicitly implements isolated or sandboxed code execution.",
+              "Every result records its exact repository identity and source query.",
+              "The leading result is inspected manually rather than approved from its score alone."
+            ]
+          }
+        ],
+        "required": true
+      }
+    ]
+  },
+  "results": [
+    {
+      "capability": {
+        "id": "repository-discovery",
+        "description": "Find source repositories that implement a requested software capability.",
+        "accepts": [
+          "capability-query/v1"
+        ],
+        "produces": [
+          "repository-candidate-set/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          }
+        ],
+        "seeds": [
+          "bgauryy/octocode",
+          "github/github-mcp-server"
+        ],
+        "acceptance": [
+          {
+            "id": "known-sandbox-query",
+            "description": "A concrete sandbox query returns relevant and auditable repositories.",
+            "given": "The query \"sandboxed code execution for AI agents\" with a limit of five results.",
+            "when": "Repository discovery and GitHub metadata enrichment are executed.",
+            "then": [
+              "At least one result explicitly implements isolated or sandboxed code execution.",
+              "Every result records its exact repository identity and source query.",
+              "The leading result is inspected manually rather than approved from its score alone."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": [
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "PawanOsman/OpenCursor",
+            "url": "https://github.com/PawanOsman/OpenCursor",
+            "description": "Open-source Cursor-like AI coding agent for VS Code — agentic chat, multi-provider LLMs (OpenAI, Ollama, llama.cpp), semantic search, and MCP support",
+            "stars": 6004,
+            "forks": 1027,
+            "open_issues": 6,
+            "pushed_at": "2026-08-15T08:46:31Z",
+            "updated_at": "2026-08-26T12:05:54Z",
+            "created_at": "2022-12-06T16:39:11Z",
+            "language": "TypeScript",
+            "topics": [
+              "agent",
+              "ai",
+              "code",
+              "coder",
+              "cursor",
+              "extension",
+              "ide",
+              "vscode"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 19.6,
+            "adoption": 9.45,
+            "community": 5.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 82.78
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "bgauryy/octocode",
+            "url": "https://github.com/bgauryy/octocode",
+            "description": "Code research platform for AI agents; find, understand, and prove context across your code and all of GitHub, in a fraction of the tokens. One toolset, MCP or CLI  ",
+            "stars": 920,
+            "forks": 75,
+            "open_issues": 3,
+            "pushed_at": "2026-08-25T19:36:22Z",
+            "updated_at": "2026-08-25T19:36:25Z",
+            "created_at": "2025-06-05T13:56:40Z",
+            "language": "TypeScript",
+            "topics": [
+              "agent",
+              "ai",
+              "ai-agents",
+              "ai-tools",
+              "claude-ai",
+              "code-intelligence",
+              "code-search",
+              "context",
+              "cursor",
+              "cursor-ai",
+              "development",
+              "github",
+              "github-api",
+              "llm",
+              "mcp",
+              "model-context-protocol",
+              "modelcontextprotocol",
+              "octocode",
+              "semantic-search",
+              "vibe-coding"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 20.0,
+            "adoption": 7.41,
+            "community": 3.13,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 80.54
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "kenn-io/agentsview",
+            "url": "https://github.com/kenn-io/agentsview",
+            "description": "Local-first session search, analytics, insights, and token use statistics for coding agents, supporting Claude Code, Codex, and more than 20 other agents. ",
+            "stars": 5276,
+            "forks": 612,
+            "open_issues": 111,
+            "pushed_at": "2026-08-26T15:45:11Z",
+            "updated_at": "2026-08-26T15:53:09Z",
+            "created_at": "2026-02-19T19:33:24Z",
+            "language": "Go",
+            "topics": [],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 3,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 22.6,
+            "maintenance": 20.0,
+            "adoption": 9.31,
+            "community": 4.65,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 80.06
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "zilliztech/claude-context",
+            "url": "https://github.com/zilliztech/claude-context",
+            "description": "Code search MCP for Claude Code. Make entire codebase the context for any coding agent.",
+            "stars": 12444,
+            "forks": 914,
+            "open_issues": 143,
+            "pushed_at": "2026-07-14T12:00:38Z",
+            "updated_at": "2026-08-26T15:07:14Z",
+            "created_at": "2025-06-06T02:12:47Z",
+            "language": "TypeScript",
+            "topics": [
+              "agent",
+              "agentic-rag",
+              "ai-coding",
+              "claude-code",
+              "code-generation",
+              "code-search",
+              "cursor",
+              "embedding",
+              "gemini-cli",
+              "mcp",
+              "merkle-tree",
+              "nodejs",
+              "openai",
+              "rag",
+              "semantic-search",
+              "typescript",
+              "vector-database",
+              "vibe-coding",
+              "voyage-ai",
+              "vscode-extension"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 4,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 21.6,
+            "maintenance": 18.47,
+            "adoption": 10.0,
+            "community": 4.94,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 78.51
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "emarco177/langchain-course",
+            "url": "https://github.com/emarco177/langchain-course",
+            "description": "A project-based course repository for developing AI agents using LangChain v1+ and LangGraph: search agents, RAG systems, reflection agents, and code interpreters.",
+            "stars": 1615,
+            "forks": 3094,
+            "open_issues": 29,
+            "pushed_at": "2026-07-30T14:00:26Z",
+            "updated_at": "2026-08-26T16:34:27Z",
+            "created_at": "2023-04-15T05:53:10Z",
+            "language": null,
+            "topics": [
+              "agents",
+              "langchain",
+              "langgraph",
+              "langsmith",
+              "python",
+              "rag"
+            ],
+            "license_spdx": "Apache-2.0",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 5,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 20.71,
+            "maintenance": 19.02,
+            "adoption": 8.02,
+            "community": 5.0,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 76.25
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "github/github-mcp-server",
+            "url": "https://github.com/github/github-mcp-server",
+            "description": "GitHub's official MCP Server",
+            "stars": 32522,
+            "forks": 4856,
+            "open_issues": 327,
+            "pushed_at": "2026-08-26T15:12:17Z",
+            "updated_at": "2026-08-26T16:30:35Z",
+            "created_at": "2025-03-04T16:42:04Z",
+            "language": "Go",
+            "topics": [
+              "github",
+              "mcp",
+              "mcp-server"
+            ],
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 11.25,
+            "maintenance": 20.0,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 69.75
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "repository-discovery",
+          "metadata": {
+            "full_name": "Dicklesworthstone/coding_agent_session_search",
+            "url": "https://github.com/Dicklesworthstone/coding_agent_session_search",
+            "description": "Unified TUI and CLI to index and search your local coding agent session history across 11+ providers (Codex, Claude, Gemini, Cursor, Aider, etc.)",
+            "stars": 1084,
+            "forks": 136,
+            "open_issues": 25,
+            "pushed_at": "2026-08-26T16:10:14Z",
+            "updated_at": "2026-08-26T16:31:20Z",
+            "created_at": "2025-11-21T01:22:15Z",
+            "language": "Rust",
+            "topics": [
+              "ai-agents",
+              "developer-tools",
+              "rust",
+              "search",
+              "tui"
+            ],
+            "license_spdx": "NOASSERTION",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "code",
+              "search",
+              "agent"
+            ],
+            "language": null,
+            "stars": ">100",
+            "updated": ">2025-01-01",
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 20.0,
+            "adoption": 7.59,
+            "community": 3.56,
+            "issue_health": 3.5,
+            "license_confidence": 5.0,
+            "security_posture": 5.0,
+            "total": 69.65
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,123 @@
+{
+  "schema_version": "1",
+  "probe_id": "24115bc8f1ec4d698f53dbb6c554628f",
+  "observed_at": "2026-08-26T19:46:37.540861Z",
+  "provider": "blackridge-copy-provenance-gate/1",
+  "subject": "D:\\Skladacz aplikacji\\blackridge-systems",
+  "request": {
+    "manifest": {
+      "schema_version": "1",
+      "allowed_copy_licenses": [
+        "Apache-2.0",
+        "BSD-3-Clause",
+        "MIT"
+      ],
+      "legal_review_licenses": [
+        "GPL-3.0-or-later"
+      ],
+      "records": [
+        {
+          "id": "deliberately-incomplete-copy",
+          "mode": "copied",
+          "upstream_repository": "example/upstream",
+          "upstream_commit": "main",
+          "upstream_paths": [],
+          "upstream_sha256": {},
+          "destination_paths": [
+            "src/blackridge/example_copy.py"
+          ],
+          "destination_sha256": {},
+          "license_spdx": null,
+          "license_text_path": null,
+          "license_text_sha256": null,
+          "compatibility_decision": "unreviewed",
+          "compatibility_reviewer": null,
+          "attribution_location": null,
+          "modifications": null,
+          "manual_review_file": null,
+          "manual_review_sha256": null
+        }
+      ]
+    }
+  },
+  "observations": {
+    "probe_completed": true,
+    "record_count": 1,
+    "records": [
+      {
+        "id": "deliberately-incomplete-copy",
+        "mode": "copied",
+        "issues": [
+          "missing license_spdx",
+          "missing license_text_path",
+          "missing compatibility_reviewer",
+          "missing attribution_location",
+          "missing modifications",
+          "missing manual_review_file",
+          "upstream_commit must be an immutable 40-character commit",
+          "missing upstream_paths",
+          "license compatibility is not approved",
+          "license is not allowed for copying: unknown",
+          "destination does not exist: src/blackridge/example_copy.py"
+        ]
+      }
+    ],
+    "derived_markers": [],
+    "issue_count": 11,
+    "issues": [
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "missing license_spdx"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "missing license_text_path"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "missing compatibility_reviewer"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "missing attribution_location"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "missing modifications"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "missing manual_review_file"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "upstream_commit must be an immutable 40-character commit"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "missing upstream_paths"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "license compatibility is not approved"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "license is not allowed for copying: unknown"
+      },
+      {
+        "record": "deliberately-incomplete-copy",
+        "issue": "destination does not exist: src/blackridge/example_copy.py"
+      }
+    ],
+    "gate_allows_copy": false,
+    "scope_warning": "The registry gate validates declared copies. Pair it with the source similarity audit because an undeclared copy can omit its attribution marker."
+  },
+  "sources": [
+    "https://github.com/krapcys1-maker/blackridge-systems/blob/main/src/blackridge/provenance.py",
+    "https://www.apache.org/licenses/LICENSE-2.0"
+  ],
+  "warnings": [
+    "Copy/adaptation provenance gate has unresolved issues."
+  ]
+}

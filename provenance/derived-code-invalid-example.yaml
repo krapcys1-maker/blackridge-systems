@@ -1,0 +1,10 @@
+schema_version: "1"
+allowed_copy_licenses: [Apache-2.0, BSD-3-Clause, MIT]
+legal_review_licenses: [GPL-3.0-or-later]
+records:
+  - id: deliberately-incomplete-copy
+    mode: copied
+    upstream_repository: example/upstream
+    upstream_commit: main
+    destination_paths: [src/blackridge/example_copy.py]
+    compatibility_decision: unreviewed

@@ -1,0 +1,219 @@
+schema_version: "1"
+snapshot_date: "2026-08-26"
+policy:
+  strategy: external-adapters-over-vendoring
+  statement: >-
+    Pin and invoke upstream releases through CLI, API, SDK, or OCI boundaries. Do not copy
+    source into Blackridge unless a provenance and license review explicitly approves it.
+
+components:
+  - repository: bgauryy/octocode
+    role: discovery-and-code-research
+    version: npm:octocode@18.3.0
+    license: MIT
+    integration: cli
+    status: active-in-mvp
+    rationale: GitHub and local search, AST, LSP, history, clone, and compact evidence in one interface.
+
+  - repository: github/github-mcp-server
+    role: official-github-control-plane
+    version: v1.11.0
+    license: MIT
+    integration: mcp-read-only
+    status: selected-next
+    rationale: Official GitHub surface with explicit read-only mode and tool allowlists.
+
+  - repository: google/deps.dev
+    role: package-ecosystem-intelligence
+    version: api-v3
+    license: Apache-2.0
+    integration: public-http-api
+    status: active-in-mvp
+    rationale: >-
+      Package versions, licenses, advisories, provenance links, and resolved dependency graphs
+      across PyPI, npm, Maven, Cargo, NuGet, Go, and RubyGems. Coverage gaps remain explicit.
+
+  - repository: yamadashy/repomix
+    role: bounded-source-snapshot
+    version: v1.18.0
+    license: MIT
+    integration: cli
+    status: selected-next
+    rationale: Remote repository packing pinned to a branch or commit, with untrusted config disabled by default.
+
+  - repository: ossf/scorecard
+    role: repository-security-posture
+    version: v5.5.0
+    license: Apache-2.0
+    integration: public-api-and-oci
+    status: active-in-mvp
+    rationale: Reusable checks for maintenance, reviews, CI, dependency pinning, releases, and vulnerabilities.
+
+  - repository: google/osv-scalibr
+    role: software-composition-analysis
+    version: v0.5.2
+    license: Apache-2.0
+    integration: library-or-cli
+    status: selected-next
+    rationale: Package inventory, vulnerability, and plugin-oriented SCA from the OSV ecosystem.
+
+  - repository: google/osv-scanner
+    role: sbom-vulnerability-scanning
+    version: v2.5.1
+    license: Apache-2.0
+    integration: pinned-oci-cli
+    status: active-in-mvp
+    rationale: >-
+      Official OSV scanner consumes the retained CycloneDX SBOM. Exit 1 is preserved as findings,
+      and complete-lockfile results stay blocked until production reachability is classified.
+
+  - repository: oss-review-toolkit/ort
+    role: license-and-policy-gate
+    version: 92.4.0
+    license: Apache-2.0
+    integration: cli-or-container
+    status: selected-next
+    rationale: Dependency analysis, source download, license scan, advisories, policy evaluation, and reports.
+
+  - repository: anchore/syft
+    role: sbom-generation
+    version: v1.51.0
+    license: Apache-2.0
+    integration: cli-or-oci
+    status: active-in-mvp
+    rationale: >-
+      Mature multi-ecosystem SBOM generation for source trees and images, invoked through a pinned
+      OCI digest with source mounted read-only, network disabled, and update checks disabled.
+
+  - repository: opensandbox-group/OpenSandbox
+    role: untrusted-execution-boundary
+    version: server/v0.2.3
+    license: Apache-2.0
+    integration: sdk-and-service
+    status: selected-next
+    rationale: Unified SDK and Docker/Kubernetes backends with gVisor, Kata, and Firecracker options.
+
+  - repository: SWE-agent/SWE-ReX
+    role: agent-execution-interface
+    version: v1.4.0
+    license: MIT
+    integration: python-sdk
+    status: active-in-mvp
+    rationale: >-
+      Replaceable Docker execution interface, wrapped by a small Blackridge policy adapter.
+      Version 1.4.0 needs an explicit aiohttp client dependency and a prebuilt image to avoid
+      its unpinned pipx fallback.
+
+  - repository: dagger/dagger
+    role: reproducible-experiment-dag
+    version: v0.21.9
+    license: Apache-2.0
+    integration: sdk-and-engine
+    status: selected-next
+    rationale: Containerized, typed, cached build and test functions that run locally or in CI.
+
+  - repository: stefankoegl/python-json-patch
+    role: declarative-payload-adaptation
+    version: v1.33
+    license: BSD-3-Clause
+    integration: python-library-rfc6902
+    status: active-in-mvp
+    rationale: >-
+      Mature dedicated RFC 6902 implementation. Blackridge deep-copies patch definitions because
+      chained add/copy operations can mutate a patch value object held in the working copy.
+
+  - repository: python-jsonschema/jsonschema
+    role: component-contract-validation
+    version: v4.26.0
+    license: MIT
+    integration: python-library-draft2020-12
+    status: active-in-mvp
+    rationale: >-
+      Standard JSON Schema validation with complete lazy error iteration, used to compare source,
+      adapted, and deliberately broken output artifacts.
+
+  - repository: ast-grep/ast-grep
+    role: structural-adaptation
+    version: 0.45.2
+    license: MIT
+    integration: cli
+    status: selected-next
+    rationale: Multi-language structural search and rewrite without fragile regex patching.
+
+  - repository: openrewrite/rewrite
+    role: large-scale-refactoring
+    version: v8.91.0
+    license: Apache-2.0
+    integration: recipes
+    status: evaluated-specialist
+    rationale: Strong option for repeatable ecosystem migrations and mass refactors, especially JVM projects.
+
+  - repository: OpenHands/software-agent-sdk
+    role: missing-code-and-adapter-agent
+    version: v1.43.1
+    license: MIT
+    integration: python-sdk
+    status: selected-next
+    rationale: Modular SDK boundary is preferable to embedding the full OpenHands product.
+
+  - repository: langchain-ai/langgraph
+    role: durable-agent-state-graph
+    version: sdk==0.4.3
+    license: MIT
+    integration: python-library
+    status: deferred
+    rationale: Add only when the deterministic pipeline needs durable resume and human approval nodes.
+
+vertical_slice_candidates:
+  - repository: Future-House/paper-qa
+    role: scientific-search-and-evidence-rag
+    version: v2026.08.12
+    license: Apache-2.0
+    status: blocked-by-supply-chain-review
+    rationale: >-
+      Strong scientific RAG candidate, but the exact v2026.08.12 review found unresolved direct
+      dependency licenses, full-lockfile OSV findings, missing Scorecard posture, and no PyPI
+      provenance. Production reachability and policy resolution are required before selection.
+
+  - repository: grobidOrg/grobid
+    role: scholarly-document-parsing
+    version: 0.9.1
+    license: Apache-2.0
+    status: inspect-and-contract-test
+    rationale: Domain-specialized service for scholarly full text, metadata, references, and coordinates; language-neutral REST boundary.
+
+  - repository: danielnsilva/semanticscholar
+    role: semantic-scholar-api-client
+    version: v0.12.0
+    license: MIT
+    status: inspect-and-contract-test
+    rationale: Small active Python client; likely preferable to maintaining another API wrapper.
+
+  - repository: zongmin-yu/semantic-scholar-fastmcp-mcp-server
+    role: citation-network-mcp
+    version: main-snapshot-2026-08-26
+    license: MIT
+    status: inspect-and-contract-test
+    rationale: Existing MCP boundary for paper, author, and citation-network access.
+
+  - repository: allenai/asta-theorizer
+    role: literature-grounded-theory-generation
+    version: main-snapshot-2026-08-26
+    license: Apache-2.0
+    status: research-prototype-to-sandbox
+    rationale: Direct implementation of evidence extraction, theory generation, and several scientific evaluation modes.
+
+  - repository: UKGovernmentBEIS/inspect_ai
+    role: agent-and-llm-evaluation
+    version: main-snapshot-2026-08-26
+    license: MIT
+    status: inspect-and-contract-test
+    rationale: Active evaluation framework with a separate reusable evaluation collection.
+
+research_only:
+  - repository: allenai/codenav
+    reason: Valuable Apache-2.0 research prototype, but last push observed in 2024 and its README warns against security-sensitive use.
+  - repository: WhitenWhiten/CodeTeam
+    reason: Interesting NL2Repo role design, but adoption is minimal and GitHub exposed no license at the research snapshot.
+  - repository: replenhq/replen
+    reason: Closely matches repository recommendation and integration-effort estimation, but is too early to become a core dependency.

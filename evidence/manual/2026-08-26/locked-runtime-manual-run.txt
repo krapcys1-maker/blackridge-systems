@@ -1,0 +1,170 @@
+Blackridge locked internal runtime — manual experiment record — 2026-08-26
+
+Scope
+-----
+This record verifies the internal-build-only SWE-ReX runtime. It is deliberately not a
+public-distribution approval. Public image publication remains prohibited by
+docker/distribution-manifest.yaml.
+
+Frozen inputs
+-------------
+Base image:
+  python:3.12-slim@sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17
+Debian snapshot:
+  20260824T000000Z
+Final no-cache image ID:
+  sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+Docker build context reported by BuildKit:
+  221 B
+The .dockerignore allowlist admitted only LICENSE, NOTICE, THIRD_PARTY_NOTICES.md,
+docker/python-requirements.lock, and docker/os-packages.lock.tsv. The .env file,
+Git history, Blackridge source, and evidence were outside the context.
+The final image Config.Env and complete Docker history contained none of the strings
+DEEPSEEK, GITHUB_TOKEN, or .env. Secret values were never read during this verification.
+
+Dependency-lock experiment
+--------------------------
+Positive control:
+  A fresh pinned base installed the exact 35-distribution lock with
+  --only-binary=:all: --require-hashes. pip check passed, swerex-remote --version
+  printed 1.4.0, and aiohttp resolved to 3.14.3.
+
+Negative control:
+  examples/fixtures/python-requirements-invalid-hash.lock replaces the expected
+  aiohappyeyeballs wheel digest with 64 zeroes. A real pip install exited 1 and
+  reported the expected zero digest and the observed
+  924321bc4f3023ab2e01ed93ac342643921df9a2673170ee88d7cf0c6b566b42.
+  An earlier invocation that omitted --requirement was rejected as a CLI syntax
+  error and was not counted as this control.
+
+Final image release probe
+-------------------------
+Command subject:
+  sha256:b1e8e07cc6cc02ad2319b76c893492e952920526e4638bcb102acf1c70ed6ad5
+CLI exit:
+  1 (expected policy block, not operational failure)
+Observed inventory:
+  161 SBOM packages
+  35/35 Python distributions match docker/python-requirements.lock
+  118/118 Debian packages match docker/os-packages.lock.tsv
+  APT source URLs match Debian snapshot 20260824T000000Z
+  6/6 exact Python technical license-review entries match extracted license hashes
+  0 review issues
+  0 unresolved Python unknown-metadata records after the technical review
+Release gate:
+  false
+Remaining blockers:
+  1. Reciprocal-license packages require qualified public-distribution review.
+  2. Corresponding source archives or a reviewed source-offer mechanism are not bundled.
+License archive inspection:
+  162 ZIP members, testzip returned None, zero zero-byte members.
+  174 retained probe files including expanded local inspection files, zero zero-byte files.
+
+Workflow-policy paired control
+------------------------------
+The v1 workflow assertion set accepted the positive probe with zero failed assertions.
+Applied to the invalid-license-review probe, the same assertions rejected four exact
+conditions: six reviews valid, no review issues, unknown metadata resolved, and only
+the two expected public blockers. Therefore an arbitrary policy exit 1 is no longer
+enough to make the release workflow green.
+
+GitHub Linux verification
+-------------------------
+Implementation commit:
+  541d6b26c648b63d1abc037ae10f78bf52fd49a3
+CI run (success):
+  https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33013289620
+Release-evidence run (success, 59 seconds):
+  https://github.com/krapcys1-maker/blackridge-systems/actions/runs/33013302865
+The runs started at 2026-08-26T21:00Z (2026-08-27 local time).
+Linux-built exact image ID:
+  sha256:e9a1f4b444ddae5f892d8116b6b078fddc5b77f55ada942592d80735c9dbba01
+Downloaded GitHub artifact:
+  id 9623451910
+  blackridge-release-evidence-541d6b26c648b63d1abc037ae10f78bf52fd49a3
+  2,150,246-byte compressed artifact
+  sha256:9c17e5613749ac427b1f8447ded5ed0c7d4dc537619ed1773fda4661ef045d45
+Manual download inspection:
+  183 files, zero zero-byte files
+  wheel gate open with zero blockers, 29 members, and seven runtime dependencies
+  image probe completed with locks 35/35 and 118/118
+  six valid reviews, zero review issues, zero unresolved metadata
+  image gate closed with exactly the same two public-distribution blockers
+  image license ZIP had 162 entries, zero empty entries, and no CRC error
+The workflow uploaded evidence before enforcing policy. Its final enforcement step
+accepted this exact internal-only state; there is still no registry login or image push.
+GitHub emitted a non-blocking warning that the pinned upload-artifact action targets
+Node.js 20 and was forced to Node.js 24 by the runner. The action itself completed.
+
+Runtime behavior experiment
+---------------------------
+Repository:
+  https://github.com/pypa/sampleproject
+Exact commit:
+  621e4974ca25ce531773def586ba3ed8e736b3fc
+Positive result:
+  SWE-ReX 1.4.0 ran ten commands. The repository unittest passed and the independent
+  behavior artifact was {"actual": 42, "expected": 42, "input": 41}.
+Boundary observation:
+  CapEff=0000000000000000; NoNewPrivs=1; memory.max=1073741824;
+  pids.max=256; cpu.max="200000 100000".
+Host and cleanup:
+  Host before/after digest matched. No container remained after stop.
+Negative result:
+  The same commit and image demanded add_one(5)==999. The process exited 1 with
+  AssertionError: expected 999, got 6. must-not-run-after-failure was explicitly
+  retained as not run. Host digest still matched and no container remained.
+
+Runtime content smoke control
+-----------------------------
+The first added smoke command expected legal files below /usr/share/blackridge and
+failed with AssertionError. Inspection showed that this was a false test assumption:
+the Dockerfile intentionally installs legal files below /usr/share/licenses/blackridge
+and locks below /usr/share/blackridge/locks. That failed attempt was not counted.
+The corrected real container command exited 0, confirmed SWE-ReX 1.4.0 and aiohttp
+3.14.3, and confirmed all three legal files and both lock files exist and are nonempty.
+
+Fresh wheel experiment
+----------------------
+An isolated PEP 517 build from the current tree produced:
+  blackridge_systems-0.1.0-py3-none-any.whl
+  SHA-256 836bcaadd07cf7a02103d8ee3f365fb674b90434df353db40599ad1f3f8135e4
+The exact wheel probe found 29 members, seven runtime and seven optional dependency
+declarations, all three Blackridge legal files, two SBOM packages, and zero blockers.
+A new venv installed the wheel; pip check, import of PythonLicenseReview, the installed
+--license-review CLI option, ZIP CRC, and all three embedded legal files passed.
+The first pip process crossed the command runner's 30-second return window before the
+entry-point script was present and was not counted. A no-dependencies forced reinstall
+of the already downloaded exact wheel completed cleanly. A first PowerShell text check
+also treated every nonmatching help line as true; direct CLI invocation proved the
+option existed, and the corrected joined-text control passed. Neither harness error was
+misclassified as a Blackridge failure or success.
+
+License-review integrity negative control
+-----------------------------------------
+examples/fixtures/python-license-review-invalid.yaml supplies a deliberately false
+markdown-it-py LICENSE digest. The same exact image probe exited 1. It reported the
+exact license path mismatch, reduced valid review entries from 6 to 0, restored four
+unresolved unknown-metadata records, and kept the release gate closed with three
+blockers. The runtime locks still matched, isolating this failure to review integrity.
+Raw control probe SHA-256:
+  92d991d49a13fc729980239b736d7a55d369a0c939d811448eace0ecb65e0fc0
+
+Exact Python source-archive observations
+----------------------------------------
+The six primary PyPI source archives referenced by docker/python-license-review.yaml
+were downloaded and hashed independently:
+  bashlex-0.18.tar.gz          5bb03a01c6d5676338c36fd1028009c8ad07e7d61d8a1ce3f513b7fff52796ee
+  certifi-2026.7.22.tar.gz     741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55
+  markdown_it_py-4.2.0.tar.gz  04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49
+  mdurl-0.1.2.tar.gz           bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba
+  ptyprocess-0.7.0.tar.gz      5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220
+  swe_rex-1.4.0.tar.gz         14f8a24c49a63f9e251340b1109ac75a4aacbaece410f8599209de9bfca843c0
+These six archives do not resolve the complete image source obligation: the Debian
+source closure and a reviewed delivery/offer mechanism are still absent.
+
+Verdict
+-------
+PASS for the frozen internal runtime, exact dependency locks, runtime behavior, and
+fail-closed controls. BLOCKED for public image publication. Functionality is not
+treated as license clearance.

@@ -1,0 +1,81 @@
+{
+  "schema_version": "1",
+  "probe_id": "087000da817b4592b07b9b7bc71a692d",
+  "observed_at": "2026-08-27T18:26:58.721487+00:00",
+  "provider": "blackridge-semanticscholar-replay/1",
+  "subject": "semanticscholar-search-v1@abd382538346c5a29a5ce9dd5da932616291075565071c2dca78f289d32a7556",
+  "request": {
+    "case_ids": [
+      "pagination",
+      "empty",
+      "get-paper",
+      "not-found",
+      "rate-limit",
+      "malformed",
+      "invalid-extra-field"
+    ],
+    "assert_public_network_denied": true
+  },
+  "observations": {
+    "probe_completed": true,
+    "subject_revision": "0fff162c803a20fc818fc267d8e5beb0b1d898d6",
+    "adapter_sha256": "abd382538346c5a29a5ce9dd5da932616291075565071c2dca78f289d32a7556",
+    "lock_sha256": "caa2aff26ba07590be982cbc96aaebbb8b466c170afb0d05e1fcf8c5a8f6a842",
+    "input_contract_sha256": "a5547fbf7ccd1f2cf25454d1c2bda477baacd378dc21c99dc58dae0007a336c1",
+    "output_contract_sha256": "04178e21846ff52defa1e0c77a7b08f2396e712b6e168be8a2e48172f05aceb1",
+    "runtime_image_id": "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+    "runtime_limits": {
+      "network": "none",
+      "root_filesystem": "read-only",
+      "capabilities": "all-dropped",
+      "no_new_privileges": true,
+      "memory_mebibytes": 512,
+      "memory_swap_mebibytes": 512,
+      "cpus": 1,
+      "pids": 128
+    },
+    "offline_install": {
+      "pip_require_hashes": true,
+      "pip_no_index": true,
+      "wheel_count": 9,
+      "wheelhouse_bytes": 623948,
+      "pip_check": "No broken requirements found"
+    },
+    "versions": {
+      "semanticscholar": "0.12.0",
+      "httpx": "0.28.1",
+      "tenacity": "9.1.4"
+    },
+    "case_count": 7,
+    "matched_case_count": 7,
+    "case_results": [
+      {"id": "pagination", "matched": true, "status": "ok", "paper_ids": ["paper-1", "paper-2", "paper-3"]},
+      {"id": "empty", "matched": true, "status": "ok", "paper_ids": []},
+      {"id": "get-paper", "matched": true, "status": "ok", "paper_ids": ["paper-doi"]},
+      {"id": "not-found", "matched": true, "status": "error", "error_code": "not-found"},
+      {"id": "rate-limit", "matched": true, "status": "error", "error_code": "rate-limited"},
+      {"id": "malformed", "matched": true, "status": "error", "error_code": "upstream-failure"},
+      {"id": "invalid-extra-field", "matched": true, "status": "error", "error_code": "invalid-request", "http_requests": 0}
+    ],
+    "http_request_count": 7,
+    "all_http_requests_loopback_replay": true,
+    "network_boundary": {
+      "required": true,
+      "direct_egress": false,
+      "dns_egress": false
+    },
+    "containers_remaining": 0,
+    "full_raw_probe_sha256": "43dbd28d210dd10ef3fdd6131584eb511d88cb35137107e13dc55d07c6cbe8b1",
+    "full_raw_probe_path": "D:\\Skladacz aplikacji\\blackridge-experiments\\semanticscholar-networkless-v1\\eval\\networkless-probe-v4.json"
+  },
+  "sources": [
+    "https://github.com/danielnsilva/semanticscholar/tree/v0.12.0",
+    "https://pypi.org/project/semanticscholar/0.12.0/",
+    "blackridge://components/semanticscholar-search-v1"
+  ],
+  "warnings": [
+    "Replay evidence verifies networkless boot behavior, not current public API contents.",
+    "The upstream package lacks PyPI provenance and OpenSSF Scorecard coverage.",
+    "L3 contract promotion remains withheld pending broader frozen behavior and upstream-risk disposition."
+  ]
+}
