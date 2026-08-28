@@ -287,6 +287,39 @@ def test_public_evaluator_contract_is_bounded_hash_bound_and_in_prompt() -> None
         )
 
 
+def test_compact_profile_omits_l0_facts_but_keeps_hash_bound_discovery() -> None:
+    class _PromptBackend(_Backend):
+        user = ""
+
+        def complete_json(self, **kwargs: object) -> AgentCompletion:
+            self.user = str(kwargs["user"])
+            return super().complete_json()
+
+    backend = _PromptBackend()
+    _, record = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=backend,
+        public_evaluator_contract="# public evaluator\n",
+        generation_profile="public-contract-compact",
+    )
+
+    assert record.generation_profile == "public-contract-compact"
+    assert record.discovery_sha256 == sha256(DISCOVERY.model_dump_json().encode()).hexdigest()
+    assert "UNTRUSTED L0 CANDIDATE FACTS" not in backend.user
+    assert "COMPACT PROFILE" in backend.user
+
+    with pytest.raises(ValueError, match="requires a public evaluator"):
+        propose_gap_system(
+            "Build a deterministic duplicate finder that never modifies input files.",
+            request=REQUEST,
+            discovery=DISCOVERY,
+            backend=_Backend(),
+            generation_profile="public-contract-compact",
+        )
+
+
 def test_schema_rejected_provider_completion_is_retained_as_evidence() -> None:
     completion = _Backend().complete_json()
     completion.content["files"][0]["forbidden"] = True

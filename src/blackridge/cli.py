@@ -295,6 +295,7 @@ def propose_gap(
         Path | None,
         typer.Option("--public-evaluator", exists=True, dir_okay=False, readable=True),
     ] = None,
+    generation_profile: Annotated[str, typer.Option("--generation-profile")] = "reuse-full",
     review_feedback_file: Annotated[
         Path | None,
         typer.Option("--review-feedback", exists=True, dir_okay=False, readable=True),
@@ -329,6 +330,7 @@ def propose_gap(
                 if public_evaluator_file is not None
                 else None
             ),
+            generation_profile=generation_profile,
             review_feedback=(
                 review_feedback_file.read_text(encoding="utf-8")
                 if review_feedback_file is not None
