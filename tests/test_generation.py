@@ -13,10 +13,15 @@ from blackridge.generation import (
     GenerationProposalRejected,
     VerifiedComponent,
     compose_with_locked_files,
+    is_generated_test_path,
     materialize_proposal,
     normalize_completion_content,
     proposal_sha256,
     propose_gap_system,
+    propose_test_only_repair,
+)
+from blackridge.generation import (
+    TestRepairProposalRejected as RepairProposalRejected,
 )
 from blackridge.models import (
     AcceptanceScenario,
@@ -413,6 +418,105 @@ def test_composition_rejects_a_locked_file_removed_by_next_proposal() -> None:
 
     with pytest.raises(ValueError, match="must exist in both proposals"):
         compose_with_locked_files(prior, next_proposal, locked_paths=["dupfinder.py"])
+
+
+def test_test_only_repair_keeps_product_and_control_fields_byte_exact() -> None:
+    prior, _ = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=_Backend(),
+    )
+    completion = _Backend().complete_json()
+    completion.content = {
+        "schema_version": "1",
+        "files": [
+            {
+                "path": "tests/test_dupfinder.py",
+                "content": "def test_detect_duplicates():\n    assert True\n",
+            }
+        ],
+        "acceptance_coverage": [
+            {
+                "acceptance_id": "detect-duplicates",
+                "test_file": "tests/test_dupfinder.py",
+                "test_name": "test_detect_duplicates",
+                "rationale": "The black-box fixture checks that input bytes remain unchanged.",
+            }
+        ],
+        "limitations": ["Sandbox execution remains required."],
+        "provider_note": "ignored but retained in the audit path",
+    }
+
+    class _RepairBackend(_Backend):
+        user = ""
+
+        def complete_json(self, **kwargs: object) -> AgentCompletion:
+            self.user = str(kwargs["user"])
+            return completion
+
+    backend = _RepairBackend()
+    repaired, record = propose_test_only_repair(
+        prior,
+        request=REQUEST,
+        public_evaluator_contract="def test_public_contract():\n    assert True\n",
+        failure_feedback="One generated black-box assertion failed.",
+        backend=backend,
+    )
+
+    assert repaired.files[0] == prior.files[0]
+    assert repaired.run_command == prior.run_command
+    assert repaired.component_decisions == prior.component_decisions
+    assert repaired.tests == prior.tests
+    assert repaired.files[1].content.startswith("def test_detect_duplicates")
+    assert record.locked_file_sha256 == {
+        "dupfinder.py": sha256(prior.files[0].content.encode()).hexdigest()
+    }
+    assert record.ignored_provider_fields == ["provider_note"]
+    assert "immutable product" in backend.user.casefold()
+    assert "authoritative evaluator" in backend.user
+
+
+def test_test_only_repair_rejects_product_files_and_missing_test_functions() -> None:
+    assert is_generated_test_path("tests/test_program.py") is True
+    assert is_generated_test_path("program.py") is False
+    prior, _ = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=_Backend(),
+    )
+    completion = _Backend().complete_json()
+    completion.content = {
+        "schema_version": "1",
+        "files": [{"path": "program.py", "content": "print('rewrite')\n"}],
+        "acceptance_coverage": [
+            {
+                "acceptance_id": "detect-duplicates",
+                "test_file": "program.py",
+                "test_name": "test_missing",
+                "rationale": "This must be rejected before any product rewrite is accepted.",
+            }
+        ],
+        "limitations": [],
+    }
+
+    class _InvalidRepairBackend(_Backend):
+        def complete_json(self, **_: object) -> AgentCompletion:
+            return completion
+
+    with pytest.raises(RepairProposalRejected, match="schema validation") as caught:
+        propose_test_only_repair(
+            prior,
+            request=REQUEST,
+            public_evaluator_contract="def test_public_contract():\n    assert True\n",
+            failure_feedback="Generated tests failed.",
+            backend=_InvalidRepairBackend(),
+        )
+    serialized = json.loads(caught.value.record.model_dump_json())
+    assert serialized["repair_status"] == "schema-rejected"
+    assert serialized["validation_errors"][0]["type"] == "value_error"
+    assert serialized["locked_file_sha256"]
 
 
 def test_generation_prompt_requires_black_box_portable_tests() -> None:
