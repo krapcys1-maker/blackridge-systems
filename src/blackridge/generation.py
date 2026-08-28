@@ -85,6 +85,7 @@ class GeneratedSystemProposal(StrictGenerationModel):
     @model_validator(mode="after")
     def safe_and_bounded(self) -> GeneratedSystemProposal:
         seen: set[str] = set()
+        content_by_path: dict[str, str] = {}
         total_bytes = 0
         for generated_file in self.files:
             canonical = validate_generated_path(generated_file.path)
@@ -94,6 +95,7 @@ class GeneratedSystemProposal(StrictGenerationModel):
                     f"{generated_file.path!r}"
                 )
             seen.add(canonical)
+            content_by_path[canonical] = generated_file.content
             content_bytes = len(generated_file.content.encode("utf-8"))
             if content_bytes > MAX_GENERATED_FILE_BYTES:
                 raise ValueError(f"generated file exceeds byte limit: {generated_file.path!r}")
@@ -124,6 +126,15 @@ class GeneratedSystemProposal(StrictGenerationModel):
             ):
                 raise ValueError(
                     f"acceptance evidence must reference a test directory: {evidence.test_file!r}"
+                )
+            if not re.search(
+                rf"^\s*def\s+{re.escape(evidence.test_name)}\s*\(",
+                content_by_path[canonical_test],
+                flags=re.MULTILINE,
+            ):
+                raise ValueError(
+                    "acceptance evidence references a missing concrete test: "
+                    f"{evidence.test_name!r}"
                 )
         return self
 
@@ -233,6 +244,9 @@ class TestRepairRecord(StrictGenerationModel):
     request_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     public_evaluator_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     failure_feedback_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    prior_test_suite_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    rejected_test_suite_sha256s: list[str] = Field(default_factory=list)
+    repaired_test_suite_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     completion: AgentCompletion
     ignored_provider_fields: list[str] = Field(default_factory=list)
     locked_file_sha256: dict[str, str]
@@ -246,6 +260,9 @@ class TestRepairRejectionRecord(StrictGenerationModel):
     request_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     public_evaluator_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     failure_feedback_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    prior_test_suite_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    rejected_test_suite_sha256s: list[str] = Field(default_factory=list)
+    candidate_test_suite_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     completion: AgentCompletion
     ignored_provider_fields: list[str] = Field(default_factory=list)
     locked_file_sha256: dict[str, str]
@@ -309,6 +326,20 @@ def is_generated_test_path(value: str) -> bool:
 def proposal_sha256(proposal: GeneratedSystemProposal) -> str:
     canonical = proposal.model_dump_json(exclude_none=False)
     return sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def test_suite_sha256(files: list[GeneratedFile]) -> str:
+    """Hash test bytes canonically so reordered or case-varied repeats remain repeats."""
+
+    test_files = [item for item in files if is_generated_test_path(item.path)]
+    if not test_files:
+        raise ValueError("test-suite hashing requires at least one generated test file")
+    canonical = [
+        {"path": validate_generated_path(item.path), "content": item.content} for item in test_files
+    ]
+    canonical.sort(key=lambda item: item["path"])
+    payload = json.dumps(canonical, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    return sha256(payload.encode("utf-8")).hexdigest()
 
 
 def normalize_completion_content(content: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
@@ -441,6 +472,7 @@ def propose_test_only_repair(
     public_evaluator_contract: str,
     failure_feedback: str,
     backend: AgentBackend,
+    rejected_test_suite_sha256s: list[str] | None = None,
 ) -> tuple[GeneratedSystemProposal, TestRepairRecord]:
     """Repair only generated tests while preserving every product file and control field."""
 
@@ -461,6 +493,12 @@ def propose_test_only_repair(
     prior_tests = [item for item in prior.files if is_generated_test_path(item.path)]
     if not prior_tests:
         raise ValueError("test-only repair requires an existing generated test suite")
+    prior_test_sha = test_suite_sha256(prior_tests)
+    rejected_hashes = list(rejected_test_suite_sha256s or [])
+    if len(rejected_hashes) != len(set(rejected_hashes)):
+        raise ValueError("rejected test-suite hashes must be unique")
+    if any(not re.fullmatch(r"[0-9a-f]{64}", item) for item in rejected_hashes):
+        raise ValueError("rejected test-suite hashes must be lowercase SHA-256 values")
 
     example = {
         "schema_version": "1",
@@ -497,9 +535,14 @@ def propose_test_only_repair(
         "- Map every acceptance id exactly once to an existing concrete test function.\n"
         "- Re-check every failing fixture against the evaluator's exact preconditions and output "
         "semantics; do not preserve an assertion contradicted by the authoritative evaluator.\n\n"
+        "- Produce a materially different suite. Returning bytes whose canonical SHA-256 equals "
+        "the prior or any rejected suite is a deterministic failure.\n\n"
         f"VALIDATED REQUEST:\n{request.model_dump_json(indent=2)}\n\n"
         f"IMMUTABLE PRIOR PROPOSAL:\n{prior.model_dump_json(indent=2)}\n\n"
         f"AUTHORITATIVE PUBLIC EVALUATOR:\n{evaluator}\n\n"
+        f"PRIOR TEST-SUITE SHA-256:\n{prior_test_sha}\n\n"
+        "REJECTED TEST-SUITE SHA-256 VALUES:\n"
+        f"{json.dumps(rejected_hashes)}\n\n"
         f"GENERATED-TEST FAILURE EVIDENCE:\n{feedback}"
     )
     completion = backend.complete_json(system=system, user=user, max_tokens=16_384)
@@ -520,12 +563,41 @@ def propose_test_only_repair(
                 request_sha256=request_sha,
                 public_evaluator_sha256=evaluator_sha,
                 failure_feedback_sha256=feedback_sha,
+                prior_test_suite_sha256=prior_test_sha,
+                rejected_test_suite_sha256s=rejected_hashes,
                 completion=completion,
                 ignored_provider_fields=ignored,
                 locked_file_sha256=locked_hashes,
                 validation_errors=_serializable_validation_errors(exc),
             )
         ) from exc
+
+    repaired_test_sha = test_suite_sha256(repair.files)
+    forbidden_hashes = {prior_test_sha, *rejected_hashes}
+    if repaired_test_sha in forbidden_hashes:
+        raise TestRepairProposalRejected(
+            TestRepairRejectionRecord(
+                operator=backend.identity,
+                prior_proposal_sha256=proposal_sha256(prior),
+                request_sha256=request_sha,
+                public_evaluator_sha256=evaluator_sha,
+                failure_feedback_sha256=feedback_sha,
+                prior_test_suite_sha256=prior_test_sha,
+                rejected_test_suite_sha256s=rejected_hashes,
+                candidate_test_suite_sha256=repaired_test_sha,
+                completion=completion,
+                ignored_provider_fields=ignored,
+                locked_file_sha256=locked_hashes,
+                validation_errors=[
+                    {
+                        "type": "value_error.test-repair-repeat",
+                        "loc": ["files"],
+                        "msg": "test repair repeats a prior or already rejected test suite",
+                        "ctx": {"test_suite_sha256": repaired_test_sha},
+                    }
+                ],
+            )
+        )
 
     expected_acceptance = {
         acceptance.id for capability in request.capabilities for acceptance in capability.acceptance
@@ -552,6 +624,9 @@ def propose_test_only_repair(
         request_sha256=request_sha,
         public_evaluator_sha256=evaluator_sha,
         failure_feedback_sha256=feedback_sha,
+        prior_test_suite_sha256=prior_test_sha,
+        rejected_test_suite_sha256s=rejected_hashes,
+        repaired_test_suite_sha256=repaired_test_sha,
         completion=completion,
         ignored_provider_fields=ignored,
         locked_file_sha256=locked_hashes,
