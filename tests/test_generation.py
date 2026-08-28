@@ -375,3 +375,24 @@ def test_composition_rejects_a_locked_file_removed_by_next_proposal() -> None:
 
     with pytest.raises(ValueError, match="must exist in both proposals"):
         compose_with_locked_files(prior, next_proposal, locked_paths=["dupfinder.py"])
+
+
+def test_generation_prompt_requires_black_box_portable_tests() -> None:
+    class _PromptBackend(_Backend):
+        user = ""
+
+        def complete_json(self, **kwargs: object) -> AgentCompletion:
+            self.user = str(kwargs["user"])
+            return super().complete_json()
+
+    backend = _PromptBackend()
+    propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=backend,
+    )
+
+    assert "only the public run_command/CLI contract" in backend.user
+    assert "Do not import the generated program module" in backend.user
+    assert "Resolve the program to an absolute path" in backend.user
