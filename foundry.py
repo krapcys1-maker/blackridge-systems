@@ -82,8 +82,42 @@ def capability_ids(request_text: str) -> set[str]:
     return {capability["id"] for capability in request["capabilities"]}
 
 
+def verified_component_index(verified_text: str) -> dict[tuple[str, str, str], int]:
+    verified = json.loads(verified_text)
+    if not isinstance(verified, list):
+        raise ValueError("verified components must be a list")
+    index: dict[tuple[str, str, str], int] = {}
+    for item in verified:
+        if not isinstance(item, dict):
+            raise ValueError("each verified component must be an object")
+        capability_id = item.get("capability_id")
+        identity = item.get("identity")
+        revision = item.get("immutable_revision")
+        evidence_level = item.get("evidence_level")
+        if (
+            not isinstance(capability_id, str)
+            or not isinstance(identity, str)
+            or not isinstance(revision, str)
+            or not isinstance(evidence_level, int)
+            or evidence_level < 2
+        ):
+            raise ValueError("verified component evidence is malformed")
+        key = (capability_id, identity, revision)
+        if key in index:
+            raise ValueError("verified component evidence contains a duplicate")
+        index[key] = evidence_level
+    return index
+
+
+def is_test_path(path: str) -> bool:
+    return any(
+        part in {"test", "tests"} or part.startswith("test_")
+        for part in PurePosixPath(path).parts
+    )
+
+
 def compile_proposal(
-    raw: dict[str, Any], request_text: str
+    raw: dict[str, Any], request_text: str, verified_text: str
 ) -> tuple[dict[str, Any], list[str]]:
     """Project recognized fields into a strict artifact and record ignored metadata."""
 
@@ -141,24 +175,41 @@ def compile_proposal(
     decisions = raw.get("component_decisions")
     if not isinstance(decisions, list):
         raise ValueError("component_decisions must be a list")
-    decision_ids = {
+    decision_ids = [
         item.get("capability_id") for item in decisions if isinstance(item, dict)
-    }
-    if decision_ids != capability_ids(request_text):
-        raise ValueError("component_decisions do not exactly cover public capabilities")
-    if any(
-        not isinstance(item, dict)
-        or item.get("source") not in {"standard-library", "generated-gap"}
-        for item in decisions
+    ]
+    if (
+        len(decision_ids) != len(decisions)
+        or len(set(decision_ids)) != len(decision_ids)
+        or set(decision_ids) != capability_ids(request_text)
     ):
-        raise ValueError("component decision source is invalid")
+        raise ValueError("component_decisions do not exactly cover public capabilities")
+    verified = verified_component_index(verified_text)
+    for item in decisions:
+        if not isinstance(item, dict):
+            raise ValueError("component decision must be an object")
+        source = item.get("source")
+        identity = item.get("identity")
+        revision = item.get("immutable_revision")
+        evidence_level = item.get("evidence_level")
+        rationale = item.get("rationale")
+        if not isinstance(identity, str) or not identity:
+            raise ValueError("component decision identity is invalid")
+        if not isinstance(rationale, str) or not rationale.strip():
+            raise ValueError("component decision rationale is invalid")
+        if source == "standard-library":
+            if not isinstance(revision, str) or not isinstance(evidence_level, int):
+                raise ValueError("standard-library evidence is incomplete")
+            supplied = verified.get((item["capability_id"], identity, revision))
+            if supplied is None or evidence_level != 2 or evidence_level > supplied:
+                raise ValueError("component decision overclaims verified evidence")
+        elif source == "generated-gap":
+            if revision is not None or evidence_level != 0:
+                raise ValueError("generated-gap must remain unverified at L0")
+        else:
+            raise ValueError("component decision source is invalid")
     test_sources = "\n".join(
-        item["content"]
-        for item in files
-        if any(
-            part in {"test", "tests"} or part.startswith("test_")
-            for part in PurePosixPath(item["path"]).parts
-        )
+        item["content"] for item in files if is_test_path(item["path"])
     )
     if len(re.findall(r"^\s*def\s+test_", test_sources, flags=re.MULTILINE)) < 9:
         raise ValueError("generated suite contains fewer than 9 test functions")
@@ -174,6 +225,36 @@ def compile_proposal(
         else [],
     }
     return proposal, ignored
+
+
+def compose_locked_files(
+    prior: dict[str, Any], candidate: dict[str, Any], locked_paths: list[str]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Keep independently passing non-test files byte-for-byte during test repair."""
+
+    prior_files = {item["path"]: item for item in prior["files"]}
+    composed = json.loads(json.dumps(candidate))
+    locked_hashes: dict[str, str] = {}
+    for raw_path in locked_paths:
+        path = portable_path(raw_path)
+        if path not in prior_files:
+            raise ValueError(f"locked file is missing from prior proposal: {path!r}")
+        if is_test_path(path):
+            raise ValueError(f"test file cannot be component-locked: {path!r}")
+        locked_hashes[path] = digest_bytes(prior_files[path]["content"].encode("utf-8"))
+    repaired_tests = [item for item in composed["files"] if is_test_path(item["path"])]
+    if not repaired_tests:
+        raise ValueError("repair proposal contains no test files")
+    composed["files"] = [prior_files[path] for path in locked_paths] + repaired_tests
+    composed["program_path"] = prior["program_path"]
+    composed["component_decisions"] = prior["component_decisions"]
+    record = {
+        "prior_proposal_sha256": digest_bytes(canonical_json(prior)),
+        "candidate_proposal_sha256": digest_bytes(canonical_json(candidate)),
+        "composed_proposal_sha256": digest_bytes(canonical_json(composed)),
+        "locked_file_sha256": locked_hashes,
+    }
+    return composed, record
 
 
 def materialize(proposal: dict[str, Any], workspace: Path) -> dict[str, str]:
@@ -311,7 +392,11 @@ def api_completion(api_key: str, system: str, user: str) -> dict[str, Any]:
 
 
 def prompt(
-    task: str, request: str, evaluator: str, feedback: str | None
+    task: str,
+    request: str,
+    evaluator: str,
+    verified_components: str,
+    feedback: str | None,
 ) -> tuple[str, str]:
     system = (
         "Build a complete portable Python project from public contracts. Return one JSON object "
@@ -330,6 +415,9 @@ def prompt(
             {
                 "capability_id": "every-capability-id",
                 "source": "standard-library",
+                "identity": "python-standard-library",
+                "immutable_revision": "exact-supplied-revision",
+                "evidence_level": 2,
                 "rationale": "...",
             }
         ],
@@ -340,7 +428,14 @@ def prompt(
         + json.dumps(schema, indent=2)
         + "\nThe suite must contain at least 9 meaningful unittest test_* functions and all must pass "
         "inside a read-only, non-root, networkless container. Implement the evaluator contract, "
-        "not shortcuts. Check output identity against every input before opening/truncating it; "
+        "not shortcuts. Tests must exercise only the public CLI contract: never import the "
+        "generated program or call, patch, or assume private functions. Resolve the program to "
+        "an absolute path from the test file or project root before subprocess execution because "
+        "tests may change working directory. Import every dependency, pass each subprocess keyword "
+        "only once, and assert the exact public output schema. Standard-library decisions may use "
+        "only exact VERIFIED COMPONENTS entries at evidence level 2; otherwise use generated-gap "
+        "with null revision and evidence level 0. Check output identity against every input before "
+        "opening/truncating it; "
         "detect hard-link aliases by file identity; keep input bytes/modes/timestamps unchanged; "
         "exclude the output; contain symlinks and terminate cycles; and report an unreadable file "
         "as an object with path and nonempty error even when the process could read mode-000 bytes. "
@@ -348,6 +443,8 @@ def prompt(
         + task
         + "\n\nPUBLIC REQUEST:\n"
         + request
+        + "\n\nVERIFIED COMPONENTS:\n"
+        + verified_components
         + "\n\nKNOWN PUBLIC EVALUATOR COPY:\n"
         + evaluator
     )
@@ -363,6 +460,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=Path, required=True)
     parser.add_argument("--request", type=Path, required=True)
+    parser.add_argument("--verified-components", type=Path, required=True)
     parser.add_argument("--evaluator", type=Path, required=True)
     parser.add_argument("--env-file", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -373,10 +471,12 @@ def main() -> int:
     args.output.mkdir(parents=True)
     task = args.task.read_text(encoding="utf-8")
     request = args.request.read_text(encoding="utf-8")
+    verified_components = args.verified_components.read_text(encoding="utf-8")
+    verified_component_index(verified_components)
     evaluator = args.evaluator.read_text(encoding="utf-8")
     frozen = {
         path.name: digest_file(path)
-        for path in (args.task, args.request, args.evaluator)
+        for path in (args.task, args.request, args.verified_components, args.evaluator)
     }
     api_key = load_secret(args.env_file)
     feedback: str | None = None
@@ -385,12 +485,14 @@ def main() -> int:
     total_input = 0
     total_output = 0
     final: dict[str, Any] | None = None
+    locked_prior: dict[str, Any] | None = None
+    locked_paths: list[str] = []
     started = time.monotonic()
 
     for iteration in range(args.max_repairs + 1):
         iteration_dir = args.output / f"iteration-{iteration:03d}"
         iteration_dir.mkdir()
-        system, user = prompt(task, request, evaluator, feedback)
+        system, user = prompt(task, request, evaluator, verified_components, feedback)
         completion = api_completion(api_key, system, user)
         write_json(iteration_dir / "provider-completion.json", completion)
         usage = completion["usage"]
@@ -403,7 +505,15 @@ def main() -> int:
             "status": "compile-failed",
         }
         try:
-            proposal, ignored = compile_proposal(completion["content"], request)
+            proposal, ignored = compile_proposal(
+                completion["content"], request, verified_components
+            )
+            composition: dict[str, Any] | None = None
+            if locked_prior is not None:
+                proposal, composition = compose_locked_files(
+                    locked_prior, proposal, locked_paths
+                )
+                write_json(iteration_dir / "component-composition.json", composition)
             proposal_sha = digest_bytes(canonical_json(proposal))
             write_json(iteration_dir / "compiled-proposal.json", proposal)
             workspace = iteration_dir / "workspace"
@@ -433,6 +543,7 @@ def main() -> int:
                     "file_sha256": file_hashes,
                     "generated_tests_returncode": test_run["returncode"],
                     "evaluator_returncode": evaluation_run["returncode"],
+                    "component_composition": composition,
                 }
             )
             if passed:
@@ -451,9 +562,26 @@ def main() -> int:
                     ),
                 }
             else:
-                feedback = json.dumps(
-                    {"generated_tests": test_run, "evaluator": evaluation_run}
-                )
+                if evaluation_run["returncode"] == 0 and test_run["returncode"] != 0:
+                    locked_prior = proposal
+                    locked_paths = [
+                        item["path"]
+                        for item in proposal["files"]
+                        if not is_test_path(item["path"])
+                    ]
+                    feedback = (
+                        "The public evaluator passed all 7/7 checks. The program files are now "
+                        "locked and will be preserved exactly. Repair only the portable black-box "
+                        "CLI tests; do not import or assume program internals. Generated-test "
+                        "failure evidence:\n" + json.dumps(test_run)
+                    )
+                else:
+                    feedback = json.dumps(
+                        {
+                            "generated_tests": test_run,
+                            "public_evaluator": evaluation_run,
+                        }
+                    )
         except Exception as exc:
             event["failure"] = type(exc).__name__
             event["failure_message"] = str(exc)[:2_000]
@@ -465,7 +593,7 @@ def main() -> int:
 
     unchanged = frozen == {
         path.name: digest_file(path)
-        for path in (args.task, args.request, args.evaluator)
+        for path in (args.task, args.request, args.verified_components, args.evaluator)
     }
     summary = {
         "schema_version": "b1",
