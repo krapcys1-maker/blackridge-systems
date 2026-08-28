@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
-  "updated_at": "2026-08-28T23:11:51+03:00",
-  "status": "round-003-complete-v1-line-promoted",
+  "updated_at": "2026-08-28T23:31:06+03:00",
+  "status": "round-004-candidate-a-provisional-leader",
   "naming": {
     "package_version": "0.1.1",
     "current_architectural_champion": "v1.3.1",
@@ -52,21 +52,22 @@
     }
   ],
   "active_round": {
-    "round_id": "round-003",
-    "status": "complete-v1-line-promoted",
-    "manifest": "evolution/rounds/003/manifest.json",
+    "round_id": "round-004",
+    "status": "candidate-a-provisional-leader-b-and-hybrids-pending",
+    "manifest": "evolution/rounds/004/manifest.json",
     "benchmark": "evolution/benchmark/measured-duplicate-finder-v1.json",
     "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
     "attempts_per_candidate": 3,
-    "candidate_a_status": "v1.3-premeasurement-critical-failure; v1.3.1-measured-2-of-3-selected",
-    "candidate_b_status": "v2.2-measured-1-of-3-not-promoted",
-    "hybrids_status": "A+B-measured-2-of-3-higher-cost; B+A-measured-1-of-3",
+    "candidate_a_status": "v1.4-measured-3-of-3-release-gates-pass-provisional-leader",
+    "candidate_b_status": "pending-v2.4",
+    "hybrids_status": "pending",
     "selected_champion": "candidate-public-evaluator-json-safe-round-003",
     "selected_architecture_line": "v1.3.1",
     "selected_champion_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
-    "candidate_a_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
-    "results": "evolution/rounds/003/measured-results.json",
-    "selected_success_rate": "2/3",
-    "next_action": "Start round 004 from v1.3.1. Keep the compact profile optional because it did not lower total cost. Build v2.4 around specialized generated-test repair, then create both transfer hybrids and rerun the unchanged benchmark."
+    "candidate_a_commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
+    "results": "evolution/rounds/004/measured-results.json",
+    "provisional_leader": "candidate-test-repair-round-004",
+    "provisional_success_rate": "3/3",
+    "next_action": "Build and measure v2.4 with an equally narrow test-repair boundary, then construct A+B and B+A before final selection. Do not attribute v1.4's 3/3 causally to test-only repair because that path was not exercised."
   }
 }

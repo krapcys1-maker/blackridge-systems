@@ -1,0 +1,60 @@
+{
+  "schema_version": "1",
+  "round_id": "round-004",
+  "status": "candidate-a-provisional-leader-b-and-hybrids-pending",
+  "champion": {
+    "candidate_id": "candidate-public-evaluator-json-safe-round-003",
+    "architecture_line": "v1.3.1",
+    "snapshot_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
+    "retained_result": "2/3"
+  },
+  "benchmark": {
+    "spec": "evolution/benchmark/measured-duplicate-finder-v1.json",
+    "spec_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
+    "frozen_inputs_directory": "evolution/rounds/002/frozen-inputs",
+    "public_evaluator": "tools/evaluate_duplicate_finder.py",
+    "public_evaluator_sha256": "a6318aad33cd8708375f07d5ab4ef1c0a9191d9d34099d06210e5a71b790e767",
+    "independent_evaluator_path": "../blackridge-evolution-evaluator/round-002/evaluate_duplicate_finder.py",
+    "independent_evaluator_sha256": "a6318aad33cd8708375f07d5ab4ef1c0a9191d9d34099d06210e5a71b790e767",
+    "reason_for_reuse": "The user requires the same measured Duplicate Finder workload. No task, evaluator, critical gate, attempt count, repair limit, or winner rule changed."
+  },
+  "candidate_slots": [
+    {
+      "origin": "champion",
+      "candidate_id": "candidate-public-evaluator-json-safe-round-003",
+      "architecture_line": "v1.3.1",
+      "status": "retained-round-003-result-2-of-3"
+    },
+    {
+      "origin": "A",
+      "candidate_id": "candidate-test-repair-round-004",
+      "architecture_line": "v1.4",
+      "snapshot_commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
+      "change": "Add a fail-closed test-only repair path that locks passing product files and control fields while retaining malformed repair completions as JSON-safe evidence.",
+      "status": "provisional-leader-measured-3-of-3-release-gates-pass"
+    },
+    {
+      "origin": "B",
+      "candidate_id": "candidate-v2-4-round-004",
+      "architecture_line": "v2.4",
+      "status": "pending"
+    },
+    {
+      "origin": "A+B",
+      "candidate_id": "pending",
+      "status": "pending"
+    },
+    {
+      "origin": "B+A",
+      "candidate_id": "pending",
+      "status": "pending"
+    }
+  ],
+  "attempts_per_candidate": 3,
+  "operator_model": "deepseek-v4-flash",
+  "max_repairs": 3,
+  "results": "evolution/rounds/004/measured-results.json",
+  "selection_status": "incomplete",
+  "selected_champion": "candidate-public-evaluator-json-safe-round-003",
+  "provisional_leader": "candidate-test-repair-round-004"
+}

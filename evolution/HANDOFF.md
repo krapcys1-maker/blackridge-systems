@@ -210,3 +210,28 @@ build v2.4 around specialized test-only repair, then create A+B and B+A and reru
 
 Raw evidence is under `D:\Skladacz aplikacji\blackridge-evolution-round-003`; machine-readable
 selection data is in `evolution/rounds/003/measured-results.json`.
+
+## Round 004 progress — 2026-08-28 23:31 +03:00
+
+The final round-003 champion remains v1.3.1 until all round-004 slots are measured. Candidate A is
+an enhanced v1 descendant named **v1.4**, never v2. At commit
+`871a469963420d9965c8f477f7c9a31a5b2c301d` it adds a narrow test-only repair contract: after a
+product passes the public evaluator, every non-test file, run command, component decision, and
+prior proposal hash is locked; the operator may return only replacement black-box tests. Invalid
+repair output is rejected fail-closed and retained with JSON-safe evidence.
+
+Candidate A measured 3/3 on the unchanged Duplicate Finder benchmark, versus v1.3.1's retained
+2/3. Its attempts passed 10/10, 10/10, and 11/11 generated tests plus independent 7/7 evaluation.
+Total provider cost was USD 0.03091980, with one repair across the series and zero manual
+interventions. Full isolated gates passed: dependency consistency, Ruff, format, mypy, compileall,
+Bandit, pip-audit, notices, provenance, 240 tests with 3 skips, 72.76% coverage, wheel/sdist, Twine,
+installed optional dependencies, and fresh-clone wheel system E2E/fail-closed controls.
+
+Do not overstate causality: none of the three attempts entered test-only repair. Attempt 1 needed a
+full repair because both its generated tests and program failed; attempts 2 and 3 passed on the
+first call. The snapshot is the provisional measured leader, but this series alone does not prove
+that the new path caused the improvement. v2.4 and both hybrids remain mandatory before selection.
+
+Raw evidence and the reusable round harness are under
+`D:\Skladacz aplikacji\blackridge-evolution-round-004`. The candidate summary SHA-256 is
+`0b0b50be2824d2e0343a3171c1ef2d47bd9fff9a9408c024cabaf8222e84ffc5`.
