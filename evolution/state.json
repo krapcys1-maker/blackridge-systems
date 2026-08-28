@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "updated_at": "2026-08-28T19:10:00+03:00",
-  "status": "round-003-active-candidate-a-ready",
+  "status": "round-003-active-candidate-a-successor-ready",
   "naming": {
     "package_version": "0.1.1",
     "current_architectural_champion": "v1.2",
@@ -44,19 +44,19 @@
   ],
   "active_round": {
     "round_id": "round-003",
-    "status": "candidate-a-ready",
+    "status": "candidate-a-successor-ready",
     "manifest": "evolution/rounds/003/manifest.json",
     "benchmark": "evolution/benchmark/measured-duplicate-finder-v1.json",
     "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
     "attempts_per_candidate": 3,
-    "candidate_a_status": "ready-v1.3-public-evaluator-contract",
+    "candidate_a_status": "v1.3-premeasurement-critical-failure; v1.3.1-json-safe-successor-ready",
     "candidate_b_status": "pending-v2.2",
     "hybrids_status": "pending",
     "selected_champion": "candidate-blackbox-tests-round-002",
     "selected_architecture_line": "v1.2",
     "selected_champion_commit": "5a0c6e348c725578650fbd668245a39658083e92",
-    "candidate_a_commit": "f0eb9a17eb65352ab040ca18a402fcfa21ddf928",
+    "candidate_a_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
     "results": "evolution/rounds/003/measured-results.json",
-    "next_action": "Run candidate-public-evaluator-round-003 three times on the unchanged Duplicate Finder benchmark, then build the hardened v2.2 candidate and both hybrids before selection."
+    "next_action": "Run candidate-public-evaluator-json-safe-round-003 three times on the unchanged Duplicate Finder benchmark, retaining the v1.3 serialization crash as premeasurement failure evidence; then build hardened v2.2 and both hybrids."
   }
 }

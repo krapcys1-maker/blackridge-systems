@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-003",
-  "status": "frozen-candidate-a-ready",
+  "status": "frozen-candidate-a-successor-ready",
   "champion": {
     "candidate_id": "candidate-blackbox-tests-round-002",
     "architecture_line": "v1.2",
@@ -29,6 +29,15 @@
       "architecture_line": "v1.3",
       "snapshot_commit": "f0eb9a17eb65352ab040ca18a402fcfa21ddf928",
       "change": "Hash-bind the known public evaluator contract into the safe v1 generation prompt and retain its exact provenance.",
+      "status": "premeasurement-critical-gate-failed",
+      "failure": "A schema rejection containing a Pydantic ValueError context could not be serialized into retained evidence. No complete three-attempt series was claimed."
+    },
+    {
+      "origin": "successive-A",
+      "candidate_id": "candidate-public-evaluator-json-safe-round-003",
+      "architecture_line": "v1.3.1",
+      "snapshot_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
+      "change": "Retain the public-evaluator transfer and normalize all validation-error context into deterministic JSON-safe evidence.",
       "status": "ready"
     },
     {
@@ -43,6 +52,7 @@
   "attempts_per_candidate": 3,
   "operator_model": "deepseek-v4-flash",
   "max_repairs": 3,
+  "premeasurement_evidence": "../blackridge-evolution-round-003/results/candidate-public-evaluator/attempt-001",
   "selection_status": "incomplete",
   "selected_champion": "candidate-blackbox-tests-round-002"
 }
