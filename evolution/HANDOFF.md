@@ -161,3 +161,23 @@ append-only iteration ledgers, and add a regression test for malformed provider 
 B+A's unpackageable foundry base or its weaker gates. Round 003 should compare that enhanced v1
 candidate against a hardened v2.2 challenger on a newly frozen benchmark without changing tests
 during measurement.
+
+## Round 003 progress — 2026-08-28 19:25 +03:00
+
+Round 003 reuses the exact frozen Duplicate Finder benchmark at the user's request. Candidate v1.3
+added the useful B+A idea: the repository's known public evaluator contract is now supplied to the
+safe v1 generator and hash-bound in generation and rejection records. A premeasurement run exposed
+a real rejection-evidence serialization bug when Pydantic included a `ValueError` in validator
+context. That crash is preserved; it was not misreported as a complete three-attempt result.
+
+The JSON-safe successor v1.3.1 at `8a37ae109c9c3dda8d86194a6c96cb1242daa655` measured 2/3 versus
+the retained v1.2 champion's 1/3. Both successes required one repair, zero manual interventions,
+and passed generated tests plus independent 7/7 evaluation. One failed attempt also proved that a
+truncated provider JSON response is retained as a bounded `ExternalToolError` and no longer crashes
+the series.
+
+All clean release gates passed again: dependency consistency, Ruff, format, mypy, compileall,
+Bandit, pip-audit, notices, provenance, 238 tests with 3 skips, 72.47% coverage, wheel/sdist, Twine,
+installed wheel extras, optional verifier resolution, and Docker system-E2E/fail-closed controls.
+This makes v1.3.1 the provisional leader, not yet the final champion. Round 003 still requires the
+hardened v2.2 candidate and both transfer hybrids before selection.

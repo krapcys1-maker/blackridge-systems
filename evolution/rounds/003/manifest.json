@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-003",
-  "status": "frozen-candidate-a-successor-ready",
+  "status": "provisional-v1-line-leader-b-and-hybrids-pending",
   "champion": {
     "candidate_id": "candidate-blackbox-tests-round-002",
     "architecture_line": "v1.2",
@@ -38,7 +38,7 @@
       "architecture_line": "v1.3.1",
       "snapshot_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
       "change": "Retain the public-evaluator transfer and normalize all validation-error context into deterministic JSON-safe evidence.",
-      "status": "ready"
+      "status": "provisional-leader-measured-2-of-3"
     },
     {
       "origin": "B",
@@ -53,6 +53,8 @@
   "operator_model": "deepseek-v4-flash",
   "max_repairs": 3,
   "premeasurement_evidence": "../blackridge-evolution-round-003/results/candidate-public-evaluator/attempt-001",
+  "results": "evolution/rounds/003/measured-results.json",
   "selection_status": "incomplete",
-  "selected_champion": "candidate-blackbox-tests-round-002"
+  "selected_champion": "candidate-blackbox-tests-round-002",
+  "provisional_leader": "candidate-public-evaluator-json-safe-round-003"
 }
