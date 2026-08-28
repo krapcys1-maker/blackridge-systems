@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
@@ -341,7 +342,12 @@ def test_acceptance_coverage_must_reference_a_generated_test_file() -> None:
             discovery=DISCOVERY,
             backend=_MissingTestBackend(),
         )
-    assert caught.value.record.validation_errors[0]["type"] == "value_error"
+    record = caught.value.record
+    assert record.validation_errors[0]["type"] == "value_error"
+    serialized = json.loads(record.model_dump_json())
+    assert serialized["validation_errors"][0]["ctx"]["error"].startswith(
+        "acceptance evidence references"
+    )
 
 
 def test_benign_provider_metadata_is_ignored_but_retained_as_an_audit_path() -> None:

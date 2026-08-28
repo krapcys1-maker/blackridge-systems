@@ -8,7 +8,7 @@ import re
 import tempfile
 from hashlib import sha256
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
@@ -177,6 +177,13 @@ class GenerationProposalRejected(ValueError):
     def __init__(self, record: GenerationRejectionRecord) -> None:
         super().__init__("provider proposal failed deterministic schema validation")
         self.record = record
+
+
+def _serializable_validation_errors(exc: ValidationError) -> list[dict[str, Any]]:
+    """Replace Pydantic context exceptions with stable JSON text for retained evidence."""
+
+    raw = exc.errors(include_url=False, include_input=False)
+    return cast(list[dict[str, Any]], json.loads(json.dumps(raw, default=str)))
 
 
 def validate_generated_path(value: str) -> str:
@@ -451,9 +458,7 @@ def propose_gap_system(
                 review_feedback_sha256=feedback_sha256,
                 completion=completion,
                 ignored_provider_fields=ignored_provider_fields,
-                validation_errors=[
-                    dict(item) for item in exc.errors(include_url=False, include_input=False)
-                ],
+                validation_errors=_serializable_validation_errors(exc),
             )
         ) from exc
     expected_capabilities = {capability.id for capability in request.capabilities}
