@@ -1,0 +1,83 @@
+{
+  "schema_version": "1",
+  "id": "blackridge-ultimate-system-suite-v1",
+  "status": "frozen",
+  "selection_order": [
+    "critical-gates",
+    "cross-workload-success-rate",
+    "duplicate-finder-success-rate",
+    "manual-interventions",
+    "provider-cost-usd",
+    "builder-wall-seconds",
+    "incumbent-on-exact-tie"
+  ],
+  "critical_gates": [
+    "frozen-input-integrity",
+    "repository-regression",
+    "grounded-researcher-adversarial",
+    "scifact-auditor",
+    "wheel-release-auditor",
+    "sandbox-system-e2e",
+    "source-and-dependency-provenance",
+    "package-and-installed-wheel",
+    "no-critical-security-finding"
+  ],
+  "workloads": [
+    {
+      "id": "duplicate-finder-generation",
+      "kind": "stochastic-builder",
+      "attempts": 3,
+      "spec": "evolution/benchmark/measured-duplicate-finder-v1.json",
+      "spec_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
+      "evaluator": "tools/evaluate_duplicate_finder.py",
+      "evaluator_sha256": "a6318aad33cd8708375f07d5ab4ef1c0a9191d9d34099d06210e5a71b790e767"
+    },
+    {
+      "id": "scientific-researcher-build-ab",
+      "kind": "stochastic-builder-ab",
+      "attempts": 3,
+      "definition": "benchmarks/scientific-researcher-v1/evaluator/benchmark.yaml",
+      "definition_sha256": "c6158408a4af555fac9d64d4ddb641e06ac9bf1f7999615a18e695f3b8e53262",
+      "public_spec_sha256": "12ab5bd80045ec9f4e32b771c7ca8cdd9030524cdcf8b2f96b7cb344c23a75ab",
+      "orchestrator": "tools/run_researcher_ab.py",
+      "orchestrator_sha256": "2257ca26b378d95ee193d634566f9742a82b8c324eb699abcb37cf245442660c"
+    },
+    {
+      "id": "grounded-researcher-adversarial",
+      "kind": "deterministic-project",
+      "files": {
+        "tests/test_grounded_researcher_component.py": "4e4a2b82767b1ca52ea6676ce5d3120e5263bd62c6648f2b54e719f7c37a1449",
+        "tests/test_grounded_researcher_adversarial.py": "5fbfd75cf1e26985e24033f981ce431c89a5ee9d7b3b0ade3c713599d0acedca"
+      }
+    },
+    {
+      "id": "scientific-claim-auditor",
+      "kind": "deterministic-project",
+      "files": {
+        "tests/test_scifact_workload.py": "1d2a6a72bff517eb38af9b27543ac02c9b5cb6d695d6ce3a6b0874fb423ea8b6"
+      }
+    },
+    {
+      "id": "wheel-release-auditor",
+      "kind": "deterministic-project",
+      "files": {
+        "tests/test_wheel_auditor_workload.py": "56c01292e01b4d10e9b0727508203800534c014d9ecb3768b57a29256597da07"
+      }
+    },
+    {
+      "id": "composition-sandbox-release-e2e",
+      "kind": "system-e2e",
+      "runner": "tools/system_e2e.py",
+      "runner_sha256": "78d35451607c94805f230f6842f3479ed8ef3ed2c5b63ab2f0312512974bbd30"
+    }
+  ],
+  "measurement_rules": [
+    "Every compared candidate is an immutable commit and clean worktree.",
+    "The evaluator copy and benchmark hashes are outside builder control during measurement.",
+    "A critical-gate failure makes a candidate ineligible regardless of weighted metrics.",
+    "Provider failure and malformed JSON count as failed attempts and remain retained evidence.",
+    "No candidate may modify benchmark inputs, tests, or expectations during its series.",
+    "A transfer is promoted only when the hybrid has no critical regression and improves a frozen metric.",
+    "The incumbent wins an exact tie."
+  ]
+}

@@ -1,14 +1,14 @@
 # Project handoff
 
-Updated: 2026-08-28 19:10 +03:00.
+Updated: 2026-08-29 00:35 +03:00.
 
 ## Read this first
 
-The current architectural champion is **v1.3.1**, packaged as `0.1.1`. It is the original v1 control
-plane enhanced with selected planner, operator, GitHub-search, deny-policy, repair-feedback, and
-hash-gated generation boundaries, plus a hash-bound public evaluator contract and JSON-safe
-rejection evidence. It is not v2. The name **v2** is reserved for the alternate ledger challenger
-architecture.
+The current architectural champion is **v1.4**, packaged as `0.1.1`. It is the original v1 control
+plane enhanced with selected planner, operator, GitHub-search, deny-policy, repair-feedback,
+hash-gated generation boundaries, a hash-bound public evaluator contract, JSON-safe rejection
+evidence, and a fail-closed test-only repair boundary. It is not v2. The name **v2** is reserved for
+the alternate ledger challenger architecture. Machine-readable truth is in `evolution/state.json`.
 
 The earlier isolated v2 r4 prototype lost v1 verification and safety gates and was rejected. Its
 artifacts remain immutable evidence under `benchmarks/blackridge-self-hosting-v2` and the sibling
@@ -96,7 +96,7 @@ same evaluator and call `blackridge select-champion` on the retained round evalu
 - Commit and push completed round evidence before beginning another candidate measurement.
 
 Machine-readable truth is in `evolution/state.json`; the latest completed manifest is
-`evolution/rounds/003/manifest.json`. Round 001 is retained as terminated evidence.
+`evolution/rounds/004/manifest.json`. Round 001 is retained as terminated evidence.
 
 ## Measurement correction and round 002
 

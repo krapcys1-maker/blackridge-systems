@@ -1,0 +1,29 @@
+{
+  "schema_version": "1",
+  "round_id": "round-005",
+  "status": "audit-and-benchmark-freeze",
+  "incumbent": {
+    "candidate_id": "candidate-test-repair-round-004",
+    "architecture_line": "v1.4",
+    "snapshot_commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
+    "main_integration_commit": "299cb2f"
+  },
+  "benchmark": {
+    "spec": "evolution/benchmark/ultimate-system-suite-v1.json",
+    "spec_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
+    "freeze_status": "frozen",
+    "external_evaluator_root": "D:/Skladacz aplikacji/blackridge-evolution-evaluator/round-005"
+  },
+  "candidate_slots": [
+    {"origin": "champion", "candidate_id": "candidate-test-repair-round-004", "architecture_line": "v1.4", "status": "retained"},
+    {"origin": "A", "candidate_id": "candidate-v1-5-round-005", "architecture_line": "v1.5", "status": "planned"},
+    {"origin": "B", "candidate_id": "candidate-v2-5-round-005", "architecture_line": "v2.5", "status": "pending-audit"},
+    {"origin": "A+B", "candidate_id": "candidate-a-plus-b-round-005", "status": "blocked-until-a-and-b-measured"},
+    {"origin": "B+A", "candidate_id": "candidate-b-plus-a-round-005", "status": "blocked-until-a-and-b-measured"}
+  ],
+  "candidate_a_changes": [
+    "Require every acceptance mapping to name a concrete test function in the referenced generated file.",
+    "Bind repeated test-only repairs to hashes of rejected test suites and reject exact repeats before sandbox execution."
+  ],
+  "selection_status": "not-started"
+}
