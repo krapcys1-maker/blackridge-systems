@@ -235,3 +235,16 @@ that the new path caused the improvement. v2.4 and both hybrids remain mandatory
 Raw evidence and the reusable round harness are under
 `D:\Skladacz aplikacji\blackridge-evolution-round-004`. The candidate summary SHA-256 is
 `0b0b50be2824d2e0343a3171c1ef2d47bd9fff9a9408c024cabaf8222e84ffc5`.
+
+## Round 004 final result
+
+Round 004 is complete. v1.4 won with 3/3. A+B and B+A each reached 2/3, v2.4 reached
+1/3, and retained v1.3.1 had 2/3. The selected base remains the enhanced v1 line; do not call it
+v2. The exact v1.4 candidate commit is `871a469963420d9965c8f477f7c9a31a5b2c301d` and its code was
+integrated into the main experimental branch at `299cb2f`.
+
+The test-only boundary was exercised by A+B: it kept the passing program byte-exact, but DeepSeek
+returned the same failing 12-test proposal three times. This proves the lock works but the repair
+prompt needs diversity or explicit delta feedback. Start round 005 from v1.4; keep the ledger line
+as challenger and do not switch architectural bases until it exceeds the champion on the frozen
+critical gates and success rate.

@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-004",
-  "status": "candidate-a-provisional-leader-b-and-hybrids-pending",
+  "status": "complete-v1-line-promoted",
   "champion": {
     "candidate_id": "candidate-public-evaluator-json-safe-round-003",
     "architecture_line": "v1.3.1",
@@ -31,30 +31,34 @@
       "architecture_line": "v1.4",
       "snapshot_commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
       "change": "Add a fail-closed test-only repair path that locks passing product files and control fields while retaining malformed repair completions as JSON-safe evidence.",
-      "status": "provisional-leader-measured-3-of-3-release-gates-pass"
+      "status": "selected-champion-measured-3-of-3-release-gates-pass"
     },
     {
       "origin": "B",
       "candidate_id": "candidate-v2-4-round-004",
       "architecture_line": "v2.4",
-      "status": "pending"
+      "snapshot_commit": "9747096f6a8eae23a929f3b138f41ee41da624fc",
+      "status": "measured-1-of-3-not-promoted"
     },
     {
       "origin": "A+B",
-      "candidate_id": "pending",
-      "status": "pending"
+      "candidate_id": "candidate-a-plus-b-round-004",
+      "snapshot_commit": "dca18de",
+      "status": "measured-2-of-3-not-promoted"
     },
     {
       "origin": "B+A",
-      "candidate_id": "pending",
-      "status": "pending"
+      "candidate_id": "candidate-b-plus-a-round-004",
+      "snapshot_commit": "e6d7741",
+      "status": "measured-2-of-3-not-promoted"
     }
   ],
   "attempts_per_candidate": 3,
   "operator_model": "deepseek-v4-flash",
   "max_repairs": 3,
   "results": "evolution/rounds/004/measured-results.json",
-  "selection_status": "incomplete",
-  "selected_champion": "candidate-public-evaluator-json-safe-round-003",
-  "provisional_leader": "candidate-test-repair-round-004"
+  "selection_status": "complete",
+  "selected_champion": "candidate-test-repair-round-004",
+  "selected_architecture_line": "v1.4",
+  "selection_reason": "v1.4 passed 3/3; A+B and B+A passed 2/3, v2.4 passed 1/3, and retained v1.3.1 passed 2/3."
 }

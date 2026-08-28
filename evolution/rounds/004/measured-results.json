@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-004",
-  "status": "candidate-a-provisional-leader-b-and-hybrids-pending",
+  "status": "complete-v1-line-promoted",
   "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
   "attempts_per_candidate": 3,
   "results_root": "../blackridge-evolution-round-004/results",
@@ -66,10 +66,13 @@
         "sdist_sha256": "d314739ec69460b59d4f4719729ca15ffeb3a5e05421a5194bc8076267783243",
         "system_e2e_summary_sha256": "9732bf2f8d29e3df5924f2912e5429280c52bb2c5680f5abe0f182405fac3149"
       }
-    }
+    },
+    {"candidate_id":"candidate-v2-4-round-004","architecture_line":"v2.4","commit":"9747096f6a8eae23a929f3b138f41ee41da624fc","successes":1,"attempts":3,"total_provider_cost_usd":0.05782487,"manual_interventions":0},
+    {"candidate_id":"candidate-a-plus-b-round-004","architecture_line":"v1.4+B","commit":"dca18de","successes":2,"attempts":3,"total_provider_cost_usd":0.05163112,"manual_interventions":0,"note":"The test-only path was exercised safely but failed to repair three identical invalid test suites in attempt 1."},
+    {"candidate_id":"candidate-b-plus-a-round-004","architecture_line":"v2.5","commit":"e6d7741","successes":2,"attempts":3,"total_provider_cost_usd":0.04331627,"manual_interventions":0}
   ],
-  "provisional_leader": "candidate-test-repair-round-004",
-  "provisional_reason": "Higher unchanged-benchmark success than v1.3.1 (3/3 versus 2/3), lower total provider cost, zero interventions, and all critical release gates passing.",
-  "selection_complete": false,
-  "selection_blocker": "The v2.4 challenger and both transfer hybrids remain required before final selection."
+  "selected_champion": "candidate-test-repair-round-004",
+  "selected_architecture_line": "v1.4",
+  "selection_reason": "v1.4 was the only 3/3 candidate and passed every critical release gate.",
+  "selection_complete": true
 }

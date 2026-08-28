@@ -1,23 +1,23 @@
 {
   "schema_version": "1",
-  "updated_at": "2026-08-28T23:31:06+03:00",
-  "status": "round-004-candidate-a-provisional-leader",
+  "updated_at": "2026-08-29T00:00:00+03:00",
+  "status": "round-004-complete-v1-line-promoted",
   "naming": {
     "package_version": "0.1.1",
-    "current_architectural_champion": "v1.3.1",
+    "current_architectural_champion": "v1.4",
     "next_fresh_challenger_name": "v2.4",
     "rule": "Package versions and architectural line names are separate. Enhanced descendants of v1 remain on the v1 line; v2 names are reserved for the alternate ledger architecture."
   },
   "current_champion": {
-    "candidate_id": "candidate-public-evaluator-json-safe-round-003",
-    "architecture_line": "v1.3.1",
+    "candidate_id": "candidate-test-repair-round-004",
+    "architecture_line": "v1.4",
     "package_version": "0.1.1",
-    "snapshot_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
-    "winning_attempts": [2, 3],
-    "winning_proposal_sha256": "768ba2114e8ff5028420d7ab454eaa3c5729187339c96b9e8448102d38d4ea4b",
-    "winning_program_sha256": "d45ac2558e2cd1a272c7b6e63fd18a7eb1d3b560555c765c70fa9e8db4f655e3",
-    "main_integration_commit": "aa58458d71c78086689a363ef00b7c97715a4c28",
-    "selection_round": "round-003"
+    "snapshot_commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
+    "winning_attempts": [1, 2, 3],
+    "winning_proposal_sha256": "bd4aaf323da6ce598c6abcc8c971cdea009e97cee3f12e388ec52f7db877bb59",
+    "winning_program_sha256": "e3c57e05804caebee6c0231915d744fe3df7b501bd97db197e8a5589fdfc65bd",
+    "main_integration_commit": "299cb2f",
+    "selection_round": "round-004"
   },
   "round_history": [
     {
@@ -53,21 +53,20 @@
   ],
   "active_round": {
     "round_id": "round-004",
-    "status": "candidate-a-provisional-leader-b-and-hybrids-pending",
+    "status": "complete-v1-line-promoted",
     "manifest": "evolution/rounds/004/manifest.json",
     "benchmark": "evolution/benchmark/measured-duplicate-finder-v1.json",
     "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
     "attempts_per_candidate": 3,
     "candidate_a_status": "v1.4-measured-3-of-3-release-gates-pass-provisional-leader",
-    "candidate_b_status": "pending-v2.4",
-    "hybrids_status": "pending",
-    "selected_champion": "candidate-public-evaluator-json-safe-round-003",
-    "selected_architecture_line": "v1.3.1",
-    "selected_champion_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
+    "candidate_b_status": "v2.4-measured-1-of-3",
+    "hybrids_status": "A+B-measured-2-of-3; B+A-measured-2-of-3",
+    "selected_champion": "candidate-test-repair-round-004",
+    "selected_architecture_line": "v1.4",
+    "selected_champion_commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
     "candidate_a_commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
     "results": "evolution/rounds/004/measured-results.json",
-    "provisional_leader": "candidate-test-repair-round-004",
-    "provisional_success_rate": "3/3",
-    "next_action": "Build and measure v2.4 with an equally narrow test-repair boundary, then construct A+B and B+A before final selection. Do not attribute v1.4's 3/3 causally to test-only repair because that path was not exercised."
+    "selected_success_rate": "3/3",
+    "next_action": "Start round 005 from v1.4. Improve test-only repair diversity because A+B returned the same failing test proposal three times; keep v2 as challenger until it beats v1 on the frozen gates."
   }
 }
