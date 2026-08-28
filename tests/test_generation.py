@@ -15,7 +15,14 @@ from blackridge.generation import (
     proposal_sha256,
     propose_gap_system,
 )
-from blackridge.models import Capability, CapabilityResult, DiscoveryRun, SearchQuery, SystemRequest
+from blackridge.models import (
+    AcceptanceScenario,
+    Capability,
+    CapabilityResult,
+    DiscoveryRun,
+    SearchQuery,
+    SystemRequest,
+)
 from blackridge.operator import AgentCompletion, AgentUsage
 
 CAPABILITY = Capability(
@@ -24,6 +31,15 @@ CAPABILITY = Capability(
     accepts=["directory/v1"],
     produces=["duplicate-report/v1"],
     searches=[SearchQuery(keywords=["duplicate", "files"])],
+    acceptance=[
+        AcceptanceScenario(
+            id="detect-duplicates",
+            description="Report files with identical bytes as one duplicate group.",
+            given="Two files contain the same bytes.",
+            when="The duplicate finder scans their directory.",
+            then=["Both paths occur in one duplicate group."],
+        )
+    ],
 )
 REQUEST = SystemRequest(
     name="duplicate-finder",
@@ -62,6 +78,16 @@ class _Backend:
                 }
             ],
             "tests": ["python -m unittest -v"],
+            "acceptance_coverage": [
+                {
+                    "acceptance_id": "detect-duplicates",
+                    "test_file": "tests/test_dupfinder.py",
+                    "test_name": "test_detect_duplicates",
+                    "rationale": (
+                        "The executable test checks the required duplicate-report behavior."
+                    ),
+                }
+            ],
             "limitations": ["The proposal has not been executed."],
         }
         return AgentCompletion(
@@ -127,6 +153,14 @@ def test_generated_proposal_rejects_cross_platform_unsafe_paths(paths: list[str]
                     }
                 ],
                 "tests": ["python -m unittest -v"],
+                "acceptance_coverage": [
+                    {
+                        "acceptance_id": "detect-duplicates",
+                        "test_file": paths[0],
+                        "test_name": "test_detect_duplicates",
+                        "rationale": "The executable test checks the duplicate-report behavior.",
+                    }
+                ],
             }
         )
 
@@ -237,3 +271,38 @@ def test_schema_rejected_provider_completion_is_retained_as_evidence() -> None:
     assert record.proposal_status == "schema-rejected"
     assert record.completion.content["files"][0]["forbidden"] is True
     assert record.validation_errors[0]["type"] == "extra_forbidden"
+
+
+def test_acceptance_coverage_must_match_request_exactly() -> None:
+    completion = _Backend().complete_json()
+    completion.content["acceptance_coverage"][0]["acceptance_id"] = "invented-check"
+
+    class _InventedCoverageBackend(_Backend):
+        def complete_json(self, **_: object) -> AgentCompletion:
+            return completion
+
+    with pytest.raises(ValueError, match="acceptance coverage does not cover"):
+        propose_gap_system(
+            "Build a deterministic duplicate finder that never modifies input files.",
+            request=REQUEST,
+            discovery=DISCOVERY,
+            backend=_InventedCoverageBackend(),
+        )
+
+
+def test_acceptance_coverage_must_reference_a_generated_test_file() -> None:
+    completion = _Backend().complete_json()
+    completion.content["acceptance_coverage"][0]["test_file"] = "tests/missing.py"
+
+    class _MissingTestBackend(_Backend):
+        def complete_json(self, **_: object) -> AgentCompletion:
+            return completion
+
+    with pytest.raises(GenerationProposalRejected) as caught:
+        propose_gap_system(
+            "Build a deterministic duplicate finder that never modifies input files.",
+            request=REQUEST,
+            discovery=DISCOVERY,
+            backend=_MissingTestBackend(),
+        )
+    assert caught.value.record.validation_errors[0]["type"] == "value_error"
