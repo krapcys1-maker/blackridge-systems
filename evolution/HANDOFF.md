@@ -95,4 +95,18 @@ same evaluator and call `blackridge select-champion` on the retained round evalu
   Do not reset, clean, stash, or overwrite them.
 - No commit or push has been performed for the current worktree.
 
-Machine-readable truth is in `evolution/state.json` and `evolution/rounds/001/manifest.json`.
+Machine-readable truth is in `evolution/state.json`; the active manifest is
+`evolution/rounds/002/manifest.json`. Round 001 is retained as terminated evidence.
+
+## Measurement correction and round 002
+
+Round 001 was terminated without promotion. A byte-identity audit proved that candidate A did not
+change planning, operator, discovery, generation, composition, workflow, the Duplicate Finder
+task, or its evaluator. Tournament-control code is not a better generated project. B failed its
+pre-build architecture gate. The retained champion is therefore v1.1.
+
+Round 002 is frozen before builders start. It uses only the previously measured Duplicate Finder
+task, the exact independent seven-test evaluator, the retained nine-test expectation, the same
+normalized discovery/request/verified-component inputs, and the complete existing v1 CI/system-E2E
+regression gates. Every candidate gets three attempts. Exact ties retain v1.1. Do not add new
+projects or alter expectations inside this round.

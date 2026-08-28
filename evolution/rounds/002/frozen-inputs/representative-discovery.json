@@ -1,0 +1,2233 @@
+{
+  "schema_version": "1",
+  "created_at": "2026-08-28T05:26:48.139358Z",
+  "provider": "github-cli:search-repos",
+  "request": {
+    "schema_version": "1",
+    "name": "deterministic-duplicate-file-finder",
+    "goal": "Build a portable Python 3.11+ command-line program that recursively finds duplicate regular files by SHA-256. It must never modify input files, directories, permissions, or timestamps. It must emit deterministic JSON containing duplicate groups and explicit unreadable-file errors, exclude its output file when that file is inside the scanned tree, reject an output path that is the same file as any input, handle symbolic links without escaping the requested tree, and include executable tests. Prefer a verified component only when it materially reduces new code; otherwise use the Python standard library and state that choice honestly.",
+    "constraints": {
+      "reuse_policy": "reuse-first"
+    },
+    "capabilities": [
+      {
+        "id": "cli-entrypoint",
+        "description": "Provide a command-line interface that accepts a root directory and an output file path, validates arguments, and invokes the scanning pipeline.",
+        "accepts": [
+          "command-line-arguments/v1"
+        ],
+        "produces": [
+          "exit-code/v1",
+          "stdout-messages/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "argparse",
+              "cli"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "click",
+              "command",
+              "line"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "cli",
+              "framework"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "cli-valid-invocation",
+            "description": "Running the program with a valid root and output path produces a JSON file and exits with code 0.",
+            "given": "A temporary directory containing a few files and a writable output path outside it.",
+            "when": "The program is invoked with the root directory and output path as arguments.",
+            "then": [
+              "The program exits with code 0.",
+              "The output file exists and contains valid JSON."
+            ]
+          }
+        ],
+        "required": true
+      },
+      {
+        "id": "tree-walker",
+        "description": "Recursively traverse the input directory, following symbolic links only within the tree, and yield regular files with their paths.",
+        "accepts": [
+          "root-directory/v1"
+        ],
+        "produces": [
+          "file-path-stream/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "os.walk",
+              "symlink"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "pathlib",
+              "rglob"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "directory",
+              "traversal"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "walk-regular-files",
+            "description": "Walking a directory tree yields all regular files, including those in subdirectories, and does not follow symlinks that point outside the tree.",
+            "given": "A temporary directory with a subdirectory containing a file, and a symlink pointing outside the tree.",
+            "when": "The tree walker is executed on that directory.",
+            "then": [
+              "The file inside the subdirectory is yielded.",
+              "The symlink target outside the tree is not yielded."
+            ]
+          }
+        ],
+        "required": true
+      },
+      {
+        "id": "file-hasher",
+        "description": "Compute the SHA-256 hash of a file's contents without modifying the file, and report unreadable files with errors.",
+        "accepts": [
+          "file-path/v1"
+        ],
+        "produces": [
+          "file-hash/v1",
+          "unreadable-file-error/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "hashlib",
+              "sha256"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "file",
+              "checksum"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "read",
+              "binary",
+              "hash"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "hash-known-file",
+            "description": "Hashing a known file returns its SHA-256 digest.",
+            "given": "A temporary file with known content.",
+            "when": "The file hasher is called on that file.",
+            "then": [
+              "The returned hash matches the expected SHA-256 digest."
+            ]
+          }
+        ],
+        "required": true
+      },
+      {
+        "id": "duplicate-grouping",
+        "description": "Group files by their SHA-256 hash and produce a deterministic list of groups that contain more than one file.",
+        "accepts": [
+          "file-hash-map/v1"
+        ],
+        "produces": [
+          "duplicate-groups/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "group",
+              "dictionary"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "duplicate",
+              "files"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "collections",
+              "defaultdict"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "group-duplicates",
+            "description": "Given hashes for two identical files and one unique file, the grouping returns one group with the two identical files.",
+            "given": "A mapping of file paths to hashes where two files share a hash.",
+            "when": "The duplicate grouping is applied to that mapping.",
+            "then": [
+              "The result contains exactly one group with the two duplicate files."
+            ]
+          }
+        ],
+        "required": true
+      },
+      {
+        "id": "output-exclusion",
+        "description": "Exclude the output file from scanning when it is inside the scanned tree, and reject an output path that is the same file as any input.",
+        "accepts": [
+          "output-path/v1",
+          "file-path-stream/v1"
+        ],
+        "produces": [
+          "filtered-file-path-stream/v1",
+          "output-path-error/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "samefile",
+              "path"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "os.path",
+              "realpath"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "exclude",
+              "file",
+              "scan"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "exclude-output-inside-tree",
+            "description": "When the output file is inside the scanned tree, it is not included in the duplicate groups.",
+            "given": "A temporary directory containing a file and an output path inside that directory.",
+            "when": "The output exclusion is applied to the file stream.",
+            "then": [
+              "The output file is not present in the filtered stream."
+            ]
+          }
+        ],
+        "required": true
+      },
+      {
+        "id": "json-output-writer",
+        "description": "Write the duplicate groups and unreadable-file errors to the output file as deterministic JSON, without modifying any input files.",
+        "accepts": [
+          "duplicate-groups/v1",
+          "unreadable-file-errors/v1",
+          "output-path/v1"
+        ],
+        "produces": [
+          "json-output-file/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "json",
+              "dump"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "json",
+              "sort_keys"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "write",
+              "json",
+              "file"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "write-json-output",
+            "description": "Writing a set of duplicate groups and errors to a file produces a JSON file with the expected structure.",
+            "given": "A temporary output path, a list of duplicate groups, and a list of unreadable-file errors.",
+            "when": "The JSON output writer is called with those inputs.",
+            "then": [
+              "The output file exists and contains valid JSON.",
+              "The JSON content matches the expected structure."
+            ]
+          }
+        ],
+        "required": true
+      },
+      {
+        "id": "deterministic-ordering",
+        "description": "Ensure all output (duplicate groups, errors, and JSON keys) is sorted deterministically so that repeated runs produce identical output.",
+        "accepts": [
+          "duplicate-groups/v1",
+          "unreadable-file-errors/v1"
+        ],
+        "produces": [
+          "sorted-duplicate-groups/v1",
+          "sorted-unreadable-file-errors/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "sort",
+              "list"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "sorted",
+              "key"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "deterministic",
+              "order"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "deterministic-output",
+            "description": "Running the program twice on the same input produces identical output files.",
+            "given": "A temporary directory with known files and an output path.",
+            "when": "The program is run twice with the same arguments.",
+            "then": [
+              "The two output files are byte-for-byte identical."
+            ]
+          }
+        ],
+        "required": true
+      },
+      {
+        "id": "test-suite",
+        "description": "Provide executable tests that verify the program's behavior, including duplicate detection, unreadable files, symlink handling, and output exclusion.",
+        "accepts": [
+          "test-framework/v1"
+        ],
+        "produces": [
+          "test-results/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "pytest",
+              "unittest"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "testing",
+              "cli"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "tmp_path",
+              "fixture"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "tests-pass",
+            "description": "Running the test suite reports all tests passing.",
+            "given": "A checkout of the project with the test suite.",
+            "when": "The test runner is executed.",
+            "then": [
+              "All tests pass."
+            ]
+          }
+        ],
+        "required": true
+      }
+    ]
+  },
+  "results": [
+    {
+      "capability": {
+        "id": "cli-entrypoint",
+        "description": "Provide a command-line interface that accepts a root directory and an output file path, validates arguments, and invokes the scanning pipeline.",
+        "accepts": [
+          "command-line-arguments/v1"
+        ],
+        "produces": [
+          "exit-code/v1",
+          "stdout-messages/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "argparse",
+              "cli"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "click",
+              "command",
+              "line"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "cli",
+              "framework"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "cli-valid-invocation",
+            "description": "Running the program with a valid root and output path produces a JSON file and exits with code 0.",
+            "given": "A temporary directory containing a few files and a writable output path outside it.",
+            "when": "The program is invoked with the root directory and output path as arguments.",
+            "then": [
+              "The program exits with code 0.",
+              "The output file exists and contains valid JSON."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": [
+        {
+          "capability_id": "cli-entrypoint",
+          "metadata": {
+            "full_name": "dymmond/sayer",
+            "url": "https://github.com/dymmond/sayer",
+            "description": "The Modern Python CLI Framework",
+            "stars": 7,
+            "forks": 1,
+            "open_issues": 0,
+            "pushed_at": "2026-07-12T13:24:59Z",
+            "updated_at": "2026-05-15T07:50:17Z",
+            "created_at": "2025-05-15T10:15:36Z",
+            "language": "Python",
+            "topics": [
+              "attrs",
+              "click",
+              "command-line",
+              "dataclass",
+              "msgspec",
+              "pydantic",
+              "rich",
+              "rich-text-editor",
+              "sayer",
+              "serialization"
+            ],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "cli",
+              "framework"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 18.37,
+            "adoption": 2.26,
+            "community": 0.5,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 71.13
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "cli-entrypoint",
+          "metadata": {
+            "full_name": "thememium/usecli",
+            "url": "https://github.com/thememium/usecli",
+            "description": "useCli is a powerful Python CLI framework for building beautiful, developer-friendly command-line tools.",
+            "stars": 4,
+            "forks": 1,
+            "open_issues": 0,
+            "pushed_at": "2026-08-14T14:58:01Z",
+            "updated_at": "2026-08-14T14:58:40Z",
+            "created_at": "2026-02-16T20:34:37Z",
+            "language": "Python",
+            "topics": [
+              "cli",
+              "python"
+            ],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "cli",
+              "framework"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 19.52,
+            "adoption": 1.75,
+            "community": 0.5,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 70.5
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "cli-entrypoint",
+          "metadata": {
+            "full_name": "simonw/click-app",
+            "url": "https://github.com/simonw/click-app",
+            "description": "Cookiecutter template for creating new Click command-line tools",
+            "stars": 413,
+            "forks": 41,
+            "open_issues": 3,
+            "pushed_at": "2025-10-09T00:20:55Z",
+            "updated_at": "2026-08-16T14:31:46Z",
+            "created_at": "2020-06-22T23:01:33Z",
+            "language": "Python",
+            "topics": [
+              "click",
+              "cookiecutter-template"
+            ],
+            "license_key": "apache-2.0",
+            "license_spdx": "Apache-2.0",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "click",
+              "command",
+              "line"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 11.0,
+            "adoption": 6.54,
+            "community": 2.71,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 70.25
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "cli-entrypoint",
+          "metadata": {
+            "full_name": "mkdocs/mkdocs-click",
+            "url": "https://github.com/mkdocs/mkdocs-click",
+            "description": "An MkDocs extension to generate documentation for Click command line applications",
+            "stars": 149,
+            "forks": 22,
+            "open_issues": 22,
+            "pushed_at": "2025-06-18T15:50:54Z",
+            "updated_at": "2026-07-28T19:41:18Z",
+            "created_at": "2020-03-16T14:47:45Z",
+            "language": "Python",
+            "topics": [
+              "command-line",
+              "extension",
+              "mkdocs",
+              "mkdocs-click"
+            ],
+            "license_key": "apache-2.0",
+            "license_spdx": "Apache-2.0",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "click",
+              "command",
+              "line"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 8.94,
+            "adoption": 5.44,
+            "community": 2.27,
+            "issue_health": 2.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 62.38
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "cli-entrypoint",
+          "metadata": {
+            "full_name": "davfive/argparts",
+            "url": "https://github.com/davfive/argparts",
+            "description": "python argparse cli auto-generator from arg parts",
+            "stars": 1,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2025-11-21T10:41:36Z",
+            "updated_at": "2025-11-21T10:45:23Z",
+            "created_at": "2025-11-21T10:36:44Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "argparse",
+              "cli"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 11.93,
+            "adoption": 0.75,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 61.41
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "cli-entrypoint",
+          "metadata": {
+            "full_name": "imayobrown/cdg",
+            "url": "https://github.com/imayobrown/cdg",
+            "description": "Python Argparse CLI Documentation Generator",
+            "stars": 1,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2019-04-10T15:19:18Z",
+            "updated_at": "2023-03-05T05:43:24Z",
+            "created_at": "2016-11-03T18:54:40Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "argparse",
+              "cli"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 0.14,
+            "adoption": 0.75,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 50.89
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified",
+            "repository has not been pushed for 2696 days"
+          ],
+          "blockers": []
+        }
+      ]
+    },
+    {
+      "capability": {
+        "id": "tree-walker",
+        "description": "Recursively traverse the input directory, following symbolic links only within the tree, and yield regular files with their paths.",
+        "accepts": [
+          "root-directory/v1"
+        ],
+        "produces": [
+          "file-path-stream/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "os.walk",
+              "symlink"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "pathlib",
+              "rglob"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "directory",
+              "traversal"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "walk-regular-files",
+            "description": "Walking a directory tree yields all regular files, including those in subdirectories, and does not follow symlinks that point outside the tree.",
+            "given": "A temporary directory with a subdirectory containing a file, and a symlink pointing outside the tree.",
+            "when": "The tree walker is executed on that directory.",
+            "then": [
+              "The file inside the subdirectory is yielded.",
+              "The symlink target outside the tree is not yielded."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": [
+        {
+          "capability_id": "tree-walker",
+          "metadata": {
+            "full_name": "TheAlgorithms/Python",
+            "url": "https://github.com/TheAlgorithms/Python",
+            "description": "All Algorithms implemented in Python",
+            "stars": 224068,
+            "forks": 50996,
+            "open_issues": 1058,
+            "pushed_at": "2026-08-27T22:39:50Z",
+            "updated_at": "2026-08-28T04:40:54Z",
+            "created_at": "2016-07-16T09:44:01Z",
+            "language": "Python",
+            "topics": [
+              "algorithm",
+              "algorithm-competitions",
+              "algorithms-implemented",
+              "algos",
+              "community-driven",
+              "education",
+              "hacktoberfest",
+              "interview",
+              "learn",
+              "practice",
+              "python",
+              "searches",
+              "sorting-algorithms",
+              "sorts"
+            ],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.4
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 20.0,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 10.8,
+            "total": 90.8
+          },
+          "warnings": [],
+          "blockers": []
+        },
+        {
+          "capability_id": "tree-walker",
+          "metadata": {
+            "full_name": "geekcomputers/Python",
+            "url": "https://github.com/geekcomputers/Python",
+            "description": "My Python Examples",
+            "stars": 35298,
+            "forks": 12934,
+            "open_issues": 503,
+            "pushed_at": "2026-08-17T11:05:26Z",
+            "updated_at": "2026-08-28T02:09:23Z",
+            "created_at": "2011-11-30T09:04:08Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.2
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 19.63,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 10.4,
+            "total": 87.26
+          },
+          "warnings": [],
+          "blockers": []
+        },
+        {
+          "capability_id": "tree-walker",
+          "metadata": {
+            "full_name": "Glitchfix/Direc-Tree",
+            "url": "https://github.com/Glitchfix/Direc-Tree",
+            "description": "Python directory traversal script",
+            "stars": 0,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2016-07-07T12:18:42Z",
+            "updated_at": "2016-07-07T12:21:53Z",
+            "created_at": "2016-07-07T10:22:41Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "",
+            "license_spdx": null,
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "directory",
+              "traversal"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 0.02,
+            "adoption": 0.0,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 0.0,
+            "security_posture": 5.0,
+            "total": 35.02
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified",
+            "repository has not been pushed for 3703 days"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        },
+        {
+          "capability_id": "tree-walker",
+          "metadata": {
+            "full_name": "davidblakecoe/dirtrav",
+            "url": "https://github.com/davidblakecoe/dirtrav",
+            "description": "Basic python directory traversal template",
+            "stars": 0,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2018-05-09T14:33:43Z",
+            "updated_at": "2019-08-23T02:33:28Z",
+            "created_at": "2018-05-09T14:30:01Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "",
+            "license_spdx": null,
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "directory",
+              "traversal"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 0.07,
+            "adoption": 0.0,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 0.0,
+            "security_posture": 5.0,
+            "total": 33.8
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified",
+            "repository has not been pushed for 3032 days"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        }
+      ]
+    },
+    {
+      "capability": {
+        "id": "file-hasher",
+        "description": "Compute the SHA-256 hash of a file's contents without modifying the file, and report unreadable files with errors.",
+        "accepts": [
+          "file-path/v1"
+        ],
+        "produces": [
+          "file-hash/v1",
+          "unreadable-file-error/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "hashlib",
+              "sha256"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "file",
+              "checksum"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "read",
+              "binary",
+              "hash"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "hash-known-file",
+            "description": "Hashing a known file returns its SHA-256 digest.",
+            "given": "A temporary file with known content.",
+            "when": "The file hasher is called on that file.",
+            "then": [
+              "The returned hash matches the expected SHA-256 digest."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": [
+        {
+          "capability_id": "file-hasher",
+          "metadata": {
+            "full_name": "TheAlgorithms/Python",
+            "url": "https://github.com/TheAlgorithms/Python",
+            "description": "All Algorithms implemented in Python",
+            "stars": 224068,
+            "forks": 50996,
+            "open_issues": 1058,
+            "pushed_at": "2026-08-27T22:39:50Z",
+            "updated_at": "2026-08-28T04:40:54Z",
+            "created_at": "2016-07-16T09:44:01Z",
+            "language": "Python",
+            "topics": [
+              "algorithm",
+              "algorithm-competitions",
+              "algorithms-implemented",
+              "algos",
+              "community-driven",
+              "education",
+              "hacktoberfest",
+              "interview",
+              "learn",
+              "practice",
+              "python",
+              "searches",
+              "sorting-algorithms",
+              "sorts"
+            ],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.4
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 20.0,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 10.8,
+            "total": 90.8
+          },
+          "warnings": [],
+          "blockers": []
+        },
+        {
+          "capability_id": "file-hasher",
+          "metadata": {
+            "full_name": "geekcomputers/Python",
+            "url": "https://github.com/geekcomputers/Python",
+            "description": "My Python Examples",
+            "stars": 35298,
+            "forks": 12934,
+            "open_issues": 503,
+            "pushed_at": "2026-08-17T11:05:26Z",
+            "updated_at": "2026-08-28T02:09:23Z",
+            "created_at": "2011-11-30T09:04:08Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.2
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 19.63,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 10.4,
+            "total": 87.26
+          },
+          "warnings": [],
+          "blockers": []
+        },
+        {
+          "capability_id": "file-hasher",
+          "metadata": {
+            "full_name": "hugohmk/PFsum",
+            "url": "https://github.com/hugohmk/PFsum",
+            "description": "Python File Checksum",
+            "stars": 1,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2026-04-06T15:45:48Z",
+            "updated_at": "2026-04-06T15:45:55Z",
+            "created_at": "2026-04-05T14:15:48Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "file",
+              "checksum"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 15.35,
+            "adoption": 0.75,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 5.0,
+            "total": 66.1
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": []
+        },
+        {
+          "capability_id": "file-hasher",
+          "metadata": {
+            "full_name": "fuzzball5000/teeny",
+            "url": "https://github.com/fuzzball5000/teeny",
+            "description": "Teeny.py A tiny Python file checksum generator.",
+            "stars": 0,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2015-02-13T19:31:11Z",
+            "updated_at": "2015-02-13T19:31:11Z",
+            "created_at": "2015-02-13T09:15:52Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "",
+            "license_spdx": null,
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "file",
+              "checksum"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 0.01,
+            "adoption": 0.0,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 0.0,
+            "security_posture": 5.0,
+            "total": 33.74
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified",
+            "repository has not been pushed for 4213 days"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        }
+      ]
+    },
+    {
+      "capability": {
+        "id": "duplicate-grouping",
+        "description": "Group files by their SHA-256 hash and produce a deterministic list of groups that contain more than one file.",
+        "accepts": [
+          "file-hash-map/v1"
+        ],
+        "produces": [
+          "duplicate-groups/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "group",
+              "dictionary"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "duplicate",
+              "files"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "collections",
+              "defaultdict"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "group-duplicates",
+            "description": "Given hashes for two identical files and one unique file, the grouping returns one group with the two identical files.",
+            "given": "A mapping of file paths to hashes where two files share a hash.",
+            "when": "The duplicate grouping is applied to that mapping.",
+            "then": [
+              "The result contains exactly one group with the two duplicate files."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": [
+        {
+          "capability_id": "duplicate-grouping",
+          "metadata": {
+            "full_name": "TheAlgorithms/Python",
+            "url": "https://github.com/TheAlgorithms/Python",
+            "description": "All Algorithms implemented in Python",
+            "stars": 224068,
+            "forks": 50996,
+            "open_issues": 1058,
+            "pushed_at": "2026-08-27T22:39:50Z",
+            "updated_at": "2026-08-28T04:40:54Z",
+            "created_at": "2016-07-16T09:44:01Z",
+            "language": "Python",
+            "topics": [
+              "algorithm",
+              "algorithm-competitions",
+              "algorithms-implemented",
+              "algos",
+              "community-driven",
+              "education",
+              "hacktoberfest",
+              "interview",
+              "learn",
+              "practice",
+              "python",
+              "searches",
+              "sorting-algorithms",
+              "sorts"
+            ],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.4
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 20.0,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 10.8,
+            "total": 90.8
+          },
+          "warnings": [],
+          "blockers": []
+        },
+        {
+          "capability_id": "duplicate-grouping",
+          "metadata": {
+            "full_name": "geekcomputers/Python",
+            "url": "https://github.com/geekcomputers/Python",
+            "description": "My Python Examples",
+            "stars": 35298,
+            "forks": 12934,
+            "open_issues": 503,
+            "pushed_at": "2026-08-17T11:05:26Z",
+            "updated_at": "2026-08-28T02:09:23Z",
+            "created_at": "2011-11-30T09:04:08Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.2
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 19.63,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 10.4,
+            "total": 87.26
+          },
+          "warnings": [],
+          "blockers": []
+        },
+        {
+          "capability_id": "duplicate-grouping",
+          "metadata": {
+            "full_name": "SrinivasWorkspace/customer-loyalty-analyzer",
+            "url": "https://github.com/SrinivasWorkspace/customer-loyalty-analyzer",
+            "description": "ETL pipeline analyzing customer loyalty & churn using Python collections (defaultdict, Counter, namedtuple) and SQL window functions (RANK, NTILE, L:AG)",
+            "stars": 0,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2026-06-25T09:03:51Z",
+            "updated_at": "2026-06-25T09:03:54Z",
+            "created_at": "2026-06-25T08:50:28Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "",
+            "license_spdx": null,
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "collections",
+              "defaultdict"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 17.8,
+            "adoption": 0.0,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 0.0,
+            "security_posture": 5.0,
+            "total": 51.53
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        },
+        {
+          "capability_id": "duplicate-grouping",
+          "metadata": {
+            "full_name": "ricky-andre/Python-duplicate-files-finder",
+            "url": "https://github.com/ricky-andre/Python-duplicate-files-finder",
+            "description": "check for duplicate files inside a directory and its subdirs",
+            "stars": 5,
+            "forks": 2,
+            "open_issues": 0,
+            "pushed_at": "2021-12-24T12:48:52Z",
+            "updated_at": "2025-04-10T19:40:01Z",
+            "created_at": "2021-12-24T12:46:40Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "",
+            "license_spdx": null,
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "duplicate",
+              "files"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 0.85,
+            "adoption": 1.95,
+            "community": 0.8,
+            "issue_health": 5.0,
+            "license_confidence": 0.0,
+            "security_posture": 5.0,
+            "total": 38.6
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified",
+            "repository has not been pushed for 1707 days"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        },
+        {
+          "capability_id": "duplicate-grouping",
+          "metadata": {
+            "full_name": "JM-Addington/jmpydupes",
+            "url": "https://github.com/JM-Addington/jmpydupes",
+            "description": "Python duplicate file finder using xxhash and sqlite",
+            "stars": 0,
+            "forks": 2,
+            "open_issues": 4,
+            "pushed_at": "2025-09-05T14:19:29Z",
+            "updated_at": "2025-09-05T14:19:32Z",
+            "created_at": "2024-10-14T18:34:10Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "",
+            "license_spdx": null,
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "duplicate",
+              "files"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 19.14,
+            "maintenance": 10.34,
+            "adoption": 0.0,
+            "community": 0.8,
+            "issue_health": 0.5,
+            "license_confidence": 0.0,
+            "security_posture": 5.0,
+            "total": 35.78
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        },
+        {
+          "capability_id": "duplicate-grouping",
+          "metadata": {
+            "full_name": "Anmol1109/PYTHON-Collections-DefaultDict-Tutorial",
+            "url": "https://github.com/Anmol1109/PYTHON-Collections-DefaultDict-Tutorial",
+            "description": "",
+            "stars": 0,
+            "forks": 0,
+            "open_issues": 0,
+            "pushed_at": "2021-08-29T18:04:03Z",
+            "updated_at": "2021-08-29T18:04:05Z",
+            "created_at": "2021-08-29T18:00:51Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "",
+            "license_spdx": null,
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "main",
+            "latest_release": null,
+            "security_score": null
+          },
+          "search_query": {
+            "keywords": [
+              "python",
+              "collections",
+              "defaultdict"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "manual-review",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 0.68,
+            "adoption": 0.0,
+            "community": 0.0,
+            "issue_health": 5.0,
+            "license_confidence": 0.0,
+            "security_posture": 5.0,
+            "total": 35.68
+          },
+          "warnings": [
+            "OpenSSF Scorecard is unavailable; security posture is unverified",
+            "repository has not been pushed for 1824 days"
+          ],
+          "blockers": [
+            "license is missing or not machine-verifiable"
+          ]
+        }
+      ]
+    },
+    {
+      "capability": {
+        "id": "output-exclusion",
+        "description": "Exclude the output file from scanning when it is inside the scanned tree, and reject an output path that is the same file as any input.",
+        "accepts": [
+          "output-path/v1",
+          "file-path-stream/v1"
+        ],
+        "produces": [
+          "filtered-file-path-stream/v1",
+          "output-path-error/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "samefile",
+              "path"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "os.path",
+              "realpath"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "exclude",
+              "file",
+              "scan"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "exclude-output-inside-tree",
+            "description": "When the output file is inside the scanned tree, it is not included in the duplicate groups.",
+            "given": "A temporary directory containing a file and an output path inside that directory.",
+            "when": "The output exclusion is applied to the file stream.",
+            "then": [
+              "The output file is not present in the filtered stream."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": [
+        {
+          "capability_id": "output-exclusion",
+          "metadata": {
+            "full_name": "TheAlgorithms/Python",
+            "url": "https://github.com/TheAlgorithms/Python",
+            "description": "All Algorithms implemented in Python",
+            "stars": 224068,
+            "forks": 50996,
+            "open_issues": 1058,
+            "pushed_at": "2026-08-27T22:39:50Z",
+            "updated_at": "2026-08-28T04:40:54Z",
+            "created_at": "2016-07-16T09:44:01Z",
+            "language": "Python",
+            "topics": [
+              "algorithm",
+              "algorithm-competitions",
+              "algorithms-implemented",
+              "algos",
+              "community-driven",
+              "education",
+              "hacktoberfest",
+              "interview",
+              "learn",
+              "practice",
+              "python",
+              "searches",
+              "sorting-algorithms",
+              "sorts"
+            ],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.4
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 1,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 25.0,
+            "maintenance": 20.0,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 5.0,
+            "license_confidence": 15.0,
+            "security_posture": 10.8,
+            "total": 90.8
+          },
+          "warnings": [],
+          "blockers": []
+        },
+        {
+          "capability_id": "output-exclusion",
+          "metadata": {
+            "full_name": "geekcomputers/Python",
+            "url": "https://github.com/geekcomputers/Python",
+            "description": "My Python Examples",
+            "stars": 35298,
+            "forks": 12934,
+            "open_issues": 503,
+            "pushed_at": "2026-08-17T11:05:26Z",
+            "updated_at": "2026-08-28T02:09:23Z",
+            "created_at": "2011-11-30T09:04:08Z",
+            "language": "Python",
+            "topics": [],
+            "license_key": "mit",
+            "license_spdx": "MIT",
+            "archived": false,
+            "is_fork": false,
+            "default_branch": "master",
+            "latest_release": null,
+            "security_score": 5.2
+          },
+          "search_query": {
+            "keywords": [
+              "python"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          "search_position": 2,
+          "evidence_level": 0,
+          "decision": "eligible-for-inspection",
+          "selection_ready": false,
+          "score": {
+            "search_fit": 23.73,
+            "maintenance": 19.63,
+            "adoption": 10.0,
+            "community": 5.0,
+            "issue_health": 3.5,
+            "license_confidence": 15.0,
+            "security_posture": 10.4,
+            "total": 87.26
+          },
+          "warnings": [],
+          "blockers": []
+        }
+      ]
+    },
+    {
+      "capability": {
+        "id": "json-output-writer",
+        "description": "Write the duplicate groups and unreadable-file errors to the output file as deterministic JSON, without modifying any input files.",
+        "accepts": [
+          "duplicate-groups/v1",
+          "unreadable-file-errors/v1",
+          "output-path/v1"
+        ],
+        "produces": [
+          "json-output-file/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "json",
+              "dump"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "json",
+              "sort_keys"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "write",
+              "json",
+              "file"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "write-json-output",
+            "description": "Writing a set of duplicate groups and errors to a file produces a JSON file with the expected structure.",
+            "given": "A temporary output path, a list of duplicate groups, and a list of unreadable-file errors.",
+            "when": "The JSON output writer is called with those inputs.",
+            "then": [
+              "The output file exists and contains valid JSON.",
+              "The JSON content matches the expected structure."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": []
+    },
+    {
+      "capability": {
+        "id": "deterministic-ordering",
+        "description": "Ensure all output (duplicate groups, errors, and JSON keys) is sorted deterministically so that repeated runs produce identical output.",
+        "accepts": [
+          "duplicate-groups/v1",
+          "unreadable-file-errors/v1"
+        ],
+        "produces": [
+          "sorted-duplicate-groups/v1",
+          "sorted-unreadable-file-errors/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "sort",
+              "list"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "sorted",
+              "key"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "deterministic",
+              "order"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "deterministic-output",
+            "description": "Running the program twice on the same input produces identical output files.",
+            "given": "A temporary directory with known files and an output path.",
+            "when": "The program is run twice with the same arguments.",
+            "then": [
+              "The two output files are byte-for-byte identical."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": []
+    },
+    {
+      "capability": {
+        "id": "test-suite",
+        "description": "Provide executable tests that verify the program's behavior, including duplicate detection, unreadable files, symlink handling, and output exclusion.",
+        "accepts": [
+          "test-framework/v1"
+        ],
+        "produces": [
+          "test-results/v1"
+        ],
+        "searches": [
+          {
+            "keywords": [
+              "python",
+              "pytest",
+              "unittest"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "testing",
+              "cli"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          },
+          {
+            "keywords": [
+              "python",
+              "tmp_path",
+              "fixture"
+            ],
+            "language": "Python",
+            "stars": null,
+            "updated": null,
+            "license": null
+          }
+        ],
+        "seeds": [],
+        "acceptance": [
+          {
+            "id": "tests-pass",
+            "description": "Running the test suite reports all tests passing.",
+            "given": "A checkout of the project with the test suite.",
+            "when": "The test runner is executed.",
+            "then": [
+              "All tests pass."
+            ]
+          }
+        ],
+        "required": true
+      },
+      "candidates": []
+    }
+  ],
+  "warnings": [
+    "OpenSSF Scorecard not-found for dymmond/sayer: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for imayobrown/cdg: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for simonw/click-app: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for davfive/argparts: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for mkdocs/mkdocs-click: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for thememium/usecli: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for Glitchfix/Direc-Tree: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for davidblakecoe/dirtrav: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for hugohmk/PFsum: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for fuzzball5000/teeny: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for Anmol1109/PYTHON-Collections-DefaultDict-Tutorial: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for ricky-andre/Python-duplicate-files-finder: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for JM-Addington/jmpydupes: OpenSSF has no Scorecard for this repository",
+    "OpenSSF Scorecard not-found for SrinivasWorkspace/customer-loyalty-analyzer: OpenSSF has no Scorecard for this repository",
+    "GitHub search query budget was exhausted; retained results are explicitly partial"
+  ]
+}

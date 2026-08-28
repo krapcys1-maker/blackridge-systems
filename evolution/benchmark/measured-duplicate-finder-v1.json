@@ -1,0 +1,76 @@
+{
+  "schema_version": "1",
+  "id": "blackridge-measured-duplicate-finder-v1",
+  "purpose": "Compare engine candidates only on the project and regression gates previously used to select v1.1.",
+  "frozen_inputs": {
+    "representative_task_sha256": "fef1062657c1cb638a3873c35b7fc8b7928f784d45ebffd739ef5ca5ec04cf09",
+    "representative_discovery_sha256": "f70c4c075c7d99c61aaaa3b780b0b3b16616d9243406873c7c9dfd60027735ce",
+    "representative_request_sha256": "9aa467f19afc3aed46a7f364551060d34ad1f59b44461b0c891930a58c7ae665",
+    "verified_components_sha256": "ab1915e77a7d90c890af8f0e0a78e9f46c664d10d0708e01e8b133758e3f63f2",
+    "independent_evaluator_sha256": "a6318aad33cd8708375f07d5ab4ef1c0a9191d9d34099d06210e5a71b790e767",
+    "ci_workflow_sha256": "84e37f15cfd4bf2e41535dc8c6c4afe00f053e746d40b67f0d4279da4fcfb113",
+    "calibration_reference_program_sha256": "94cbe15a6f5724df657b9bd76190e4f9e84ac7ca2c81a9e6aec60779180149da"
+  },
+  "builder_protocol": {
+    "attempts_per_candidate": 3,
+    "operator_model": "deepseek-v4-flash",
+    "same_model_settings": true,
+    "same_frozen_inputs": true,
+    "evaluator_logic_known_to_builder": true,
+    "builder_may_read_repository_copy_of_evaluator": true,
+    "builder_may_access_or_modify_evaluator_execution_copy": false,
+    "builder_may_change_tests": false,
+    "builder_may_select_winner": false,
+    "candidate_may_change_after_evaluation": false
+  },
+  "critical_project_gates": [
+    "generated proposal passes strict schema validation",
+    "exact reviewed proposal SHA is the materialized program",
+    "candidate-owned generated test suite contains at least 9 meaningful cases and all pass",
+    "independent adversarial evaluator passes 7 of 7",
+    "sandbox has no network, non-root UID/GID, read-only root and source, dropped capabilities, and frozen resource limits",
+    "input bytes, permissions, and timestamps are unchanged",
+    "same-path and hard-link output collisions are rejected without mutation",
+    "symlink escape and cycle cases pass",
+    "unreadable files produce explicit retained errors"
+  ],
+  "critical_regression_gates": [
+    "pip check",
+    "ruff check",
+    "ruff format check",
+    "mypy production source",
+    "compileall source, tests, tools, and components",
+    "Bandit medium/high",
+    "pip-audit resolved environment",
+    "third-party notices check",
+    "copy provenance check",
+    "pytest with at least 70 percent coverage",
+    "wheel and sdist build",
+    "Twine distribution check",
+    "installed-wheel Docker system E2E and fail-closed controls"
+  ],
+  "raw_metrics": [
+    "task_success_rate",
+    "critical_checks_passed",
+    "generated_tests_passed",
+    "independent_tests_passed",
+    "builder_wall_seconds",
+    "evaluator_wall_seconds",
+    "provider_input_tokens",
+    "provider_output_tokens",
+    "provider_cost_usd",
+    "repair_iterations",
+    "manual_interventions",
+    "generated_source_lines",
+    "reused_source_lines",
+    "project_builder_source_lines"
+  ],
+  "winner_rule": [
+    "Any critical gate failure rejects the attempt.",
+    "A candidate must have higher three-attempt task success rate than the incumbent to replace it.",
+    "Equal success rate requires no worse safety or regression result and lower externally measured interventions or cost.",
+    "An exact remaining tie retains v1.1.",
+    "Evolution-control features do not count as better project output unless they improve these frozen measurements."
+  ],
+  "claim_limit": "This known-workload regression benchmark can select the better engine for the measured Duplicate Finder task and existing v1 gates only. It cannot establish universal superiority."
+}

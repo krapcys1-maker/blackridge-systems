@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
-  "updated_at": "2026-08-28T13:25:50+03:00",
-  "status": "round-001-design-loop-active",
+  "updated_at": "2026-08-28T14:24:35+03:00",
+  "status": "round-002-benchmark-calibrated-builders-not-started",
   "naming": {
     "package_version": "0.1.1",
     "current_architectural_champion": "v1.1",
@@ -25,20 +25,26 @@
       "winner": "champion-v1-1",
       "comparison": "benchmarks/blackridge-self-hosting-v2/round-000-v1.1-comparison.json",
       "comparison_sha256": "e85a0c3ac027441aec809e13e2bacece8bb7fb15882f8d7251ca6094f851651f"
+    },
+    {
+      "round_id": "round-001",
+      "status": "terminated-no-promotion",
+      "winner": "champion-v1-1",
+      "reason": "Candidate A did not change project-building modules; candidate B failed architecture review; hybrids were not built.",
+      "audit": "evolution/rounds/001/a-vs-champion-project-builder-audit.json"
     }
   ],
   "active_round": {
-    "round_id": "round-001",
-    "status": "candidate-a-frozen-candidate-b-design-rejected",
-    "manifest": "evolution/rounds/001/manifest.json",
-    "public_benchmark_sha256": "77495687a7fb65a3fc4e90691093443924a20292a9f42a9f9ce2704d84a827f9",
-    "hidden_holdout_sha256": "04cd24be9e9ae39327f146bb76ed299b4fd42be42a0c3f1615a18716a178b86e",
-    "candidate_a_snapshot_commit": "ee72dd6b39f3e98ab4384cb708e7df98a81a6111",
-    "candidate_a_remote_branch": "evolution/candidate-a-v1.2-round-001",
-    "candidate_a_source_archive_sha256": "530ca9477984e858e2a198d35e2d90f08df60ddadc51f918be12b6405cd2dcc5",
-    "candidate_b_attempts": 10,
-    "candidate_b_status": "architecture-rejected-before-build",
-    "hybrids_status": "blocked-until-b-has-measured-strengths",
-    "next_action": "Create a corrected fresh B design from public inputs. Do not implement or hybridize attempt 010; it failed semantic review."
+    "round_id": "round-002",
+    "status": "benchmark-frozen-and-calibrated-builders-not-started",
+    "manifest": "evolution/rounds/002/manifest.json",
+    "benchmark": "evolution/benchmark/measured-duplicate-finder-v1.json",
+    "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
+    "attempts_per_candidate": 3,
+    "candidate_a_status": "not-started",
+    "candidate_b_status": "not-started",
+    "hybrids_status": "blocked-on-measured-a-and-b",
+    "selected_champion": "champion-v1-1",
+    "next_action": "Build fresh A and B only after verifying the committed round-002 benchmark and input hashes; then run three identical Duplicate Finder attempts per candidate."
   }
 }

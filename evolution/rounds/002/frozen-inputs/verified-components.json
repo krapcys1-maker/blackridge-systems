@@ -1,0 +1,10 @@
+[
+  {"capability_id":"cli-entrypoint","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2},
+  {"capability_id":"tree-walker","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2},
+  {"capability_id":"file-hasher","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2},
+  {"capability_id":"duplicate-grouping","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2},
+  {"capability_id":"output-exclusion","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2},
+  {"capability_id":"json-output-writer","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2},
+  {"capability_id":"deterministic-ordering","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2},
+  {"capability_id":"test-suite","identity":"python-standard-library","immutable_revision":"cpython-3.12.14@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903","evidence_level":2}
+]

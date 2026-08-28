@@ -1,0 +1,34 @@
+{
+  "schema_version": "1",
+  "round_id": "round-002",
+  "status": "benchmark-frozen-and-calibrated-builders-not-started",
+  "champion": {
+    "candidate_id": "champion-v1-1",
+    "architecture_line": "v1.1",
+    "snapshot_commit": "0bdfd5ac055118fcd38f157522a88f460d6ba64e",
+    "artifact_sha256": "196551749cb767b75e31302f55a7e17e10178bfe86994ab2a295330ce10bb58e"
+  },
+  "benchmark": {
+    "spec": "evolution/benchmark/measured-duplicate-finder-v1.json",
+    "spec_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
+    "frozen_inputs_directory": "evolution/rounds/002/frozen-inputs",
+    "evaluator_path": "../blackridge-evolution-evaluator/round-002/evaluate_duplicate_finder.py",
+    "evaluator_sha256": "a6318aad33cd8708375f07d5ab4ef1c0a9191d9d34099d06210e5a71b790e767",
+    "calibration_reference_path": "../blackridge-evolution-evaluator/round-002/reference-program.py",
+    "calibration_reference_sha256": "94cbe15a6f5724df657b9bd76190e4f9e84ac7ca2c81a9e6aec60779180149da",
+    "calibration_evidence": "evolution/rounds/002/calibration.json",
+    "calibration_result": "pass-7-of-7",
+    "evaluator_logic_known_to_builder": true,
+    "builder_may_access_evaluator_workspace": false
+  },
+  "candidate_slots": [
+    {"origin":"champion","candidate_id":"champion-v1-1","status":"frozen"},
+    {"origin":"A","candidate_id":"candidate-a-round-002","status":"not-started","requirement":"must change project-building behavior, not only tournament controls"},
+    {"origin":"B","candidate_id":"candidate-b-round-002","status":"not-started","requirement":"fresh architecture from public inputs"},
+    {"origin":"A+B","candidate_id":"candidate-a-plus-b-round-002","status":"blocked-on-measured-a-and-b"},
+    {"origin":"B+A","candidate_id":"candidate-b-plus-a-round-002","status":"blocked-on-measured-a-and-b"}
+  ],
+  "attempts_per_candidate": 3,
+  "selection_status": "not-run",
+  "selected_champion": "champion-v1-1"
+}
