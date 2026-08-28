@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-002",
-  "status": "provisional-leader-selected-b-plus-a-pending",
+  "status": "complete-v1-line-promoted",
   "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
   "attempts_per_candidate": 3,
   "results_root": "../blackridge-evolution-round-002/results",
@@ -63,12 +63,46 @@
       "winning_provider_cost_usd": 0.03003612,
       "winning_repair_iterations": 3,
       "manual_interventions": 0
+    },
+    {
+      "candidate_id": "candidate-b-plus-a-round-002",
+      "architecture_origin": "B+A",
+      "commit": "6bd8882b536164503c1a5a2d04952a6aa6408e2e",
+      "successes": 1,
+      "attempts": 3,
+      "summary_sha256": "5eb420684526701de0e1d518c6c2dc495ae0ea36190ea952fc6691028fd76c6c",
+      "winning_proposal_sha256": "321f32bb1c26e7e149abd67449c0e35ffd2523d2cf1bf9a622c414c1827bd54b",
+      "winning_program_sha256": "3c22ffb7b3bb45e26dea2c0a660974d6f73965205e2c1c67f46112f4e6d70f06",
+      "winning_generated_tests": "10/10",
+      "winning_public_evaluator": "7/7",
+      "winning_independent_evaluator": "7/7",
+      "winning_provider_cost_usd": 0.01926666,
+      "winning_repair_iterations": 2,
+      "manual_interventions": 0,
+      "promotion_eligible": false,
+      "critical_regressions": [
+        "one of three attempts crashed before summary when provider returned malformed JSON",
+        "engine unit-test coverage was 46.02 percent, below the frozen 70 percent gate",
+        "no installable package, notices/provenance checks, wheel/sdist, or installed-wheel system E2E"
+      ]
     }
   ],
-  "provisional_leader": "candidate-blackbox-tests-round-002",
-  "provisional_reason": "Higher measured three-attempt success rate than champion v1.1 (1/3 versus 0/3) with no critical repository or release regression.",
-  "selection_complete": false,
-  "selection_blocker": "B+A must still be built and measured before the five-way round can select the architectural champion.",
+  "selected_champion": "candidate-blackbox-tests-round-002",
+  "selected_architecture_line": "v1.2",
+  "selection_reason": "A+B and B+A tied at 1/3 with zero manual interventions. B+A's successful attempt was cheaper, but it failed the frozen no-worse-regression prerequisite through an unhandled provider-output crash, 46.02 percent engine coverage, and missing release/package gates. The fully gated improved v1 line therefore wins.",
+  "selection_complete": true,
+  "transfer_to_next_round": {
+    "from_b_plus_a": [
+      "evaluate whether supplying the known public evaluator contract to the v1 builder reduces repair cost without weakening hidden evaluation",
+      "retain append-only per-iteration ledger evidence",
+      "add a regression test that malformed provider JSON is retained as a failed iteration rather than crashing the run"
+    ],
+    "rejected_from_b_plus_a": [
+      "standalone unpackageable foundry base",
+      "weaker unit-test and release coverage",
+      "uncaught provider JSON failure boundary"
+    ]
+  },
   "release_gates": {
     "clean_environment_pip_check": "pass",
     "ruff": "pass",

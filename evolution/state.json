@@ -1,22 +1,22 @@
 {
   "schema_version": "1",
-  "updated_at": "2026-08-28T18:15:00+03:00",
-  "status": "round-002-provisional-v1-line-leader-b-plus-a-pending",
+  "updated_at": "2026-08-28T19:10:00+03:00",
+  "status": "round-002-complete-v1-line-promoted",
   "naming": {
     "package_version": "0.1.1",
-    "current_architectural_champion": "v1.1",
-    "next_fresh_challenger_name": "v2",
+    "current_architectural_champion": "v1.2",
+    "next_fresh_challenger_name": "v2.2",
     "rule": "Package versions and architectural line names are separate. Never call enhanced v1.1 'v2'."
   },
   "current_champion": {
-    "candidate_id": "champion-v1-1",
-    "architecture_line": "v1.1",
+    "candidate_id": "candidate-blackbox-tests-round-002",
+    "architecture_line": "v1.2",
     "package_version": "0.1.1",
-    "snapshot_commit": "0bdfd5ac055118fcd38f157522a88f460d6ba64e",
-    "source_archive_sha256": "196551749cb767b75e31302f55a7e17e10178bfe86994ab2a295330ce10bb58e",
-    "snapshot_path": "../blackridge-champion-v1.1-snapshot-20260828-r1",
-    "source_archive_path": "../blackridge-evolution-evaluator/champion-v1.1-0bdfd5ac.tar",
-    "selection_round": "round-000"
+    "snapshot_commit": "5a0c6e348c725578650fbd668245a39658083e92",
+    "winning_proposal_sha256": "cd3f40f4bc7484f06733682c01a86218d42e211e4be9a072c7a2d05819275506",
+    "winning_program_sha256": "dc74d49358fca82ad1b0eb5b33689a0f70e5b2697fd94066835ec017d4404142",
+    "main_integration_commit": "9b1fc4f80ccea74ebcc194777a04d2b199a858d4",
+    "selection_round": "round-002"
   },
   "round_history": [
     {
@@ -32,23 +32,33 @@
       "winner": "champion-v1-1",
       "reason": "Candidate A did not change project-building modules; candidate B failed architecture review; hybrids were not built.",
       "audit": "evolution/rounds/001/a-vs-champion-project-builder-audit.json"
+    },
+    {
+      "round_id": "round-002",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-blackbox-tests-round-002",
+      "architecture_line": "v1.2",
+      "result": "evolution/rounds/002/measured-results.json",
+      "reason": "The improved v1 and B+A each passed 1/3. B+A failed the no-worse-regression prerequisite, so the fully gated v1 line won."
     }
   ],
   "active_round": {
     "round_id": "round-002",
-    "status": "provisional-v1-line-leader-b-plus-a-pending",
+    "status": "complete",
     "manifest": "evolution/rounds/002/manifest.json",
     "benchmark": "evolution/benchmark/measured-duplicate-finder-v1.json",
     "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
     "attempts_per_candidate": 3,
     "candidate_a_status": "measured-0-of-3",
     "candidate_b_status": "measured-0-of-3-and-protocol-disqualified",
-    "hybrids_status": "a-plus-b-provisional-leader-1-of-3; b-plus-a-pending",
-    "selected_champion": "champion-v1-1",
-    "provisional_leader": "candidate-blackbox-tests-round-002",
-    "provisional_leader_commit": "5a0c6e348c725578650fbd668245a39658083e92",
+    "hybrids_status": "a-plus-b-selected-1-of-3; b-plus-a-not-promoted-1-of-3",
+    "selected_champion": "candidate-blackbox-tests-round-002",
+    "selected_architecture_line": "v1.2",
+    "selected_champion_commit": "5a0c6e348c725578650fbd668245a39658083e92",
     "integrated_main_commit": "9b1fc4f80ccea74ebcc194777a04d2b199a858d4",
     "results": "evolution/rounds/002/measured-results.json",
-    "next_action": "Build B+A from the fresh ledger architecture plus the measured v1 evidence, component-lock, and black-box test controls; run three identical attempts and only then select the round champion."
+    "b_plus_a_commit": "6bd8882b536164503c1a5a2d04952a6aa6408e2e",
+    "b_plus_a_summary_sha256": "5eb420684526701de0e1d518c6c2dc495ae0ea36190ea952fc6691028fd76c6c",
+    "next_action": "Start round 003 from v1.2. Test B+A's useful lower-cost idea by giving the safe v1 builder the known public evaluator contract, and harden malformed provider-output handling. Continue the v2 challenger line only as an isolated candidate until it passes all v1 release gates."
   }
 }

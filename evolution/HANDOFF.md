@@ -1,10 +1,10 @@
 # Project handoff
 
-Updated: 2026-08-28 13:25 +03:00.
+Updated: 2026-08-28 19:10 +03:00.
 
 ## Read this first
 
-The current architectural champion is **v1.1**, packaged as `0.1.1`. It is the original v1 control
+The current architectural champion is **v1.2**, packaged as `0.1.1`. It is the original v1 control
 plane enhanced with selected planner, operator, GitHub-search, deny-policy, repair-feedback, and
 hash-gated generation boundaries. It is not v2. The name **v2** is reserved for the fresh challenger
 architecture in round 001.
@@ -136,8 +136,28 @@ Machine-readable measurements and evidence hashes are in
 `evolution/rounds/002/measured-results.json`. Raw provider, proposal, test, evaluator, and release
 evidence remains under `D:\Skladacz aplikacji\blackridge-evolution-round-002`.
 
-Next action: build B+A from the independent ledger base plus v1's measured evidence controls,
-component locking, and black-box test contract. Give it three identical attempts. If it beats the
-provisional 1/3 or ties with better cost/interventions and no regression, it may justify switching
-the architectural base. Otherwise the improved v1 line becomes the round champion and creates the
-next fresh challenger.
+## Round 002 final result — 2026-08-28 19:10 +03:00
+
+Round 002 is complete. B+A was built from the fresh ledger base plus v1's evidence validation,
+component locking, and black-box CLI test contract at commit
+`6bd8882b536164503c1a5a2d04952a6aa6408e2e`. It measured 1/3. Its successful attempt passed 10/10
+generated tests, public 7/7, and independent 7/7 after two repairs for USD 0.01926666 with zero
+manual interventions.
+
+B+A did not replace the improved v1 line despite the lower successful-attempt cost. One attempt
+crashed the builder when the provider returned malformed JSON, engine test coverage was only
+46.02% against the frozen 70% gate, and the standalone foundry lacked package, notice/provenance,
+wheel/sdist, and installed-wheel system-E2E gates. The winner rule requires equal-success candidates
+to have no worse safety or regression result before cost can break the tie.
+
+The selected champion is therefore the enhanced v1 line, now named **v1.2**, represented by
+`candidate-blackbox-tests-round-002` at commit
+`5a0c6e348c725578650fbd668245a39658083e92`. Do not call it v2. The B/B+A architecture remains an
+isolated v2 challenger line, not the product base.
+
+Evidence worth transferring into the next v1 iteration is narrow and explicit: test whether giving
+the safe v1 builder the known public evaluator contract reproduces B+A's lower repair cost, preserve
+append-only iteration ledgers, and add a regression test for malformed provider JSON. Do not import
+B+A's unpackageable foundry base or its weaker gates. Round 003 should compare that enhanced v1
+candidate against a hardened v2.2 challenger on a newly frozen benchmark without changing tests
+during measurement.

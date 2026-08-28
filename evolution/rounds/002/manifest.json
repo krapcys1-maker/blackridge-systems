@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-002",
-  "status": "provisional-v1-line-leader-b-plus-a-pending",
+  "status": "complete-v1-line-promoted",
   "champion": {
     "candidate_id": "champion-v1-1",
     "architecture_line": "v1.1",
@@ -25,12 +25,13 @@
     {"origin":"champion","candidate_id":"champion-v1-1","status":"measured-0-of-3"},
     {"origin":"A","candidate_id":"candidate-a-round-002","status":"measured-0-of-3","requirement":"must change project-building behavior, not only tournament controls"},
     {"origin":"B","candidate_id":"candidate-b-ledger-round-002","status":"measured-0-of-3-and-protocol-disqualified","requirement":"fresh architecture from public inputs"},
-    {"origin":"A+B","candidate_id":"candidate-blackbox-tests-round-002","status":"provisional-leader-1-of-3"},
-    {"origin":"B+A","candidate_id":"candidate-b-plus-a-round-002","status":"pending-build-and-measurement"}
+    {"origin":"A+B","candidate_id":"candidate-blackbox-tests-round-002","status":"selected-champion-1-of-3"},
+    {"origin":"B+A","candidate_id":"candidate-b-plus-a-round-002","status":"measured-1-of-3-not-promoted-critical-regressions"}
   ],
   "attempts_per_candidate": 3,
   "results": "evolution/rounds/002/measured-results.json",
-  "selection_status": "incomplete-b-plus-a-pending",
-  "selected_champion": "champion-v1-1",
-  "provisional_leader": "candidate-blackbox-tests-round-002"
+  "selection_status": "complete",
+  "selected_champion": "candidate-blackbox-tests-round-002",
+  "selected_architecture_line": "v1.2",
+  "selection_reason": "B+A tied the improved v1 line on task success and used less provider cost on its successful attempt, but failed the required no-worse safety/regression condition. The improved v1 line retains the architectural base."
 }
