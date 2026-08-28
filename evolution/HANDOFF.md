@@ -4,10 +4,11 @@ Updated: 2026-08-28 19:10 +03:00.
 
 ## Read this first
 
-The current architectural champion is **v1.2**, packaged as `0.1.1`. It is the original v1 control
+The current architectural champion is **v1.3.1**, packaged as `0.1.1`. It is the original v1 control
 plane enhanced with selected planner, operator, GitHub-search, deny-policy, repair-feedback, and
-hash-gated generation boundaries. It is not v2. The name **v2** is reserved for the fresh challenger
-architecture in round 001.
+hash-gated generation boundaries, plus a hash-bound public evaluator contract and JSON-safe
+rejection evidence. It is not v2. The name **v2** is reserved for the alternate ledger challenger
+architecture.
 
 The earlier isolated v2 r4 prototype lost v1 verification and safety gates and was rejected. Its
 artifacts remain immutable evidence under `benchmarks/blackridge-self-hosting-v2` and the sibling
@@ -53,7 +54,7 @@ artifacts remain immutable evidence under `benchmarks/blackridge-self-hosting-v2
 - Candidate A source archive SHA-256:
   `530ca9477984e858e2a198d35e2d90f08df60ddadc51f918be12b6405cd2dcc5`
 
-## Current status and next action
+## Historical round-001 status
 
 Round 000 is a completed bootstrap that selected v1.1. Round 001 is active, but no challenger has
 won and no five-way benchmark has run.
@@ -73,7 +74,7 @@ but remains rejected because it has untyped broadcast routing, possible evidence
 independent verification of generated adapters, a non-executable first slice, and a control plane
 that does not actually gate dispatcher releases. Do not implement or hybridize it.
 
-The next action is to create a corrected B proposal with typed post-commit subscriptions,
+The historical next action was to create a corrected B proposal with typed post-commit subscriptions,
 idempotent evidence collection, exact-hash adapter verification, control-authorized releases, and
 an executable minimal slice. Continue to use public inputs only. A+B and B+A remain blocked until B
 has measured strengths rather than model claims.
@@ -91,12 +92,11 @@ same evaluator and call `blackridge select-champion` on the retained round evalu
 - A schema-valid or mechanically repaired architecture is not build-approved; semantic review is
   a mandatory pre-build critical gate.
 - Keep secrets out of artifacts and prompts except at the narrow provider boundary.
-- The main repository worktree is intentionally uncommitted and contains user-owned prior changes.
-  Do not reset, clean, stash, or overwrite them.
-- No commit or push has been performed for the current worktree.
+- Preserve unrelated user changes. Do not reset, clean, stash, or overwrite them.
+- Commit and push completed round evidence before beginning another candidate measurement.
 
-Machine-readable truth is in `evolution/state.json`; the active manifest is
-`evolution/rounds/002/manifest.json`. Round 001 is retained as terminated evidence.
+Machine-readable truth is in `evolution/state.json`; the latest completed manifest is
+`evolution/rounds/003/manifest.json`. Round 001 is retained as terminated evidence.
 
 ## Measurement correction and round 002
 
@@ -181,3 +181,32 @@ Bandit, pip-audit, notices, provenance, 238 tests with 3 skips, 72.47% coverage,
 installed wheel extras, optional verifier resolution, and Docker system-E2E/fail-closed controls.
 This makes v1.3.1 the provisional leader, not yet the final champion. Round 003 still requires the
 hardened v2.2 candidate and both transfer hybrids before selection.
+
+## Round 003 final result — 2026-08-28 23:11 +03:00
+
+Round 003 is complete. Every required slot used the unchanged Duplicate Finder benchmark, the same
+three attempts, the same public and independent evaluator hashes, the same repair limit, and zero
+manual interventions:
+
+- retained v1.2: 1/3;
+- initial v1.3: rejected before measurement because rejection evidence was not JSON serializable;
+- JSON-safe v1.3.1: 2/3, total provider cost USD 0.04173154;
+- packaged ledger v2.2: 1/3, total provider cost USD 0.05314388;
+- A+B compact v1 profile: 2/3, total provider cost USD 0.06229176;
+- B+A acceptance-mapped ledger: 1/3, total provider cost USD 0.08316530.
+
+The selected champion is **v1.3.1** at
+`8a37ae109c9c3dda8d86194a6c96cb1242daa655`. It improved success over v1.2 and passed all critical
+repository, dependency, provenance, package, installed-wheel, and Docker system-E2E gates. A+B tied
+its 2/3 success rate and zero interventions, but cost more over the frozen series, so the incumbent
+v1.3.1 wins under the predeclared tie-break rule. This remains an enhanced v1, not v2.
+
+Useful evidence from the losing lines is retained rather than blindly merged. The compact prompt
+can produce a cheap first-call success but did not lower total series cost, so it stays optional.
+The ledger line's exact acceptance mapping and component locking are sound safeguards, but v1.3.1
+already has richer equivalents. In failed v2/B+A attempts the generated program could pass 7/7
+while model-written tests remained broken. Round 004 should therefore keep v1.3.1 as champion and
+build v2.4 around specialized test-only repair, then create A+B and B+A and rerun the same benchmark.
+
+Raw evidence is under `D:\Skladacz aplikacji\blackridge-evolution-round-003`; machine-readable
+selection data is in `evolution/rounds/003/measured-results.json`.

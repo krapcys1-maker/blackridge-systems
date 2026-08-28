@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-003",
-  "status": "provisional-v1-line-leader-b-and-hybrids-pending",
+  "status": "complete-v1-line-promoted",
   "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
   "attempts_per_candidate": 3,
   "results_root": "../blackridge-evolution-round-003/results",
@@ -49,13 +49,96 @@
           "repair_iterations": 1
         }
       ],
-      "manual_interventions": 0
+      "manual_interventions": 0,
+      "total_provider_cost_usd": 0.04173154
+    },
+    {
+      "candidate_id": "candidate-v2-2-round-003",
+      "architecture_line": "v2.2",
+      "commit": "d58645428f5025f4878cbaee5c581cabf6bd7b39",
+      "successes": 1,
+      "attempts": 3,
+      "summary_sha256": "7414847ade22944362547b4b325e8a7db2b61f68f333105be4d7149ffa7cc32f",
+      "successful_attempts": [
+        {
+          "attempt": 2,
+          "proposal_sha256": "ad562399e0a18252a7852f40e6ce9f7b80d513b17bf7d61b228932d249d65eea",
+          "program_sha256": "03a89467cb31c33d89eef2057c59122c3b3585cffc3458d07416e77d491c5200",
+          "generated_tests": "9/9",
+          "independent_evaluator": "7/7",
+          "provider_cost_usd": 0.00631176,
+          "repair_iterations": 0
+        }
+      ],
+      "manual_interventions": 0,
+      "total_provider_cost_usd": 0.05314388,
+      "repository_tests": "243 passed, 3 skipped",
+      "coverage_percent": 72.26,
+      "package_gates": "pass"
+    },
+    {
+      "candidate_id": "candidate-a-plus-b-compact-round-003",
+      "architecture_line": "v1.3.1-compact",
+      "commit": "cfef6104ec1f3a34875c0e33d77ef2b68ac216f3",
+      "successes": 2,
+      "attempts": 3,
+      "summary_sha256": "b350521dc21d65dfee17fce901bf196cc52f714e199fcb2097401be4258052f6",
+      "successful_attempts": [
+        {
+          "attempt": 1,
+          "proposal_sha256": "cd9f1be948894cdea074b1ef0401ed0afbec3e53ab95d1023103bf5618b8d9e8",
+          "program_sha256": "a9e3a00f5ab013b25abb0db9750efa4207fa30f92c7dfd1248b12e7326ec2f34",
+          "generated_tests": "10/10",
+          "independent_evaluator": "7/7",
+          "provider_cost_usd": 0.02472098,
+          "repair_iterations": 2
+        },
+        {
+          "attempt": 3,
+          "proposal_sha256": "10cc7cdcf7e1f03577ee1704938d68c2b56e93c75ca4c185d0ef96ff73a44e15",
+          "program_sha256": "4af1e86e6c882c30fb194d45df7360c1eb385c3f80dcb739facc222baee3c07e",
+          "generated_tests": "10/10",
+          "independent_evaluator": "7/7",
+          "provider_cost_usd": 0.0067423,
+          "repair_iterations": 0
+        }
+      ],
+      "manual_interventions": 0,
+      "total_provider_cost_usd": 0.06229176,
+      "repository_tests": "239 passed, 3 skipped",
+      "coverage_percent": 72.54,
+      "package_gates": "pass",
+      "selection_note": "Tied v1.3.1 on success and interventions but had higher total provider cost, so it did not replace the incumbent under the frozen rule."
+    },
+    {
+      "candidate_id": "candidate-b-plus-a-acceptance-round-003",
+      "architecture_line": "v2.3",
+      "commit": "af25c7284486e7b57fe8e84290995afb0227cc21",
+      "successes": 1,
+      "attempts": 3,
+      "summary_sha256": "5d8cd08cb245801d9349c02b5db7ef41b9b4106f1031f905a222e32f839febd4",
+      "successful_attempts": [
+        {
+          "attempt": 2,
+          "proposal_sha256": "1a7ec4f509868287ec2a47ca4769909a0fc3975a4412bc57f96b2f0cf9081193",
+          "program_sha256": "a0d097bd91ee0f50b258bc0d2ebcdf6f9b3ee8204307a9d44a8e789902d5d8e7",
+          "generated_tests": "11/11",
+          "independent_evaluator": "7/7",
+          "provider_cost_usd": 0.02100079,
+          "repair_iterations": 2
+        }
+      ],
+      "manual_interventions": 0,
+      "total_provider_cost_usd": 0.0831653,
+      "repository_tests": "244 passed, 3 skipped",
+      "coverage_percent": 72.28,
+      "package_gates": "pass"
     }
   ],
-  "provisional_leader": "candidate-public-evaluator-json-safe-round-003",
-  "provisional_reason": "Higher task success rate than v1.2 on the unchanged benchmark (2/3 versus 1/3) with all critical repository and release gates passing.",
-  "selection_complete": false,
-  "selection_blocker": "The v2.2 challenger and the A+B and B+A hybrids remain required before final round selection.",
+  "selected_champion": "candidate-public-evaluator-json-safe-round-003",
+  "selected_architecture_line": "v1.3.1",
+  "selection_reason": "v1.3.1 improved success from 1/3 to 2/3 and passed every critical release gate. A+B tied at 2/3 with zero interventions but cost USD 0.06229176 versus USD 0.04173154. v2.2 and B+A reached 1/3.",
+  "selection_complete": true,
   "release_gates": {
     "tested_checkout_commit": "465755c947d49ff8a966d9408d13f2f5f1d33e8d",
     "production_code_unchanged_from_candidate_commit": true,

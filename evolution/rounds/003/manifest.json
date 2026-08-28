@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-003",
-  "status": "provisional-v1-line-leader-b-and-hybrids-pending",
+  "status": "complete-v1-line-promoted",
   "champion": {
     "candidate_id": "candidate-blackbox-tests-round-002",
     "architecture_line": "v1.2",
@@ -38,23 +38,40 @@
       "architecture_line": "v1.3.1",
       "snapshot_commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
       "change": "Retain the public-evaluator transfer and normalize all validation-error context into deterministic JSON-safe evidence.",
-      "status": "provisional-leader-measured-2-of-3"
+      "status": "selected-champion-measured-2-of-3"
     },
     {
       "origin": "B",
       "candidate_id": "candidate-v2-2-round-003",
       "architecture_line": "v2.2",
-      "status": "pending"
+      "snapshot_commit": "d58645428f5025f4878cbaee5c581cabf6bd7b39",
+      "change": "Package the alternate ledger architecture and reuse the hardened operator boundary without importing the v1 control plane.",
+      "status": "measured-1-of-3-not-promoted"
     },
-    {"origin": "A+B", "candidate_id": "pending", "status": "pending"},
-    {"origin": "B+A", "candidate_id": "pending", "status": "pending"}
+    {
+      "origin": "A+B",
+      "candidate_id": "candidate-a-plus-b-compact-round-003",
+      "architecture_line": "v1.3.1-compact",
+      "snapshot_commit": "cfef6104ec1f3a34875c0e33d77ef2b68ac216f3",
+      "change": "Add an optional compact public-contract generation profile to the safe v1 base.",
+      "status": "measured-2-of-3-not-promoted-higher-total-cost"
+    },
+    {
+      "origin": "B+A",
+      "candidate_id": "candidate-b-plus-a-acceptance-round-003",
+      "architecture_line": "v2.3",
+      "snapshot_commit": "af25c7284486e7b57fe8e84290995afb0227cc21",
+      "change": "Require exact public acceptance coverage and concrete generated-test mappings in the ledger architecture.",
+      "status": "measured-1-of-3-not-promoted"
+    },
   ],
   "attempts_per_candidate": 3,
   "operator_model": "deepseek-v4-flash",
   "max_repairs": 3,
   "premeasurement_evidence": "../blackridge-evolution-round-003/results/candidate-public-evaluator/attempt-001",
   "results": "evolution/rounds/003/measured-results.json",
-  "selection_status": "incomplete",
-  "selected_champion": "candidate-blackbox-tests-round-002",
-  "provisional_leader": "candidate-public-evaluator-json-safe-round-003"
+  "selection_status": "complete",
+  "selected_champion": "candidate-public-evaluator-json-safe-round-003",
+  "selected_architecture_line": "v1.3.1",
+  "selection_reason": "v1.3.1 improved unchanged-benchmark success from 1/3 to 2/3 and passed all release gates. A+B tied 2/3 but had higher total provider cost; v2.2 and B+A reached only 1/3."
 }
