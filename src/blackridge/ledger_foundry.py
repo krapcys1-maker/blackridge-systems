@@ -304,6 +304,26 @@ def compile_test_repair(
     return proposal, sorted(set(ignored + nested_ignored))
 
 
+def test_repair_rejection_record(
+    prior: dict[str, Any], completion: dict[str, Any], locked_paths: list[str], exc: Exception
+) -> dict[str, Any]:
+    """Retain a JSON-safe rejection bound to the exact locked product bytes."""
+
+    prior_files = {item["path"]: item for item in prior["files"]}
+    return {
+        "schema_version": "1",
+        "status": "schema-rejected",
+        "prior_proposal_sha256": digest_bytes(canonical_json(prior)),
+        "completion_sha256": completion.get("content_sha256"),
+        "locked_file_sha256": {
+            path: digest_bytes(prior_files[path]["content"].encode("utf-8"))
+            for path in locked_paths
+        },
+        "error_type": type(exc).__name__,
+        "error_message": str(exc)[:2_000],
+    }
+
+
 def materialize(proposal: dict[str, Any], workspace: Path) -> dict[str, str]:
     workspace.mkdir()
     root = workspace.resolve()
@@ -557,16 +577,26 @@ def main() -> int:
             total_input += usage["input_tokens"]
             total_output += usage["output_tokens"]
             event["completion_sha256"] = completion["content_sha256"]
-            proposal, ignored = (
-                compile_test_repair(
-                    completion["content"],
-                    locked_prior,
-                    request,
-                    verified_components,
+            try:
+                proposal, ignored = (
+                    compile_test_repair(
+                        completion["content"],
+                        locked_prior,
+                        request,
+                        verified_components,
+                    )
+                    if locked_prior is not None
+                    else compile_proposal(completion["content"], request, verified_components)
                 )
-                if locked_prior is not None
-                else compile_proposal(completion["content"], request, verified_components)
-            )
+            except Exception as compile_error:
+                if locked_prior is not None:
+                    write_json(
+                        iteration_dir / "test-repair-rejection.json",
+                        test_repair_rejection_record(
+                            locked_prior, completion, locked_paths, compile_error
+                        ),
+                    )
+                raise
             composition: dict[str, Any] | None = None
             if locked_prior is not None:
                 proposal, composition = compose_locked_files(locked_prior, proposal, locked_paths)

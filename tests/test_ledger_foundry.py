@@ -144,6 +144,17 @@ class CompilerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "only test files"):
             foundry.compile_test_repair(raw, prior, request_text(), verified_text())
 
+        record = foundry.test_repair_rejection_record(
+            prior,
+            {"content_sha256": "b" * 64},
+            ["program.py"],
+            ValueError("unsafe provider value"),
+        )
+        self.assertEqual(record["status"], "schema-rejected")
+        self.assertEqual(record["completion_sha256"], "b" * 64)
+        self.assertEqual(set(record["locked_file_sha256"]), {"program.py"})
+        json.dumps(record)
+
     def test_prompt_requires_portable_black_box_tests(self) -> None:
         _, user = foundry.prompt("task", "request", "evaluator", "[]", None)
 
