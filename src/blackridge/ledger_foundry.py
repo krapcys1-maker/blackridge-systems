@@ -115,7 +115,7 @@ def compile_proposal(
             "files",
             "program_path",
             "test_command",
-            "acceptance_ids",
+            "acceptance_coverage",
             "component_decisions",
             "limitations",
         }
@@ -155,9 +155,16 @@ def compile_proposal(
         or not all(isinstance(item, str) and item and len(item) <= 4096 for item in command)
     ):
         raise ValueError("test_command must be a bounded argv list")
-    coverage = raw.get("acceptance_ids")
-    if not isinstance(coverage, list) or set(coverage) != acceptance_ids(request_text):
-        raise ValueError("acceptance_ids do not exactly cover the public request")
+    coverage = raw.get("acceptance_coverage")
+    if not isinstance(coverage, list) or not all(isinstance(item, dict) for item in coverage):
+        raise ValueError("acceptance_coverage must be a list of objects")
+    coverage_ids = [item.get("acceptance_id") for item in coverage]
+    if (
+        not all(isinstance(item, str) for item in coverage_ids)
+        or len(coverage_ids) != len(set(coverage_ids))
+        or set(coverage_ids) != acceptance_ids(request_text)
+    ):
+        raise ValueError("acceptance_coverage does not exactly cover the public request")
     decisions = raw.get("component_decisions")
     if not isinstance(decisions, list):
         raise ValueError("component_decisions must be a list")
@@ -195,12 +202,38 @@ def compile_proposal(
     test_sources = "\n".join(item["content"] for item in files if is_test_path(item["path"]))
     if len(re.findall(r"^\s*def\s+test_", test_sources, flags=re.MULTILINE)) < 9:
         raise ValueError("generated suite contains fewer than 9 test functions")
+    file_content = {item["path"]: item["content"] for item in files}
+    normalized_coverage: list[dict[str, str]] = []
+    for item in coverage:
+        test_file = portable_path(item.get("test_file"))
+        test_name = item.get("test_name")
+        rationale = item.get("rationale")
+        if test_file not in file_content or not is_test_path(test_file):
+            raise ValueError("acceptance coverage references a missing generated test file")
+        if not isinstance(test_name, str) or not re.fullmatch(r"test_[A-Za-z0-9_]+", test_name):
+            raise ValueError("acceptance coverage test_name is invalid")
+        if not re.search(
+            rf"^\s*def\s+{re.escape(test_name)}\s*\(",
+            file_content[test_file],
+            flags=re.MULTILINE,
+        ):
+            raise ValueError("acceptance coverage references a missing test function")
+        if not isinstance(rationale, str) or len(rationale.strip()) < 10:
+            raise ValueError("acceptance coverage rationale is invalid")
+        normalized_coverage.append(
+            {
+                "acceptance_id": item["acceptance_id"],
+                "test_file": test_file,
+                "test_name": test_name,
+                "rationale": rationale.strip(),
+            }
+        )
     proposal = {
         "schema_version": "b1",
         "files": files,
         "program_path": program_path,
         "test_command": command,
-        "acceptance_ids": sorted(coverage),
+        "acceptance_coverage": sorted(normalized_coverage, key=lambda item: item["acceptance_id"]),
         "component_decisions": decisions,
         "limitations": raw.get("limitations") if isinstance(raw.get("limitations"), list) else [],
     }
@@ -329,7 +362,14 @@ def prompt(
         ],
         "program_path": "program.py",
         "test_command": ["python", "-m", "unittest", "discover", "-s", "tests", "-v"],
-        "acceptance_ids": ["every-public-acceptance-id-exactly-once"],
+        "acceptance_coverage": [
+            {
+                "acceptance_id": "every-public-acceptance-id-exactly-once",
+                "test_file": "tests/test_program.py",
+                "test_name": "test_exact_public_behavior",
+                "rationale": "This executable black-box test verifies the stated behavior.",
+            }
+        ],
         "component_decisions": [
             {
                 "capability_id": "every-capability-id",
@@ -360,6 +400,8 @@ def prompt(
         "exclude the output; contain symlinks and terminate cycles; and report an unreadable file "
         "as an object with path and nonempty error even when the process could read mode-000 "
         "bytes. "
+        "Map every public acceptance id exactly once to an existing generated test file and an "
+        "existing concrete test_* function. Do not claim coverage with comments or placeholders. "
         "Do not create parent directories outside the requested output parent.\n\nPUBLIC TASK:\n"
         + task
         + "\n\nPUBLIC REQUEST:\n"

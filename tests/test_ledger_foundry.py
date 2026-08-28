@@ -46,7 +46,14 @@ def proposal(program: str = "print('ok')\n", tests: str | None = None) -> dict[s
         ],
         "program_path": "program.py",
         "test_command": ["python", "-m", "unittest"],
-        "acceptance_ids": ["cli-runs"],
+        "acceptance_coverage": [
+            {
+                "acceptance_id": "cli-runs",
+                "test_file": "tests/test_program.py",
+                "test_name": "test_case_0",
+                "rationale": "The black-box test executes the public CLI behavior.",
+            }
+        ],
         "component_decisions": [
             {
                 "capability_id": "cli-entrypoint",
@@ -74,6 +81,13 @@ class CompilerTests(unittest.TestCase):
         raw["component_decisions"][0]["evidence_level"] = 3  # type: ignore[index]
 
         with self.assertRaisesRegex(ValueError, "overclaims"):
+            foundry.compile_proposal(raw, request_text(), verified_text())
+
+    def test_rejects_acceptance_mapping_to_missing_test_function(self) -> None:
+        raw = proposal()
+        raw["acceptance_coverage"][0]["test_name"] = "test_missing"  # type: ignore[index]
+
+        with self.assertRaisesRegex(ValueError, "missing test function"):
             foundry.compile_proposal(raw, request_text(), verified_text())
 
     def test_component_lock_preserves_program_and_accepts_repaired_tests(self) -> None:
