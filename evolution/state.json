@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "updated_at": "2026-08-28T19:10:00+03:00",
-  "status": "round-002-complete-v1-line-promoted",
+  "status": "round-003-active-candidate-a-ready",
   "naming": {
     "package_version": "0.1.1",
     "current_architectural_champion": "v1.2",
@@ -43,22 +43,20 @@
     }
   ],
   "active_round": {
-    "round_id": "round-002",
-    "status": "complete",
-    "manifest": "evolution/rounds/002/manifest.json",
+    "round_id": "round-003",
+    "status": "candidate-a-ready",
+    "manifest": "evolution/rounds/003/manifest.json",
     "benchmark": "evolution/benchmark/measured-duplicate-finder-v1.json",
     "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
     "attempts_per_candidate": 3,
-    "candidate_a_status": "measured-0-of-3",
-    "candidate_b_status": "measured-0-of-3-and-protocol-disqualified",
-    "hybrids_status": "a-plus-b-selected-1-of-3; b-plus-a-not-promoted-1-of-3",
+    "candidate_a_status": "ready-v1.3-public-evaluator-contract",
+    "candidate_b_status": "pending-v2.2",
+    "hybrids_status": "pending",
     "selected_champion": "candidate-blackbox-tests-round-002",
     "selected_architecture_line": "v1.2",
     "selected_champion_commit": "5a0c6e348c725578650fbd668245a39658083e92",
-    "integrated_main_commit": "9b1fc4f80ccea74ebcc194777a04d2b199a858d4",
-    "results": "evolution/rounds/002/measured-results.json",
-    "b_plus_a_commit": "6bd8882b536164503c1a5a2d04952a6aa6408e2e",
-    "b_plus_a_summary_sha256": "5eb420684526701de0e1d518c6c2dc495ae0ea36190ea952fc6691028fd76c6c",
-    "next_action": "Start round 003 from v1.2. Test B+A's useful lower-cost idea by giving the safe v1 builder the known public evaluator contract, and harden malformed provider-output handling. Continue the v2 challenger line only as an isolated candidate until it passes all v1 release gates."
+    "candidate_a_commit": "f0eb9a17eb65352ab040ca18a402fcfa21ddf928",
+    "results": "evolution/rounds/003/measured-results.json",
+    "next_action": "Run candidate-public-evaluator-round-003 three times on the unchanged Duplicate Finder benchmark, then build the hardened v2.2 candidate and both hybrids before selection."
   }
 }
