@@ -70,7 +70,10 @@ class _Backend:
             "schema_version": "1",
             "files": [
                 {"path": "dupfinder.py", "content": "print('proposal')\n"},
-                {"path": "tests/test_dupfinder.py", "content": "# executable fixture\n"},
+                {
+                    "path": "tests/test_dupfinder.py",
+                    "content": "def test_detect_duplicates():\n    assert True\n",
+                },
             ],
             "run_command": ["python", "dupfinder.py"],
             "component_decisions": [
@@ -355,6 +358,26 @@ def test_acceptance_coverage_must_reference_a_generated_test_file() -> None:
     )
 
 
+def test_acceptance_coverage_must_reference_a_concrete_test_function() -> None:
+    completion = _Backend().complete_json()
+    completion.content["acceptance_coverage"][0]["test_name"] = "test_missing"
+
+    class _MissingFunctionBackend(_Backend):
+        def complete_json(self, **_: object) -> AgentCompletion:
+            return completion
+
+    with pytest.raises(GenerationProposalRejected) as caught:
+        propose_gap_system(
+            "Build a deterministic duplicate finder that never modifies input files.",
+            request=REQUEST,
+            discovery=DISCOVERY,
+            backend=_MissingFunctionBackend(),
+        )
+    serialized = json.loads(caught.value.record.model_dump_json())
+    assert serialized["validation_errors"][0]["type"] == "value_error"
+    assert "missing concrete test" in serialized["validation_errors"][0]["ctx"]["error"]
+
+
 def test_benign_provider_metadata_is_ignored_but_retained_as_an_audit_path() -> None:
     completion = _Backend().complete_json()
     completion.content["files"][0]["executable"] = True
@@ -389,7 +412,7 @@ def test_composition_keeps_passing_program_bytes_and_accepts_repaired_tests() ->
     )
     next_value = prior.model_dump(mode="json")
     next_value["files"][0]["content"] = "print('regressed program')\n"
-    next_value["files"][1]["content"] = "# repaired executable tests\n"
+    next_value["files"][1]["content"] = "def test_detect_duplicates():\n    assert 'repaired'\n"
     next_proposal = GeneratedSystemProposal.model_validate(next_value)
 
     composed, record = compose_with_locked_files(
@@ -397,7 +420,7 @@ def test_composition_keeps_passing_program_bytes_and_accepts_repaired_tests() ->
     )
 
     assert composed.files[0].content == "print('proposal')\n"
-    assert composed.files[1].content == "# repaired executable tests\n"
+    assert composed.files[1].content == ("def test_detect_duplicates():\n    assert 'repaired'\n")
     assert record.prior_proposal_sha256 == proposal_sha256(prior)
     assert record.next_proposal_sha256 == proposal_sha256(next_proposal)
     assert record.composed_proposal_sha256 == proposal_sha256(composed)

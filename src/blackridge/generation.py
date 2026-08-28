@@ -85,6 +85,7 @@ class GeneratedSystemProposal(StrictGenerationModel):
     @model_validator(mode="after")
     def safe_and_bounded(self) -> GeneratedSystemProposal:
         seen: set[str] = set()
+        content_by_path: dict[str, str] = {}
         total_bytes = 0
         for generated_file in self.files:
             canonical = validate_generated_path(generated_file.path)
@@ -94,6 +95,7 @@ class GeneratedSystemProposal(StrictGenerationModel):
                     f"{generated_file.path!r}"
                 )
             seen.add(canonical)
+            content_by_path[canonical] = generated_file.content
             content_bytes = len(generated_file.content.encode("utf-8"))
             if content_bytes > MAX_GENERATED_FILE_BYTES:
                 raise ValueError(f"generated file exceeds byte limit: {generated_file.path!r}")
@@ -124,6 +126,15 @@ class GeneratedSystemProposal(StrictGenerationModel):
             ):
                 raise ValueError(
                     f"acceptance evidence must reference a test directory: {evidence.test_file!r}"
+                )
+            if not re.search(
+                rf"^\s*def\s+{re.escape(evidence.test_name)}\s*\(",
+                content_by_path[canonical_test],
+                flags=re.MULTILINE,
+            ):
+                raise ValueError(
+                    "acceptance evidence references a missing concrete test: "
+                    f"{evidence.test_name!r}"
                 )
         return self
 
