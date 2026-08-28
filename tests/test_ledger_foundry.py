@@ -1,0 +1,172 @@
+from __future__ import annotations
+
+import json
+import sys
+import unittest
+from pathlib import Path
+
+import pytest
+
+from blackridge import ledger_foundry as foundry
+from blackridge.errors import ExternalToolError
+
+REVISION = "cpython-3.12.14@sha256:" + "a" * 64
+
+
+def request_text() -> str:
+    return """
+capabilities:
+  - id: cli-entrypoint
+    acceptance:
+      - id: cli-runs
+"""
+
+
+def verified_text() -> str:
+    return json.dumps(
+        [
+            {
+                "capability_id": "cli-entrypoint",
+                "identity": "python-standard-library",
+                "immutable_revision": REVISION,
+                "evidence_level": 2,
+            }
+        ]
+    )
+
+
+def proposal(program: str = "print('ok')\n", tests: str | None = None) -> dict[str, object]:
+    test_source = tests or "\n".join(
+        f"def test_case_{number}():\n    assert True" for number in range(9)
+    )
+    return {
+        "files": [
+            {"path": "program.py", "content": program},
+            {"path": "tests/test_program.py", "content": test_source},
+        ],
+        "program_path": "program.py",
+        "test_command": ["python", "-m", "unittest"],
+        "acceptance_ids": ["cli-runs"],
+        "component_decisions": [
+            {
+                "capability_id": "cli-entrypoint",
+                "source": "standard-library",
+                "identity": "python-standard-library",
+                "immutable_revision": REVISION,
+                "evidence_level": 2,
+                "rationale": "Exact supplied interpreter evidence.",
+            }
+        ],
+        "limitations": [],
+    }
+
+
+class CompilerTests(unittest.TestCase):
+    def test_rejects_unsafe_generated_path(self) -> None:
+        raw = proposal()
+        raw["files"][0]["path"] = "../program.py"  # type: ignore[index]
+
+        with self.assertRaisesRegex(ValueError, "traverses"):
+            foundry.compile_proposal(raw, request_text(), verified_text())
+
+    def test_rejects_overclaimed_component_evidence(self) -> None:
+        raw = proposal()
+        raw["component_decisions"][0]["evidence_level"] = 3  # type: ignore[index]
+
+        with self.assertRaisesRegex(ValueError, "overclaims"):
+            foundry.compile_proposal(raw, request_text(), verified_text())
+
+    def test_component_lock_preserves_program_and_accepts_repaired_tests(self) -> None:
+        prior, _ = foundry.compile_proposal(
+            proposal(
+                "print('trusted')\n",
+                "\n".join(f"def test_case_{number}():\n    assert False" for number in range(9)),
+            ),
+            request_text(),
+            verified_text(),
+        )
+        candidate, _ = foundry.compile_proposal(
+            proposal("print('replacement')\n"), request_text(), verified_text()
+        )
+
+        composed, evidence = foundry.compose_locked_files(prior, candidate, ["program.py"])
+
+        files = {item["path"]: item["content"] for item in composed["files"]}
+        self.assertEqual(files["program.py"], "print('trusted')\n")
+        self.assertEqual(
+            files["tests/test_program.py"],
+            next(
+                item["content"]
+                for item in candidate["files"]
+                if item["path"] == "tests/test_program.py"
+            ),
+        )
+        self.assertIn("program.py", evidence["locked_file_sha256"])
+
+    def test_prompt_requires_portable_black_box_tests(self) -> None:
+        _, user = foundry.prompt("task", "request", "evaluator", "[]", None)
+
+        self.assertIn("only the public CLI contract", user)
+        self.assertIn("never import the generated program", user)
+        self.assertIn("absolute path", user)
+        self.assertIn("VERIFIED COMPONENTS", user)
+
+
+def test_main_retains_provider_failures_and_finishes_summary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    task = tmp_path / "task.md"
+    request = tmp_path / "request.yaml"
+    verified = tmp_path / "verified.json"
+    evaluator = tmp_path / "evaluate_duplicate_finder.py"
+    env_file = tmp_path / ".env"
+    output = tmp_path / "output"
+    task.write_text("Build the public duplicate finder contract.\n", encoding="utf-8")
+    request.write_text(request_text(), encoding="utf-8")
+    verified.write_text(verified_text(), encoding="utf-8")
+    evaluator.write_text("# public evaluator fixture\n", encoding="utf-8")
+    env_file.write_text("DEEPSEEK_API_KEY=fixture-secret\n", encoding="utf-8")
+
+    class _FailingBackend:
+        def __init__(self, **_: object) -> None:
+            pass
+
+        def complete_json(self, **_: object) -> object:
+            raise ExternalToolError("truncated provider JSON")
+
+    monkeypatch.setattr(foundry, "DeepSeekBackend", _FailingBackend)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "blackridge-ledger",
+            "--task",
+            str(task),
+            "--request",
+            str(request),
+            "--verified-components",
+            str(verified),
+            "--evaluator",
+            str(evaluator),
+            "--env-file",
+            str(env_file),
+            "--output",
+            str(output),
+            "--max-repairs",
+            "1",
+        ],
+    )
+
+    assert foundry.main() == 1
+    ledger = json.loads((output / "ledger.json").read_text(encoding="utf-8"))
+    summary = json.loads((output / "summary.json").read_text(encoding="utf-8"))
+    assert len(ledger) == 2
+    assert {event["status"] for event in ledger} == {"builder-failed"}
+    assert {event["failure"] for event in ledger} == {"ExternalToolError"}
+    assert summary["status"] == "failed"
+    assert summary["frozen_inputs_unchanged"] is True
+    assert summary["manual_interventions"] == 0
+
+
+if __name__ == "__main__":
+    unittest.main()
