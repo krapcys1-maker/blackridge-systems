@@ -1208,13 +1208,9 @@ def _validate_runtime_consistency(bundle: Path, runtime: dict[str, Any]) -> None
         if runtime.get(runtime_key) != definition.get(definition_key):
             raise BlackridgeError(f"generated runtime disagrees with its definition: {runtime_key}")
     default_sandbox_resources = _primitive(SandboxResources())
-    definition_sandbox_resources = definition.get(
-        "sandbox_resources", default_sandbox_resources
-    )
+    definition_sandbox_resources = definition.get("sandbox_resources", default_sandbox_resources)
     if runtime.get("sandbox_resources") != definition_sandbox_resources:
-        raise BlackridgeError(
-            "generated runtime disagrees with its definition: sandbox_resources"
-        )
+        raise BlackridgeError("generated runtime disagrees with its definition: sandbox_resources")
     if runtime.get("sandbox_image") != definition.get("sandbox_image"):
         raise BlackridgeError("generated runtime disagrees with its definition: sandbox_image")
     if runtime.get("system_name") != plan_value.get("system_name") or runtime.get(

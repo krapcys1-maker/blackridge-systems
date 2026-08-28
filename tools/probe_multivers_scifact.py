@@ -64,9 +64,7 @@ class MultiVerSInference:
     def __init__(self, model_path: Path, tokenizer_directory: Path) -> None:
         torch.set_num_threads(8)
         config = LongformerConfig.from_pretrained(tokenizer_directory, local_files_only=True)
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            tokenizer_directory, local_files_only=True
-        )
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_directory, local_files_only=True)
         if len(self.tokenizer) != 50275 or config.vocab_size != 50275:
             raise ValueError("MultiVerS tokenizer vocabulary is incompatible")
         state = load_file(model_path, device="cpu")
@@ -78,9 +76,10 @@ class MultiVerSInference:
         }
         incompatible = self.encoder.load_state_dict(encoder_state, strict=False)
         allowed_position_id = {"embeddings.position_ids"}
-        if set(incompatible.missing_keys) - allowed_position_id or set(
-            incompatible.unexpected_keys
-        ) - allowed_position_id:
+        if (
+            set(incompatible.missing_keys) - allowed_position_id
+            or set(incompatible.unexpected_keys) - allowed_position_id
+        ):
             raise ValueError(f"MultiVerS encoder tensors are incompatible: {incompatible}")
 
         self.label_first = nn.Linear(1024, 1024)
@@ -149,14 +148,11 @@ class MultiVerSInference:
             "label": label,
             "label_probabilities": {
                 name: round(float(probability), 8)
-                for name, probability in zip(
-                    LABELS, label_probabilities.tolist(), strict=True
-                )
+                for name, probability in zip(LABELS, label_probabilities.tolist(), strict=True)
             },
             "rationales": rationales,
             "rationale_probabilities": [
-                round(float(probability), 8)
-                for probability in rationale_probabilities.tolist()
+                round(float(probability), 8) for probability in rationale_probabilities.tolist()
             ],
             "input_tokens": int(input_ids.shape[0]),
         }
@@ -171,9 +167,7 @@ def _audit_case(
     traces = []
     documents = []
     considered = []
-    limit = {"top3": 3, "cascade5": 5, "cascade6": 6, "cascade10": 10}[
-        candidate_policy
-    ]
+    limit = {"top3": 3, "cascade5": 5, "cascade6": 6, "cascade10": 10}[candidate_policy]
     for position, candidate in enumerate(candidates["candidates"][:limit], start=1):
         considered.append(candidate)
         started = time.perf_counter()
@@ -211,10 +205,7 @@ def _audit_case(
         status = "contradicted"
     else:
         status = "insufficient-evidence"
-    sources = [
-        {"document_id": item["document_id"], "title": item["title"]}
-        for item in considered
-    ]
+    sources = [{"document_id": item["document_id"], "title": item["title"]} for item in considered]
     audit = {
         "schema_version": "1",
         "request_id": request["request_id"],
@@ -236,17 +227,13 @@ def probe(args: argparse.Namespace) -> dict[str, Any]:
     cases = _cases(args)
     for position, case in enumerate(cases, start=1):
         candidates = index.retrieve(case["request"])
-        audit, traces = _audit_case(
-            engine, case["request"], candidates, args.candidate_policy
-        )
+        audit, traces = _audit_case(engine, case["request"], candidates, args.candidate_policy)
         expected = case["expected_audit"]
         expected_documents = sorted(
-            (item["document_id"], item["verdict"])
-            for item in expected["documents"]
+            (item["document_id"], item["verdict"]) for item in expected["documents"]
         )
         actual_documents = sorted(
-            (item["document_id"], item["verdict"])
-            for item in audit["documents"]
+            (item["document_id"], item["verdict"]) for item in audit["documents"]
         )
         expected_rationales = {
             item["document_id"]: sorted(
@@ -293,9 +280,7 @@ def probe(args: argparse.Namespace) -> dict[str, Any]:
             "status_matches": sum(item["status_match"] for item in observations),
             "document_matches": sum(item["document_match"] for item in observations),
             "rationale_matches": sum(item["rationale_match"] for item in observations),
-            "nonempty_rationale_cases": sum(
-                item["rationales_nonempty"] for item in observations
-            ),
+            "nonempty_rationale_cases": sum(item["rationales_nonempty"] for item in observations),
             "gold_document_retrieved_top3_cases": sum(
                 item["gold_document_retrieved_top3"] for item in observations
             ),

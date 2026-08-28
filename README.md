@@ -49,6 +49,16 @@ This repository contains an executable, manually reviewed vertical slice:
     memory swap, and retain real filesystem, memory, PID, timeout, and signal hostile controls.
 20. bundle separately licensed, hash-locked component resources and carry explicit memory, CPU,
     and PID limits from the frozen definition through Docker and live cgroup verification.
+21. turn a plain-language brief into a strictly validated capability request through a
+    provider-neutral operator contract, with DeepSeek JSON mode as the first optional backend;
+22. perform official GitHub CLI search with a deterministic query budget and one auditable
+    fallback when a model-generated query is too restrictive;
+23. enforce case-insensitive denied-repository policy before enrichment and generation, while
+    retaining explicitly partial discovery when an opted-in query budget is exhausted;
+24. propose only the remaining code gap, reject unsafe cross-platform paths and unsupported
+    provenance claims, and materialize only the exact manually approved SHA-256;
+25. retain schema-rejected provider completions, feed hash-bound review findings into bounded
+    repair iterations, and evaluate generated code independently in a networkless non-root sandbox.
 
 These probes produce evidence, not automatic approval. A candidate cannot be marked
 production-ready until its concrete acceptance scenarios pass named manual review through L4.
@@ -79,9 +89,13 @@ python -m venv .venv
 python -m pip install -e ".[dev]"
 
 blackridge doctor
-blackridge discover examples/scientific-researcher.yaml --output .blackridge/research.json
-blackridge report .blackridge/research.json
-blackridge blueprint .blackridge/research.json --output .blackridge/blueprint.yaml
+blackridge plan path/to/brief.md --output .blackridge/system-request.yaml
+blackridge discover .blackridge/system-request.yaml --provider github \
+  --deny-repository owner/repository --output .blackridge/discovery.json
+blackridge propose-gap path/to/brief.md --request .blackridge/system-request.yaml \
+  --discovery .blackridge/discovery.json --output .blackridge/proposal.json
+blackridge report .blackridge/discovery.json
+blackridge blueprint .blackridge/discovery.json --output .blackridge/blueprint.yaml
 
 # A real package probe does not assign its own PASS/FAIL verdict.
 blackridge probe-package pypi paper-qa --output .blackridge/evidence/paper-qa.json
@@ -97,6 +111,20 @@ blackridge review-probe examples/blackridge-self-hosting.yaml \
 
 The discovery command invokes pinned upstream tooling as a subprocess with an argument vector,
 never through an interpolated shell command. Remote repository code is not executed.
+
+`blackridge plan` currently supports DeepSeek through `DEEPSEEK_API_KEY`. The core boundary is the
+`AgentBackend` protocol rather than a provider SDK. In the interactive workflow, the current Codex
+subscription session remains the human-supervised intellectual operator; Blackridge does not need
+an OpenAI API key. A directly callable Codex subscription backend is not claimed by this release.
+
+The retained Blackridge 2.0 self-hosting protocol and Pareto comparison live in
+[`benchmarks/blackridge-self-hosting-v2`](benchmarks/blackridge-self-hosting-v2). The isolated r4
+prototype did not beat v1, so its evidence was frozen and the prototype runner was removed. The
+planner, operator boundary, official GitHub discovery, deny policy, bounded repair feedback and
+hash-gated materialization were then integrated into the v1 control plane. This produced the
+architectural champion **v1.1**, packaged as `0.1.1`, not a replacement v2. The repeated workload
+passed 9 generated tests plus 7 independent adversarial tests in the pinned sandbox while all v1
+gates remained green. It is not a claim that the complete autonomous universal foundry is finished.
 
 ## Why this architecture
 
@@ -268,7 +296,7 @@ blackridge probe-source-provenance provenance/source-audit.yaml `
   --output .blackridge/evidence/source-provenance.json
 blackridge check-provenance provenance/derived-code.yaml
 blackridge compliance-notices --check
-blackridge probe-wheel-release dist/blackridge_systems-0.1.0-py3-none-any.whl
+blackridge probe-wheel-release dist/blackridge_systems-0.1.1-py3-none-any.whl
 blackridge probe-image-release `
   blackridge/swerex-runtime@sha256:<exact-repository-digest>
 ```

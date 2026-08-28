@@ -31,9 +31,11 @@ def benchmark(args: argparse.Namespace) -> dict[str, Any]:
     started = time.perf_counter()
     index = module.Bm25Index(args.corpus)
     index_seconds = time.perf_counter() - started
-    excluded = {
-        case["upstream_claim_id"] for case in _jsonl(args.exclude_cases)
-    } if args.exclude_cases is not None else set()
+    excluded = (
+        {case["upstream_claim_id"] for case in _jsonl(args.exclude_cases)}
+        if args.exclude_cases is not None
+        else set()
+    )
     claims = [
         claim
         for claim in _jsonl(args.development)

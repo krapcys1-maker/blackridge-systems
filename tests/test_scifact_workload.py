@@ -44,18 +44,10 @@ def test_audit_contract_rejects_status_document_disagreement() -> None:
         "sources": [{"document_id": "10", "title": "Frozen source"}],
     }
 
-    assert not list(
-        validator.iter_errors({**base, "status": "supported", "documents": [document]})
-    )
-    assert list(
-        validator.iter_errors({**base, "status": "supported", "documents": []})
-    )
-    assert list(
-        validator.iter_errors({**base, "status": "contradicted", "documents": [document]})
-    )
-    assert list(
-        validator.iter_errors({**base, "status": "mixed", "documents": [document]})
-    )
+    assert not list(validator.iter_errors({**base, "status": "supported", "documents": [document]}))
+    assert list(validator.iter_errors({**base, "status": "supported", "documents": []}))
+    assert list(validator.iter_errors({**base, "status": "contradicted", "documents": [document]}))
+    assert list(validator.iter_errors({**base, "status": "mixed", "documents": [document]}))
 
 
 def _jsonl(records: list[dict[str, object]]) -> bytes:

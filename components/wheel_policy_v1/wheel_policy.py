@@ -36,12 +36,9 @@ def evaluate(payload: dict[str, Any]) -> dict[str, Any]:
     archive = inventory["archive"]
     artifact = inventory["artifact"]
     license_kinds = sorted({item["kind"] for item in inventory["license_files"]})
-    dependencies = sorted(
-        {_normalized_distribution(item) for item in metadata["requires_dist"]}
-    )
+    dependencies = sorted({_normalized_distribution(item) for item in metadata["requires_dist"]})
     forbidden = sorted(
-        re.sub(r"[-_.]+", "-", item).lower()
-        for item in request["forbidden_dependency_names"]
+        re.sub(r"[-_.]+", "-", item).lower() for item in request["forbidden_dependency_names"]
     )
     forbidden_present = sorted(set(dependencies) & set(forbidden))
     checks = [

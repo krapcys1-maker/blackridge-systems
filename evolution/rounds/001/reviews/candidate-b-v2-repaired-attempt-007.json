@@ -1,0 +1,44 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 7,
+  "proposal_sha256": "d641cc126f5da87e2d6e0a41e551e6b4f0ca30f007bcebb1d0e3731f774feb62",
+  "parent_completion_sha256": "7802747018bcd8d95199a068bc7155113e42e8a56a5917321a40f657e87c601b",
+  "verdict": "rejected-before-build",
+  "reviewer": "codex-independent-architecture-review",
+  "champion_source_disclosed_to_builder": false,
+  "findings": [
+    {
+      "severity": "critical",
+      "id": "event-bus-is-a-sink",
+      "finding": "The event bus receives plan, candidate, evidence, artifact, bundle, verdict, and response events but publishes none of them to downstream consumers. Only brief/v1 leaves the bus."
+    },
+    {
+      "severity": "critical",
+      "id": "control-plane-invents-artifacts",
+      "finding": "The control plane sends candidate, evidence, plan, and bundle contracts without inbound flows that supply those artifacts, so the graph is not executable."
+    },
+    {
+      "severity": "critical",
+      "id": "license-does-not-gate-probe",
+      "finding": "License inspection and sandbox probing receive the same candidate independently; no license verdict gates execution of untrusted candidate code."
+    },
+    {
+      "severity": "critical",
+      "id": "composition-inputs-missing",
+      "finding": "The composition engine has no flows supplying verified component evidence or adapter artifacts, and the evaluator cannot receive a bundle through the declared event backbone."
+    },
+    {
+      "severity": "high",
+      "id": "evidence-path-incomplete",
+      "finding": "Evidence emitted by license, probe, composition, and evaluator is not delivered through an end-to-end immutable path into the evidence store."
+    },
+    {
+      "severity": "high",
+      "id": "vertical-slice-skips-gates",
+      "finding": "The first slice jumps from discovery to composition and evaluation while omitting license gating, probing, verified selection, adapter input, and evidence persistence."
+    }
+  ],
+  "repair_instruction": "Design an executable typed-event graph rather than a list of components. Every produced artifact must have a path to its consumer. Make the event bus publish each typed event to explicit consumers or replace it with a ledger plus deterministic projector. License approval must gate sandbox probing. Probe evidence must gate selection and composition. Adapter artifacts and verified components must reach composition. Bundle must reach both evidence store and independent evaluator; verdict must reach evidence store. The first vertical slice must traverse those gates end to end. Keep every flow contract declared at both endpoints. Do not request or use champion source code."
+}

@@ -153,9 +153,7 @@ class Bm25Index:
                 if not frequency:
                     continue
                 numerator = frequency * 2.2
-                denominator = frequency + 1.2 * (
-                    0.25 + 0.75 * length / self._average_length
-                )
+                denominator = frequency + 1.2 * (0.25 + 0.75 * length / self._average_length)
                 score += self._inverse_frequency.get(term, 0.0) * numerator / denominator
             ranked.append((score, document["doc_id"], document))
         ranked.sort(key=lambda item: (-item[0], item[1]))

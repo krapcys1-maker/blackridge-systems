@@ -1,0 +1,13 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 3,
+  "classification": "round-infrastructure-failure",
+  "candidate_failure": false,
+  "occurred_at": "2026-08-28T13:24:00+03:00",
+  "summary": "The deterministic flow-contract validator rejected the provider completion, but rejection evidence serialization failed because Pydantic included a ValueError object in validation context.",
+  "retained_completion": false,
+  "remediation": "Validation errors are converted to JSON-safe values before constructing retained rejection evidence, and a regression test serializes a model-level validator failure.",
+  "retry_policy": "Repeat with the same public inputs and review feedback; do not count this infrastructure incident as a candidate architecture attempt."
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 4,
+  "source_completion_sha256": "1111e75166e28f0dc776ae373928bbde26fccaa14bf55710aa028fda9a783b27",
+  "source_rejection_sha256": "d664739acee38cbab26e37ffdbd83ec1d187a25da5e5866ac931292fed77af1e",
+  "validation_errors": [
+    {
+      "location": "flows: control-plane -> capability-broker",
+      "contract": "request/v1",
+      "problem": "source control-plane does not declare the contract in produces"
+    },
+    {
+      "location": "flows: control-plane -> license-inspector",
+      "contract": "candidate/v1",
+      "problem": "source control-plane does not declare the contract in produces"
+    },
+    {
+      "location": "flows: control-plane -> probe-sandbox",
+      "contract": "candidate/v1",
+      "problem": "source control-plane does not declare the contract in produces"
+    },
+    {
+      "location": "flows: control-plane -> evidence-store",
+      "contract": "evidence/v1",
+      "problem": "source control-plane does not declare the contract in produces"
+    }
+  ],
+  "repair_instruction": "Preserve the proposal's architecture, components, and coherent interfaces. Add request/v1, candidate/v1, and evidence/v1 to the control-plane produces list, and verify every flow contract against both endpoint declarations before returning JSON. Do not request or use champion source code."
+}

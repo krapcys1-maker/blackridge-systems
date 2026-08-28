@@ -34,9 +34,10 @@ class MultiVerSInference:
         }
         incompatible = self._encoder.load_state_dict(encoder_state, strict=False)
         allowed_position_id = {"embeddings.position_ids"}
-        if set(incompatible.missing_keys) - allowed_position_id or set(
-            incompatible.unexpected_keys
-        ) - allowed_position_id:
+        if (
+            set(incompatible.missing_keys) - allowed_position_id
+            or set(incompatible.unexpected_keys) - allowed_position_id
+        ):
             raise ValueError(f"MultiVerS encoder tensors are incompatible: {incompatible}")
 
         self._label_first = nn.Linear(1024, 1024)
@@ -64,9 +65,7 @@ class MultiVerSInference:
         self._activation = nn.GELU()
 
     def predict(self, claim: str, document: dict[str, Any]) -> dict[str, Any]:
-        text = claim + "</s>" + document["title"] + "</s>" + "</s>".join(
-            document["abstract"]
-        )
+        text = claim + "</s>" + document["title"] + "</s>" + "</s>".join(document["abstract"])
         encoded = self._tokenizer.encode(text)
         input_ids = torch.tensor([encoded.ids], dtype=torch.int64)
         attention_mask = torch.tensor([encoded.attention_mask], dtype=torch.int64)
@@ -86,9 +85,7 @@ class MultiVerSInference:
                 global_attention_mask=global_attention.unsqueeze(0),
             )
             pooled = output.pooler_output
-            label_logits = self._label_second(
-                self._activation(self._label_first(pooled))
-            )
+            label_logits = self._label_second(self._activation(self._label_first(pooled)))
             label_probabilities = torch.softmax(label_logits, dim=1)[0]
             sentence_states = output.last_hidden_state[:, sentence_indices, :]
             rationale_input = torch.cat(
@@ -113,18 +110,13 @@ def audit(payload: dict[str, Any], engine: MultiVerSInference) -> dict[str, Any]
     inputs = payload["inputs"]
     request = inputs["scientific-claim-request/v1"]
     retrieval = inputs["scientific-candidate-set/v1"]
-    if (
-        request["request_id"] != retrieval["request_id"]
-        or request["claim"] != retrieval["claim"]
-    ):
+    if request["request_id"] != retrieval["request_id"] or request["claim"] != retrieval["claim"]:
         raise ValueError("request identity does not match retrieval identity")
     candidates = retrieval["candidates"][:6]
     sources = []
     documents = []
     for position, candidate in enumerate(candidates, start=1):
-        sources.append(
-            {"document_id": candidate["document_id"], "title": candidate["title"]}
-        )
+        sources.append({"document_id": candidate["document_id"], "title": candidate["title"]})
         prediction = engine.predict(request["claim"], candidate)
         if prediction["label"] != "neutral" and prediction["rationales"]:
             documents.append(
@@ -138,10 +130,7 @@ def audit(payload: dict[str, Any], engine: MultiVerSInference) -> dict[str, Any]
                     ],
                 }
             )
-        if (
-            position >= 3
-            and len(documents) >= request["minimum_evidence_documents"]
-        ):
+        if position >= 3 and len(documents) >= request["minimum_evidence_documents"]:
             break
     if len(documents) < request["minimum_evidence_documents"]:
         documents = []

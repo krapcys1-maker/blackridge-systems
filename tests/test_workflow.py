@@ -143,3 +143,26 @@ def test_empty_discovery_result_remains_a_valid_capability_result() -> None:
     assert result.results[0].capability == CAPABILITY
     assert result.results[0].candidates == []
     assert result.warnings == []
+
+
+def test_denied_repository_is_removed_before_enrichment() -> None:
+    hits = [
+        DiscoveryHit(_metadata("blocked/project"), QUERY, 1),
+        DiscoveryHit(_metadata("allowed/project"), QUERY, 2),
+    ]
+    result = discover(
+        REQUEST,
+        discovery=_Discovery(hits),  # type: ignore[arg-type]
+        github=_DelayedGitHub(),  # type: ignore[arg-type]
+        scorecard=_AvailableScorecard(),  # type: ignore[arg-type]
+        denied_repositories={"BLOCKED/PROJECT"},
+        workers=1,
+        now=NOW,
+    )
+
+    assert [candidate.metadata.full_name for candidate in result.results[0].candidates] == [
+        "allowed/project"
+    ]
+    assert result.warnings == [
+        "Denied-repository policy excluded 1 candidate(s) for grounded-research"
+    ]

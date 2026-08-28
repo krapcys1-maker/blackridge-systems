@@ -1,0 +1,30 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "status": "architecture-rejected-before-build",
+  "champion_source_disclosed_to_builder": false,
+  "chronological_attempts": 10,
+  "retained_provider_completions": 9,
+  "known_provider_cost_usd": 0.03821941,
+  "unretained_cost_note": "Attempt 003 cost is unknown because rejection serialization failed before retention.",
+  "attempts": [
+    {"attempt":1,"result":"schema-rejected","content_sha256":"5b24d521510f0c131b92aa2f9f3ff658be794f52cb24454ee20d29bc2249aa6c"},
+    {"attempt":2,"result":"manual-review-rejected","proposal_sha256":"c6e432b5a8cce2809f80de26aedb630a160d6b053e8e7bed1a23b0bdff339ce6"},
+    {"attempt":3,"result":"round-infrastructure-failure","completion_retained":false,"candidate_failure":false},
+    {"attempt":4,"result":"schema-rejected","content_sha256":"1111e75166e28f0dc776ae373928bbde26fccaa14bf55710aa028fda9a783b27"},
+    {"attempt":5,"result":"schema-rejected","content_sha256":"0bfe9d3bf93a4a12ea7e6436f0a544f417e93a370d957d9f6ab1f369ff049629"},
+    {"attempt":6,"result":"schema-rejected","content_sha256":"7802747018bcd8d95199a068bc7155113e42e8a56a5917321a40f657e87c601b"},
+    {"attempt":7,"result":"manual-review-rejected-after-interface-repair","proposal_sha256":"d641cc126f5da87e2d6e0a41e551e6b4f0ca30f007bcebb1d0e3731f774feb62"},
+    {"attempt":8,"result":"manual-review-rejected-after-interface-repair","proposal_sha256":"b2201d9a4eb4c256253c5344578799e3fccc5d0c4d9402bcfba19bc50005ebd2"},
+    {"attempt":9,"result":"manual-review-rejected-after-interface-repair","proposal_sha256":"fe6607b903408357cfacb9786fc235355b5c65b9378bf4142f7662cc90e309ec"},
+    {"attempt":10,"result":"manual-review-rejected-after-interface-repair","proposal_sha256":"0cdeca7e7ef55fc093d7ee30d21e3608ba333983dd67b8cb64fe936df47eeeb4"}
+  ],
+  "latest_artifacts": {
+    "architecture_path": "../blackridge-evolution-round-001/candidate-b-v2-architecture-repaired-attempt-010.json",
+    "architecture_file_sha256": "51bd976f877540780fb40977b5b1cf5a657f93776eaef0b1bbf5c1e9beb4db5f",
+    "repair_evidence_path": "../blackridge-evolution-round-001/candidate-b-v2-interface-repair-attempt-010.json",
+    "repair_evidence_file_sha256": "6ac1d2caf8cf2c2fe20dce6c0c4b7b7b75df6fa8381ad1b39bca62efe1fdb90e",
+    "review": "evolution/rounds/001/reviews/candidate-b-v2-repaired-attempt-010.json"
+  }
+}

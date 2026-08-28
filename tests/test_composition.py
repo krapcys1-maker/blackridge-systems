@@ -501,9 +501,7 @@ def test_generated_runtime_locks_explicit_sandbox_resources(tmp_path: Path) -> N
         "reference": "example.invalid/runtime@sha256:" + "a" * 64,
         "expected_id": "sha256:" + "b" * 64,
     }
-    definition_file.write_text(
-        yaml.safe_dump(definition_value, sort_keys=False), encoding="utf-8"
-    )
+    definition_file.write_text(yaml.safe_dump(definition_value, sort_keys=False), encoding="utf-8")
     definition = load_composition_definition(definition_file)
     plan = solve_composition(definition, definition_file=definition_file)
     bundle = tmp_path / "resource-bounded"

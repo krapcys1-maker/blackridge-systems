@@ -34,6 +34,36 @@ same mechanism must first work with at least two meaningfully different real sub
 reviewer, expected behavior, concrete observations, explanatory notes, and the SHA-256 digest of
 the exact probe file that was inspected.
 
+## Integrated self-hosting v2 loop
+
+Use the normal control plane rather than the removed one-off prototype runner:
+
+```powershell
+blackridge plan benchmarks/blackridge-self-hosting-v2/public/representative-task.md `
+  --output D:\experiment\request.yaml --evidence D:\experiment\planning.json
+blackridge discover D:\experiment\request.yaml --provider github --limit 2 `
+  --max-queries 20 --allow-partial-budget `
+  --deny-repository krapcys1-maker/blackridge-systems `
+  --output D:\experiment\discovery.json
+blackridge propose-gap benchmarks/blackridge-self-hosting-v2/public/representative-task.md `
+  --request D:\experiment\request.yaml --discovery D:\experiment\discovery.json `
+  --output D:\experiment\proposal.json --evidence D:\experiment\generation.json `
+  --rejection-evidence D:\experiment\rejected-completion.json
+```
+
+Read every proposed file. A rejected attempt remains evidence and its findings may be supplied to
+the next bounded proposal through `--review-feedback`. Materialize only an exact reviewed hash:
+
+```powershell
+blackridge materialize-proposal D:\experiment\proposal.json `
+  --workspace D:\experiment\workspace --approved-sha256 <reviewed-sha256>
+```
+
+Run generated tests in the pinned non-root, networkless, read-only sandbox, then run
+`tools/evaluate_duplicate_finder.py` as an independent evaluator. A successful model-written test
+suite alone is insufficient. The promotion rule is Pareto: every v1 gate remains true, no v1
+capability regresses, and at least one additive v2 capability passes.
+
 Promoting composition evidence above L0 additionally requires a typed `EvidencePromotion`. The
 promotion binds the claimed level to a successfully completed probe, provider, subject, immutable
 revision, SPDX license, and exact component artifact or adapter-operation digest. Production

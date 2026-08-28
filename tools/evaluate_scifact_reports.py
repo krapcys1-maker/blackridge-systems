@@ -57,8 +57,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             evidence[document_id] = {
                 "label": label,
                 "sentences": [
-                    int(rationale["sentence_index"])
-                    for rationale in document["rationales"]
+                    int(rationale["sentence_index"]) for rationale in document["rationales"]
                 ],
             }
         predictions.append({"id": claim_id, "evidence": evidence})

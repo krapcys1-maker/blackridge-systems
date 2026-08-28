@@ -248,6 +248,51 @@ def test_discover_rejects_an_unknown_capability_without_output(tmp_path) -> None
     assert output.exists() is False
 
 
+def test_discover_can_use_official_github_provider_and_denied_policy(tmp_path, monkeypatch) -> None:
+    request_file = _request_file(tmp_path)
+    output = tmp_path / "discovery.json"
+    observed: dict[str, object] = {}
+
+    def fake_discovery(request, **kwargs):
+        observed.update(
+            provider=kwargs["discovery"].provider_name,
+            max_queries=kwargs["discovery"].max_queries,
+            denied=kwargs["denied_repositories"],
+        )
+        return DiscoveryRun(
+            created_at=datetime(2026, 8, 27, tzinfo=UTC),
+            provider=kwargs["discovery"].provider_name,
+            request=request,
+            results=[
+                CapabilityResult(capability=item, candidates=[]) for item in request.capabilities
+            ],
+        )
+
+    monkeypatch.setattr("blackridge.cli.run_discovery", fake_discovery)
+    result = runner.invoke(
+        app,
+        [
+            "discover",
+            str(request_file),
+            "--output",
+            str(output),
+            "--provider",
+            "github",
+            "--max-queries",
+            "12",
+            "--deny-repository",
+            "blocked/repository",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert observed == {
+        "provider": "github-cli:search-repos",
+        "max_queries": 12,
+        "denied": {"blocked/repository"},
+    }
+
+
 def test_report_and_blueprint_handle_a_capability_without_candidates(tmp_path) -> None:
     request_file = _request_file(tmp_path)
     run_file = tmp_path / "run.json"

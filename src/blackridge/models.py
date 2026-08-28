@@ -123,6 +123,7 @@ class RepositoryMetadata(StrictModel):
     created_at: datetime | None = None
     language: str | None = None
     topics: list[str] = Field(default_factory=list)
+    license_key: str | None = None
     license_spdx: str | None = None
     archived: bool = False
     is_fork: bool = False

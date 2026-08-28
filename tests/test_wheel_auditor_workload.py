@@ -25,9 +25,7 @@ def _module(name: str, relative: str) -> ModuleType:
     return module
 
 
-INSPECTOR = _module(
-    "wheel_inspector_component", "components/wheel_inspector_v1/wheel_inspector.py"
-)
+INSPECTOR = _module("wheel_inspector_component", "components/wheel_inspector_v1/wheel_inspector.py")
 POLICY = _module("wheel_policy_component", "components/wheel_policy_v1/wheel_policy.py")
 SCHEMA_ROOT = ROOT / "benchmarks" / "wheel-release-auditor-v1" / "public"
 
@@ -71,9 +69,9 @@ def _wheel(
     record_stream = io.StringIO(newline="")
     writer = csv.writer(record_stream, lineterminator="\n")
     for member_name, content in members.items():
-        digest = base64.urlsafe_b64encode(
-            hashlib.new(record_algorithm, content).digest()
-        ).rstrip(b"=")
+        digest = base64.urlsafe_b64encode(hashlib.new(record_algorithm, content).digest()).rstrip(
+            b"="
+        )
         writer.writerow((member_name, f"{record_algorithm}={digest.decode()}", len(content)))
     writer.writerow((record_path, "", ""))
     members[record_path] = record_stream.getvalue().encode()

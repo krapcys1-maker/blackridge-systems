@@ -174,12 +174,8 @@ def inspect_wheel(request: dict[str, Any], wheel_path: Path) -> dict[str, Any]:
         counts = Counter(names)
         duplicate_names = sorted(name for name, count in counts.items() if count > 1)
         unsafe_paths = sorted(name for name in names if _unsafe_member(name))
-        metadata_names = sorted(
-            name for name in names if name.endswith(".dist-info/METADATA")
-        )
-        record_infos = [
-            info for info in infos if info.filename.endswith(".dist-info/RECORD")
-        ]
+        metadata_names = sorted(name for name in names if name.endswith(".dist-info/METADATA"))
+        record_infos = [info for info in infos if info.filename.endswith(".dist-info/RECORD")]
         if len(metadata_names) != 1:
             raise ValueError(
                 f"wheel must contain exactly one dist-info/METADATA; found {len(metadata_names)}"

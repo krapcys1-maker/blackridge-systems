@@ -1,0 +1,48 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 9,
+  "proposal_sha256": "fe6607b903408357cfacb9786fc235355b5c65b9378bf4142f7662cc90e309ec",
+  "parent_completion_sha256": "dbd31b8cf2019a85e80c92e76bcc18e13934878a48bd375382663b8ab518250e",
+  "verdict": "rejected-before-build",
+  "reviewer": "codex-independent-architecture-review",
+  "champion_source_disclosed_to_builder": false,
+  "strengths": [
+    "Explicit brief ingress, deny-policy owner, hash-bound candidate approval, adapter sandbox, evaluator trust zone, and complete evidence artifact types.",
+    "All declared flow endpoint interfaces are structurally coherent after one recorded interface repair."
+  ],
+  "findings": [
+    {
+      "severity": "critical",
+      "id": "ledger-first-not-enforced",
+      "finding": "Workers send each artifact directly to both ledger and the next consumer. Nothing proves ledger persistence completes before downstream action, contradicting write-before-use and allowing unrecorded influence."
+    },
+    {
+      "severity": "critical",
+      "id": "operator-boundary-missing",
+      "finding": "The proposal claims to preserve a provider-neutral operator contract but declares no operator adapter or provider boundary."
+    },
+    {
+      "severity": "critical",
+      "id": "deterministic-control-owner-missing",
+      "finding": "No component owns budgets, timeouts, revisions, deterministic stage transitions, or recovery despite claiming preservation of the deterministic control plane."
+    },
+    {
+      "severity": "high",
+      "id": "denials-not-retained",
+      "finding": "policy-gate produces deny-decision/v1 but there is no flow or ledger input retaining denied candidates and reasons."
+    },
+    {
+      "severity": "medium",
+      "id": "adapter-source-policy-wrong",
+      "finding": "adapter-builder generates gap code but source_policy is reuse-first rather than generate-gap or hybrid."
+    },
+    {
+      "severity": "medium",
+      "id": "vertical-slice-not-minimal",
+      "finding": "The proposed first slice requires implementing every component at once, increasing cost and preventing incremental proof of the architecture thesis."
+    }
+  ],
+  "repair_instruction": "Use a true write-before-consume design: producers append only to the ledger; typed projectors or a dispatcher release persisted, hash-addressed artifacts to consumers after commit. Add a deterministic control component for budgets, timeouts, revisions, stage transitions, and recovery. Add a provider-neutral operator adapter used by planning or gap generation. Persist deny-decision/v1. Set adapter-builder source_policy to generate-gap or hybrid and sandbox all generated output. Define a smaller first slice that still proves ledger commit ordering, license gate, sandbox, evidence, and independent evaluation. Keep every flow contract declared at both endpoints and keep the evaluator unable to influence builds. Do not request or use champion source code."
+}

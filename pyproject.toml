@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "blackridge-systems"
-version = "0.1.0"
+version = "0.1.1"
 description = "Evidence-driven, reuse-first composition of software systems from proven open-source components."
 readme = "README.md"
 requires-python = ">=3.11"

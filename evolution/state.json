@@ -1,0 +1,43 @@
+{
+  "schema_version": "1",
+  "updated_at": "2026-08-28T13:25:50+03:00",
+  "status": "round-001-design-loop-active",
+  "naming": {
+    "package_version": "0.1.1",
+    "current_architectural_champion": "v1.1",
+    "next_fresh_challenger_name": "v2",
+    "rule": "Package versions and architectural line names are separate. Never call enhanced v1.1 'v2'."
+  },
+  "current_champion": {
+    "candidate_id": "champion-v1-1",
+    "architecture_line": "v1.1",
+    "package_version": "0.1.1",
+    "snapshot_commit": "0bdfd5ac055118fcd38f157522a88f460d6ba64e",
+    "source_archive_sha256": "196551749cb767b75e31302f55a7e17e10178bfe86994ab2a295330ce10bb58e",
+    "snapshot_path": "../blackridge-champion-v1.1-snapshot-20260828-r1",
+    "source_archive_path": "../blackridge-evolution-evaluator/champion-v1.1-0bdfd5ac.tar",
+    "selection_round": "round-000"
+  },
+  "round_history": [
+    {
+      "round_id": "round-000",
+      "status": "complete-bootstrap",
+      "winner": "champion-v1-1",
+      "comparison": "benchmarks/blackridge-self-hosting-v2/round-000-v1.1-comparison.json",
+      "comparison_sha256": "e85a0c3ac027441aec809e13e2bacece8bb7fb15882f8d7251ca6094f851651f"
+    }
+  ],
+  "active_round": {
+    "round_id": "round-001",
+    "status": "candidate-a-frozen-candidate-b-design-rejected",
+    "manifest": "evolution/rounds/001/manifest.json",
+    "public_benchmark_sha256": "77495687a7fb65a3fc4e90691093443924a20292a9f42a9f9ce2704d84a827f9",
+    "hidden_holdout_sha256": "04cd24be9e9ae39327f146bb76ed299b4fd42be42a0c3f1615a18716a178b86e",
+    "candidate_a_snapshot_commit": "ee72dd6b39f3e98ab4384cb708e7df98a81a6111",
+    "candidate_a_source_archive_sha256": "530ca9477984e858e2a198d35e2d90f08df60ddadc51f918be12b6405cd2dcc5",
+    "candidate_b_attempts": 10,
+    "candidate_b_status": "architecture-rejected-before-build",
+    "hybrids_status": "blocked-until-b-has-measured-strengths",
+    "next_action": "Create a corrected fresh B design from public inputs. Do not implement or hybridize attempt 010; it failed semantic review."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 1,
+  "source_completion_sha256": "5b24d521510f0c131b92aa2f9f3ff658be794f52cb24454ee20d29bc2249aa6c",
+  "validation_errors": [
+    {
+      "location": "components[6].boundary",
+      "received": "sandbox",
+      "allowed": ["cli", "api", "mcp", "oci", "package", "event", "file"]
+    }
+  ],
+  "repair_instruction": "Keep the architecture and trust_zone=sandbox, but set the component boundary to one of the allowed transport boundary values. Do not use or request champion source code."
+}
