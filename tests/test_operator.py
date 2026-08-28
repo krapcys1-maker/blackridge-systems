@@ -91,6 +91,26 @@ def test_deepseek_rejects_non_stop_completion() -> None:
         backend.complete_json(system="JSON", user="JSON")
 
 
+def test_deepseek_converts_truncated_completion_json_to_bounded_external_error() -> None:
+    client = _Client(
+        _Response(
+            {
+                "model": "deepseek-v4-flash",
+                "choices": [{"finish_reason": "stop", "message": {"content": '{"files": ['}}],
+                "usage": {"prompt_tokens": 2, "completion_tokens": 2},
+            }
+        )
+    )
+    backend = DeepSeekBackend(api_key="secret", client=client)  # type: ignore[arg-type]
+
+    with pytest.raises(ExternalToolError, match="invalid JSON completion envelope"):
+        backend.complete_json(system="JSON", user="JSON")
+
+    assert backend.calls_made == 1
+    assert backend.total_tokens == 0
+    assert backend.total_estimated_cost_usd == 0
+
+
 def test_deepseek_rejects_cost_bound_before_network_call() -> None:
     client = _Client(_Response({}))
     backend = DeepSeekBackend(

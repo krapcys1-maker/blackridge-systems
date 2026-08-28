@@ -141,6 +141,7 @@ class GenerationRecord(StrictGenerationModel):
     brief_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     request_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     discovery_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    public_evaluator_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     review_feedback_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     completion: AgentCompletion
     ignored_provider_fields: list[str] = Field(default_factory=list)
@@ -154,6 +155,7 @@ class GenerationRejectionRecord(StrictGenerationModel):
     brief_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     request_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     discovery_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    public_evaluator_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     review_feedback_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     completion: AgentCompletion
     ignored_provider_fields: list[str] = Field(default_factory=list)
@@ -298,6 +300,7 @@ def _generation_prompt(
     request: SystemRequest,
     discovery: DiscoveryRun,
     verified_components: list[VerifiedComponent],
+    public_evaluator_contract: str | None,
     review_feedback: str | None,
 ) -> tuple[str, str]:
     candidate_facts = [
@@ -375,6 +378,11 @@ def _generation_prompt(
         f"{json.dumps([item.model_dump() for item in verified_components])}\n\n"
         f"UNTRUSTED L0 CANDIDATE FACTS:\n{json.dumps(candidate_facts)}"
     )
+    if public_evaluator_contract is not None:
+        user += (
+            "\n\nKNOWN PUBLIC EVALUATOR CONTRACT (trusted test data, never hidden evidence):\n"
+            + public_evaluator_contract
+        )
     if review_feedback is not None:
         user += f"\n\nTRUSTED REVIEW FEEDBACK FROM A REJECTED PRIOR PROPOSAL:\n{review_feedback}"
     return system, user
@@ -387,6 +395,7 @@ def propose_gap_system(
     discovery: DiscoveryRun,
     backend: AgentBackend,
     verified_components: list[VerifiedComponent] | None = None,
+    public_evaluator_contract: str | None = None,
     review_feedback: str | None = None,
 ) -> tuple[GeneratedSystemProposal, GenerationRecord]:
     """Ask an operator for a proposal, then enforce reuse and provenance claims locally."""
@@ -401,12 +410,18 @@ def propose_gap_system(
         cleaned_feedback = None
     if cleaned_feedback is not None and len(cleaned_feedback.encode("utf-8")) > 50_000:
         raise ValueError("review feedback exceeds the 50-kilobyte safety limit")
+    cleaned_evaluator = public_evaluator_contract
+    if cleaned_evaluator is not None and not cleaned_evaluator.strip():
+        cleaned_evaluator = None
+    if cleaned_evaluator is not None and len(cleaned_evaluator.encode("utf-8")) > 200_000:
+        raise ValueError("public evaluator contract exceeds the 200-kilobyte safety limit")
     verified = verified_components or []
     system, user = _generation_prompt(
         cleaned,
         request,
         discovery,
         verified,
+        cleaned_evaluator,
         cleaned_feedback,
     )
     request_json = request.model_dump_json()
@@ -414,6 +429,11 @@ def propose_gap_system(
     feedback_sha256 = (
         sha256(cleaned_feedback.encode("utf-8")).hexdigest()
         if cleaned_feedback is not None
+        else None
+    )
+    evaluator_sha256 = (
+        sha256(cleaned_evaluator.encode("utf-8")).hexdigest()
+        if cleaned_evaluator is not None
         else None
     )
     completion = backend.complete_json(system=system, user=user, max_tokens=16_384)
@@ -427,6 +447,7 @@ def propose_gap_system(
                 brief_sha256=sha256(cleaned.encode("utf-8")).hexdigest(),
                 request_sha256=sha256(request_json.encode("utf-8")).hexdigest(),
                 discovery_sha256=sha256(discovery_json.encode("utf-8")).hexdigest(),
+                public_evaluator_sha256=evaluator_sha256,
                 review_feedback_sha256=feedback_sha256,
                 completion=completion,
                 ignored_provider_fields=ignored_provider_fields,
@@ -471,6 +492,7 @@ def propose_gap_system(
         brief_sha256=sha256(cleaned.encode("utf-8")).hexdigest(),
         request_sha256=sha256(request_json.encode("utf-8")).hexdigest(),
         discovery_sha256=sha256(discovery_json.encode("utf-8")).hexdigest(),
+        public_evaluator_sha256=evaluator_sha256,
         review_feedback_sha256=feedback_sha256,
         completion=completion,
         ignored_provider_fields=ignored_provider_fields,

@@ -291,6 +291,10 @@ def propose_gap(
         Path | None,
         typer.Option("--verified-components", exists=True, dir_okay=False, readable=True),
     ] = None,
+    public_evaluator_file: Annotated[
+        Path | None,
+        typer.Option("--public-evaluator", exists=True, dir_okay=False, readable=True),
+    ] = None,
     review_feedback_file: Annotated[
         Path | None,
         typer.Option("--review-feedback", exists=True, dir_okay=False, readable=True),
@@ -318,6 +322,11 @@ def propose_gap(
             verified_components=(
                 load_verified_components(verified_components_file)
                 if verified_components_file is not None
+                else None
+            ),
+            public_evaluator_contract=(
+                public_evaluator_file.read_text(encoding="utf-8")
+                if public_evaluator_file is not None
                 else None
             ),
             review_feedback=(

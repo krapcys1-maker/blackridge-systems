@@ -254,6 +254,38 @@ def test_review_feedback_is_bounded_and_hash_bound() -> None:
         )
 
 
+def test_public_evaluator_contract_is_bounded_hash_bound_and_in_prompt() -> None:
+    class _PromptBackend(_Backend):
+        user = ""
+
+        def complete_json(self, **kwargs: object) -> AgentCompletion:
+            self.user = str(kwargs["user"])
+            return super().complete_json()
+
+    evaluator = "def test_public_contract():\n    assert True\n"
+    backend = _PromptBackend()
+    _, record = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=backend,
+        public_evaluator_contract=evaluator,
+    )
+
+    assert record.public_evaluator_sha256 == sha256(evaluator.encode()).hexdigest()
+    assert "KNOWN PUBLIC EVALUATOR CONTRACT" in backend.user
+    assert evaluator in backend.user
+
+    with pytest.raises(ValueError, match="200-kilobyte"):
+        propose_gap_system(
+            "Build a deterministic duplicate finder that never modifies input files.",
+            request=REQUEST,
+            discovery=DISCOVERY,
+            backend=_Backend(),
+            public_evaluator_contract="x" * 200_001,
+        )
+
+
 def test_schema_rejected_provider_completion_is_retained_as_evidence() -> None:
     completion = _Backend().complete_json()
     completion.content["files"][0]["forbidden"] = True
