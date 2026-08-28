@@ -117,6 +117,33 @@ class CompilerTests(unittest.TestCase):
         )
         self.assertIn("program.py", evidence["locked_file_sha256"])
 
+    def test_test_only_compiler_rejects_product_rewrites_and_preserves_controls(self) -> None:
+        prior, _ = foundry.compile_proposal(
+            proposal("print('trusted')\n"), request_text(), verified_text()
+        )
+        repaired_tests = "\n".join(
+            f"def test_case_{number}():\n    assert True" for number in range(9)
+        )
+        raw = {
+            "files": [{"path": "tests/test_program.py", "content": repaired_tests}],
+            "acceptance_coverage": prior["acceptance_coverage"],
+            "limitations": ["Sandbox execution remains required."],
+            "program_path": "replacement.py",
+        }
+
+        repaired, ignored = foundry.compile_test_repair(raw, prior, request_text(), verified_text())
+
+        files = {item["path"]: item["content"] for item in repaired["files"]}
+        self.assertEqual(files["program.py"], "print('trusted')\n")
+        self.assertEqual(repaired["program_path"], prior["program_path"])
+        self.assertEqual(repaired["test_command"], prior["test_command"])
+        self.assertEqual(repaired["component_decisions"], prior["component_decisions"])
+        self.assertEqual(ignored, ["program_path"])
+
+        raw["files"] = [{"path": "replacement.py", "content": "print('rewrite')\n"}]
+        with self.assertRaisesRegex(ValueError, "only test files"):
+            foundry.compile_test_repair(raw, prior, request_text(), verified_text())
+
     def test_prompt_requires_portable_black_box_tests(self) -> None:
         _, user = foundry.prompt("task", "request", "evaluator", "[]", None)
 
@@ -124,6 +151,14 @@ class CompilerTests(unittest.TestCase):
         self.assertIn("never import the generated program", user)
         self.assertIn("absolute path", user)
         self.assertIn("VERIFIED COMPONENTS", user)
+
+        prior, _ = foundry.compile_proposal(
+            proposal("print('trusted')\n"), request_text(), verified_text()
+        )
+        _, repair_user = foundry.prompt("task", "request", "evaluator", "[]", "tests failed", prior)
+        self.assertIn("Return only files under a test or tests directory", repair_user)
+        self.assertIn("IMMUTABLE PRIOR PROPOSAL", repair_user)
+        self.assertNotIn("Return a full replacement project", repair_user)
 
 
 def test_main_retains_provider_failures_and_finishes_summary(
