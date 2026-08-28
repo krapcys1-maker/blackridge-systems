@@ -12,6 +12,7 @@ from blackridge.generation import (
     GenerationProposalRejected,
     VerifiedComponent,
     materialize_proposal,
+    normalize_completion_content,
     proposal_sha256,
     propose_gap_system,
 )
@@ -255,6 +256,7 @@ def test_review_feedback_is_bounded_and_hash_bound() -> None:
 def test_schema_rejected_provider_completion_is_retained_as_evidence() -> None:
     completion = _Backend().complete_json()
     completion.content["files"][0]["forbidden"] = True
+    completion.content["files"][0]["path"] = 7
 
     class _InvalidBackend(_Backend):
         def complete_json(self, **_: object) -> AgentCompletion:
@@ -270,7 +272,8 @@ def test_schema_rejected_provider_completion_is_retained_as_evidence() -> None:
     record = caught.value.record
     assert record.proposal_status == "schema-rejected"
     assert record.completion.content["files"][0]["forbidden"] is True
-    assert record.validation_errors[0]["type"] == "extra_forbidden"
+    assert record.ignored_provider_fields == ["files[0].forbidden"]
+    assert record.validation_errors[0]["type"] == "string_type"
 
 
 def test_acceptance_coverage_must_match_request_exactly() -> None:
@@ -306,3 +309,28 @@ def test_acceptance_coverage_must_reference_a_generated_test_file() -> None:
             backend=_MissingTestBackend(),
         )
     assert caught.value.record.validation_errors[0]["type"] == "value_error"
+
+
+def test_benign_provider_metadata_is_ignored_but_retained_as_an_audit_path() -> None:
+    completion = _Backend().complete_json()
+    completion.content["files"][0]["executable"] = True
+
+    class _MetadataBackend(_Backend):
+        def complete_json(self, **_: object) -> AgentCompletion:
+            return completion
+
+    proposal, record = propose_gap_system(
+        "Build a deterministic duplicate finder that never modifies input files.",
+        request=REQUEST,
+        discovery=DISCOVERY,
+        backend=_MetadataBackend(),
+    )
+    assert proposal.files[0].path == "dupfinder.py"
+    assert record.ignored_provider_fields == ["files[0].executable"]
+    assert record.completion.content["files"][0]["executable"] is True
+
+
+def test_normalization_keeps_wrong_types_for_strict_schema_rejection() -> None:
+    normalized, ignored = normalize_completion_content({"files": "not-a-list", "note": True})
+    assert normalized == {"files": "not-a-list"}
+    assert ignored == ["note"]
