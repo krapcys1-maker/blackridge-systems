@@ -41,6 +41,13 @@ class GeneratedFile(StrictGenerationModel):
     content: str
 
 
+class AcceptanceTestEvidence(StrictGenerationModel):
+    acceptance_id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+    test_file: str = Field(min_length=1, max_length=240)
+    test_name: str = Field(min_length=3, max_length=240)
+    rationale: str = Field(min_length=20, max_length=2_000)
+
+
 class ComponentDecision(StrictGenerationModel):
     capability_id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     source: Literal["verified-component", "standard-library", "generated-gap"]
@@ -72,6 +79,7 @@ class GeneratedSystemProposal(StrictGenerationModel):
     run_command: list[str] = Field(min_length=1, max_length=MAX_RUN_COMMAND_ITEMS)
     component_decisions: list[ComponentDecision] = Field(min_length=1)
     tests: list[str] = Field(min_length=1)
+    acceptance_coverage: list[AcceptanceTestEvidence] = Field(min_length=1)
     limitations: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
@@ -100,6 +108,23 @@ class GeneratedSystemProposal(StrictGenerationModel):
         capability_ids = [decision.capability_id for decision in self.component_decisions]
         if len(capability_ids) != len(set(capability_ids)):
             raise ValueError("generated component decisions must have unique capability ids")
+        acceptance_ids = [evidence.acceptance_id for evidence in self.acceptance_coverage]
+        if len(acceptance_ids) != len(set(acceptance_ids)):
+            raise ValueError("acceptance coverage must contain unique acceptance ids")
+        for evidence in self.acceptance_coverage:
+            canonical_test = validate_generated_path(evidence.test_file)
+            if canonical_test not in seen:
+                raise ValueError(
+                    f"acceptance evidence references a missing generated test file: "
+                    f"{evidence.test_file!r}"
+                )
+            if not any(
+                part.casefold() in {"test", "tests"}
+                for part in PurePosixPath(evidence.test_file.replace("\\", "/")).parts
+            ):
+                raise ValueError(
+                    f"acceptance evidence must reference a test directory: {evidence.test_file!r}"
+                )
         return self
 
 
@@ -207,6 +232,16 @@ def _generation_prompt(
             }
         ],
         "tests": ["python -m unittest -v"],
+        "acceptance_coverage": [
+            {
+                "acceptance_id": "example-acceptance",
+                "test_file": "tests/test_program.py",
+                "test_name": "test_example_acceptance",
+                "rationale": (
+                    "This executable test directly exercises the stated acceptance outcome."
+                ),
+            }
+        ],
         "limitations": ["The proposal has not been executed."],
     }
     user = (
@@ -218,7 +253,14 @@ def _generation_prompt(
         "interpreter revision.\n"
         "- Otherwise use generated-gap at L0; never relabel a search result as verified.\n"
         "- Paths must be portable relative paths and run_command must be an argv list.\n"
-        "- Include executable tests and never modify user input data.\n\n"
+        "- Include executable tests and never modify user input data.\n"
+        "- Map every acceptance id exactly once in acceptance_coverage to a generated file under "
+        "a test or tests directory; name the concrete executable test and explain the assertion.\n"
+        "- Treat every Given/When/Then acceptance statement as a required behavior, including "
+        "negative and aliasing cases. Do not claim coverage from comments or placeholders.\n"
+        "- Before returning, trace each required output back to an executable test and check "
+        "failure paths for partial writes, path aliases, links, permissions, and deterministic "
+        "ordering whenever those concerns occur in the validated request.\n\n"
         f"BRIEF:\n{brief}\n\n"
         f"VALIDATED REQUEST:\n{request.model_dump_json(indent=2)}\n\n"
         "VERIFIED COMPONENTS:\n"
@@ -287,6 +329,17 @@ def propose_gap_system(
     actual_capabilities = {decision.capability_id for decision in proposal.component_decisions}
     if actual_capabilities != expected_capabilities:
         raise ValueError("generated component decisions do not cover the request exactly")
+    expected_acceptance = {
+        acceptance.id for capability in request.capabilities for acceptance in capability.acceptance
+    }
+    actual_acceptance = {evidence.acceptance_id for evidence in proposal.acceptance_coverage}
+    if actual_acceptance != expected_acceptance:
+        missing = sorted(expected_acceptance - actual_acceptance)
+        unexpected = sorted(actual_acceptance - expected_acceptance)
+        raise ValueError(
+            "generated acceptance coverage does not cover the request exactly: "
+            f"missing={missing!r}, unexpected={unexpected!r}"
+        )
     verified_index = {
         (item.capability_id, item.identity, item.immutable_revision): item for item in verified
     }
