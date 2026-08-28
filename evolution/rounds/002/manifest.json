@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-002",
-  "status": "benchmark-frozen-and-calibrated-builders-not-started",
+  "status": "provisional-v1-line-leader-b-plus-a-pending",
   "champion": {
     "candidate_id": "champion-v1-1",
     "architecture_line": "v1.1",
@@ -22,13 +22,15 @@
     "builder_may_access_evaluator_workspace": false
   },
   "candidate_slots": [
-    {"origin":"champion","candidate_id":"champion-v1-1","status":"frozen"},
-    {"origin":"A","candidate_id":"candidate-a-round-002","status":"not-started","requirement":"must change project-building behavior, not only tournament controls"},
-    {"origin":"B","candidate_id":"candidate-b-round-002","status":"not-started","requirement":"fresh architecture from public inputs"},
-    {"origin":"A+B","candidate_id":"candidate-a-plus-b-round-002","status":"blocked-on-measured-a-and-b"},
-    {"origin":"B+A","candidate_id":"candidate-b-plus-a-round-002","status":"blocked-on-measured-a-and-b"}
+    {"origin":"champion","candidate_id":"champion-v1-1","status":"measured-0-of-3"},
+    {"origin":"A","candidate_id":"candidate-a-round-002","status":"measured-0-of-3","requirement":"must change project-building behavior, not only tournament controls"},
+    {"origin":"B","candidate_id":"candidate-b-ledger-round-002","status":"measured-0-of-3-and-protocol-disqualified","requirement":"fresh architecture from public inputs"},
+    {"origin":"A+B","candidate_id":"candidate-blackbox-tests-round-002","status":"provisional-leader-1-of-3"},
+    {"origin":"B+A","candidate_id":"candidate-b-plus-a-round-002","status":"pending-build-and-measurement"}
   ],
   "attempts_per_candidate": 3,
-  "selection_status": "not-run",
-  "selected_champion": "champion-v1-1"
+  "results": "evolution/rounds/002/measured-results.json",
+  "selection_status": "incomplete-b-plus-a-pending",
+  "selected_champion": "champion-v1-1",
+  "provisional_leader": "candidate-blackbox-tests-round-002"
 }

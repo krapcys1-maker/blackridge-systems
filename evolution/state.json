@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
-  "updated_at": "2026-08-28T14:24:35+03:00",
-  "status": "round-002-benchmark-calibrated-builders-not-started",
+  "updated_at": "2026-08-28T18:15:00+03:00",
+  "status": "round-002-provisional-v1-line-leader-b-plus-a-pending",
   "naming": {
     "package_version": "0.1.1",
     "current_architectural_champion": "v1.1",
@@ -36,15 +36,19 @@
   ],
   "active_round": {
     "round_id": "round-002",
-    "status": "benchmark-frozen-and-calibrated-builders-not-started",
+    "status": "provisional-v1-line-leader-b-plus-a-pending",
     "manifest": "evolution/rounds/002/manifest.json",
     "benchmark": "evolution/benchmark/measured-duplicate-finder-v1.json",
     "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
     "attempts_per_candidate": 3,
-    "candidate_a_status": "not-started",
-    "candidate_b_status": "not-started",
-    "hybrids_status": "blocked-on-measured-a-and-b",
+    "candidate_a_status": "measured-0-of-3",
+    "candidate_b_status": "measured-0-of-3-and-protocol-disqualified",
+    "hybrids_status": "a-plus-b-provisional-leader-1-of-3; b-plus-a-pending",
     "selected_champion": "champion-v1-1",
-    "next_action": "Build fresh A and B only after verifying the committed round-002 benchmark and input hashes; then run three identical Duplicate Finder attempts per candidate."
+    "provisional_leader": "candidate-blackbox-tests-round-002",
+    "provisional_leader_commit": "5a0c6e348c725578650fbd668245a39658083e92",
+    "integrated_main_commit": "9b1fc4f80ccea74ebcc194777a04d2b199a858d4",
+    "results": "evolution/rounds/002/measured-results.json",
+    "next_action": "Build B+A from the fresh ledger architecture plus the measured v1 evidence, component-lock, and black-box test controls; run three identical attempts and only then select the round champion."
   }
 }

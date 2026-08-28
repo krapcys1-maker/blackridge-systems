@@ -110,3 +110,34 @@ task, the exact independent seven-test evaluator, the retained nine-test expecta
 normalized discovery/request/verified-component inputs, and the complete existing v1 CI/system-E2E
 regression gates. Every candidate gets three attempts. Exact ties retain v1.1. Do not add new
 projects or alter expectations inside this round.
+
+## Round 002 progress update — 2026-08-28 18:15 +03:00
+
+This section supersedes the earlier "builders not started" status above. The selected champion is
+still v1.1 until B+A is measured, but the provisional leader is now an improved v1 line, not v2.
+
+- Exact champion v1.1 measured 0/3 on fresh one-shot builds.
+- Candidate A with strict acceptance coverage measured 0/3.
+- Fresh ledger B measured 0/3. Its run also breached the protocol because its builder received the
+  external evaluator path instead of only the repository copy; it is ineligible for promotion.
+- The first A+B hybrid and the component-lock successor each measured 0/3.
+- The black-box-test successor at commit `5a0c6e348c725578650fbd668245a39658083e92`
+  measured 1/3. Its passing attempt had 11/11 generated tests, public 7/7, independent 7/7,
+  zero manual interventions, three repairs, and provider cost USD 0.03003612.
+- The successful program SHA-256 is
+  `dc74d49358fca82ad1b0eb5b33689a0f70e5b2697fd94066835ec017d4404142`.
+- Full clean release gates passed, including dependency consistency, Ruff, format, mypy,
+  compileall, Bandit medium/high, pip-audit, notices, provenance, coverage, build, Twine,
+  installed-wheel optional dependency resolution, and Docker system E2E/fail-closed controls.
+- The four measured v1-line improvements were cherry-picked into the main experimental branch.
+  This is integration for continued development, not final round selection.
+
+Machine-readable measurements and evidence hashes are in
+`evolution/rounds/002/measured-results.json`. Raw provider, proposal, test, evaluator, and release
+evidence remains under `D:\Skladacz aplikacji\blackridge-evolution-round-002`.
+
+Next action: build B+A from the independent ledger base plus v1's measured evidence controls,
+component locking, and black-box test contract. Give it three identical attempts. If it beats the
+provisional 1/3 or ties with better cost/interventions and no regression, it may justify switching
+the architectural base. Otherwise the improved v1 line becomes the round champion and creates the
+next fresh challenger.
