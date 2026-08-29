@@ -59,6 +59,7 @@ dev = [
 
 [project.scripts]
 blackridge = "blackridge.cli:app"
+blackridge-ledger = "blackridge.ledger_foundry:main"
 
 [project.urls]
 Repository = "https://github.com/krapcys1-maker/blackridge-systems"
