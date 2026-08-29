@@ -102,6 +102,8 @@ class GeneratedSystemProposal(StrictGenerationModel):
             total_bytes += content_bytes
         if total_bytes > MAX_GENERATED_TOTAL_BYTES:
             raise ValueError("generated files exceed the total byte limit")
+        if _generated_test_function_count(self.files) < 9:
+            raise ValueError("generated suite contains fewer than 9 concrete test functions")
         for item in self.run_command:
             if not item or len(item.encode("utf-8")) > MAX_RUN_COMMAND_ITEM_BYTES:
                 raise ValueError("generated run command contains an empty or oversized item")
@@ -214,6 +216,8 @@ class GeneratedTestRepairProposal(StrictGenerationModel):
             total_bytes += content_bytes
         if total_bytes > MAX_GENERATED_TOTAL_BYTES:
             raise ValueError("generated test files exceed the total byte limit")
+        if _generated_test_function_count(self.files) < 9:
+            raise ValueError("test repair contains fewer than 9 concrete test functions")
         acceptance_ids = [evidence.acceptance_id for evidence in self.acceptance_coverage]
         if len(acceptance_ids) != len(set(acceptance_ids)):
             raise ValueError("test-repair acceptance coverage must contain unique ids")
@@ -320,6 +324,14 @@ def is_generated_test_path(value: str) -> bool:
     return any(
         part.casefold() in {"test", "tests"}
         for part in PurePosixPath(value.replace("\\", "/")).parts[:-1]
+    )
+
+
+def _generated_test_function_count(files: list[GeneratedFile]) -> int:
+    return sum(
+        len(re.findall(r"^\s*def\s+test_[A-Za-z0-9_]+\s*\(", item.content, re.MULTILINE))
+        for item in files
+        if is_generated_test_path(item.path)
     )
 
 

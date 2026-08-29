@@ -64,6 +64,10 @@ DISCOVERY = DiscoveryRun(
     request=REQUEST,
     results=[CapabilityResult(capability=CAPABILITY, candidates=[])],
 )
+TEST_SOURCE = "\n".join(
+    ["def test_detect_duplicates():\n    assert 1 == 1"]
+    + [f"def test_case_{number}():\n    assert True" for number in range(1, 9)]
+)
 
 
 class _Backend:
@@ -76,7 +80,7 @@ class _Backend:
                 {"path": "dupfinder.py", "content": "print('proposal')\n"},
                 {
                     "path": "tests/test_dupfinder.py",
-                    "content": "def test_detect_duplicates():\n    assert 1 == 1\n",
+                    "content": TEST_SOURCE,
                 },
             ],
             "run_command": ["python", "dupfinder.py"],
@@ -382,6 +386,24 @@ def test_acceptance_coverage_must_reference_a_concrete_test_function() -> None:
     assert "missing concrete test" in serialized["validation_errors"][0]["ctx"]["error"]
 
 
+def test_generated_suite_requires_nine_concrete_test_functions() -> None:
+    completion = _Backend().complete_json()
+    completion.content["files"][1]["content"] = "def test_detect_duplicates():\n    assert True\n"
+
+    class _TooSmallSuiteBackend(_Backend):
+        def complete_json(self, **_: object) -> AgentCompletion:
+            return completion
+
+    with pytest.raises(GenerationProposalRejected) as caught:
+        propose_gap_system(
+            "Build a deterministic duplicate finder that never modifies input files.",
+            request=REQUEST,
+            discovery=DISCOVERY,
+            backend=_TooSmallSuiteBackend(),
+        )
+    assert "fewer than 9" in caught.value.record.validation_errors[0]["ctx"]["error"]
+
+
 def test_benign_provider_metadata_is_ignored_but_retained_as_an_audit_path() -> None:
     completion = _Backend().complete_json()
     completion.content["files"][0]["executable"] = True
@@ -416,7 +438,7 @@ def test_composition_keeps_passing_program_bytes_and_accepts_repaired_tests() ->
     )
     next_value = prior.model_dump(mode="json")
     next_value["files"][0]["content"] = "print('regressed program')\n"
-    next_value["files"][1]["content"] = "def test_detect_duplicates():\n    assert 'repaired'\n"
+    next_value["files"][1]["content"] = TEST_SOURCE.replace("1 == 1", "2 == 2")
     next_proposal = GeneratedSystemProposal.model_validate(next_value)
 
     composed, record = compose_with_locked_files(
@@ -424,7 +446,7 @@ def test_composition_keeps_passing_program_bytes_and_accepts_repaired_tests() ->
     )
 
     assert composed.files[0].content == "print('proposal')\n"
-    assert composed.files[1].content == ("def test_detect_duplicates():\n    assert 'repaired'\n")
+    assert composed.files[1].content == TEST_SOURCE.replace("1 == 1", "2 == 2")
     assert record.prior_proposal_sha256 == proposal_sha256(prior)
     assert record.next_proposal_sha256 == proposal_sha256(next_proposal)
     assert record.composed_proposal_sha256 == proposal_sha256(composed)
@@ -460,7 +482,7 @@ def test_test_only_repair_keeps_product_and_control_fields_byte_exact() -> None:
         "files": [
             {
                 "path": "tests/test_dupfinder.py",
-                "content": "def test_detect_duplicates():\n    assert True\n",
+                "content": TEST_SOURCE.replace("1 == 1", "3 == 3"),
             }
         ],
         "acceptance_coverage": [
