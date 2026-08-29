@@ -8,7 +8,7 @@ import yaml
 from typer.main import get_command
 from typer.testing import CliRunner
 
-from blackridge.cli import app
+from blackridge.cli import _environment_probe_gate_failures, app
 from blackridge.doctor import ToolCheck
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
@@ -65,6 +65,69 @@ def test_cli_help_is_runnable() -> None:
 
     assert result.exit_code == 0
     assert "Evidence-driven" in result.stdout
+
+
+def _environment_probe_observations() -> dict[str, object]:
+    return {
+        "probe_completed": True,
+        "execution_boundary": {"requested": "none", "applied": True},
+        "commands": [{"id": "behavior-test", "exit_code": 0, "transport_error": None}],
+        "not_run_command_ids": [],
+        "host_workspace": {"unchanged": True},
+        "cleanup": {
+            "stop_error": None,
+            "force_remove": {"exit_code": 0},
+            "container_exists_after_stop": False,
+        },
+    }
+
+
+def test_environment_probe_completion_gate_accepts_complete_evidence() -> None:
+    probe = ProbeEvidence(
+        probe_id="a" * 32,
+        observed_at=datetime(2026, 8, 29, tzinfo=UTC),
+        provider="fixture",
+        subject="fixture",
+        request={},
+        observations=_environment_probe_observations(),
+        sources=["https://example.test/source"],
+    )
+
+    assert _environment_probe_gate_failures(probe) == []
+
+
+def test_environment_probe_completion_gate_reports_each_critical_boundary() -> None:
+    observations = _environment_probe_observations()
+    observations["probe_completed"] = False
+    observations["execution_boundary"] = {"requested": "none", "applied": False}
+    observations["commands"] = [{"id": "behavior-test", "exit_code": 9, "transport_error": None}]
+    observations["not_run_command_ids"] = ["second-test"]
+    observations["host_workspace"] = {"unchanged": False}
+    observations["cleanup"] = {
+        "stop_error": "stop failed",
+        "force_remove": {"exit_code": 7},
+        "container_exists_after_stop": True,
+    }
+    probe = ProbeEvidence(
+        probe_id="b" * 32,
+        observed_at=datetime(2026, 8, 29, tzinfo=UTC),
+        provider="fixture",
+        subject="fixture",
+        request={},
+        observations=observations,
+        sources=["https://example.test/source"],
+    )
+
+    failures = _environment_probe_gate_failures(probe)
+
+    assert "probe did not complete" in failures
+    assert "requested network isolation was not applied" in failures
+    assert "command behavior-test exited with code 9" in failures
+    assert "commands were not run: second-test" in failures
+    assert "host workspace integrity was not confirmed" in failures
+    assert "container stop failed: stop failed" in failures
+    assert "forced container cleanup exited with code 7" in failures
+    assert "container cleanup was not confirmed" in failures
 
 
 def test_release_help_does_not_render_a_truncated_image_digest() -> None:
