@@ -12,7 +12,9 @@
     "base_spec": "evolution/benchmark/ultimate-system-suite-v1.json",
     "base_spec_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
     "external_security_tests": "D:/Skladacz aplikacji/blackridge-evolution-evaluator/round-006/tests/test_security_boundaries_round006.py",
-    "external_security_tests_sha256": "c986b34a7f6eba81237f86d1edf5a0f8b4454bfd3a2852bd0dc62ed035356945",
+    "external_security_tests_sha256": "4f7b04ea7c87dc0e54abebf7e9271330867bae2083b9c45251ecebd52e7a5f76",
+    "superseded_external_security_tests_sha256": "c986b34a7f6eba81237f86d1edf5a0f8b4454bfd3a2852bd0dc62ed035356945",
+    "evaluator_revision_reason": "The first freeze incorrectly rejected every trusted setup command whose executable was Python. Revision 2 rejects only the exact user-supplied preparation argv through the SWE-ReX control transport.",
     "freeze_status": "frozen"
   },
   "focus_segments": [
