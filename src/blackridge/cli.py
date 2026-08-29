@@ -547,6 +547,62 @@ def probe_package(
     console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
 
 
+def _environment_probe_gate_failures(probe: ProbeEvidence) -> list[str]:
+    """Return fail-closed automation reasons without changing raw probe evidence."""
+
+    observations = probe.observations
+    failures: list[str] = []
+    if observations.get("probe_completed") is not True:
+        failures.append("probe did not complete")
+
+    boundary = observations.get("execution_boundary")
+    if not isinstance(boundary, dict):
+        failures.append("execution boundary evidence is missing")
+    elif boundary.get("requested") == "none" and boundary.get("applied") is not True:
+        failures.append("requested network isolation was not applied")
+
+    commands = observations.get("commands")
+    if not isinstance(commands, list):
+        failures.append("command evidence is missing")
+    else:
+        for item in commands:
+            if not isinstance(item, dict):
+                failures.append("command evidence contains an invalid record")
+                continue
+            command_id = str(item.get("id") or "unknown")
+            transport_error = item.get("transport_error")
+            if transport_error is not None:
+                failures.append(f"command {command_id} transport failed: {transport_error}")
+            elif item.get("exit_code") != 0:
+                failures.append(f"command {command_id} exited with code {item.get('exit_code')}")
+
+    not_run = observations.get("not_run_command_ids")
+    if not isinstance(not_run, list):
+        failures.append("not-run command evidence is missing")
+    elif not_run:
+        failures.append(f"commands were not run: {', '.join(str(item) for item in not_run)}")
+
+    host_workspace = observations.get("host_workspace")
+    if not isinstance(host_workspace, dict) or host_workspace.get("unchanged") is not True:
+        failures.append("host workspace integrity was not confirmed")
+
+    cleanup = observations.get("cleanup")
+    if not isinstance(cleanup, dict):
+        failures.append("container cleanup evidence is missing")
+    else:
+        if cleanup.get("stop_error"):
+            failures.append(f"container stop failed: {cleanup['stop_error']}")
+        force_remove = cleanup.get("force_remove")
+        if isinstance(force_remove, dict) and force_remove.get("exit_code") != 0:
+            failures.append(
+                f"forced container cleanup exited with code {force_remove.get('exit_code')}"
+            )
+        if cleanup.get("container_exists_after_stop") is not False:
+            failures.append("container cleanup was not confirmed")
+
+    return failures
+
+
 @app.command("probe-environment")
 def probe_environment(
     experiment_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
@@ -554,6 +610,13 @@ def probe_environment(
         ".blackridge/evidence/environment-probe.json"
     ),
     host_root: Annotated[Path, typer.Option("--host-root")] = Path("."),
+    require_complete: Annotated[
+        bool,
+        typer.Option(
+            "--require-complete",
+            help="Exit nonzero unless commands, isolation, host integrity, and cleanup all pass.",
+        ),
+    ] = False,
 ) -> None:
     """Run a pinned repository experiment in Docker through SWE-ReX and retain raw evidence."""
 
@@ -603,7 +666,18 @@ def probe_environment(
             f"transport_error={failed['transport_error'] or 'none'}"
         )
     console.print(f"Evidence written to {output}")
-    console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
+    if require_complete:
+        failures = _environment_probe_gate_failures(probe)
+        if failures:
+            console.print("[red]Strict environment gate: FAIL[/red]")
+            for reason in failures:
+                console.print(f"- {reason}")
+            raise typer.Exit(code=1)
+        console.print("[green]Strict environment gate: PASS[/green]")
+    else:
+        console.print(
+            "[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]"
+        )
 
 
 @app.command("probe-adapter")
