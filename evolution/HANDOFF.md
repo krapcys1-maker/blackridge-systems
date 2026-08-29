@@ -1,10 +1,10 @@
 # Project handoff
 
-Updated: 2026-08-29 06:55 +03:00.
+Updated: 2026-08-29 07:25 +03:00.
 
 ## Read this first
 
-The current architectural champion is **v1.6**, packaged as `0.1.1`. It is the original v1 control
+The current architectural champion is **v1.7**, packaged as `0.1.1`. It is the original v1 control
 plane enhanced with selected planner, operator, GitHub-search, deny-policy, repair-feedback,
 hash-gated generation boundaries, a hash-bound public evaluator contract, JSON-safe rejection
 evidence, a fail-closed test-only repair boundary, repeated-test-suite rejection, concrete
@@ -21,6 +21,18 @@ B+A passed only 1/3. The winner passed 244 repository tests with 3 skips and 72.
 an isolated wheel installation, and the complete Docker system-E2E fail-closed suite. Exact hashes,
 known infrastructure-only false starts, and selection evidence are in
 `evolution/rounds/005/measured-results.json`.
+
+Round 006 is also complete. The promoted candidate is
+`candidate-security-boundaries-round-006`, tested snapshot
+`47c8ff9948a762b64dfe19d52ef768fb65ca09f9`, integrated as `893e290`. It adds
+unambiguous canonical provenance manifests and runs user preparation commands through the bounded,
+shell-free, non-root Docker executor. The first real sandbox attempt correctly failed closed on
+checkout permissions; the revised candidate grants write access only to the disposable checkout
+and then passed all 13 production-sandbox commands, network isolation, host-integrity, and cleanup
+checks. v1.7 passed 2/3 new Duplicate Finder attempts, while v2.7 and B+A passed 1/3. A+B was not
+materialized because no unique safe ledger advantage remained to transfer. Exact evaluator
+revision history, failures, costs, package hashes, and E2E evidence are in
+`evolution/rounds/006/measured-results.json`.
 
 The earlier isolated v2 r4 prototype lost v1 verification and safety gates and was rejected. Its
 artifacts remain immutable evidence under `benchmarks/blackridge-self-hosting-v2` and the sibling

@@ -1,0 +1,142 @@
+{
+  "schema_version": "1",
+  "round_id": "round-006",
+  "status": "complete-v1-line-promoted",
+  "base_benchmark": "evolution/benchmark/ultimate-system-suite-v1.json",
+  "base_benchmark_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
+  "security_evaluator": "D:/Skladacz aplikacji/blackridge-evolution-evaluator/round-006/tests/test_security_boundaries_round006.py",
+  "security_evaluator_sha256": "4f7b04ea7c87dc0e54abebf7e9271330867bae2083b9c45251ecebd52e7a5f76",
+  "attempts_per_measured_candidate": 3,
+  "results_root": "../blackridge-evolution-round-006/results",
+  "retained_champion": {
+    "candidate_id": "candidate-a-plus-b-round-005",
+    "architecture_line": "v1.6",
+    "commit": "8e4d4891370087d9711cd024817b01b78839e6ae",
+    "historical_duplicate_finder": "3/3 in round-005",
+    "security_evaluator": "0/5",
+    "eligibility": "rejected-by-new-critical-security-gates"
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate-security-boundaries-round-006",
+      "architecture_line": "v1.7",
+      "commit": "47c8ff9948a762b64dfe19d52ef768fb65ca09f9",
+      "code_change_commit": "b746b68",
+      "main_integration_commit": "893e290",
+      "successes": 2,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.03256232,
+      "total_builder_wall_seconds": 282.296,
+      "manual_interventions": 0,
+      "security_evaluator": "5/5",
+      "generation_sha256": "7b514265596081f3c149997c4fa28b94f705a43b6645194c368a4791faf6f4b6",
+      "generation_change_from_v1_6": "none-byte-identical",
+      "attempt_results": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "repair_iterations": 3,
+          "provider_cost_usd": 0.0154863,
+          "builder_wall_seconds": 206.969,
+          "summary_sha256": "608595a6b6321cd49a05ae4db1fe50f085503307f9615eaf878d901667d41fd1"
+        },
+        {
+          "attempt": 2,
+          "status": "pass",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00950227,
+          "builder_wall_seconds": 42.984,
+          "proposal_sha256": "bad5531c560939f7e7d9eb7aa359d4369ec42b26af11b1bd659594d26f6a1400",
+          "program_sha256": "d914921755c2f279110c308d92ba5ab74db327a6911cfc85ce9cf8d9f7f3a1f0",
+          "tests_sha256": "8a3b5ebfaceea261fe9009e065afc03f6c9959697ce5de151e7364e75a880e14",
+          "summary_sha256": "fe51892c9cf649d360713e3b54af692aceb4de5a7b448fba98bcadd137e03bd7"
+        },
+        {
+          "attempt": 3,
+          "status": "pass",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00757375,
+          "builder_wall_seconds": 32.343,
+          "proposal_sha256": "490861b6e5ded155666ce4c6e7c6de2c5a8ef288ee524a489e4fe4c6ad40d411",
+          "program_sha256": "823ead59ac4cccb0d01d098a1de6a88c0714ba602a6a645f8982be43e3cc7787",
+          "tests_sha256": "e2fcee4bf58e3fa7b99a679743bb0734f7045de8ec88390bf100600455fab165",
+          "summary_sha256": "609590d40b50f692a93992dd02802fd5e2891ff1d25acdb36e4daf2a52c6f60f"
+        }
+      ],
+      "security_changes": [
+        "Reject duplicate provenance record ids and destinations claimed by multiple records.",
+        "Reject noncanonical repository paths and overlapping copy/legal-review license policies.",
+        "Execute user preparation commands through bounded shell-free docker exec as 65534:65534.",
+        "Grant write access only to the disposable checkout so non-root package preparation remains functional."
+      ],
+      "release_gates": {
+        "repository_tests": "250 passed, 3 skipped",
+        "coverage_percent": 74.08,
+        "provenance_coverage_percent": 56,
+        "sandbox_coverage_percent": 73,
+        "pip_check": "pass",
+        "ruff": "pass",
+        "format": "pass",
+        "mypy": "pass",
+        "compileall": "pass",
+        "bandit_medium_high": "pass",
+        "pip_audit": "pass-no-known-vulnerabilities",
+        "notices": "pass",
+        "copy_provenance": "pass-zero-issues",
+        "frozen_project_workloads": "23 passed with four exact external test hashes",
+        "real_non_root_production_sandbox": "pass-all-13-commands",
+        "real_non_root_production_sandbox_sha256": "6dc7943a0067a899d4cda4d0668f152b1985f56387e79ffb764583ec29a8d94c",
+        "wheel_sha256": "402ccbddd623fffaabfb8149f27538c1927af9e145b9e7902569a0e85fa7543b",
+        "sdist_sha256": "ac928f20cc6d9f8ab488be64f757c337314762e9c025d841f4c5118719c10291",
+        "twine": "pass",
+        "installed_wheel_extras": "pass",
+        "installed_pypi_attestations": "0.0.30",
+        "docker_image_digest": "sha256:58bd9a4f3a4d94e9d5a068f9d27ea6b0d313ddf9a59f161dd2698ec2889c9a78",
+        "installed_wheel_system_e2e": "pass-on-fresh-clean-clone",
+        "system_e2e_summary_sha256": "bde1d3d36447c1f61b8c80378abde4da9032674e9f090306e31aa863680b7ae3"
+      }
+    },
+    {
+      "candidate_id": "candidate-ledger-security-round-006",
+      "architecture_line": "v2.7",
+      "commit": "7debf8c",
+      "successes": 1,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.07675765,
+      "total_builder_wall_seconds": 360.532,
+      "manual_interventions": 0,
+      "security_evaluator": "5/5",
+      "repository_tests": "253 passed, 3 skipped",
+      "coverage_percent": 73.49,
+      "real_non_root_production_sandbox": "pass",
+      "rejection_reason": "Only 1/3 Duplicate Finder attempts passed versus v1.7 at 2/3, with higher cost and wall time."
+    },
+    {
+      "candidate_id": "candidate-a-plus-b-round-006",
+      "status": "not-materialized-deduplicated",
+      "reason": "Every safe, evidence-backed ledger advantage was already present in v1.7. Expanding test-file recognition to root test_*.py files would broaden the test-repair mutation boundary without measured benefit."
+    },
+    {
+      "candidate_id": "candidate-b-plus-a-round-006",
+      "architecture_line": "v2.8",
+      "commit": "39e069aca288aec39601e36cb1a4b5ece057dc37",
+      "successes": 1,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.07354475,
+      "total_builder_wall_seconds": 273.608,
+      "manual_interventions": 0,
+      "security_evaluator": "5/5",
+      "repository_tests": "254 passed, 3 skipped",
+      "coverage_percent": 73.53,
+      "rejection_reason": "The v1 path and argv safeguards improved deterministic security but did not improve measured effectiveness beyond 1/3."
+    }
+  ],
+  "infrastructure_events": [
+    "Evaluator revision 1 incorrectly rejected any trusted setup command whose executable was Python. It was superseded before candidate measurement by revision 2, which rejects only the exact user-supplied preparation argv on the SWE-ReX transport.",
+    "The first real v1.7 sandbox probe failed because the root-created checkout was not writable by UID 65534. The candidate was changed to grant write access only inside the disposable checkout; the second frozen scenario passed all commands."
+  ],
+  "selected_champion": "candidate-security-boundaries-round-006",
+  "selected_architecture_line": "v1.7",
+  "selection_reason": "v1.7 was the only candidate with 2/3 generation success and 5/5 new critical security gates. Its generator is byte-identical to v1.6, while its provenance and sandbox boundaries are strictly stronger and all release gates passed.",
+  "selection_complete": true
+}

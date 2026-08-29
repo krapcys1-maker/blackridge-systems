@@ -1,23 +1,23 @@
 {
   "schema_version": "1",
-  "updated_at": "2026-08-29T07:10:00+03:00",
-  "status": "round-006-security-benchmark-frozen",
+  "updated_at": "2026-08-29T07:25:00+03:00",
+  "status": "round-006-complete-v1-line-promoted",
   "naming": {
     "package_version": "0.1.1",
-    "current_architectural_champion": "v1.6",
-    "next_fresh_challenger_name": "v2.7",
+    "current_architectural_champion": "v1.7",
+    "next_fresh_challenger_name": "v2.9",
     "rule": "Package versions and architectural line names are separate. Enhanced descendants of v1 remain on the v1 line; v2 names are reserved for the alternate ledger architecture."
   },
   "current_champion": {
-    "candidate_id": "candidate-a-plus-b-round-005",
-    "architecture_line": "v1.6",
+    "candidate_id": "candidate-security-boundaries-round-006",
+    "architecture_line": "v1.7",
     "package_version": "0.1.1",
-    "snapshot_commit": "8e4d4891370087d9711cd024817b01b78839e6ae",
-    "winning_attempts": [1, 2, 3],
-    "winning_proposal_sha256": "1645c6ba72e049d6555046fc82dfe659600f50f4efe2e0e39c428e827ec13bbe",
-    "winning_program_sha256": "c165286f70c8a3a851a4b94549e2cc6de85121ef4f725e57397db31eadad4b8b",
-    "main_integration_commit": "73d9095",
-    "selection_round": "round-005"
+    "snapshot_commit": "47c8ff9948a762b64dfe19d52ef768fb65ca09f9",
+    "winning_attempts": [2, 3],
+    "winning_proposal_sha256": "bad5531c560939f7e7d9eb7aa359d4369ec42b26af11b1bd659594d26f6a1400",
+    "winning_program_sha256": "d914921755c2f279110c308d92ba5ab74db327a6911cfc85ce9cf8d9f7f3a1f0",
+    "main_integration_commit": "893e290",
+    "selection_round": "round-006"
   },
   "round_history": [
     {
@@ -65,19 +65,15 @@
       "architecture_line": "v1.6",
       "result": "evolution/rounds/005/measured-results.json",
       "reason": "v1.6 passed 3/3 with the lowest current-round cost and time among perfect candidates and passed every release, provenance, frozen-workload, wheel, Docker, and system-E2E gate; B+A passed 1/3."
+    },
+    {
+      "round_id": "round-006",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-security-boundaries-round-006",
+      "architecture_line": "v1.7",
+      "result": "evolution/rounds/006/measured-results.json",
+      "reason": "v1.7 passed 2/3 and all five new critical provenance/sandbox gates; v2.7 and B+A passed 1/3. The v1.7 generator remained byte-identical to v1.6 and every release gate passed."
     }
   ],
-  "active_round": {
-    "round_id": "round-006",
-    "status": "security-benchmark-frozen",
-    "manifest": "evolution/rounds/006/manifest.json",
-    "benchmark": "evolution/benchmark/ultimate-system-suite-v1.json",
-    "benchmark_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
-    "attempts_per_candidate": 3,
-    "incumbent": "candidate-a-plus-b-round-005",
-    "incumbent_architecture_line": "v1.6",
-    "incumbent_commit": "8e4d4891370087d9711cd024817b01b78839e6ae",
-    "focus": "provenance and sandbox preparation boundaries",
-    "next_action": "Hash-freeze the independent security tests, measure the v1.6 baseline, then build v1.7 and v2.7 in isolated worktrees without editing the evaluator."
-  }
+  "active_round": null
 }

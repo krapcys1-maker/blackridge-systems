@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-006",
-  "status": "security-benchmark-frozen",
+  "status": "complete-v1-line-promoted",
   "incumbent": {
     "candidate_id": "candidate-a-plus-b-round-005",
     "architecture_line": "v1.6",
@@ -30,10 +30,14 @@
   },
   "candidate_slots": [
     {"origin": "champion", "candidate_id": "candidate-a-plus-b-round-005", "architecture_line": "v1.6", "status": "retained"},
-    {"origin": "A", "candidate_id": "candidate-security-boundaries-round-006", "architecture_line": "v1.7", "status": "planned"},
-    {"origin": "B", "candidate_id": "candidate-ledger-security-round-006", "architecture_line": "v2.7", "status": "planned"},
-    {"origin": "A+B", "candidate_id": "candidate-a-plus-b-round-006", "status": "blocked-until-a-and-b-measured"},
-    {"origin": "B+A", "candidate_id": "candidate-b-plus-a-round-006", "status": "blocked-until-a-and-b-measured"}
+    {"origin": "A", "candidate_id": "candidate-security-boundaries-round-006", "architecture_line": "v1.7", "status": "promoted-2-of-3"},
+    {"origin": "B", "candidate_id": "candidate-ledger-security-round-006", "architecture_line": "v2.7", "status": "rejected-1-of-3"},
+    {"origin": "A+B", "candidate_id": "candidate-a-plus-b-round-006", "status": "deduplicated-no-unique-safe-transfer"},
+    {"origin": "B+A", "candidate_id": "candidate-b-plus-a-round-006", "architecture_line": "v2.8", "status": "rejected-1-of-3"}
   ],
-  "selection_status": "not-started"
+  "selection_status": "complete",
+  "selected_champion": "candidate-security-boundaries-round-006",
+  "selected_architecture_line": "v1.7",
+  "selected_snapshot_commit": "47c8ff9948a762b64dfe19d52ef768fb65ca09f9",
+  "result": "evolution/rounds/006/measured-results.json"
 }
