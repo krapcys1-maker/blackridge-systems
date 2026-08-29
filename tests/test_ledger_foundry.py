@@ -35,6 +35,22 @@ def verified_text() -> str:
     )
 
 
+def test_ledger_evidence_uses_atomic_persistence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output = tmp_path / "ledger.json"
+    calls: list[tuple[Path, str]] = []
+    monkeypatch.setattr(
+        foundry,
+        "_atomic_write_text",
+        lambda path, value: calls.append((path, value)),
+    )
+
+    foundry.write_json(output, {"status": "retained"})
+
+    assert calls == [(output, '{\n  "status": "retained"\n}\n')]
+
+
 def proposal(program: str = "print('ok')\n", tests: str | None = None) -> dict[str, object]:
     test_source = tests or "\n".join(
         f"def test_case_{number}():\n    assert True" for number in range(9)

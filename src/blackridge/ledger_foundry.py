@@ -15,6 +15,7 @@ from typing import Any
 
 import yaml
 
+from blackridge.io import _atomic_write_text
 from blackridge.operator import DeepSeekBackend, load_secret
 
 IMAGE = (
@@ -54,7 +55,7 @@ def digest_file(path: Path) -> str:
 
 def write_json(path: Path, value: object) -> None:
     payload = json.dumps(value, indent=2, sort_keys=True) + "\n"
-    path.write_text(payload, encoding="utf-8", newline="\n")
+    _atomic_write_text(path, payload)
 
 
 def portable_path(value: object) -> str:
