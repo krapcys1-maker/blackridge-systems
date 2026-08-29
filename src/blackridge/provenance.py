@@ -7,11 +7,11 @@ import json
 import re
 from collections import defaultdict
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
@@ -88,6 +88,27 @@ class DerivedCodeRecord(StrictModel):
     manual_review_file: str | None = None
     manual_review_sha256: str | None = None
 
+    @model_validator(mode="after")
+    def canonical_unique_paths(self) -> DerivedCodeRecord:
+        path_groups = {
+            "upstream_paths": self.upstream_paths,
+            "destination_paths": self.destination_paths,
+        }
+        optional_paths = {
+            "license_text_path": self.license_text_path,
+            "attribution_location": self.attribution_location,
+            "manual_review_file": self.manual_review_file,
+        }
+        for label, paths in path_groups.items():
+            if len(paths) != len(set(paths)):
+                raise ValueError(f"{label} must not contain duplicates")
+            for path in paths:
+                _require_canonical_repo_path(path, label=label)
+        for label, optional_path in optional_paths.items():
+            if optional_path is not None:
+                _require_canonical_repo_path(optional_path, label=label)
+        return self
+
 
 class ProvenanceManifest(StrictModel):
     """Copy policy and the complete registry of derived Blackridge files."""
@@ -96,6 +117,43 @@ class ProvenanceManifest(StrictModel):
     allowed_copy_licenses: list[str]
     legal_review_licenses: list[str]
     records: list[DerivedCodeRecord] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def unambiguous_policy_and_records(self) -> ProvenanceManifest:
+        allowed = set(self.allowed_copy_licenses)
+        reviewed = set(self.legal_review_licenses)
+        if len(allowed) != len(self.allowed_copy_licenses):
+            raise ValueError("allowed_copy_licenses must not contain duplicates")
+        if len(reviewed) != len(self.legal_review_licenses):
+            raise ValueError("legal_review_licenses must not contain duplicates")
+        overlap = sorted(allowed & reviewed)
+        if overlap:
+            raise ValueError(
+                "copy and legal-review license policies overlap: " + ", ".join(overlap)
+            )
+        record_ids = [record.id for record in self.records]
+        if len(record_ids) != len(set(record_ids)):
+            raise ValueError("derived-code record ids must be unique")
+        destination_owners: dict[str, str] = {}
+        for record in self.records:
+            for destination in record.destination_paths:
+                owner = destination_owners.setdefault(destination, record.id)
+                if owner != record.id:
+                    raise ValueError(
+                        f"destination path {destination!r} is claimed by {owner!r} "
+                        f"and {record.id!r}"
+                    )
+        return self
+
+
+def _require_canonical_repo_path(value: str, *, label: str) -> None:
+    if not value or "\\" in value or any(ord(character) < 32 for character in value):
+        raise ValueError(f"{label} must contain canonical repository paths")
+    path = PurePosixPath(value)
+    if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
+        raise ValueError(f"{label} must contain canonical repository paths")
+    if path.as_posix() != value:
+        raise ValueError(f"{label} must contain canonical repository paths")
 
 
 def load_source_audit_definition(path: Path) -> SourceAuditDefinition:

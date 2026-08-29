@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import subprocess
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -59,6 +61,16 @@ def test_source_setup_fetches_only_requested_commit_without_shell() -> None:
     assert fetch["argv"][-1] == experiment.commit
     assert all(isinstance(item["argv"], list) for item in commands)
     assert "shell" not in fetch
+
+
+def test_source_setup_grants_only_disposable_checkout_write_access() -> None:
+    experiment = SandboxExperiment.model_validate(experiment_data())
+
+    commands = SwerexDockerProbe._setup_commands(experiment)
+    access = next(item for item in commands if item["id"] == "source-non-root-access")
+
+    assert access["argv"] == ["chmod", "-R", "a+rwX", experiment.workdir]
+    assert access["phase"] == "source"
 
 
 def test_production_experiment_requires_networkless_workload() -> None:
@@ -254,3 +266,83 @@ def test_workspace_snapshot_detects_real_content_change(tmp_path) -> None:
 
     assert before.digest != after.digest
     assert before.changed_paths(after) == ["component.py"]
+
+
+def test_preparation_uses_bounded_non_root_executor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    bounded_phases: list[str] = []
+
+    class FakeCommand:
+        def __init__(self, *, command, **_kwargs):
+            self.command = command
+
+    class FakeResponse:
+        stdout = ""
+        stderr = ""
+        exit_code = 0
+
+    class FakeRuntime:
+        async def execute(self, _command):
+            return FakeResponse()
+
+    class FakeDeployment:
+        def __init__(self, **_kwargs):
+            self.runtime = FakeRuntime()
+            self.container_name = "bounded-preparation"
+
+        async def start(self):
+            return None
+
+        async def stop(self):
+            return None
+
+    data = experiment_data()
+    data["preparation_commands"] = [
+        {
+            "id": "prepare",
+            "description": "Prepare the exact package without an interactive shell.",
+            "argv": ["python", "-m", "pip", "--version"],
+        }
+    ]
+    experiment = SandboxExperiment.model_validate(data)
+    snapshot = WorkspaceSnapshot(digest="same", files={})
+    monkeypatch.setattr(
+        SwerexDockerProbe,
+        "_runtime_types",
+        lambda _self: (FakeDeployment, FakeCommand),
+    )
+    monkeypatch.setattr(
+        "blackridge.sandbox.inspect_local_image",
+        lambda _image: {"resolved_id": "sha256:" + "a" * 64},
+    )
+    monkeypatch.setattr(
+        WorkspaceSnapshot,
+        "capture",
+        classmethod(lambda _cls, _root: snapshot),
+    )
+    monkeypatch.setattr("blackridge.sandbox._container_exists", lambda _name: False)
+
+    def bounded(_container: str, item: dict[str, object]) -> dict[str, object]:
+        bounded_phases.append(str(item["phase"]))
+        return {
+            **item,
+            "executor": "docker-exec-shell-free",
+            "duration_seconds": 0.01,
+            "stdout": "",
+            "stderr": "",
+            "exit_code": 0,
+            "transport_error": None,
+        }
+
+    monkeypatch.setattr(SwerexDockerProbe, "_docker_exec_result", staticmethod(bounded))
+
+    evidence = asyncio.run(SwerexDockerProbe()._probe(experiment, tmp_path))
+
+    assert evidence.observations["probe_completed"] is True
+    assert bounded_phases == ["preparation", "experiment"]
+    preparation = next(
+        item for item in evidence.observations["commands"] if item["id"] == "prepare"
+    )
+    assert preparation["executor"] == "docker-exec-shell-free"
+    assert preparation["phase"] == "preparation"
