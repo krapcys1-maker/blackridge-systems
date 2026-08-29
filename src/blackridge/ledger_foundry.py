@@ -26,6 +26,12 @@ MAX_FILE_BYTES = 100_000
 MAX_TOTAL_BYTES = 1_000_000
 
 
+class RepeatedTestSuiteError(ValueError):
+    def __init__(self, test_suite_sha256: str) -> None:
+        super().__init__("test repair repeats the prior or an already rejected test suite")
+        self.test_suite_sha256 = test_suite_sha256
+
+
 def canonical_json(value: object) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
@@ -100,8 +106,23 @@ def verified_component_index(verified_text: str) -> dict[tuple[str, str, str], i
 
 def is_test_path(path: str) -> bool:
     return any(
-        part in {"test", "tests"} or part.startswith("test_") for part in PurePosixPath(path).parts
+        part.casefold() in {"test", "tests"} or part.casefold().startswith("test_")
+        for part in PurePosixPath(path).parts
     )
+
+
+def generated_test_suite_sha256(proposal: dict[str, Any]) -> str:
+    """Hash generated tests canonically across ordering and path case."""
+
+    files = [item for item in proposal["files"] if is_test_path(item["path"])]
+    if not files:
+        raise ValueError("test-suite hashing requires generated test files")
+    canonical = [
+        {"path": portable_path(item["path"]).casefold(), "content": item["content"]}
+        for item in files
+    ]
+    canonical.sort(key=lambda item: item["path"])
+    return digest_bytes(canonical_json(canonical))
 
 
 def compile_proposal(
@@ -275,6 +296,7 @@ def compile_test_repair(
     prior: dict[str, Any],
     request_text: str,
     verified_text: str,
+    rejected_test_suite_sha256s: list[str] | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
     """Compile a test-only response without accepting any product or control rewrite."""
 
@@ -301,7 +323,43 @@ def compile_test_repair(
         "limitations": raw.get("limitations", prior.get("limitations", [])),
     }
     proposal, nested_ignored = compile_proposal(combined, request_text, verified_text)
+    prior_test_sha = generated_test_suite_sha256(prior)
+    rejected_hashes = list(rejected_test_suite_sha256s or [])
+    if len(rejected_hashes) != len(set(rejected_hashes)):
+        raise ValueError("rejected test-suite hashes must be unique")
+    if any(not re.fullmatch(r"[0-9a-f]{64}", item) for item in rejected_hashes):
+        raise ValueError("rejected test-suite hashes must be lowercase SHA-256 values")
+    candidate_test_sha = generated_test_suite_sha256(proposal)
+    if candidate_test_sha in {prior_test_sha, *rejected_hashes}:
+        raise RepeatedTestSuiteError(candidate_test_sha)
     return proposal, sorted(set(ignored + nested_ignored))
+
+
+def test_repair_rejection_record(
+    prior: dict[str, Any],
+    completion: dict[str, Any],
+    locked_paths: list[str],
+    rejected_test_suite_sha256s: list[str],
+    exc: Exception,
+) -> dict[str, Any]:
+    """Retain a JSON-safe rejection bound to exact product and test-suite bytes."""
+
+    prior_files = {item["path"]: item for item in prior["files"]}
+    return {
+        "schema_version": "1",
+        "status": "schema-rejected",
+        "prior_proposal_sha256": digest_bytes(canonical_json(prior)),
+        "prior_test_suite_sha256": generated_test_suite_sha256(prior),
+        "rejected_test_suite_sha256s": rejected_test_suite_sha256s,
+        "candidate_test_suite_sha256": getattr(exc, "test_suite_sha256", None),
+        "completion_sha256": completion.get("content_sha256"),
+        "locked_file_sha256": {
+            path: digest_bytes(prior_files[path]["content"].encode("utf-8"))
+            for path in locked_paths
+        },
+        "error_type": type(exc).__name__,
+        "error_message": str(exc)[:2_000],
+    }
 
 
 def materialize(proposal: dict[str, Any], workspace: Path) -> dict[str, str]:
@@ -385,6 +443,7 @@ def prompt(
     verified_components: str,
     feedback: str | None,
     locked_prior: dict[str, Any] | None = None,
+    rejected_test_suite_sha256s: list[str] | None = None,
 ) -> tuple[str, str]:
     if locked_prior is not None:
         system = (
@@ -413,7 +472,13 @@ def prompt(
             "subprocesses; never import or patch product internals. Map every public acceptance "
             "id exactly once to an existing concrete test function. The immutable product passed "
             "the authoritative evaluator, so correct any generated-test assertion that conflicts "
-            "with its exact preconditions or output semantics.\n\nPUBLIC REQUEST:\n"
+            "with its exact preconditions or output semantics. Return materially different test "
+            "bytes: a canonical SHA-256 equal to the prior or any rejected suite is a "
+            "deterministic failure.\n\nPRIOR TEST-SUITE SHA-256:\n"
+            + generated_test_suite_sha256(locked_prior)
+            + "\n\nREJECTED TEST-SUITE SHA-256 VALUES:\n"
+            + json.dumps(rejected_test_suite_sha256s or [])
+            + "\n\nPUBLIC REQUEST:\n"
             + request
             + "\n\nIMMUTABLE PRIOR PROPOSAL:\n"
             + json.dumps(locked_prior, indent=2, sort_keys=True)
@@ -530,6 +595,7 @@ def main() -> int:
     final: dict[str, Any] | None = None
     locked_prior: dict[str, Any] | None = None
     locked_paths: list[str] = []
+    rejected_test_suite_sha256s: list[str] = []
     started = time.monotonic()
 
     for iteration in range(args.max_repairs + 1):
@@ -547,6 +613,7 @@ def main() -> int:
                 verified_components,
                 feedback,
                 locked_prior,
+                rejected_test_suite_sha256s,
             )
             completion = backend.complete_json(
                 system=system, user=user, max_tokens=16_384
@@ -557,16 +624,35 @@ def main() -> int:
             total_input += usage["input_tokens"]
             total_output += usage["output_tokens"]
             event["completion_sha256"] = completion["content_sha256"]
-            proposal, ignored = (
-                compile_test_repair(
-                    completion["content"],
-                    locked_prior,
-                    request,
-                    verified_components,
+            try:
+                proposal, ignored = (
+                    compile_test_repair(
+                        completion["content"],
+                        locked_prior,
+                        request,
+                        verified_components,
+                        rejected_test_suite_sha256s,
+                    )
+                    if locked_prior is not None
+                    else compile_proposal(completion["content"], request, verified_components)
                 )
-                if locked_prior is not None
-                else compile_proposal(completion["content"], request, verified_components)
-            )
+            except Exception as compile_error:
+                if locked_prior is not None:
+                    rejection = test_repair_rejection_record(
+                        locked_prior,
+                        completion,
+                        locked_paths,
+                        rejected_test_suite_sha256s,
+                        compile_error,
+                    )
+                    write_json(iteration_dir / "test-repair-rejection.json", rejection)
+                    candidate_hash = rejection["candidate_test_suite_sha256"]
+                    if (
+                        isinstance(candidate_hash, str)
+                        and candidate_hash not in rejected_test_suite_sha256s
+                    ):
+                        rejected_test_suite_sha256s.append(candidate_hash)
+                raise
             composition: dict[str, Any] | None = None
             if locked_prior is not None:
                 proposal, composition = compose_locked_files(locked_prior, proposal, locked_paths)

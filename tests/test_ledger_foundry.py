@@ -122,7 +122,7 @@ class CompilerTests(unittest.TestCase):
             proposal("print('trusted')\n"), request_text(), verified_text()
         )
         repaired_tests = "\n".join(
-            f"def test_case_{number}():\n    assert True" for number in range(9)
+            f"def test_case_{number}():\n    assert 1 == 1" for number in range(9)
         )
         raw = {
             "files": [{"path": "tests/test_program.py", "content": repaired_tests}],
@@ -144,6 +144,43 @@ class CompilerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "only test files"):
             foundry.compile_test_repair(raw, prior, request_text(), verified_text())
 
+    def test_test_only_compiler_rejects_repeated_suite_with_hash_bound_record(self) -> None:
+        prior, _ = foundry.compile_proposal(proposal(), request_text(), verified_text())
+        prior_tests = [item for item in prior["files"] if foundry.is_test_path(item["path"])]
+        raw = {
+            "files": prior_tests,
+            "acceptance_coverage": prior["acceptance_coverage"],
+            "limitations": [],
+        }
+
+        with self.assertRaises(foundry.RepeatedTestSuiteError) as caught:
+            foundry.compile_test_repair(raw, prior, request_text(), verified_text(), ["a" * 64])
+
+        test_hash = foundry.generated_test_suite_sha256(prior)
+        self.assertEqual(caught.exception.test_suite_sha256, test_hash)
+        record = foundry.test_repair_rejection_record(
+            prior,
+            {"content_sha256": "b" * 64},
+            ["program.py"],
+            ["a" * 64],
+            caught.exception,
+        )
+        self.assertEqual(record["candidate_test_suite_sha256"], test_hash)
+        self.assertEqual(record["prior_test_suite_sha256"], test_hash)
+        self.assertEqual(record["rejected_test_suite_sha256s"], ["a" * 64])
+        json.dumps(record)
+
+    def test_test_suite_hash_is_stable_across_order_and_path_case(self) -> None:
+        first = proposal()
+        second = json.loads(json.dumps(first))
+        second["files"] = list(reversed(second["files"]))
+        second["files"][0]["path"] = "Tests/test_program.py"
+
+        self.assertEqual(
+            foundry.generated_test_suite_sha256(first),
+            foundry.generated_test_suite_sha256(second),
+        )
+
     def test_prompt_requires_portable_black_box_tests(self) -> None:
         _, user = foundry.prompt("task", "request", "evaluator", "[]", None)
 
@@ -158,6 +195,7 @@ class CompilerTests(unittest.TestCase):
         _, repair_user = foundry.prompt("task", "request", "evaluator", "[]", "tests failed", prior)
         self.assertIn("Return only files under a test or tests directory", repair_user)
         self.assertIn("IMMUTABLE PRIOR PROPOSAL", repair_user)
+        self.assertIn(foundry.generated_test_suite_sha256(prior), repair_user)
         self.assertNotIn("Return a full replacement project", repair_user)
 
 
