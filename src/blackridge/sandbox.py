@@ -277,6 +277,16 @@ class SwerexDockerProbe:
                 "timeout_seconds": 60,
                 "phase": "source",
             },
+            {
+                "id": "source-non-root-access",
+                "description": (
+                    "Make the disposable checkout writable by the non-root preparation user."
+                ),
+                "argv": ["chmod", "-R", "a+rwX", experiment.workdir],
+                "cwd": None,
+                "timeout_seconds": 60,
+                "phase": "source",
+            },
         ]
 
     @staticmethod
@@ -433,9 +443,10 @@ class SwerexDockerProbe:
         stop_error: str | None = None
         container_name: str | None = None
         force_remove: dict[str, object] | None = None
-        control_commands = self._setup_commands(experiment) + self._preparation_commands(experiment)
+        control_commands = self._setup_commands(experiment)
+        preparation_commands = self._preparation_commands(experiment)
         workload_commands = self._experiment_commands(experiment)
-        all_commands = control_commands + workload_commands
+        all_commands = control_commands + preparation_commands + workload_commands
         execution_boundary: dict[str, object] = {
             "requested": experiment.execution_network,
             "applied": experiment.execution_network == "inherit",
@@ -508,6 +519,14 @@ class SwerexDockerProbe:
                 if result["transport_error"] is not None or result["exit_code"] != 0:
                     control_failed = True
                     break
+            if not control_failed:
+                for item in preparation_commands:
+                    attempted += 1
+                    result = self._docker_exec_result(container_name, item)
+                    command_results.append(result)
+                    if result["transport_error"] is not None or result["exit_code"] != 0:
+                        control_failed = True
+                        break
             if not control_failed and experiment.execution_network == "none":
                 try:
                     execution_boundary = self._isolate_execution_network(container_name)
