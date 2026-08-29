@@ -1,0 +1,37 @@
+{
+  "schema_version": "1",
+  "round_id": "round-006",
+  "status": "security-benchmark-frozen",
+  "incumbent": {
+    "candidate_id": "candidate-a-plus-b-round-005",
+    "architecture_line": "v1.6",
+    "snapshot_commit": "8e4d4891370087d9711cd024817b01b78839e6ae",
+    "main_integration_commit": "73d9095"
+  },
+  "benchmark": {
+    "base_spec": "evolution/benchmark/ultimate-system-suite-v1.json",
+    "base_spec_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
+    "external_security_tests": "D:/Skladacz aplikacji/blackridge-evolution-evaluator/round-006/tests/test_security_boundaries_round006.py",
+    "external_security_tests_sha256": "c986b34a7f6eba81237f86d1edf5a0f8b4454bfd3a2852bd0dc62ed035356945",
+    "freeze_status": "frozen"
+  },
+  "focus_segments": [
+    "unambiguous and canonical copied-code provenance records",
+    "bounded non-root sandbox preparation commands",
+    "no regression in generation, composition, frozen workloads, packaging, or system E2E"
+  ],
+  "incumbent_security_baseline": {
+    "tests_passed": 0,
+    "tests_failed": 5,
+    "manual_interventions": 0,
+    "interpretation": "The frozen tests demonstrate missing fail-closed policy; they are not regressions from an earlier published contract."
+  },
+  "candidate_slots": [
+    {"origin": "champion", "candidate_id": "candidate-a-plus-b-round-005", "architecture_line": "v1.6", "status": "retained"},
+    {"origin": "A", "candidate_id": "candidate-security-boundaries-round-006", "architecture_line": "v1.7", "status": "planned"},
+    {"origin": "B", "candidate_id": "candidate-ledger-security-round-006", "architecture_line": "v2.7", "status": "planned"},
+    {"origin": "A+B", "candidate_id": "candidate-a-plus-b-round-006", "status": "blocked-until-a-and-b-measured"},
+    {"origin": "B+A", "candidate_id": "candidate-b-plus-a-round-006", "status": "blocked-until-a-and-b-measured"}
+  ],
+  "selection_status": "not-started"
+}
