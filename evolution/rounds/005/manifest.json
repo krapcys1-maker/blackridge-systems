@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-005",
-  "status": "audit-and-benchmark-freeze",
+  "status": "complete-v1-line-promoted",
   "incumbent": {
     "candidate_id": "candidate-test-repair-round-004",
     "architecture_line": "v1.4",
@@ -16,14 +16,18 @@
   },
   "candidate_slots": [
     {"origin": "champion", "candidate_id": "candidate-test-repair-round-004", "architecture_line": "v1.4", "status": "retained"},
-    {"origin": "A", "candidate_id": "candidate-v1-5-round-005", "architecture_line": "v1.5", "status": "planned"},
-    {"origin": "B", "candidate_id": "candidate-v2-5-round-005", "architecture_line": "v2.5", "status": "pending-audit"},
-    {"origin": "A+B", "candidate_id": "candidate-a-plus-b-round-005", "status": "blocked-until-a-and-b-measured"},
-    {"origin": "B+A", "candidate_id": "candidate-b-plus-a-round-005", "status": "blocked-until-a-and-b-measured"}
+    {"origin": "A", "candidate_id": "candidate-v1-5-round-005", "architecture_line": "v1.5", "status": "measured-3-of-3"},
+    {"origin": "B", "candidate_id": "candidate-v2-5-round-005", "architecture_line": "v2.5", "status": "measured-3-of-3"},
+    {"origin": "A+B", "candidate_id": "candidate-a-plus-b-round-005", "architecture_line": "v1.6", "status": "promoted-3-of-3"},
+    {"origin": "B+A", "candidate_id": "candidate-b-plus-a-round-005", "architecture_line": "v2.6", "status": "rejected-1-of-3"}
   ],
   "candidate_a_changes": [
     "Require every acceptance mapping to name a concrete test function in the referenced generated file.",
     "Bind repeated test-only repairs to hashes of rejected test suites and reject exact repeats before sandbox execution."
   ],
-  "selection_status": "not-started"
+  "selection_status": "complete",
+  "selected_champion": "candidate-a-plus-b-round-005",
+  "selected_architecture_line": "v1.6",
+  "selected_snapshot_commit": "8e4d4891370087d9711cd024817b01b78839e6ae",
+  "result": "evolution/rounds/005/measured-results.json"
 }

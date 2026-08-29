@@ -1,0 +1,153 @@
+{
+  "schema_version": "1",
+  "round_id": "round-005",
+  "status": "complete-v1-line-promoted",
+  "benchmark": "evolution/benchmark/ultimate-system-suite-v1.json",
+  "benchmark_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
+  "attempts_per_candidate": 3,
+  "results_root": "../blackridge-evolution-round-005/results",
+  "retained_champion": {
+    "candidate_id": "candidate-test-repair-round-004",
+    "architecture_line": "v1.4",
+    "commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
+    "successes": 3,
+    "attempts": 3,
+    "total_provider_cost_usd": 0.0309198,
+    "evidence": "evolution/rounds/004/measured-results.json"
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate-v1-5-round-005",
+      "architecture_line": "v1.5",
+      "commit": "e9b81ffcc24d76a692da54140f5c1023266e6bd8",
+      "successes": 3,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.03463874,
+      "total_builder_wall_seconds": 132.343,
+      "manual_interventions": 0,
+      "changes": [
+        "Bind acceptance evidence to a concrete existing generated test function.",
+        "Hash generated test suites and reject repeated test-only repairs before sandbox execution."
+      ],
+      "repository_tests": "243 passed, 3 skipped",
+      "coverage_percent": 72.84
+    },
+    {
+      "candidate_id": "candidate-v2-5-round-005",
+      "architecture_line": "v2.5",
+      "commit": "9c077f89f8574e4f92d88fd8fa176f4c2e89defa",
+      "successes": 3,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.03117443,
+      "total_builder_wall_seconds": 130.688,
+      "manual_interventions": 0,
+      "changes": [
+        "Make ledger test-only repairs hash-bound and diversity-aware.",
+        "Reject repeated ledger test suites before sandbox execution."
+      ],
+      "repository_tests": "247 passed, 3 skipped",
+      "coverage_percent": 72.29
+    },
+    {
+      "candidate_id": "candidate-a-plus-b-round-005",
+      "architecture_line": "v1.6",
+      "commit": "8e4d4891370087d9711cd024817b01b78839e6ae",
+      "main_integration_commit": "73d9095",
+      "successes": 3,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.02968519,
+      "total_builder_wall_seconds": 123.812,
+      "manual_interventions": 0,
+      "changes": [
+        "All v1.5 concrete-evidence and repeated-test protections.",
+        "Transfer the ledger line's minimum-nine-concrete-test proposal gate into the v1 generator."
+      ],
+      "successful_attempts": [
+        {
+          "attempt": 1,
+          "attempt_directory": "attempt-001-valid",
+          "proposal_sha256": "1645c6ba72e049d6555046fc82dfe659600f50f4efe2e0e39c428e827ec13bbe",
+          "program_sha256": "c165286f70c8a3a851a4b94549e2cc6de85121ef4f725e57397db31eadad4b8b",
+          "tests_sha256": "d6d4d064c39b05388fde140a296006dafc021f691d4965cdb575611af401e28c",
+          "generated_tests": "11/11",
+          "independent_evaluator": "7/7",
+          "repair_iterations": 1,
+          "provider_cost_usd": 0.01477793,
+          "builder_wall_seconds": 58.953,
+          "summary_sha256": "121f50b9d3b225cd006b0b4d0bd8829a96e69d8e6e5d893507bec299af3ef15d"
+        },
+        {
+          "attempt": 2,
+          "attempt_directory": "attempt-002",
+          "proposal_sha256": "2ffedab063da36c862f8882063da1158124b5ff3f47d44fc2d9b6fe031d2efbf",
+          "program_sha256": "35a140068a771ce2a52c8104998e7a98beea828fd12e3917e9c734e328edeb76",
+          "tests_sha256": "3651194d7abb134c9eca1b7c5052b46d3b1753ff84122dbc793becaeb0df4657",
+          "generated_tests": "12/12",
+          "independent_evaluator": "7/7",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00770971,
+          "builder_wall_seconds": 34.125,
+          "summary_sha256": "c20671807174ac60109e6925300acfc2eec37c8ecf6d0bd22483ebb1491c02aa"
+        },
+        {
+          "attempt": 3,
+          "attempt_directory": "attempt-003",
+          "proposal_sha256": "c7a02d285e691b192f720fec40fc3b5e4898f4420b2aa4f9c9d72857fab1e6aa",
+          "program_sha256": "7ac9646e0a004719d7f869fa7fe538d1cb2ccc1f94761c1e68d9908d4dd18c9b",
+          "tests_sha256": "f7507fe4c386ca1e4431115b0376317584265e96f7ee54a44bf612505820313c",
+          "generated_tests": "10/10",
+          "independent_evaluator": "7/7",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00719755,
+          "builder_wall_seconds": 30.734,
+          "summary_sha256": "711612f6731d9b2db8fa114ba13d273dd3012cafe4576215ce81d84c8d20b256"
+        }
+      ],
+      "release_gates": {
+        "repository_tests": "244 passed, 3 skipped",
+        "coverage_percent": 72.85,
+        "pip_check": "pass",
+        "ruff": "pass",
+        "format": "pass",
+        "mypy": "pass",
+        "compileall": "pass",
+        "bandit_medium_high": "pass",
+        "pip_audit": "pass-no-known-vulnerabilities",
+        "notices": "pass",
+        "copy_provenance": "pass-zero-issues",
+        "frozen_project_workloads": "23 passed with four exact external test hashes",
+        "wheel_sha256": "25a02469c0d0e67427df0a249310b4ac16c2ba7e5d515b7e24750b1deec85e05",
+        "sdist_sha256": "23fc7360ffd60506f4cde0aec970288eff509daefe16ca87b415bf4a448cd438",
+        "twine": "pass",
+        "installed_wheel_extras": "pass",
+        "installed_pypi_attestations": "0.0.30",
+        "docker_image_digest": "sha256:72bf9c99b77148d1ff512879e0f1545b05fa177f7f64019a29f438a9a7688746",
+        "installed_wheel_system_e2e": "pass-on-fresh-clean-clone",
+        "system_e2e_summary_sha256": "0cfdf8bac479b6756043440d7a423262e3ac477f26ec7a4c289a03ca8302f39b"
+      },
+      "causal_claim_limit": "The measured series exercised full-proposal repair once but did not naturally exercise repeated test-only repair. Deterministic tests cover that rejection path; no stochastic causal uplift is claimed for it."
+    },
+    {
+      "candidate_id": "candidate-b-plus-a-round-005",
+      "architecture_line": "v2.6",
+      "commit": "b589985",
+      "successes": 1,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.05926892,
+      "total_builder_wall_seconds": 301.954,
+      "manual_interventions": 0,
+      "repository_tests": "248 passed, 3 skipped",
+      "coverage_percent": 72.33,
+      "rejection_reason": "Two attempts exhausted all three repairs and failed preflight; 1/3 is a critical effectiveness regression."
+    }
+  ],
+  "infrastructure_events": [
+    "The first A+B launch used a stale frozen-input filename and stopped before any provider call. Its empty attempt-001 directory was retained; the valid predeclared attempt 1 is attempt-001-valid.",
+    "The first system-E2E launch correctly refused a checkout containing an in-tree test virtual environment. The valid E2E used a second clean clone and an externally installed wheel.",
+    "Direct collection from the external test directory lacked deliberately uncopied relative dependencies. SHA-256 equality was proven for all four frozen test files before their identical checkout copies passed 23 tests."
+  ],
+  "selected_champion": "candidate-a-plus-b-round-005",
+  "selected_architecture_line": "v1.6",
+  "selection_reason": "A+B passed 3/3 with zero interventions, had the lowest current-round cost and wall time among all 3/3 candidates, added fail-closed evidence and generated-test-count gates, and passed every source, provenance, package, frozen-workload, installed-wheel, Docker, and system-E2E gate.",
+  "selection_complete": true
+}

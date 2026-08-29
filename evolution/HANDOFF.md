@@ -1,14 +1,26 @@
 # Project handoff
 
-Updated: 2026-08-29 00:35 +03:00.
+Updated: 2026-08-29 06:55 +03:00.
 
 ## Read this first
 
-The current architectural champion is **v1.4**, packaged as `0.1.1`. It is the original v1 control
+The current architectural champion is **v1.6**, packaged as `0.1.1`. It is the original v1 control
 plane enhanced with selected planner, operator, GitHub-search, deny-policy, repair-feedback,
 hash-gated generation boundaries, a hash-bound public evaluator contract, JSON-safe rejection
-evidence, and a fail-closed test-only repair boundary. It is not v2. The name **v2** is reserved for
-the alternate ledger challenger architecture. Machine-readable truth is in `evolution/state.json`.
+evidence, a fail-closed test-only repair boundary, repeated-test-suite rejection, concrete
+acceptance-test binding, and a minimum-nine-concrete-generated-tests gate. It is not v2. The name
+**v2** is reserved for the alternate ledger challenger architecture. Machine-readable truth is in
+`evolution/state.json`.
+
+Round 005 is complete. The promoted candidate is `candidate-a-plus-b-round-005`, snapshot
+`8e4d4891370087d9711cd024817b01b78839e6ae`, integrated on the main audit branch as `73d9095`.
+It passed 3/3 frozen Duplicate Finder attempts with zero intervention, total provider cost
+USD 0.02968519, and 123.812 seconds total builder time. v1.5 and v2.5 also passed 3/3 but cost more;
+B+A passed only 1/3. The winner passed 244 repository tests with 3 skips and 72.85% coverage,
+23 hash-identical frozen project-workload tests, all static/dependency/provenance/package gates,
+an isolated wheel installation, and the complete Docker system-E2E fail-closed suite. Exact hashes,
+known infrastructure-only false starts, and selection evidence are in
+`evolution/rounds/005/measured-results.json`.
 
 The earlier isolated v2 r4 prototype lost v1 verification and safety gates and was rejected. Its
 artifacts remain immutable evidence under `benchmarks/blackridge-self-hosting-v2` and the sibling
