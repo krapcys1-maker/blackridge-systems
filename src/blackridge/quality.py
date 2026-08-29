@@ -34,7 +34,14 @@ class OpenSSFScorecardClient:
 
     def inspect(self, full_name: str) -> ScorecardObservation:
         if self._fetch:
-            score = self._fetch(full_name)
+            try:
+                score = self._fetch(full_name)
+            except Exception as exc:  # injected adapters may wrap arbitrary provider clients
+                return ScorecardObservation(
+                    score=None,
+                    status="error",
+                    detail=(f"injected Scorecard provider failed: {type(exc).__name__}: {exc}"),
+                )
             if score is None:
                 return ScorecardObservation(
                     score=None,
