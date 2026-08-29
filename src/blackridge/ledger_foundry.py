@@ -24,6 +24,14 @@ IMAGE = (
 MAX_FILES = 100
 MAX_FILE_BYTES = 100_000
 MAX_TOTAL_BYTES = 1_000_000
+_WINDOWS_RESERVED = {
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    *(f"com{number}" for number in range(1, 10)),
+    *(f"lpt{number}" for number in range(1, 10)),
+}
 
 
 class RepeatedTestSuiteError(ValueError):
@@ -52,6 +60,8 @@ def write_json(path: Path, value: object) -> None:
 def portable_path(value: object) -> str:
     if not isinstance(value, str) or not value or len(value) > 240:
         raise ValueError("generated path must be a bounded string")
+    if any(character in value for character in ("\r", "\n", "\x00")):
+        raise ValueError(f"generated path contains a control character: {value!r}")
     posix = PurePosixPath(value.replace("\\", "/"))
     windows = PureWindowsPath(value)
     if posix.is_absolute() or windows.is_absolute() or windows.drive or windows.root:
@@ -60,6 +70,8 @@ def portable_path(value: object) -> str:
         raise ValueError(f"generated path traverses outside workspace: {value!r}")
     if any(":" in part or part.endswith((" ", ".")) for part in posix.parts):
         raise ValueError(f"generated path is not portable: {value!r}")
+    if any(part.split(".", 1)[0].casefold() in _WINDOWS_RESERVED for part in posix.parts):
+        raise ValueError(f"generated path uses a reserved Windows name: {value!r}")
     return "/".join(posix.parts)
 
 
@@ -173,7 +185,13 @@ def compile_proposal(
     if (
         not isinstance(command, list)
         or not command
-        or not all(isinstance(item, str) and item and len(item) <= 4096 for item in command)
+        or not all(
+            isinstance(item, str)
+            and item
+            and len(item.encode("utf-8")) <= 4096
+            and not any(character in item for character in ("\r", "\n", "\x00"))
+            for item in command
+        )
     ):
         raise ValueError("test_command must be a bounded argv list")
     coverage = raw.get("acceptance_coverage")
