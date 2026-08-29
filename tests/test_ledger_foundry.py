@@ -76,6 +76,19 @@ class CompilerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "traverses"):
             foundry.compile_proposal(raw, request_text(), verified_text())
 
+    def test_rejects_reserved_control_paths_and_control_argv(self) -> None:
+        for path in ("NUL.txt", "tests/COM1.py", "tests/bad\nname.py"):
+            raw = proposal()
+            raw["files"][0]["path"] = path  # type: ignore[index]
+            with self.assertRaisesRegex(ValueError, "reserved|control"):
+                foundry.compile_proposal(raw, request_text(), verified_text())
+
+        for item in ("python\n-c", "python\x00-c", "ą" * 2_049):
+            raw = proposal()
+            raw["test_command"] = [item]
+            with self.assertRaisesRegex(ValueError, "bounded argv"):
+                foundry.compile_proposal(raw, request_text(), verified_text())
+
     def test_rejects_overclaimed_component_evidence(self) -> None:
         raw = proposal()
         raw["component_decisions"][0]["evidence_level"] = 3  # type: ignore[index]
