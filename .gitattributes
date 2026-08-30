@@ -2,6 +2,10 @@
 .gitattributes text eol=lf
 
 *.md text eol=lf
+*.json text eol=lf
+*.in text eol=lf
+*.lock text eol=lf
+*.patch text eol=lf whitespace=-blank-at-eol
 *.py text eol=lf
 *.toml text eol=lf
 *.yaml text eol=lf
@@ -9,6 +13,11 @@
 docker/*.Dockerfile text eol=lf
 docker/*.lock text eol=lf
 docker/*.tsv text eol=lf
+.dockerignore text eol=lf
+.gitignore text eol=lf
+LICENSE text eol=lf
+NOTICE text eol=lf
+THIRD_PARTY_NOTICES.md text eol=lf
 
 # Retained evidence hashes describe exact bytes and must survive checkout unchanged.
 evidence/manual/** -text

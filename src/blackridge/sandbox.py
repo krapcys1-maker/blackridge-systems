@@ -49,7 +49,9 @@ class SandboxExperiment(StrictModel):
     schema_version: Literal["1"] = "1"
     name: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     description: str = Field(min_length=20)
-    repository_url: str = Field(pattern=r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:\.git)?$")
+    repository_url: str = Field(
+        pattern=r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:\.git)?$"
+    )
     commit: str = Field(pattern=r"^[a-f0-9]{40}$")
     image: str = Field(min_length=3)
     workdir: str = Field(default="/workspace/repository", pattern=r"^/[A-Za-z0-9_./-]+$")
@@ -60,9 +62,7 @@ class SandboxExperiment(StrictModel):
 
     @model_validator(mode="after")
     def production_policy_and_unique_ids(self) -> SandboxExperiment:
-        ids = [
-            command.id for command in [*self.preparation_commands, *self.commands]
-        ]
+        ids = [command.id for command in [*self.preparation_commands, *self.commands]]
         if len(ids) != len(set(ids)):
             raise ValueError("sandbox command ids must be unique")
         if self.execution_profile == "production" and self.execution_network != "none":
@@ -73,9 +73,7 @@ class SandboxExperiment(StrictModel):
     @classmethod
     def workdir_stays_in_workspace(cls, value: str) -> str:
         path = PurePosixPath(value)
-        if path.parts[:2] != ("/", "workspace") or any(
-            part in {".", ".."} for part in path.parts
-        ):
+        if path.parts[:2] != ("/", "workspace") or any(part in {".", ".."} for part in path.parts):
             raise ValueError("workdir must stay below /workspace without dot segments")
         return value
 
@@ -98,11 +96,7 @@ class WorkspaceSnapshot:
             raise BlackridgeError(f"cannot snapshot workspace: {completed.stderr.strip()}")
         if completed.output_limit_exceeded:
             raise BlackridgeError("workspace file list exceeded the output limit")
-        names = [
-            name
-            for name in completed.stdout.split("\0")
-            if name
-        ]
+        names = [name for name in completed.stdout.split("\0") if name]
         files: dict[str, str] = {}
         for name in sorted(set(names)):
             path = root / name
@@ -124,9 +118,7 @@ def inspect_local_image(image: str) -> dict[str, object]:
     """Resolve a local image reference to immutable Docker metadata."""
 
     try:
-        completed = run_bounded(
-            ["docker", "image", "inspect", image], timeout_seconds=30
-        )
+        completed = run_bounded(["docker", "image", "inspect", image], timeout_seconds=30)
         if completed.returncode != 0 or completed.timed_out:
             raise BlackridgeError(completed.stderr.strip() or "Docker inspect failed")
         if completed.output_limit_exceeded:
@@ -163,11 +155,7 @@ def _container_exists(name: str | None) -> bool | None:
         )
     except OSError:
         return None
-    if (
-        completed.returncode != 0
-        or completed.timed_out
-        or completed.output_limit_exceeded
-    ):
+    if completed.returncode != 0 or completed.timed_out or completed.output_limit_exceeded:
         return None
     return bool(completed.stdout.strip())
 
@@ -289,6 +277,16 @@ class SwerexDockerProbe:
                 "timeout_seconds": 60,
                 "phase": "source",
             },
+            {
+                "id": "source-non-root-access",
+                "description": (
+                    "Make the disposable checkout writable by the non-root preparation user."
+                ),
+                "argv": ["chmod", "-R", "a+rwX", experiment.workdir],
+                "cwd": None,
+                "timeout_seconds": 60,
+                "phase": "source",
+            },
         ]
 
     @staticmethod
@@ -379,9 +377,7 @@ class SwerexDockerProbe:
         }
 
     @staticmethod
-    def _docker_exec_result(
-        container_name: str, item: dict[str, Any]
-    ) -> dict[str, object]:
+    def _docker_exec_result(container_name: str, item: dict[str, Any]) -> dict[str, object]:
         argv = [
             "docker",
             "exec",
@@ -447,11 +443,10 @@ class SwerexDockerProbe:
         stop_error: str | None = None
         container_name: str | None = None
         force_remove: dict[str, object] | None = None
-        control_commands = self._setup_commands(experiment) + self._preparation_commands(
-            experiment
-        )
+        control_commands = self._setup_commands(experiment)
+        preparation_commands = self._preparation_commands(experiment)
         workload_commands = self._experiment_commands(experiment)
-        all_commands = control_commands + workload_commands
+        all_commands = control_commands + preparation_commands + workload_commands
         execution_boundary: dict[str, object] = {
             "requested": experiment.execution_network,
             "applied": experiment.execution_network == "inherit",
@@ -524,6 +519,14 @@ class SwerexDockerProbe:
                 if result["transport_error"] is not None or result["exit_code"] != 0:
                     control_failed = True
                     break
+            if not control_failed:
+                for item in preparation_commands:
+                    attempted += 1
+                    result = self._docker_exec_result(container_name, item)
+                    command_results.append(result)
+                    if result["transport_error"] is not None or result["exit_code"] != 0:
+                        control_failed = True
+                        break
             if not control_failed and experiment.execution_network == "none":
                 try:
                     execution_boundary = self._isolate_execution_network(container_name)
@@ -582,8 +585,10 @@ class SwerexDockerProbe:
         if changed_paths:
             warnings.append("The host source snapshot changed during the sandbox probe.")
         container_exists = _container_exists(container_name)
-        if stop_error or container_exists is not False or (
-            force_remove is not None and force_remove["exit_code"] != 0
+        if (
+            stop_error
+            or container_exists is not False
+            or (force_remove is not None and force_remove["exit_code"] != 0)
         ):
             warnings.append("Container cleanup could not be confirmed.")
 

@@ -16,7 +16,7 @@ from typing import Literal
 from uuid import uuid4
 
 from jsonschema import Draft202012Validator
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, field_validator, model_validator
 
 from blackridge.errors import BlackridgeError
 from blackridge.evidence import ProbeEvidence
@@ -47,14 +47,12 @@ class ResearchRequest(BaseModel):
     schema_version: Literal["1"] = "1"
     request_id: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     question: str = Field(min_length=10)
-    minimum_sources: int = Field(ge=1)
+    minimum_sources: StrictInt = Field(ge=1)
     documents: list[ResearchDocument] = Field(min_length=1)
 
     @field_validator("documents")
     @classmethod
-    def unique_document_ids(
-        cls, value: list[ResearchDocument]
-    ) -> list[ResearchDocument]:
+    def unique_document_ids(cls, value: list[ResearchDocument]) -> list[ResearchDocument]:
         identifiers = [item.document_id for item in value]
         if len(identifiers) != len(set(identifiers)):
             raise ValueError("document IDs must be unique")
@@ -186,9 +184,7 @@ class CandidateInvocation(BaseModel):
     pids_limit: int = Field(default=64, ge=16, le=1024)
     tmpfs_mib: int = Field(default=64, ge=16, le=1024)
     timeout_seconds_per_case: float = Field(default=60, gt=0, le=3600)
-    maximum_output_bytes_per_stream: int = Field(
-        default=1_000_000, ge=1024, le=10_000_000
-    )
+    maximum_output_bytes_per_stream: int = Field(default=1_000_000, ge=1024, le=10_000_000)
     environment_allowlist: list[str] = Field(default_factory=list)
 
     @field_validator("argv")
@@ -222,9 +218,7 @@ class CandidateInvocation(BaseModel):
             or re.search(r"@sha256:[a-f0-9]{64}$", self.docker_image)
         )
         if not immutable_image:
-            raise ValueError(
-                "docker image must be an immutable image ID or repository digest"
-            )
+            raise ValueError("docker image must be an immutable image ID or repository digest")
         if not self.read_only_root:
             raise ValueError("docker benchmark root filesystem must be read-only")
         return self
@@ -369,14 +363,10 @@ class BenchmarkEvaluator:
         if not workspace.is_dir():
             raise BlackridgeError(f"candidate workspace does not exist: {workspace}")
         if benchmark_root.is_relative_to(workspace):
-            raise BlackridgeError(
-                "candidate workspace cannot contain the private benchmark root"
-            )
+            raise BlackridgeError("candidate workspace cannot contain the private benchmark root")
         symlinks = [path for path in workspace.rglob("*") if path.is_symlink()]
         if symlinks:
-            raise BlackridgeError(
-                f"candidate workspace contains a symbolic link: {symlinks[0]}"
-            )
+            raise BlackridgeError(f"candidate workspace contains a symbolic link: {symlinks[0]}")
         if not run.candidate.cwd.startswith("/") or ".." in Path(run.candidate.cwd).parts:
             raise BlackridgeError("docker candidate cwd must be an absolute contained path")
         forbidden_placeholders = ("{benchmark_root}", "{run_dir}")
@@ -385,9 +375,7 @@ class BenchmarkEvaluator:
             for value in run.candidate.argv
             for placeholder in forbidden_placeholders
         ):
-            raise BlackridgeError(
-                "docker candidate argv cannot expose host benchmark or run paths"
-            )
+            raise BlackridgeError("docker candidate argv cannot expose host benchmark or run paths")
         candidate_argv = [
             value.replace("{python}", "python").replace("{workspace}", "/workspace")
             for value in run.candidate.argv
@@ -397,6 +385,7 @@ class BenchmarkEvaluator:
             "docker",
             "run",
             "--rm",
+            "--interactive",
             "--name",
             container_name,
             "--network",
@@ -437,9 +426,7 @@ class BenchmarkEvaluator:
         )
 
     def _environment(self, run: BenchmarkRunPlan) -> dict[str, str]:
-        names = set(self.safe_environment_names) | set(
-            run.candidate.environment_allowlist
-        )
+        names = set(self.safe_environment_names) | set(run.candidate.environment_allowlist)
         return {name: os.environ[name] for name in sorted(names) if name in os.environ}
 
     @staticmethod
@@ -496,8 +483,7 @@ class BenchmarkEvaluator:
         source_ids = [item.document_id for item in output.sources]
         unique_source_ids = set(source_ids)
         sources_valid = len(source_ids) == len(unique_source_ids) and all(
-            item.document_id in documents
-            and item.title == documents[item.document_id].title
+            item.document_id in documents and item.title == documents[item.document_id].title
             for item in output.sources
         )
         self._check(
@@ -538,9 +524,7 @@ class BenchmarkEvaluator:
                     critical=critical,
                     expected=expectation.maximum_unique_sources,
                     observed=len(unique_source_ids),
-                    matched=(
-                        len(unique_source_ids) <= expectation.maximum_unique_sources
-                    ),
+                    matched=(len(unique_source_ids) <= expectation.maximum_unique_sources),
                     detail="Citing the complete corpus cannot substitute for source selection.",
                 )
             self._check(
@@ -615,8 +599,7 @@ class BenchmarkEvaluator:
                 observed={"missing_groups": missing_groups},
                 matched=not missing_groups,
                 detail=(
-                    "Semantic expectations are groups of accepted alternatives, "
-                    "not exact prose."
+                    "Semantic expectations are groups of accepted alternatives, not exact prose."
                 ),
             )
             if expectation.maximum_answer_characters is not None:
@@ -624,12 +607,9 @@ class BenchmarkEvaluator:
                     checks,
                     check_id="answer-length-bound",
                     critical=critical,
-                    expected={
-                        "maximum_characters": expectation.maximum_answer_characters
-                    },
+                    expected={"maximum_characters": expectation.maximum_answer_characters},
                     observed={"characters": len(output.answer)},
-                    matched=len(output.answer)
-                    <= expectation.maximum_answer_characters,
+                    matched=len(output.answer) <= expectation.maximum_answer_characters,
                     detail="Copying the complete corpus is not accepted as concise synthesis.",
                 )
         else:
@@ -688,9 +668,7 @@ class BenchmarkEvaluator:
                 ),
             )
 
-    def evaluate(
-        self, definition_path: Path, run_plan_path: Path
-    ) -> ProbeEvidence:
+    def evaluate(self, definition_path: Path, run_plan_path: Path) -> ProbeEvidence:
         definition_path = definition_path.resolve()
         run_plan_path = run_plan_path.resolve()
         definition = load_benchmark_definition(definition_path)
@@ -700,9 +678,7 @@ class BenchmarkEvaluator:
                 f"run task {run.task_id} does not match benchmark {definition.task_id}"
             )
 
-        public_spec = self._resolve_definition_file(
-            definition_path, definition.public_spec_file
-        )
+        public_spec = self._resolve_definition_file(definition_path, definition.public_spec_file)
         input_contract = self._resolve_definition_file(
             definition_path, definition.input_contract_file
         )
@@ -729,21 +705,13 @@ class BenchmarkEvaluator:
             "definition": _snapshot_file(definition_path, content=definition_bytes),
             "evaluator_module": _snapshot_file(Path(__file__).resolve()),
             "public_spec": _snapshot_file(public_spec, content=public_spec_bytes),
-            "input_contract": _snapshot_file(
-                input_contract, content=input_contract_bytes
-            ),
-            "output_contract": _snapshot_file(
-                output_contract, content=output_contract_bytes
-            ),
+            "input_contract": _snapshot_file(input_contract, content=input_contract_bytes),
+            "output_contract": _snapshot_file(output_contract, content=output_contract_bytes),
             "run_plan": _snapshot_file(run_plan_path, content=run_plan_bytes),
         }
-        prepared_cases: list[
-            tuple[BenchmarkCase, Path, bytes, ResearchRequest]
-        ] = []
+        prepared_cases: list[tuple[BenchmarkCase, Path, bytes, ResearchRequest]] = []
         for case in definition.cases:
-            request_path = self._resolve_definition_file(
-                definition_path, case.request_file
-            )
+            request_path = self._resolve_definition_file(definition_path, case.request_file)
             try:
                 request_bytes = request_path.read_bytes()
                 request_data = json.loads(request_bytes)
@@ -761,9 +729,7 @@ class BenchmarkEvaluator:
                     f"benchmark case {case.id} violates the public input contract: {messages}"
                 )
             request = ResearchRequest.model_validate(request_data)
-            frozen_inputs[f"case:{case.id}"] = _snapshot_file(
-                request_path, content=request_bytes
-            )
+            frozen_inputs[f"case:{case.id}"] = _snapshot_file(request_path, content=request_bytes)
             prepared_cases.append((case, request_path, request_bytes, request))
 
         case_observations: list[dict[str, object]] = []
@@ -779,9 +745,7 @@ class BenchmarkEvaluator:
                     env=environment,
                     input_text=request_bytes.decode("utf-8"),
                     timeout_seconds=run.candidate.timeout_seconds_per_case,
-                    maximum_output_bytes_per_stream=(
-                        run.candidate.maximum_output_bytes_per_stream
-                    ),
+                    maximum_output_bytes_per_stream=(run.candidate.maximum_output_bytes_per_stream),
                 )
             finally:
                 if command.cleanup_argv is not None:
@@ -824,9 +788,7 @@ class BenchmarkEvaluator:
                 expected="all pre-run benchmark and run-plan bytes unchanged",
                 observed={"changed_inputs": frozen_changes},
                 matched=not frozen_changes,
-                detail=(
-                    "Candidate execution must not alter either arm's frozen evaluator inputs."
-                ),
+                detail=("Candidate execution must not alter either arm's frozen evaluator inputs."),
             )
 
             parsed_output: ResearchOutput | None = None
@@ -948,9 +910,7 @@ class BenchmarkEvaluator:
                 "critical_check_count": len(critical_checks),
                 "matched_critical_check_count": len(matched_critical),
                 "critical_match_rate": (
-                    len(matched_critical) / len(critical_checks)
-                    if critical_checks
-                    else None
+                    len(matched_critical) / len(critical_checks) if critical_checks else None
                 ),
                 "all_critical_matched": all_critical_matched,
                 "frozen_inputs_before": frozen_inputs,
@@ -989,16 +949,14 @@ class BenchmarkCalibrationProbe:
 
         same_controls = {
             "definition_sha256": (
-                reference.request["definition_sha256"]
-                == broken.request["definition_sha256"]
+                reference.request["definition_sha256"] == broken.request["definition_sha256"]
             ),
             "evaluator_module_sha256": (
                 reference.request["evaluator_module_sha256"]
                 == broken.request["evaluator_module_sha256"]
             ),
             "public_spec_sha256": (
-                reference.request["public_spec_sha256"]
-                == broken.request["public_spec_sha256"]
+                reference.request["public_spec_sha256"] == broken.request["public_spec_sha256"]
             ),
             "input_contract_sha256": (
                 reference.request["input_contract_sha256"]
@@ -1009,12 +967,10 @@ class BenchmarkCalibrationProbe:
                 == broken.request["output_contract_sha256"]
             ),
             "model_identifier": (
-                reference_run.get("model_identifier")
-                == broken_run.get("model_identifier")
+                reference_run.get("model_identifier") == broken_run.get("model_identifier")
             ),
             "model_configuration": (
-                reference_run.get("model_configuration")
-                == broken_run.get("model_configuration")
+                reference_run.get("model_configuration") == broken_run.get("model_configuration")
             ),
             "builder_time_budget_seconds": (
                 reference_run.get("builder_time_budget_seconds")
@@ -1025,12 +981,8 @@ class BenchmarkCalibrationProbe:
                 == broken_run.get("candidate", {}).get("backend")
             ),
             "maximum_output_bytes_per_stream": (
-                reference_run.get("candidate", {}).get(
-                    "maximum_output_bytes_per_stream"
-                )
-                == broken_run.get("candidate", {}).get(
-                    "maximum_output_bytes_per_stream"
-                )
+                reference_run.get("candidate", {}).get("maximum_output_bytes_per_stream")
+                == broken_run.get("candidate", {}).get("maximum_output_bytes_per_stream")
             ),
         }
         broken_cases = broken.observations.get("cases")
@@ -1057,10 +1009,7 @@ class BenchmarkCalibrationProbe:
             for check in case.get("checks", [])
             if isinstance(check, dict)
             and not check.get("matched")
-            and reference_checks.get(
-                (str(case.get("case_id")), str(check.get("check_id")))
-            )
-            is True
+            and reference_checks.get((str(case.get("case_id")), str(check.get("check_id")))) is True
         ]
         warnings = [
             "Calibration is a harness test, not evidence that either A/B method is superior.",
@@ -1088,9 +1037,7 @@ class BenchmarkCalibrationProbe:
                         "all_critical_matched"
                     ),
                     "broken_all_processes_exited_zero": broken_processes_green,
-                    "broken_all_critical_matched": broken.observations.get(
-                        "all_critical_matched"
-                    ),
+                    "broken_all_critical_matched": broken.observations.get("all_critical_matched"),
                     "detected_broken_check_count": len(detected_broken_checks),
                     "detected_broken_checks": detected_broken_checks,
                     "weighted_success_score_used": False,
@@ -1115,9 +1062,7 @@ class BenchmarkComparisonProbe:
             "builder_time_budget_seconds": run.builder_time_budget_seconds,
             "candidate_backend": run.candidate.backend,
             "timeout_seconds_per_case": run.candidate.timeout_seconds_per_case,
-            "maximum_output_bytes_per_stream": (
-                run.candidate.maximum_output_bytes_per_stream
-            ),
+            "maximum_output_bytes_per_stream": (run.candidate.maximum_output_bytes_per_stream),
             "environment_allowlist": sorted(run.candidate.environment_allowlist),
             "docker_image": run.candidate.docker_image,
             "network": run.candidate.network,
@@ -1135,13 +1080,7 @@ class BenchmarkComparisonProbe:
         if not isinstance(cases, list):
             raise BlackridgeError("benchmark probe contains no case observations")
         result: dict[str, object] = {}
-        categories = sorted(
-            {
-                str(case.get("category"))
-                for case in cases
-                if isinstance(case, dict)
-            }
-        )
+        categories = sorted({str(case.get("category")) for case in cases if isinstance(case, dict)})
         for category in categories:
             selected = [
                 case
@@ -1157,9 +1096,7 @@ class BenchmarkComparisonProbe:
             result[category] = {
                 "case_count": len(selected),
                 "critical_check_count": len(checks),
-                "matched_critical_check_count": sum(
-                    1 for check in checks if check.get("matched")
-                ),
+                "matched_critical_check_count": sum(1 for check in checks if check.get("matched")),
                 "all_critical_matched": bool(checks)
                 and all(bool(check.get("matched")) for check in checks),
             }
@@ -1177,9 +1114,7 @@ class BenchmarkComparisonProbe:
             "task_success": probe.observations.get("all_critical_matched"),
             "experiment_eligible": probe.observations.get("experiment_eligible"),
             "critical_match_rate": probe.observations.get("critical_match_rate"),
-            "matched_critical_check_count": probe.observations.get(
-                "matched_critical_check_count"
-            ),
+            "matched_critical_check_count": probe.observations.get("matched_critical_check_count"),
             "critical_check_count": probe.observations.get("critical_check_count"),
             "evaluator_duration_seconds": probe.observations.get("duration_seconds"),
             "categories": BenchmarkComparisonProbe._category_summary(probe),
@@ -1202,14 +1137,11 @@ class BenchmarkComparisonProbe:
         baseline_controls = self._controls(baseline_run)
         blackridge_controls = self._controls(blackridge_run)
         control_matches = {
-            name: baseline_controls[name] == blackridge_controls[name]
-            for name in baseline_controls
+            name: baseline_controls[name] == blackridge_controls[name] for name in baseline_controls
         }
         mismatches = [name for name, matched in control_matches.items() if not matched]
         if mismatches:
-            raise BlackridgeError(
-                f"A/B controls differ before execution: {', '.join(mismatches)}"
-            )
+            raise BlackridgeError(f"A/B controls differ before execution: {', '.join(mismatches)}")
         is_experiment = baseline_run.run_kind == "experiment"
         if is_experiment:
             if baseline_run.candidate.backend != "docker":
@@ -1254,8 +1186,7 @@ class BenchmarkComparisonProbe:
         blackridge_rate = blackridge_arm["critical_match_rate"]
         rate_delta = (
             float(blackridge_rate) - float(baseline_rate)
-            if isinstance(baseline_rate, int | float)
-            and isinstance(blackridge_rate, int | float)
+            if isinstance(baseline_rate, int | float) and isinstance(blackridge_rate, int | float)
             else None
         )
         return ProbeEvidence(

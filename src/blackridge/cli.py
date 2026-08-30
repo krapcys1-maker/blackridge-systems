@@ -11,7 +11,6 @@ from typing import Annotated, Literal
 import typer
 from pydantic import ValidationError
 from rich.console import Console
-from rich.table import Table
 
 from blackridge.adaptation import (
     JSON_PATCH_SOURCE,
@@ -43,24 +42,52 @@ from blackridge.evidence import (
     ManualVerdict,
     ProbeEvidence,
 )
-from blackridge.github import GitHubCli
+from blackridge.evolution import (
+    ChallengerProposalRejected,
+    propose_challenger_architecture,
+    repair_challenger_interfaces,
+    select_champion,
+)
+from blackridge.generation import (
+    GenerationProposalRejected,
+    materialize_proposal,
+    propose_gap_system,
+)
+from blackridge.github import GitHubCli, GitHubSearchDiscovery
+from blackridge.holdout import verify_sealed_holdout
 from blackridge.io import (
     load_adapter_experiment,
+    load_challenger_rejection,
     load_composition_definition,
     load_composition_plan,
+    load_evolution_round,
+    load_generated_proposal,
     load_probe,
     load_request,
     load_run,
     load_sandbox_experiment,
     load_supply_chain_experiment,
+    load_verified_components,
     write_blueprint,
+    write_challenger_interface_repair,
+    write_challenger_proposal,
+    write_challenger_proposal_record,
+    write_challenger_rejection,
+    write_champion_selection,
     write_composition_plan,
+    write_generated_proposal,
+    write_generation_record,
+    write_generation_rejection,
     write_manual_review,
+    write_planning_record,
     write_probe,
+    write_request,
     write_run,
 )
 from blackridge.models import EvidenceLevel
 from blackridge.octocode import DEFAULT_OCTOCODE_PACKAGE, OctocodeDiscovery
+from blackridge.operator import DeepSeekBackend, load_secret
+from blackridge.planning import plan_system
 from blackridge.provenance import (
     audit_source_provenance,
     load_provenance_manifest,
@@ -100,23 +127,274 @@ def _publish_completed_artifact(probe: ProbeEvidence, output: Path) -> bool:
     return True
 
 
+@app.command("select-champion")
+def select_evolution_champion(
+    round_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evolution/champion-selection.json"
+    ),
+) -> None:
+    """Select a round winner using frozen gates, metrics, and evaluator identity."""
+
+    try:
+        selection = select_champion(load_evolution_round(round_file))
+        write_champion_selection(selection, output)
+    except (ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Champion selection failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(
+        f"[green]Selected {selection.selected_candidate_id} "
+        f"({selection.selected_architecture_line}).[/green]"
+    )
+    console.print(f"Selection evidence written to {output}")
+
+
+@app.command("propose-challenger")
+def propose_evolution_challenger(
+    public_brief_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    public_benchmark_file: Annotated[
+        Path, typer.Option("--benchmark", exists=True, dir_okay=False, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evolution/challenger-v2-proposal.json"
+    ),
+    evidence: Annotated[Path, typer.Option("--evidence")] = Path(
+        ".blackridge/evolution/challenger-v2-evidence.json"
+    ),
+    rejection_evidence: Annotated[Path, typer.Option("--rejection-evidence")] = Path(
+        ".blackridge/evolution/challenger-v2-rejection.json"
+    ),
+    review_feedback_file: Annotated[
+        Path | None,
+        typer.Option("--review-feedback", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    env_file: Annotated[Path, typer.Option("--env-file")] = Path(".env"),
+    model: Annotated[str, typer.Option()] = "deepseek-v4-flash",
+    max_cost_usd: Annotated[float, typer.Option(min=0.02, max=10.0)] = 2.0,
+) -> None:
+    """Propose fresh architecture B from public inputs, without champion source."""
+
+    try:
+        backend = DeepSeekBackend(
+            api_key=load_secret("DEEPSEEK_API_KEY", env_file=env_file),
+            model=model,
+            max_total_cost_usd=max_cost_usd,
+        )
+        proposal, record = propose_challenger_architecture(
+            public_brief_file.read_text(encoding="utf-8"),
+            public_benchmark_file.read_text(encoding="utf-8"),
+            backend=backend,
+            review_feedback=(
+                review_feedback_file.read_text(encoding="utf-8")
+                if review_feedback_file is not None
+                else None
+            ),
+        )
+        write_challenger_proposal(proposal, output)
+        write_challenger_proposal_record(record, evidence)
+    except ChallengerProposalRejected as exc:
+        try:
+            write_challenger_rejection(exc.record, rejection_evidence)
+        except OSError as write_error:
+            console.print(f"[red]Cannot retain rejected challenger:[/red] {write_error}")
+            raise typer.Exit(code=2) from write_error
+        console.print(f"[red]Challenger proposal failed:[/red] {exc}")
+        console.print(f"Rejected completion retained at {rejection_evidence}")
+        raise typer.Exit(code=2) from exc
+    except (BlackridgeError, ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Challenger proposal failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Fresh v2 architecture proposal written to {output}[/green]")
+    console.print(f"Proposal evidence written to {evidence}")
+    console.print(f"Manual review required for SHA-256: {record.proposal_sha256}")
+
+
+@app.command("repair-challenger-interfaces")
+def repair_evolution_challenger_interfaces(
+    rejection_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    approved_completion_sha256: Annotated[str, typer.Option("--approved-completion-sha256")],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    evidence: Annotated[Path, typer.Option("--evidence")],
+) -> None:
+    """Repair only flow-interface declarations in an exact rejected challenger."""
+
+    try:
+        proposal, record = repair_challenger_interfaces(
+            load_challenger_rejection(rejection_file),
+            approved_completion_sha256=approved_completion_sha256,
+        )
+        write_challenger_proposal(proposal, output)
+        write_challenger_interface_repair(record, evidence)
+    except (ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Challenger interface repair failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Mechanically repaired challenger written to {output}[/green]")
+    console.print(f"Repair evidence written to {evidence}")
+    console.print(f"Manual review required for SHA-256: {record.proposal_sha256}")
+
+
+@app.command("plan")
+def plan_brief(
+    brief_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/system-request.yaml"
+    ),
+    evidence: Annotated[Path, typer.Option("--evidence")] = Path(
+        ".blackridge/evidence/planning.json"
+    ),
+    provider: Annotated[Literal["deepseek"], typer.Option()] = "deepseek",
+    env_file: Annotated[Path, typer.Option("--env-file")] = Path(".env"),
+    model: Annotated[str, typer.Option()] = "deepseek-v4-flash",
+    max_cost_usd: Annotated[float, typer.Option(min=0.01, max=10.0)] = 2.0,
+) -> None:
+    """Turn a natural-language brief into a validated capability request."""
+
+    try:
+        brief = brief_file.read_text(encoding="utf-8")
+        if provider != "deepseek":  # pragma: no cover - Typer enforces the literal.
+            raise BlackridgeError(f"unsupported operator provider: {provider}")
+        backend = DeepSeekBackend(
+            api_key=load_secret("DEEPSEEK_API_KEY", env_file=env_file),
+            model=model,
+            max_total_cost_usd=max_cost_usd,
+        )
+        request, record = plan_system(brief, backend=backend)
+        write_request(request, output)
+        write_planning_record(record, evidence)
+    except (BlackridgeError, ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Planning failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Capability request written to {output}[/green]")
+    console.print(f"Planning evidence written to {evidence}")
+    console.print("The plan is a model proposal; no component has been functionally verified.")
+
+
+@app.command("propose-gap")
+def propose_gap(
+    brief_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    request_file: Annotated[
+        Path, typer.Option("--request", exists=True, dir_okay=False, readable=True)
+    ],
+    discovery_file: Annotated[
+        Path, typer.Option("--discovery", exists=True, dir_okay=False, readable=True)
+    ],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/generated-proposal.json"
+    ),
+    evidence: Annotated[Path, typer.Option("--evidence")] = Path(
+        ".blackridge/evidence/generation.json"
+    ),
+    env_file: Annotated[Path, typer.Option("--env-file")] = Path(".env"),
+    model: Annotated[str, typer.Option()] = "deepseek-v4-flash",
+    max_cost_usd: Annotated[float, typer.Option(min=0.02, max=10.0)] = 2.0,
+    verified_components_file: Annotated[
+        Path | None,
+        typer.Option("--verified-components", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    public_evaluator_file: Annotated[
+        Path | None,
+        typer.Option("--public-evaluator", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    review_feedback_file: Annotated[
+        Path | None,
+        typer.Option("--review-feedback", exists=True, dir_okay=False, readable=True),
+    ] = None,
+    rejection_evidence: Annotated[Path, typer.Option("--rejection-evidence")] = Path(
+        ".blackridge/evidence/generation-rejection.json"
+    ),
+) -> None:
+    """Propose only the remaining code gap after discovery; never execute it."""
+
+    try:
+        brief = brief_file.read_text(encoding="utf-8")
+        request = load_request(request_file)
+        discovery = load_run(discovery_file)
+        backend = DeepSeekBackend(
+            api_key=load_secret("DEEPSEEK_API_KEY", env_file=env_file),
+            model=model,
+            max_total_cost_usd=max_cost_usd,
+        )
+        proposal, record = propose_gap_system(
+            brief,
+            request=request,
+            discovery=discovery,
+            backend=backend,
+            verified_components=(
+                load_verified_components(verified_components_file)
+                if verified_components_file is not None
+                else None
+            ),
+            public_evaluator_contract=(
+                public_evaluator_file.read_text(encoding="utf-8")
+                if public_evaluator_file is not None
+                else None
+            ),
+            review_feedback=(
+                review_feedback_file.read_text(encoding="utf-8")
+                if review_feedback_file is not None
+                else None
+            ),
+        )
+        write_generated_proposal(proposal, output)
+        write_generation_record(record, evidence)
+    except GenerationProposalRejected as exc:
+        try:
+            write_generation_rejection(exc.record, rejection_evidence)
+        except OSError as write_error:
+            console.print(f"[red]Cannot retain rejected proposal:[/red] {write_error}")
+            raise typer.Exit(code=2) from write_error
+        console.print(f"[red]Gap proposal failed:[/red] {exc}")
+        console.print(f"Rejected completion retained at {rejection_evidence}")
+        raise typer.Exit(code=2) from exc
+    except (BlackridgeError, ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Gap proposal failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Gap proposal written to {output}[/green]")
+    console.print(f"Generation evidence written to {evidence}")
+    console.print(f"Manual review required for proposal SHA-256: {record.proposal_sha256}")
+
+
+@app.command("materialize-proposal")
+def materialize_generated_proposal(
+    proposal_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    workspace: Annotated[Path, typer.Option("--workspace")],
+    approved_sha256: Annotated[str, typer.Option("--approved-sha256")],
+) -> None:
+    """Materialize an exact reviewed proposal without executing its command."""
+
+    try:
+        proposal = load_generated_proposal(proposal_file)
+        hashes = materialize_proposal(
+            proposal,
+            workspace,
+            approved_sha256=approved_sha256,
+        )
+    except (ValidationError, OSError, ValueError) as exc:
+        console.print(f"[red]Materialization failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]Materialized {len(hashes)} reviewed file(s) in {workspace}.[/green]")
+    console.print("Nothing was executed; sandbox verification is still required.")
+
+
 @app.command()
 def doctor() -> None:
     """Check the local MVP prerequisites and upcoming sandbox tools."""
 
-    table = Table(title="Blackridge toolchain")
-    table.add_column("Tool")
-    table.add_column("Status")
-    table.add_column("Required now")
-    table.add_column("Purpose")
-    table.add_column("Diagnostic")
+    console.print("Blackridge toolchain")
     missing_required = False
     for check in check_tools():
-        status = "[green]ready[/green]" if check.available else "[yellow]missing[/yellow]"
+        status = "ready" if check.available else "missing"
         required = "yes" if check.required_for_mvp else "later"
-        table.add_row(check.name, status, required, check.purpose, check.detail)
+        # Keep the complete diagnostic in captured output and legacy Windows
+        # terminals. Rich tables otherwise truncate with a Unicode ellipsis or
+        # split tool names according to the current terminal width.
+        console.print(
+            f"- {check.name}: {status}; required={required}; "
+            f"purpose={check.purpose}; diagnostic={check.detail}",
+            markup=False,
+            soft_wrap=True,
+        )
         missing_required |= check.required_for_mvp and not check.available
-    console.print(table)
     if missing_required:
         raise typer.Exit(code=1)
 
@@ -128,6 +406,12 @@ def discover(
     limit: Annotated[int, typer.Option(min=1, max=30)] = 10,
     workers: Annotated[int, typer.Option(min=1, max=16)] = 8,
     capability: Annotated[str | None, typer.Option("--capability")] = None,
+    search_provider: Annotated[Literal["octocode", "github"], typer.Option("--provider")] = (
+        "octocode"
+    ),
+    max_queries: Annotated[int, typer.Option(min=1, max=100)] = 60,
+    allow_partial_budget: Annotated[bool, typer.Option("--allow-partial-budget")] = False,
+    deny_repository: Annotated[list[str] | None, typer.Option("--deny-repository")] = None,
     octocode_package: Annotated[str, typer.Option()] = DEFAULT_OCTOCODE_PACKAGE,
 ) -> None:
     """Discover and provisionally rank repositories for a capability specification."""
@@ -139,13 +423,22 @@ def discover(
             if not selected:
                 raise BlackridgeError(f"capability not found in request: {capability}")
             request = request.model_copy(update={"capabilities": selected})
+        discovery = (
+            GitHubSearchDiscovery(
+                max_queries=max_queries,
+                partial_on_budget_exhaustion=allow_partial_budget,
+            )
+            if search_provider == "github"
+            else OctocodeDiscovery(package=octocode_package)
+        )
         run = run_discovery(
             request,
-            discovery=OctocodeDiscovery(package=octocode_package),
+            discovery=discovery,
             github=GitHubCli(),
             scorecard=OpenSSFScorecardClient(),
             limit=limit,
             workers=workers,
+            denied_repositories=set(deny_repository or []),
         )
         write_run(run, output)
     except (BlackridgeError, ValidationError, OSError) as exc:
@@ -172,25 +465,19 @@ def report(
         console.print(f"[red]Cannot read discovery run:[/red] {exc}")
         raise typer.Exit(code=2) from exc
 
-    console.print(f"[bold]{run.request.name}[/bold] — {run.request.goal}")
+    console.print(f"[bold]{run.request.name}[/bold] - {run.request.goal}")
     for result in run.results:
-        table = Table(title=f"Capability: {result.capability.id}")
-        table.add_column("Repository")
-        table.add_column("Score", justify="right")
-        table.add_column("License")
-        table.add_column("Evidence")
-        table.add_column("Decision")
+        console.print(f"Capability: {result.capability.id}", markup=False)
         for candidate in result.candidates[:top]:
-            table.add_row(
-                candidate.metadata.full_name,
-                f"{candidate.score.total:.2f}",
-                candidate.metadata.license_spdx or "unknown",
-                f"L{int(candidate.evidence_level)}",
-                candidate.decision,
+            console.print(
+                f"- {candidate.metadata.full_name}: score={candidate.score.total:.2f}; "
+                f"license={candidate.metadata.license_spdx or 'unknown'}; "
+                f"evidence=L{int(candidate.evidence_level)}; decision={candidate.decision}",
+                markup=False,
+                soft_wrap=True,
             )
         if not result.candidates:
-            table.add_row("—", "—", "—", "—", "no candidates")
-        console.print(table)
+            console.print("- no candidates")
 
 
 @app.command()
@@ -260,6 +547,62 @@ def probe_package(
     console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
 
 
+def _environment_probe_gate_failures(probe: ProbeEvidence) -> list[str]:
+    """Return fail-closed automation reasons without changing raw probe evidence."""
+
+    observations = probe.observations
+    failures: list[str] = []
+    if observations.get("probe_completed") is not True:
+        failures.append("probe did not complete")
+
+    boundary = observations.get("execution_boundary")
+    if not isinstance(boundary, dict):
+        failures.append("execution boundary evidence is missing")
+    elif boundary.get("requested") == "none" and boundary.get("applied") is not True:
+        failures.append("requested network isolation was not applied")
+
+    commands = observations.get("commands")
+    if not isinstance(commands, list):
+        failures.append("command evidence is missing")
+    else:
+        for item in commands:
+            if not isinstance(item, dict):
+                failures.append("command evidence contains an invalid record")
+                continue
+            command_id = str(item.get("id") or "unknown")
+            transport_error = item.get("transport_error")
+            if transport_error is not None:
+                failures.append(f"command {command_id} transport failed: {transport_error}")
+            elif item.get("exit_code") != 0:
+                failures.append(f"command {command_id} exited with code {item.get('exit_code')}")
+
+    not_run = observations.get("not_run_command_ids")
+    if not isinstance(not_run, list):
+        failures.append("not-run command evidence is missing")
+    elif not_run:
+        failures.append(f"commands were not run: {', '.join(str(item) for item in not_run)}")
+
+    host_workspace = observations.get("host_workspace")
+    if not isinstance(host_workspace, dict) or host_workspace.get("unchanged") is not True:
+        failures.append("host workspace integrity was not confirmed")
+
+    cleanup = observations.get("cleanup")
+    if not isinstance(cleanup, dict):
+        failures.append("container cleanup evidence is missing")
+    else:
+        if cleanup.get("stop_error"):
+            failures.append(f"container stop failed: {cleanup['stop_error']}")
+        force_remove = cleanup.get("force_remove")
+        if isinstance(force_remove, dict) and force_remove.get("exit_code") != 0:
+            failures.append(
+                f"forced container cleanup exited with code {force_remove.get('exit_code')}"
+            )
+        if cleanup.get("container_exists_after_stop") is not False:
+            failures.append("container cleanup was not confirmed")
+
+    return failures
+
+
 @app.command("probe-environment")
 def probe_environment(
     experiment_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
@@ -267,6 +610,13 @@ def probe_environment(
         ".blackridge/evidence/environment-probe.json"
     ),
     host_root: Annotated[Path, typer.Option("--host-root")] = Path("."),
+    require_complete: Annotated[
+        bool,
+        typer.Option(
+            "--require-complete",
+            help="Exit nonzero unless commands, isolation, host integrity, and cleanup all pass.",
+        ),
+    ] = False,
 ) -> None:
     """Run a pinned repository experiment in Docker through SWE-ReX and retain raw evidence."""
 
@@ -316,7 +666,18 @@ def probe_environment(
             f"transport_error={failed['transport_error'] or 'none'}"
         )
     console.print(f"Evidence written to {output}")
-    console.print("[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]")
+    if require_complete:
+        failures = _environment_probe_gate_failures(probe)
+        if failures:
+            console.print("[red]Strict environment gate: FAIL[/red]")
+            for reason in failures:
+                console.print(f"- {reason}")
+            raise typer.Exit(code=1)
+        console.print("[green]Strict environment gate: PASS[/green]")
+    else:
+        console.print(
+            "[yellow]No PASS/FAIL was assigned. A manual review is still required.[/yellow]"
+        )
 
 
 @app.command("probe-adapter")
@@ -676,10 +1037,7 @@ def compose_generate(
     console.print(f"Generated system written to {generated.output_directory}")
     console.print(f"Execution ready: {generated.execution_ready}")
     console.print(f"Release ready: {generated.release_ready}")
-    console.print(
-        "Trusted provenance SHA-256: "
-        f"{generated.artifact_sha256['provenance.json']}"
-    )
+    console.print(f"Trusted provenance SHA-256: {generated.artifact_sha256['provenance.json']}")
     console.print("[yellow]Generation completeness is not an L4 verdict.[/yellow]")
 
 
@@ -708,7 +1066,7 @@ def compose_run(
         output_published = _publish_completed_artifact(probe, output)
     except (BlackridgeError, ValidationError, OSError, json.JSONDecodeError) as exc:
         failure = ProbeEvidence.failure(
-            provider="blackridge-generated-linear-runtime/1",
+            provider="blackridge-generated-graph-runtime/1",
             subject=str(bundle_directory),
             request={
                 "bundle_directory": str(bundle_directory),
@@ -739,7 +1097,7 @@ def compose_run_sandbox(
     bundle_directory: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
     input_file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
     provenance_sha256: Annotated[str, typer.Option("--provenance-sha256")],
-    image: Annotated[str, typer.Option("--image")] = "blackridge/swerex-runtime:1.4.0",
+    image: Annotated[str | None, typer.Option("--image")] = None,
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/composition-sandbox-output.json"
     ),
@@ -781,8 +1139,7 @@ def compose_run_sandbox(
     console.print(f"All generated steps completed: {complete}")
     console.print(f"Resolved image: {sandbox['image']['resolved_id']}")
     console.print(
-        "Container remaining after cleanup: "
-        f"{sandbox['cleanup']['container_exists_after']}"
+        f"Container remaining after cleanup: {sandbox['cleanup']['container_exists_after']}"
     )
     if output_published:
         console.print(f"Output artifact written to {output}")
@@ -876,7 +1233,9 @@ def probe_wheel_compliance(
     output_directory: Annotated[Path, typer.Option("--output-directory", "-o")] = Path(
         ".blackridge/release/wheel"
     ),
-    syft_image: Annotated[str, typer.Option("--syft-image")] = DEFAULT_SYFT_IMAGE,
+    syft_image: Annotated[
+        str, typer.Option("--syft-image", show_default=False)
+    ] = DEFAULT_SYFT_IMAGE,
 ) -> None:
     """Create wheel SBOMs, component inventory, license bundle, and raw evidence."""
 
@@ -913,7 +1272,9 @@ def probe_image_compliance(
     license_review: Annotated[
         Path, typer.Option("--license-review", exists=True, dir_okay=False, readable=True)
     ] = Path("docker/python-license-review.yaml"),
-    syft_image: Annotated[str, typer.Option("--syft-image")] = DEFAULT_SYFT_IMAGE,
+    syft_image: Annotated[
+        str, typer.Option("--syft-image", show_default=False)
+    ] = DEFAULT_SYFT_IMAGE,
 ) -> None:
     """Inspect an exact image and block while distribution obligations remain unresolved."""
 
@@ -1013,9 +1374,7 @@ def review_probe(
     promotion_level: Annotated[int | None, typer.Option("--promotion-level")] = None,
     subject_type: Annotated[str | None, typer.Option("--subject-type")] = None,
     subject_revision: Annotated[str | None, typer.Option("--subject-revision")] = None,
-    subject_license_spdx: Annotated[
-        str | None, typer.Option("--subject-license-spdx")
-    ] = None,
+    subject_license_spdx: Annotated[str | None, typer.Option("--subject-license-spdx")] = None,
     artifact_sha256: Annotated[str | None, typer.Option("--artifact-sha256")] = None,
     output: Annotated[Path, typer.Option("--output", "-o")] = Path(
         ".blackridge/evidence/manual-review.json"
@@ -1053,10 +1412,13 @@ def review_probe(
         if promotion_level is not None:
             if probe.observations.get("probe_completed") is not True:
                 raise BlackridgeError("an incomplete probe cannot promote evidence")
-            assert subject_type is not None
-            assert subject_revision is not None
-            assert subject_license_spdx is not None
-            assert artifact_sha256 is not None
+            if (
+                subject_type is None
+                or subject_revision is None
+                or subject_license_spdx is None
+                or artifact_sha256 is None
+            ):
+                raise BlackridgeError("all evidence promotion options must be supplied together")
             if subject_type not in {"component", "adapter"}:
                 raise BlackridgeError("subject type must be component or adapter")
             promotion_subject_type: Literal["component", "adapter"] = (
@@ -1101,6 +1463,47 @@ def review_probe(
         f"Manual verdict recorded: {capability}/{scenario} = [bold]{verdict.value}[/bold]"
     )
     console.print(f"Review written to {output}")
+
+
+@app.command("verify-holdout")
+def verify_holdout(
+    suite_root: Annotated[Path, typer.Argument(exists=True, file_okay=False, readable=True)],
+    manifest_sha256: Annotated[str, typer.Option("--manifest-sha256")],
+    system_revision: Annotated[str, typer.Option("--system-revision")],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        ".blackridge/evidence/sealed-holdout-verification.json"
+    ),
+) -> None:
+    """Verify an externally authored holdout inventory without executing hidden cases."""
+
+    try:
+        probe = verify_sealed_holdout(
+            suite_root,
+            expected_manifest_sha256=manifest_sha256,
+            expected_system_revision=system_revision,
+        )
+        write_probe(probe, output)
+    except (BlackridgeError, ValidationError, OSError) as exc:
+        failure = ProbeEvidence.failure(
+            provider="blackridge-sealed-holdout-verifier/1",
+            subject=str(suite_root),
+            request={
+                "suite_root": str(suite_root),
+                "expected_manifest_sha256": manifest_sha256,
+                "expected_system_revision": system_revision,
+            },
+            sources=[str(suite_root / "holdout-manifest.json")],
+            error=exc,
+        )
+        with suppress(OSError):
+            write_probe(failure, output)
+        console.print(f"[red]Sealed holdout verification failed:[/red] {exc}")
+        raise typer.Exit(code=2) from exc
+    console.print(f"Sealed holdout verified: {probe.subject}")
+    console.print(f"Files verified: {probe.observations['file_count']}")
+    console.print(f"Case files retained: {probe.observations['case_file_count']}")
+    console.print(f"Raw evidence written to {output}")
+    console.print("[yellow]No evaluator cases were interpreted or executed.[/yellow]")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "round_id": "round-002",
+  "result": "pass",
+  "evaluator_sha256": "a6318aad33cd8708375f07d5ab4ef1c0a9191d9d34099d06210e5a71b790e767",
+  "reference_program_sha256": "94cbe15a6f5724df657b9bd76190e4f9e84ac7ca2c81a9e6aec60779180149da",
+  "tests_run": 7,
+  "tests_passed": 7,
+  "tests_failed": 0,
+  "evaluator_seconds": 0.358,
+  "sandbox": {
+    "image": "blackridge/swerex-runtime@sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+    "network": "none",
+    "uid_gid": "65534:65534",
+    "root_filesystem": "read-only",
+    "evaluation_mount": "read-only",
+    "capabilities": "all-dropped",
+    "no_new_privileges": true,
+    "pids_limit": 64,
+    "memory": "256m",
+    "cpus": 1,
+    "tmpfs": "/tmp:rw,noexec,nosuid,size=64m"
+  }
+}

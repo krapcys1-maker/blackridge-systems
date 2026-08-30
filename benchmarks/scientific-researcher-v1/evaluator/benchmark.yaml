@@ -1,6 +1,6 @@
 schema_version: "1"
 task_id: scientific-researcher-v1
-version: "1.0"
+version: "1.1"
 description: >-
   Frozen smoke benchmark for grounded synthesis, citation integrity, abstention, and artifact
   inspection before any from-scratch or Blackridge builder is allowed to run.

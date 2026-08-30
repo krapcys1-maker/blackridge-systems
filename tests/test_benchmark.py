@@ -12,6 +12,7 @@ from blackridge.benchmark import (
     BenchmarkEvaluator,
     CandidateInvocation,
     ResearchOutput,
+    ResearchRequest,
     load_benchmark_definition,
     load_benchmark_run_plan,
 )
@@ -29,9 +30,7 @@ def comparison_plans(tmp_path: Path) -> tuple[Path, Path]:
     baseline = yaml.safe_load(REFERENCE.read_text(encoding="utf-8"))
     blackridge = yaml.safe_load(BROKEN.read_text(encoding="utf-8"))
     baseline.update({"run_id": "baseline-attempt-one", "method": "from-scratch"})
-    blackridge.update(
-        {"run_id": "blackridge-attempt-one", "method": "blackridge-hybrid"}
-    )
+    blackridge.update({"run_id": "blackridge-attempt-one", "method": "blackridge-hybrid"})
     baseline_path = tmp_path / "baseline.yaml"
     blackridge_path = tmp_path / "blackridge.yaml"
     baseline_path.write_text(yaml.safe_dump(baseline), encoding="utf-8")
@@ -58,6 +57,25 @@ def test_output_contract_rejects_unexpected_fields() -> None:
                 "claims": [],
                 "sources": [],
                 "secret_unchecked_payload": True,
+            }
+        )
+
+
+def test_input_contract_rejects_boolean_minimum_sources() -> None:
+    with pytest.raises(ValidationError):
+        ResearchRequest.model_validate(
+            {
+                "schema_version": "1",
+                "request_id": "boolean-minimum",
+                "question": "Which evidence supports this decision?",
+                "minimum_sources": True,
+                "documents": [
+                    {
+                        "document_id": "evidence-one",
+                        "title": "Evidence Record",
+                        "full_text": "A retained record supports the named decision under review.",
+                    }
+                ],
             }
         )
 
@@ -110,8 +128,7 @@ def test_public_schema_keeps_fixed_check_denominator_for_invalid_output() -> Non
         ]
         assert all(check["matched"] is False for check in blocked_checks)
         assert all(
-            check["observed"] == "blocked by invalid output contract"
-            for check in blocked_checks
+            check["observed"] == "blocked by invalid output contract" for check in blocked_checks
         )
 
 
@@ -155,12 +172,14 @@ def test_docker_candidate_command_disables_root_and_swap(tmp_path: Path) -> None
 
     command = BenchmarkEvaluator()._candidate_command(DEFINITION, tmp_path / "run.yaml", run)
 
-    assert command.argv[
-        command.argv.index("--user") : command.argv.index("--user") + 2
-    ] == ["--user", "65534:65534"]
+    assert command.argv[command.argv.index("--user") : command.argv.index("--user") + 2] == [
+        "--user",
+        "65534:65534",
+    ]
     assert command.argv[
         command.argv.index("--memory-swap") : command.argv.index("--memory-swap") + 2
     ] == ["--memory-swap", "256m"]
+    assert "--interactive" in command.argv
     assert "HOME=/tmp" in command.argv
     assert "TMPDIR=/tmp" in command.argv
 

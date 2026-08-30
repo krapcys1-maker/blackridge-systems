@@ -1,0 +1,68 @@
+{
+  "schema_version": "1",
+  "round_id": "round-007",
+  "status": "complete-v1-line-promoted",
+  "incumbent": {
+    "candidate_id": "candidate-security-boundaries-round-006",
+    "architecture_line": "v1.7",
+    "snapshot_commit": "47c8ff9948a762b64dfe19d52ef768fb65ca09f9",
+    "main_integration_commit": "893e290"
+  },
+  "benchmark": {
+    "base_spec": "evolution/benchmark/ultimate-system-suite-v1.json",
+    "base_spec_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
+    "external_operational_tests": "D:/Skladacz aplikacji/blackridge-evolution-evaluator/round-007/tests/test_operational_boundaries_round007.py",
+    "external_operational_tests_sha256": "53149d14e4114b8209db92c528ea08b49a0b1730017d93d1bc5579e1014699b9",
+    "freeze_status": "frozen"
+  },
+  "focus_segments": [
+    "atomic persistence for every discovery, blueprint, composition, probe, and review artifact",
+    "explicit error observations for injected OpenSSF Scorecard provider failures",
+    "opt-in fail-closed environment-probe completion gate without changing raw calibration semantics",
+    "no regression in generation, composition, frozen workloads, packaging, or system E2E"
+  ],
+  "incumbent_operational_baseline": {
+    "tests_passed": 2,
+    "tests_failed": 9,
+    "manual_interventions": 0,
+    "interpretation": "The frozen tests exposed missing operational guarantees. The two passing tests preserved atomic replacement cleanup and the existing raw-calibration CLI contract. Candidate A closed the remaining nine and now passes 11/11."
+  },
+  "candidate_slots": [
+    {
+      "origin": "champion",
+      "candidate_id": "candidate-security-boundaries-round-006",
+      "architecture_line": "v1.7",
+      "status": "retained",
+      "outcome": "2/11 operational; superseded by candidate A"
+    },
+    {
+      "origin": "A",
+      "candidate_id": "candidate-operational-boundaries-round-007",
+      "architecture_line": "v1.8",
+      "status": "selected-champion",
+      "outcome": "3/3 generation, 11/11 operational, all release gates green"
+    },
+    {
+      "origin": "B",
+      "candidate_id": "candidate-ledger-operational-round-007",
+      "architecture_line": "v2.9",
+      "status": "measured-rejected",
+      "outcome": "0/3 generation at ~3x winner cost"
+    },
+    {
+      "origin": "A+B",
+      "candidate_id": "candidate-a-plus-b-round-007",
+      "status": "not-materialized",
+      "outcome": "B produced no evidence-backed advantage to transfer"
+    },
+    {
+      "origin": "B+A",
+      "candidate_id": "candidate-b-plus-a-round-007",
+      "status": "measured-rejected",
+      "outcome": "2/3 generation at ~2.4x winner cost; unpackageable ledger base"
+    }
+  ],
+  "selection_status": "complete",
+  "measured_results": "evolution/rounds/007/measured-results.json",
+  "loop_closure": "This is the final champion-challenger round on the Duplicate Finder workload. See measured-results.json loop_closure."
+}

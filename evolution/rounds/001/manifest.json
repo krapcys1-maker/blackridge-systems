@@ -1,0 +1,55 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "status": "terminated-no-promotion-incumbent-retained",
+  "created_at": "2026-08-28T13:02:53+03:00",
+  "champion": {
+    "candidate_id": "champion-v1-1",
+    "architecture_line": "v1.1",
+    "snapshot_commit": "0bdfd5ac055118fcd38f157522a88f460d6ba64e",
+    "artifact_sha256": "196551749cb767b75e31302f55a7e17e10178bfe86994ab2a295330ce10bb58e"
+  },
+  "benchmark": {
+    "id": "blackridge-evolution-v1",
+    "public_spec": "evolution/benchmark/public-spec.json",
+    "public_spec_sha256": "77495687a7fb65a3fc4e90691093443924a20292a9f42a9f9ce2704d84a827f9",
+    "hidden_holdout_sha256": "04cd24be9e9ae39327f146bb76ed299b4fd42be42a0c3f1615a18716a178b86e",
+    "builder_may_access_hidden_holdout": false
+  },
+  "candidates": [
+    {"candidate_id":"champion-v1-1","origin":"champion","architecture_line":"v1.1","status":"frozen","parent_ids":["v1.1"]},
+    {"candidate_id":"candidate-a-v1-2","origin":"A","architecture_line":"v1.2","status":"rejected-no-measured-project-builder-advantage","parent_ids":["champion-v1-1"],"snapshot_commit":"ee72dd6b39f3e98ab4384cb708e7df98a81a6111","artifact_sha256":"530ca9477984e858e2a198d35e2d90f08df60ddadc51f918be12b6405cd2dcc5"},
+    {"candidate_id":"candidate-b-v2","origin":"B","architecture_line":"v2","status":"architecture-rejected-before-build","parent_ids":["champion-v1-1-public-contract-only"],"attempts":10,"retained_provider_completions":9,"latest_proposal_sha256":"0cdeca7e7ef55fc093d7ee30d21e3608ba333983dd67b8cb64fe936df47eeeb4"},
+    {"candidate_id":"candidate-a-plus-b","origin":"A+B","architecture_line":"v1.2","status":"not-built-no-measured-b-strengths","parent_ids":["candidate-a-v1-2","candidate-b-v2"]},
+    {"candidate_id":"candidate-b-plus-a","origin":"B+A","architecture_line":"v2.1","status":"not-built-no-measured-b-strengths","parent_ids":["candidate-b-v2","candidate-a-v1-2"]}
+  ],
+  "authority": {
+    "builder_may_change_benchmark": false,
+    "builder_may_select_winner": false,
+    "evaluator_must_differ_from_all_builders": true,
+    "candidate_tests_are_promotion_evidence": false
+  },
+  "termination": {
+    "selected_champion": "champion-v1-1",
+    "reason": "A has byte-identical project-building modules and no fresh measured workload advantage; B failed pre-build architecture gates; hybrids therefore have no evidence-backed transfer inputs.",
+    "audit": "evolution/rounds/001/a-vs-champion-project-builder-audit.json"
+  },
+  "candidate_a": {
+    "snapshot_path": "../blackridge-evolution-round-001/candidate-a-v1.2",
+    "remote_branch": "evolution/candidate-a-v1.2-round-001",
+    "snapshot_commit": "ee72dd6b39f3e98ab4384cb708e7df98a81a6111",
+    "source_archive_path": "../blackridge-evolution-evaluator/candidate-a-v1.2-round-001.tar",
+    "source_archive_sha256": "530ca9477984e858e2a198d35e2d90f08df60ddadc51f918be12b6405cd2dcc5",
+    "static_gates": "passed",
+    "tests": {"passed": 229, "skipped": 3, "coverage_percent": 72.15},
+    "benchmark_status": "not-run-byte-identity-proves-no-engine-delta",
+    "promotion_status": "rejected"
+  },
+  "candidate_b": {
+    "artifact_directory": "../blackridge-evolution-round-001",
+    "attempt_summary": "evolution/rounds/001/candidate-b-attempts.json",
+    "latest_repaired_architecture_sha256": "0cdeca7e7ef55fc093d7ee30d21e3608ba333983dd67b8cb64fe936df47eeeb4",
+    "latest_architecture_file_sha256": "51bd976f877540780fb40977b5b1cf5a657f93776eaef0b1bbf5c1e9beb4db5f",
+    "status": "rejected-before-build"
+  }
+}

@@ -1,3 +1,3 @@
 """Blackridge Systems: evidence-driven, reuse-first system composition."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"

@@ -82,3 +82,12 @@ manual verdict.
 
 Do not select or edit hidden cases after inspecting either method's system. A changed evaluator is a
 new benchmark version and invalidates direct comparison with prior runs.
+
+## Evaluator revisions
+
+- `1.0` calibrated the host fixture boundary but did not attach stdin to Docker candidates. Real
+  Docker observations made with that revision are invalid because candidates received an empty
+  stream.
+- `1.1` adds Docker stdin attachment with `--interactive`. It was recalibrated before immutable
+  experimental candidates were reevaluated. The public task, schemas, cases, and expectations did
+  not change.

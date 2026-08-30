@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
 from copy import deepcopy
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -13,7 +14,9 @@ import yaml
 from blackridge.composition import (
     ContractDefinition,
     EvidenceReference,
+    _host_component_process,
     _sandbox_component_argv,
+    _sandbox_resource_target,
     _verify_evidence,
     generate_system,
     run_generated_system,
@@ -36,7 +39,51 @@ BROKEN_OUTPUT = ROOT / "examples" / "composition-linear-broken-output.yaml"
 PRODUCTION_UNREVIEWED = ROOT / "examples" / "composition-production-unreviewed.yaml"
 TIMEOUT_HOSTILE = ROOT / "examples" / "composition-timeout-calibration.yaml"
 RESOURCE_HOSTILE = ROOT / "examples" / "composition-resource-calibration.yaml"
+FANIN = ROOT / "examples" / "composition-fanin-calibration.yaml"
+BUNDLED_RESOURCE = ROOT / "examples" / "composition-bundled-resource-calibration.yaml"
 INPUT = {"topic": "evidence-driven composition"}
+
+
+def test_host_component_gets_isolated_runtime_identity_and_scratch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    component = tmp_path / "inspect_environment.py"
+    component.write_text(
+        "import getpass, json, os, sys, tempfile\n"
+        "json.load(sys.stdin)\n"
+        "print(json.dumps({\n"
+        "  'user': getpass.getuser(),\n"
+        "  'home': os.environ['HOME'],\n"
+        "  'temp': tempfile.gettempdir(),\n"
+        "  'secret': os.environ['BLACKRIDGE_TEST_ALLOWED'],\n"
+        "  'names': sorted(os.environ),\n"
+        "}))\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("BLACKRIDGE_TEST_ALLOWED", "allowed-value")
+    monkeypatch.setenv("HOME", str(tmp_path / "real-host-home"))
+
+    process = _host_component_process(
+        "environment-fixture",
+        {
+            "argv": [sys.executable, str(component)],
+            "working_directory": str(tmp_path),
+            "environment_allowlist": ["BLACKRIDGE_TEST_ALLOWED"],
+            "timeout_seconds": 5,
+        },
+        {},
+    )
+
+    assert process["exit_code"] == 0
+    observed = json.loads(str(process["stdout"]))
+    assert observed["user"] == "blackridge"
+    assert observed["secret"] == "allowed-value"
+    assert observed["home"] == observed["temp"]
+    assert not Path(observed["home"]).exists()
+    assert "HOME" in process["environment_names"]
+    assert "USERNAME" in process["environment_names"]
+    assert "real-host-home" not in observed["home"]
+    assert "PYTHONIOENCODING" in observed["names"]
 
 
 def test_contract_identifier_cannot_escape_generated_contract_directory() -> None:
@@ -56,9 +103,7 @@ def test_solver_rejects_blocked_option_and_selects_one_adapter() -> None:
     assert plan.selected_component_ids == ["fixture-report-sink", "fixture-research-source"]
     assert plan.selected_adapter_ids == ["paper-title-to-document-name"]
     assert [step.step_type for step in plan.steps] == ["component", "adapter", "component"]
-    blocked = next(
-        item for item in plan.qualifications if item.subject_id == "blocked-report-sink"
-    )
+    blocked = next(item for item in plan.qualifications if item.subject_id == "blocked-report-sink")
     assert blocked.eligible is False
     assert blocked.reasons == ["deliberate policy-blocked alternative"]
 
@@ -72,6 +117,55 @@ def test_solver_keeps_missing_adapter_route_incomplete() -> None:
     assert plan.unresolved_capabilities == ["report-sink"]
     assert plan.selected_adapter_ids == []
     assert [step.subject_id for step in plan.steps] == ["fixture-research-source"]
+
+
+def test_solver_and_runtime_preserve_independent_branches_for_fanin(tmp_path: Path) -> None:
+    definition = load_composition_definition(FANIN)
+    plan = solve_composition(definition, definition_file=FANIN)
+
+    assert plan.complete is True
+    assert [step.subject_id for step in plan.steps] == [
+        "fixture-length-branch",
+        "fixture-uppercase-branch",
+        "fixture-join-branches",
+    ]
+    join = plan.steps[-1]
+    assert [join.input_contract, *join.additional_input_contracts] == [
+        "uppercase/v1",
+        "length/v1",
+    ]
+
+    bundle = tmp_path / "fanin"
+    generated = generate_system(
+        definition,
+        plan,
+        definition_file=FANIN,
+        output_directory=bundle,
+    )
+    probe = run_generated_system(
+        bundle,
+        {"text": "Blackridge"},
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
+
+    assert probe.observations["all_steps_completed"] is True
+    assert probe.observations["available_contracts"] == [
+        "joined/v1",
+        "length/v1",
+        "seed/v1",
+        "uppercase/v1",
+    ]
+    assert probe.observations["final_artifact"] == {
+        "observed_contracts": ["length/v1", "uppercase/v1"],
+        "summary": "BLACKRIDGE:10",
+    }
+    join_observation = probe.observations["steps"][-1]
+    assert join_observation["input_artifact"] == {
+        "inputs": {
+            "uppercase/v1": {"uppercase": "BLACKRIDGE"},
+            "length/v1": {"length": 10},
+        }
+    }
 
 
 def test_production_mode_rejects_unreviewed_claimed_l3() -> None:
@@ -133,6 +227,13 @@ def test_generator_writes_locked_layout_and_runtime_completes(tmp_path: Path) ->
         "runtime.yaml",
     }
     assert expected <= {path.name for path in bundle.iterdir() if path.is_file()}
+    bundled_components = sorted(path.name for path in (bundle / "components").iterdir())
+    assert bundled_components == ["fixture-report-sink.py", "fixture-research-source.py"]
+    runtime = yaml.safe_load((bundle / "runtime.yaml").read_text(encoding="utf-8"))
+    launches = [step["launch"] for step in runtime["steps"] if step["step_type"] == "component"]
+    assert all(launch["working_directory"] == "components" for launch in launches)
+    assert all(not Path(launch["artifact_file"]).is_absolute() for launch in launches)
+    assert all(launch["argv"] == ["{python}", "{artifact}"] for launch in launches)
     assert generated.execution_ready is True
     assert generated.release_ready is False
     assert probe.observations["all_steps_completed"] is True
@@ -140,12 +241,8 @@ def test_generator_writes_locked_layout_and_runtime_completes(tmp_path: Path) ->
         "title": "Evidence for evidence-driven composition",
         "based_on": "fixture-paper-001",
     }
-    assert all(
-        step.get("output_contract_valid") is True for step in probe.observations["steps"]
-    )
-    adapter = next(
-        step for step in probe.observations["steps"] if step["step_type"] == "adapter"
-    )
+    assert all(step.get("output_contract_valid") is True for step in probe.observations["steps"])
+    adapter = next(step for step in probe.observations["steps"] if step["step_type"] == "adapter")
     assert adapter["operations"][0] == {"op": "add", "path": "/document", "value": {}}
     assert "verdict" not in probe.model_dump()
 
@@ -195,7 +292,7 @@ def test_runtime_rejects_tampered_generated_artifact(tmp_path: Path) -> None:
         )
 
 
-def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path) -> None:
+def test_generated_bundle_runs_after_its_definition_source_is_removed(tmp_path: Path) -> None:
     examples = tmp_path / "examples"
     shutil.copytree(ROOT / "examples", examples)
     definition_file = examples / "composition-linear-calibration.yaml"
@@ -208,8 +305,85 @@ def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path
         definition_file=definition_file,
         output_directory=bundle,
     )
-    sink = examples / "fixtures" / "report_sink.py"
+    shutil.rmtree(examples)
+
+    probe = run_generated_system(
+        bundle,
+        INPUT,
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
+
+    assert probe.observations["all_steps_completed"] is True
+    assert probe.observations["final_artifact"]["report"]["based_on"] == "fixture-paper-001"
+
+
+def test_bundled_resource_runs_without_source_tree_and_tampering_is_blocked(
+    tmp_path: Path,
+) -> None:
+    examples = tmp_path / "examples"
+    shutil.copytree(ROOT / "examples", examples)
+    definition_file = examples / "composition-bundled-resource-calibration.yaml"
+    definition = load_composition_definition(definition_file)
+    plan = solve_composition(definition, definition_file=definition_file)
+    bundle = tmp_path / "generated-resource"
+    generated = generate_system(
+        definition,
+        plan,
+        definition_file=definition_file,
+        output_directory=bundle,
+    )
+    runtime = yaml.safe_load((bundle / "runtime.yaml").read_text(encoding="utf-8"))
+    resource_step = next(
+        step for step in runtime["steps"] if step["subject_id"] == "fixture-resource-calculator"
+    )
+    assert resource_step["launch"]["resources"][0]["copy_timeout_seconds"] == 300
+    shutil.rmtree(examples)
+
+    probe = run_generated_system(
+        bundle,
+        {"value": 14},
+        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+    )
+    assert probe.observations["all_steps_completed"] is True
+    assert probe.observations["final_artifact"] == {"result": "locked:42"}
+
+    resource = (
+        bundle
+        / "resources"
+        / "fixture-resource-calculator"
+        / "calculation-data"
+        / "resource_data.json"
+    )
+    resource.write_text(resource.read_text(encoding="utf-8") + " ", encoding="utf-8")
+    with pytest.raises(BlackridgeError, match=r"resource_data\.json"):
+        run_generated_system(
+            bundle,
+            {"value": 14},
+            expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        )
+
+
+def test_runtime_preflights_every_bundled_component_hash_before_execution(
+    tmp_path: Path,
+) -> None:
+    definition = load_composition_definition(POSITIVE)
+    plan = solve_composition(definition, definition_file=POSITIVE)
+    bundle = tmp_path / "generated"
+    generate_system(
+        definition,
+        plan,
+        definition_file=POSITIVE,
+        output_directory=bundle,
+    )
+    sink = bundle / "components" / "fixture-report-sink.py"
     sink.write_text(sink.read_text(encoding="utf-8") + "# tampered\n", encoding="utf-8")
+    provenance_file = bundle / "provenance.json"
+    provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
+    provenance["artifact_sha256"]["components/fixture-report-sink.py"] = sha256(
+        sink.read_bytes()
+    ).hexdigest()
+    provenance_file.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
+    resigned_root = sha256(provenance_file.read_bytes()).hexdigest()
 
     def unexpected_process(*_args, **_kwargs):
         raise AssertionError("no component may execute after a preflight hash mismatch")
@@ -217,7 +391,7 @@ def test_runtime_preflights_every_component_hash_before_execution(tmp_path: Path
     probe = run_generated_system(
         bundle,
         INPUT,
-        expected_provenance_sha256=generated.artifact_sha256["provenance.json"],
+        expected_provenance_sha256=resigned_root,
         _component_process=unexpected_process,
     )
 
@@ -239,9 +413,7 @@ def _rewrite_runtime_and_relock(bundle: Path, mutate) -> str:
     runtime_file.write_text(yaml.safe_dump(runtime, sort_keys=False), encoding="utf-8")
     provenance_file = bundle / "provenance.json"
     provenance = json.loads(provenance_file.read_text(encoding="utf-8"))
-    provenance["artifact_sha256"]["runtime.yaml"] = sha256(
-        runtime_file.read_bytes()
-    ).hexdigest()
+    provenance["artifact_sha256"]["runtime.yaml"] = sha256(runtime_file.read_bytes()).hexdigest()
     provenance_file.write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
     return sha256(provenance_file.read_bytes()).hexdigest()
 
@@ -307,8 +479,82 @@ def test_sandboxed_generated_runner_refuses_environment_forwarding(tmp_path: Pat
 
     provenance_sha256 = _rewrite_runtime_and_relock(bundle, add_environment)
 
-    with pytest.raises(BlackridgeError, match="forwards no component environment"):
+    with pytest.raises(BlackridgeError, match="component launch disagrees with its lock"):
         run_generated_system_sandboxed(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=provenance_sha256,
+        )
+
+
+def test_generated_runtime_locks_explicit_sandbox_resources(tmp_path: Path) -> None:
+    examples = tmp_path / "examples"
+    shutil.copytree(ROOT / "examples", examples)
+    definition_file = examples / POSITIVE.name
+    definition_value = yaml.safe_load(definition_file.read_text(encoding="utf-8"))
+    definition_value["sandbox_resources"] = {
+        "memory_mb": 4096,
+        "cpus": 3.5,
+        "pids": 512,
+    }
+    definition_value["sandbox_image"] = {
+        "reference": "example.invalid/runtime@sha256:" + "a" * 64,
+        "expected_id": "sha256:" + "b" * 64,
+    }
+    definition_file.write_text(yaml.safe_dump(definition_value, sort_keys=False), encoding="utf-8")
+    definition = load_composition_definition(definition_file)
+    plan = solve_composition(definition, definition_file=definition_file)
+    bundle = tmp_path / "resource-bounded"
+
+    generate_system(
+        definition,
+        plan,
+        definition_file=definition_file,
+        output_directory=bundle,
+    )
+
+    runtime = yaml.safe_load((bundle / "runtime.yaml").read_text(encoding="utf-8"))
+    assert runtime["sandbox_resources"] == {
+        "memory_mb": 4096,
+        "cpus": 3.5,
+        "pids": 512,
+    }
+    assert runtime["sandbox_image"] == {
+        "reference": "example.invalid/runtime@sha256:" + "a" * 64,
+        "expected_id": "sha256:" + "b" * 64,
+    }
+    with pytest.raises(BlackridgeError, match="disagrees with the generated image lock"):
+        run_generated_system_sandboxed(
+            bundle,
+            INPUT,
+            expected_provenance_sha256=sha256(
+                (bundle / "provenance.json").read_bytes()
+            ).hexdigest(),
+            image_ref="sha256:" + "c" * 64,
+        )
+
+
+def test_runtime_rejects_resigned_adapter_operations_that_disagree_with_lock(
+    tmp_path: Path,
+) -> None:
+    definition = load_composition_definition(POSITIVE)
+    plan = solve_composition(definition, definition_file=POSITIVE)
+    bundle = tmp_path / "adapter-mismatch"
+    generate_system(
+        definition,
+        plan,
+        definition_file=POSITIVE,
+        output_directory=bundle,
+    )
+
+    def change_adapter(runtime) -> None:
+        adapter = next(step for step in runtime["steps"] if step["step_type"] == "adapter")
+        adapter["operations"][-1]["from"] = "/paper/missing"
+
+    provenance_sha256 = _rewrite_runtime_and_relock(bundle, change_adapter)
+
+    with pytest.raises(BlackridgeError, match="adapter runtime disagrees with its lock"):
+        run_generated_system(
             bundle,
             INPUT,
             expected_provenance_sha256=provenance_sha256,
@@ -333,6 +579,16 @@ def test_sandboxed_component_maps_a_different_python_venv_safely(tmp_path: Path)
             container_artifact="/workspace/components/component-1.py",
             subject_id="portable-python-component",
         )
+
+
+def test_sandbox_resource_target_preserves_the_generated_bundle_basename(
+    tmp_path: Path,
+) -> None:
+    bundled_resource = tmp_path / "resources" / "component" / "wheel.whl"
+
+    assert _sandbox_resource_target(2, str(bundled_resource)) == (
+        "/workspace/resources/component-2/wheel.whl"
+    )
 
 
 def test_evidence_review_is_bound_to_exact_probe_subject(tmp_path: Path) -> None:

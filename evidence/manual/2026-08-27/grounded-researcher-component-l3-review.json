@@ -1,0 +1,39 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-27T15:10:36.924074Z",
+  "reviewer": "Codex /root manual artifact reviewer",
+  "verdict": "pass",
+  "capability_id": "grounded-research-synthesis",
+  "scenario_id": "independent-domains-and-negative-control",
+  "scenario_description": "Answer three unrelated domains exactly and reject an unsupported fourth domain.",
+  "expected": [
+    "The component exits zero and returns the exact expected source set for all three answerable domains.",
+    "Every request and response satisfies the frozen public JSON Schema contracts.",
+    "Every emitted citation quote occurs verbatim in its identified input document.",
+    "The component returns insufficient-evidence with no claims or sources for the unrelated corpus.",
+    "The green-exit broken control is rejected by semantic checks despite exiting zero.",
+    "All probe containers are removed after execution."
+  ],
+  "observed": [
+    "Policy fixture returned exactly five expected sources and five exact document-backed citations.",
+    "Backup fixture returned exactly four expected sources and four exact document-backed citations.",
+    "Museum-loan fixture returned exactly ten expected sources, excluded all five topical distractors, and emitted ten exact document-backed citations.",
+    "Astronomy fixture returned insufficient-evidence with zero claims and zero sources.",
+    "All four frozen requests and all four candidate responses satisfied the public input and output JSON Schema contracts.",
+    "Broken green-exit control exited zero in all four cases but failed ten semantic checks; independent cleanup inspection found zero remaining probe containers."
+  ],
+  "probe_id": "d4634edec8a848089c99a2a763b20a1b",
+  "probe_file": "evidence\\manual\\2026-08-27\\grounded-researcher-component-l3-probe.json",
+  "probe_sha256": "fb7b4ca52e26c572f871009e5f4586c884a086d83ee9a8db2017d902bac76b19",
+  "promotion": {
+    "target_level": 3,
+    "subject_type": "component",
+    "probe_provider": "blackridge-grounded-researcher-probe/1",
+    "probe_subject": "grounded-researcher-v1@092a3d7208ab0d983d95ceb51b8c8cd1c3fc45e6d71005d0893a6474d403b2c8",
+    "probe_completed": true,
+    "subject_revision": "efadac17efd630415c8c2bc862b8de55b4a9835e",
+    "subject_license_spdx": "Apache-2.0",
+    "artifact_sha256": "092a3d7208ab0d983d95ceb51b8c8cd1c3fc45e6d71005d0893a6474d403b2c8"
+  },
+  "notes": "Named manual comparison performed against complete raw stdout, parsed artifacts, frozen fixtures, public JSON Schema validation, process constraints, cleanup results, and an independent exact-substring citation check. Scope is three answerable domains and one unrelated negative corpus; it is L3 contract evidence, not L4 end-system verification."
+}

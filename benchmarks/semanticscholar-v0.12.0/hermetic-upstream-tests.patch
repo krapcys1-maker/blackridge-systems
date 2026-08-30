@@ -1,0 +1,45 @@
+diff --git a/tests/test_semanticscholar.py b/tests/test_semanticscholar.py
+--- a/tests/test_semanticscholar.py
++++ b/tests/test_semanticscholar.py
+@@ -29,6 +29,6 @@ test_vcr = vcr.VCR(
+     cassette_library_dir='tests/data',
+     path_transformer=vcr.VCR.ensure_suffix('.yaml'),
+-    record_mode=['new_episodes'],
++    record_mode='none',
+     match_on=['uri', 'method', 'raw_body'],
+     drop_unused_requests=True
+ )
+@@ -339,9 +339,14 @@ class SemanticScholarTest(unittest.TestCase):
+     def test_timeout(self):
+         self.sch.timeout = 0.01
+         self.assertEqual(self.sch.timeout, 0.01)
+-        self.assertRaises(TimeoutException,
+-                          self.sch.get_paper,
+-                          '10.1093/mind/lix.236.433')
++        with mock.patch(
++            'httpx.AsyncClient.request',
++            new_callable=mock.AsyncMock,
++            side_effect=TimeoutException('hermetic timeout')
++        ):
++            self.assertRaises(TimeoutException,
++                              self.sch.get_paper,
++                              '10.1093/mind/lix.236.433')
+ 
+     @test_vcr.use_cassette
+     def test_get_author(self):
+@@ -927,8 +932,13 @@ class AsyncSemanticScholarTest(unittest.IsolatedAsyncioTestCase):
+     async def test_timeout_async(self):
+         self.sch.timeout = 0.01
+         self.assertEqual(self.sch.timeout, 0.01)
+-        with self.assertRaises(TimeoutException):
+-            await self.sch.get_paper('10.1093/mind/lix.236.433')
++        with mock.patch(
++            'httpx.AsyncClient.request',
++            new_callable=mock.AsyncMock,
++            side_effect=TimeoutException('hermetic timeout')
++        ):
++            with self.assertRaises(TimeoutException):
++                await self.sch.get_paper('10.1093/mind/lix.236.433')
+     
+     @use_shared_cassette
+     async def test_get_author_async(self):

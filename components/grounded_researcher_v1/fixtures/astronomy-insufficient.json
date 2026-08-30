@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "request_id": "astronomy-insufficient",
+  "question": "Which observations establish the atmospheric composition of a distant exoplanet?",
+  "minimum_sources": 2,
+  "documents": [
+    {
+      "document_id": "garden-mulch",
+      "title": "Mulching Berry Plants",
+      "full_text": "A layer of organic mulch can reduce weeds around berry plants. Keep the material away from the crown to limit rot."
+    },
+    {
+      "document_id": "bread-fermentation",
+      "title": "Bread Fermentation",
+      "full_text": "Dough fermentation depends on temperature and starter activity. A baker watches volume and texture instead of relying only on elapsed time."
+    },
+    {
+      "document_id": "bicycle-chain",
+      "title": "Cleaning a Bicycle Chain",
+      "full_text": "A bicycle chain should be cleaned and dried before lubricant is applied. Excess lubricant attracts road grit."
+    }
+  ]
+}

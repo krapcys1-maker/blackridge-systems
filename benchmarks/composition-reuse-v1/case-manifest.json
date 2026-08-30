@@ -1,0 +1,13 @@
+{
+  "schema_version": "1",
+  "component_artifact_sha256": "c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+  "manual_review_sha256": "d8eede51f0111b06673b7e0c1e4ea85bba1ee420a736b6fcb89fab614f658fec",
+  "cases": {
+    "reuse-complete.yaml": "50627a65ee02f5060052dc6c1d44141cb0adb0f447b4d1e31b304a6d9fc7df1f",
+    "blocked-preferred-fallback.yaml": "584a662c2ae9d159eff2df0e0892d5f031daf754835dd28d77608d5eaae52329",
+    "evidence-floor.yaml": "9811fc1e108fe0473cc60fab5affc32d66f8ec5f2b58644043b9bd777984cf48",
+    "license-blocked.yaml": "95d7598074571292d864290368aae7630604e007992847f2b6a50e0b6fa78fc9",
+    "hash-drift.yaml": "5cd41074317175d59b140f3392001b6ec20061c105d25ebce98627fd5095e8e5",
+    "adapter-gap.yaml": "75643c97c8c9be57a1dfc3c6c38e6a5e6626d493524442b86856827e360ac89a"
+  }
+}

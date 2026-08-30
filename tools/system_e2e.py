@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
 from time import perf_counter
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -100,6 +101,18 @@ def _load_json(path: Path) -> dict[str, object]:
     return value
 
 
+def _object(value: object, message: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise AssertionError(message)
+    return value
+
+
+def _array(value: object, message: str) -> list[Any]:
+    if not isinstance(value, list):
+        raise AssertionError(message)
+    return value
+
+
 def _sha256_file(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
 
@@ -145,13 +158,26 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
     )
     containers_before = _docker_container_ids(harness, "containers-before", docker)
 
+    positive_source = work / "positive-source"
+    shutil.copytree(examples, positive_source)
+    portable_input = work / "positive-input.json"
+    shutil.copy2(input_file, portable_input)
     positive = work / "positive"
     bundle, provenance_sha256 = _generate_bundle(
         harness,
         name="positive",
-        definition=examples / "composition-linear-calibration.yaml",
+        definition=positive_source / "composition-linear-calibration.yaml",
         destination=positive,
     )
+    bundled_components = sorted((bundle / "components").glob("*"))
+    _expect(len(bundled_components) == 2, "positive bundle did not retain both components")
+    runtime_text = (bundle / "runtime.yaml").read_text(encoding="utf-8")
+    _expect(
+        str(positive_source.resolve()) not in runtime_text,
+        "positive runtime retained its source checkout path",
+    )
+    shutil.rmtree(positive_source)
+    _expect(not positive_source.exists(), "positive source fixture was not removed")
     host_output = positive / "host-output.json"
     host_evidence = positive / "host-evidence.json"
     harness.cli(
@@ -159,7 +185,7 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         [
             "compose-run",
             bundle,
-            input_file,
+            portable_input,
             "--provenance-sha256",
             provenance_sha256,
             "--output",
@@ -175,7 +201,7 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         [
             "compose-run-sandbox",
             bundle,
-            input_file,
+            portable_input,
             "--provenance-sha256",
             provenance_sha256,
             "--image",
@@ -188,18 +214,16 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
     )
     host_probe = _load_json(host_evidence)
     sandbox_probe = _load_json(sandbox_evidence)
-    host_observations = host_probe["observations"]
-    sandbox_observations = sandbox_probe["observations"]
-    _expect(isinstance(host_observations, dict), "host evidence has invalid observations")
-    _expect(isinstance(sandbox_observations, dict), "sandbox evidence has invalid observations")
-    sandbox = sandbox_observations["sandbox"]
-    _expect(isinstance(sandbox, dict), "sandbox evidence has no sandbox boundary")
-    preflight = sandbox["preflight"]
-    cleanup = sandbox["cleanup"]
-    _expect(isinstance(preflight, dict), "sandbox preflight evidence is invalid")
-    _expect(isinstance(cleanup, dict), "sandbox cleanup evidence is invalid")
-    checks = preflight["checks"]
-    _expect(isinstance(checks, dict), "sandbox preflight checks are invalid")
+    host_observations = _object(
+        host_probe["observations"], "host evidence has invalid observations"
+    )
+    sandbox_observations = _object(
+        sandbox_probe["observations"], "sandbox evidence has invalid observations"
+    )
+    sandbox = _object(sandbox_observations["sandbox"], "sandbox evidence has no sandbox boundary")
+    preflight = _object(sandbox["preflight"], "sandbox preflight evidence is invalid")
+    cleanup = _object(sandbox["cleanup"], "sandbox cleanup evidence is invalid")
+    checks = _object(preflight["checks"], "sandbox preflight checks are invalid")
     _expect(host_observations["all_steps_completed"] is True, "host path did not complete")
     _expect(sandbox_observations["all_steps_completed"] is True, "sandbox path did not complete")
     _expect(
@@ -221,7 +245,7 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         [
             "compose-run",
             bundle,
-            input_file,
+            portable_input,
             "--provenance-sha256",
             "0" * 64,
             "--output",
@@ -232,10 +256,117 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         expected_exit_codes={2},
     )
     wrong_probe = _load_json(wrong_evidence)
-    wrong_observations = wrong_probe["observations"]
-    _expect(isinstance(wrong_observations, dict), "wrong-root evidence is invalid")
+    wrong_observations = _object(wrong_probe["observations"], "wrong-root evidence is invalid")
     _expect(wrong_observations["probe_completed"] is False, "wrong trust root completed")
     _expect(not wrong_output.exists(), "wrong trust root published output")
+
+    invalid_input = controls / "invalid-input.json"
+    invalid_input.write_text('{"topic": "x"}\n', encoding="utf-8", newline="\n")
+    invalid_output = controls / "invalid-input-output.json"
+    invalid_evidence = controls / "invalid-input-evidence.json"
+    harness.cli(
+        "invalid-input",
+        [
+            "compose-run",
+            bundle,
+            invalid_input,
+            "--provenance-sha256",
+            provenance_sha256,
+            "--output",
+            invalid_output,
+            "--evidence",
+            invalid_evidence,
+        ],
+        expected_exit_codes={1},
+    )
+    invalid_probe = _load_json(invalid_evidence)
+    invalid_observations = _object(
+        invalid_probe["observations"], "invalid-input evidence is invalid"
+    )
+    invalid_errors = _array(
+        invalid_observations["initial_validation_errors"], "invalid input errors are invalid"
+    )
+    invalid_steps = _array(invalid_observations["steps"], "invalid-input steps are invalid")
+    _expect(bool(invalid_errors), "invalid input passed schema")
+    _expect(
+        all(isinstance(step, dict) and step.get("status") == "skipped" for step in invalid_steps),
+        "a step was not skipped after invalid external input",
+    )
+    _expect(
+        not any(isinstance(step, dict) and "process" in step for step in invalid_steps),
+        "a component executed after invalid external input",
+    )
+    _expect(not invalid_output.exists(), "invalid external input published output")
+
+    no_adapter_plan = controls / "no-adapter-plan.yaml"
+    no_adapter_definition = examples / "composition-linear-no-adapter.yaml"
+    harness.cli(
+        "no-adapter-solve",
+        ["compose-solve", no_adapter_definition, "--output", no_adapter_plan],
+        expected_exit_codes={1},
+    )
+    no_adapter_text = no_adapter_plan.read_text(encoding="utf-8")
+    _expect("complete: false" in no_adapter_text, "missing-adapter route completed")
+    _expect("unresolved_capabilities:" in no_adapter_text, "missing route was not explained")
+    no_adapter_bundle = controls / "no-adapter-bundle"
+    harness.cli(
+        "no-adapter-generate",
+        ["compose-generate", no_adapter_definition, no_adapter_plan, no_adapter_bundle],
+        expected_exit_codes={2},
+    )
+    _expect(not no_adapter_bundle.exists(), "incomplete no-adapter bundle was generated")
+
+    adapter_source = controls / "adapter-failure-source"
+    shutil.copytree(examples, adapter_source)
+    adapter_definition = adapter_source / "composition-linear-calibration.yaml"
+    adapter_text = adapter_definition.read_text(encoding="utf-8")
+    adapter_text = adapter_text.replace("/paper/title", "/paper/missing")
+    adapter_text = adapter_text.replace(
+        "a8d1e77ec95c12f57d453101dc342971b0988e6bc5daf641a29f556d54774af9",
+        "62c020b6f3c8c2349b586b9595163e037e3a41a1891842e0f2ae43fec791deb2",
+    )
+    adapter_definition.write_text(adapter_text, encoding="utf-8", newline="\n")
+    adapter_failure = controls / "adapter-failure"
+    adapter_bundle, adapter_hash = _generate_bundle(
+        harness,
+        name="adapter-failure",
+        definition=adapter_definition,
+        destination=adapter_failure,
+    )
+    shutil.rmtree(adapter_source)
+    adapter_output = adapter_failure / "output.json"
+    adapter_evidence = adapter_failure / "evidence.json"
+    harness.cli(
+        "adapter-failure-run",
+        [
+            "compose-run",
+            adapter_bundle,
+            portable_input,
+            "--provenance-sha256",
+            adapter_hash,
+            "--output",
+            adapter_output,
+            "--evidence",
+            adapter_evidence,
+        ],
+        expected_exit_codes={1},
+    )
+    adapter_probe = _load_json(adapter_evidence)
+    adapter_observations = _object(
+        adapter_probe["observations"], "adapter-failure evidence is invalid"
+    )
+    adapter_steps = _array(adapter_observations["steps"], "adapter-failure steps are invalid")
+    adapter_statuses = [step.get("status") for step in adapter_steps if isinstance(step, dict)]
+    _expect(
+        adapter_statuses == ["completed", "failed", "skipped"],
+        "adapter failure did not stop the boundary chain",
+    )
+    failed_adapter = adapter_steps[1]
+    _expect(
+        bool(isinstance(failed_adapter, dict) and failed_adapter.get("patch_error")),
+        "adapter failure did not retain its patch error",
+    )
+    _expect(not adapter_output.exists(), "failed adapter published output")
 
     broken = controls / "broken-contract"
     broken_bundle, broken_hash = _generate_bundle(
@@ -262,14 +393,13 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         expected_exit_codes={1},
     )
     broken_probe = _load_json(broken_evidence)
-    broken_observations = broken_probe["observations"]
-    _expect(isinstance(broken_observations, dict), "broken-contract evidence is invalid")
-    broken_steps = broken_observations["steps"]
-    _expect(isinstance(broken_steps, list) and broken_steps, "broken-contract steps missing")
-    broken_last = broken_steps[-1]
-    _expect(isinstance(broken_last, dict), "broken-contract final step is invalid")
-    broken_process = broken_last["process"]
-    _expect(isinstance(broken_process, dict), "broken-contract process evidence is invalid")
+    broken_observations = _object(
+        broken_probe["observations"], "broken-contract evidence is invalid"
+    )
+    broken_steps = _array(broken_observations["steps"], "broken-contract steps are invalid")
+    _expect(bool(broken_steps), "broken-contract steps missing")
+    broken_last = _object(broken_steps[-1], "broken-contract final step is invalid")
+    broken_process = _object(broken_last["process"], "broken-contract process evidence is invalid")
     _expect(broken_process["exit_code"] == 0, "broken fixture did not retain green exit")
     _expect(broken_last["output_contract_valid"] is False, "broken output passed contract")
     _expect(not broken_output.exists(), "broken contract published output")
@@ -301,20 +431,17 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         expected_exit_codes={1},
     )
     timeout_probe = _load_json(timeout_evidence)
-    timeout_observations = timeout_probe["observations"]
-    _expect(isinstance(timeout_observations, dict), "timeout evidence is invalid")
-    timeout_steps = timeout_observations["steps"]
-    _expect(isinstance(timeout_steps, list) and timeout_steps, "timeout steps missing")
-    timeout_step = timeout_steps[0]
-    _expect(isinstance(timeout_step, dict), "timeout step is invalid")
-    timeout_process = timeout_step["process"]
-    _expect(isinstance(timeout_process, dict), "timeout process evidence is invalid")
+    timeout_observations = _object(timeout_probe["observations"], "timeout evidence is invalid")
+    timeout_steps = _array(timeout_observations["steps"], "timeout steps are invalid")
+    _expect(bool(timeout_steps), "timeout steps missing")
+    timeout_step = _object(timeout_steps[0], "timeout step is invalid")
+    timeout_process = _object(timeout_step["process"], "timeout process evidence is invalid")
     _expect(timeout_process["timed_out"] is True, "hostile component did not time out")
     _expect(timeout_process["exit_code"] == 137, "timeout did not escalate to exit 137")
-    timeout_sandbox = timeout_observations["sandbox"]
-    _expect(isinstance(timeout_sandbox, dict), "timeout sandbox evidence is invalid")
-    timeout_cleanup = timeout_sandbox["cleanup"]
-    _expect(isinstance(timeout_cleanup, dict), "timeout cleanup evidence is invalid")
+    timeout_sandbox = _object(
+        timeout_observations["sandbox"], "timeout sandbox evidence is invalid"
+    )
+    timeout_cleanup = _object(timeout_sandbox["cleanup"], "timeout cleanup evidence is invalid")
     _expect(timeout_cleanup["container_exists_after"] is False, "timeout container remained")
     _expect(not timeout_output.exists(), "timeout published output")
 
@@ -327,9 +454,21 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         definition=tamper_examples / "composition-linear-calibration.yaml",
         destination=tamper,
     )
-    sink = tamper_examples / "fixtures" / "report_sink.py"
+    sink = tamper_bundle / "components" / "fixture-report-sink.py"
     with sink.open("a", encoding="utf-8", newline="\n") as stream:
         stream.write("\n# Deliberate post-generation E2E tamper.\n")
+    tamper_provenance = tamper_bundle / "provenance.json"
+    tamper_manifest = _load_json(tamper_provenance)
+    tamper_artifacts = _object(
+        tamper_manifest.get("artifact_sha256"), "tamper provenance artifacts are invalid"
+    )
+    tamper_artifacts["components/fixture-report-sink.py"] = _sha256_file(sink)
+    tamper_provenance.write_text(
+        json.dumps(tamper_manifest, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    tamper_hash = _sha256_file(tamper_provenance)
     tamper_output = tamper / "output.json"
     tamper_evidence = tamper / "evidence.json"
     harness.cli(
@@ -348,10 +487,8 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
         expected_exit_codes={1},
     )
     tamper_probe = _load_json(tamper_evidence)
-    tamper_observations = tamper_probe["observations"]
-    _expect(isinstance(tamper_observations, dict), "tamper evidence is invalid")
-    tamper_steps = tamper_observations["steps"]
-    _expect(isinstance(tamper_steps, list), "tamper steps are invalid")
+    tamper_observations = _object(tamper_probe["observations"], "tamper evidence is invalid")
+    tamper_steps = _array(tamper_observations["steps"], "tamper steps are invalid")
     statuses = [step.get("status") for step in tamper_steps if isinstance(step, dict)]
     processes = [step for step in tamper_steps if isinstance(step, dict) and "process" in step]
     _expect(statuses == ["skipped", "skipped", "failed"], "tamper preflight statuses changed")
@@ -399,9 +536,14 @@ def _run_system(harness: Harness, *, image: str, docker: str) -> dict[str, objec
             "output_sha256": _sha256_file(host_output),
             "step_count": len(host_observations["steps"]),
             "sandbox_preflight_checks": len(checks),
+            "source_removed_before_execution": not positive_source.exists(),
+            "bundled_component_count": len(bundled_components),
         },
         "controls": {
             "wrong_provenance_rejected": True,
+            "invalid_input_processes_executed": 0,
+            "missing_adapter_rejected": True,
+            "adapter_failure_statuses": adapter_statuses,
             "green_exit_invalid_contract_rejected": True,
             "timeout_exit_code": timeout_process["exit_code"],
             "tamper_processes_executed": len(processes),

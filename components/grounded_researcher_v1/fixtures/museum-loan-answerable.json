@@ -1,0 +1,83 @@
+{
+  "schema_version": "1",
+  "request_id": "museum-loan-answerable",
+  "question": "Which operational records make a museum loan verifiable and recoverable?",
+  "minimum_sources": 10,
+  "documents": [
+    {
+      "document_id": "loan-identity",
+      "title": "Object Identity",
+      "full_text": "The loan record binds every object to its accession number and catalog revision. Staff verify the mark before packing begins."
+    },
+    {
+      "document_id": "loan-approval",
+      "title": "Named Loan Approval",
+      "full_text": "A named curator approves the exact object list after reviewing the destination. The approval remains attached to the loan file."
+    },
+    {
+      "document_id": "loan-condition",
+      "title": "Condition Evidence",
+      "full_text": "A conservator records photographs and defects before transport. Return inspection compares the object with this retained condition evidence."
+    },
+    {
+      "document_id": "loan-custody",
+      "title": "Custody Handoffs",
+      "full_text": "Each custody transfer records the sender, receiver, time, and object identifier. Missing handoff evidence stops onward movement."
+    },
+    {
+      "document_id": "loan-environment",
+      "title": "Environmental Monitoring",
+      "full_text": "Calibrated sensors retain temperature and humidity measurements throughout the loan. Excursions remain visible in the object record."
+    },
+    {
+      "document_id": "loan-packaging",
+      "title": "Packaging Seal",
+      "full_text": "The packing record identifies the crate and tamper seal used for each object. A broken seal triggers a documented inspection."
+    },
+    {
+      "document_id": "loan-insurance",
+      "title": "Coverage Evidence",
+      "full_text": "The loan file retains the insurer, covered value, effective period, and exclusions. Dispatch waits until coverage matches the object list."
+    },
+    {
+      "document_id": "loan-incident",
+      "title": "Incident History",
+      "full_text": "Damage reports and failed checks are never replaced by a later clean photograph. Corrective actions stay linked to the affected object."
+    },
+    {
+      "document_id": "loan-return",
+      "title": "Return Reconciliation",
+      "full_text": "Return staff reconcile every accession number and repeat the condition review. The loan closes only after discrepancies have named owners."
+    },
+    {
+      "document_id": "loan-audit",
+      "title": "Retained Audit Trail",
+      "full_text": "Raw approvals, custody receipts, sensor exports, and inspection results remain in one audit trail. A summary does not replace the underlying records."
+    },
+    {
+      "document_id": "garden-tomato",
+      "title": "Watering Tomato Plants",
+      "full_text": "Tomato plants grow well with steady moisture and free draining soil. Water reaches the roots most effectively in the morning."
+    },
+    {
+      "document_id": "garden-compost",
+      "title": "Compost Ingredients",
+      "full_text": "A garden compost heap combines dry leaves with fresh plant material. Turning the pile adds oxygen for decomposition."
+    },
+    {
+      "document_id": "garden-pollinator",
+      "title": "Pollinator Planting",
+      "full_text": "Flowering garden plants support pollinators across the growing season. Several bloom periods provide a steady food source."
+    },
+    {
+      "document_id": "garden-path",
+      "title": "Draining a Garden Path",
+      "full_text": "A compacted stone base improves drainage under a garden path. Edge restraints keep loose material away from nearby plants."
+    },
+    {
+      "document_id": "garden-seed",
+      "title": "Storing Garden Seed",
+      "full_text": "Dry garden seed keeps longer in a cool sealed container. A label records the plant variety and harvest year."
+    }
+  ]
+}

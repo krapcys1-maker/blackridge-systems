@@ -1,0 +1,41 @@
+{
+  "schema_version": "1",
+  "reviewed_at": "2026-08-27T18:28:55.997323Z",
+  "reviewer": "Codex /root manual artifact reviewer",
+  "verdict": "pass",
+  "capability_id": "literature-search-adapter",
+  "scenario_id": "networkless-boot-and-replay",
+  "scenario_description": "Boot exact dependencies and exercise success and failure API boundaries offline.",
+  "expected": [
+    "Every dependency installs offline under pip require-hashes and exact reviewed versions load.",
+    "Search traverses two replayed pages and returns the exact three paper identities.",
+    "Empty search and exact paper lookup satisfy the frozen response contract.",
+    "Not-found, rate-limit, malformed JSON, and invalid request cases return stable safe errors.",
+    "Invalid input performs no HTTP request and caller-controlled API URLs are rejected.",
+    "Direct IP and DNS public egress both fail while loopback replay remains functional.",
+    "The probe completes all seven cases and leaves no sandbox container behind."
+  ],
+  "observed": [
+    "Nine exact wheels installed with --no-index and --require-hashes; pip check reported no broken requirements.",
+    "The real semanticscholar 0.12.0 client returned exact paper-1, paper-2, and paper-3 identities across two replay pages.",
+    "Empty search and exact DOI lookup returned the frozen normalized output shape.",
+    "404, wrapped 429, malformed JSON, and caller-controlled URL cases returned stable safe error codes without exception detail leakage.",
+    "The invalid request emitted no HTTP request; all seven observed HTTP requests targeted only the loopback replay server.",
+    "Direct 1.1.1.1 egress and DNS egress to api.semanticscholar.org both failed while loopback remained functional.",
+    "All seven cases matched under 512 MiB, one CPU, 128 PID, read-only-root, capability-dropped execution; independent docker ps found zero remaining probe containers."
+  ],
+  "probe_id": "087000da817b4592b07b9b7bc71a692d",
+  "probe_file": "evidence\\manual\\2026-08-27\\semanticscholar-adapter-l2-probe.json",
+  "probe_sha256": "96ca5bf067d8e464c3f3ca6de008270988f5f55a6a91eb82c03ce5ca1df63b12",
+  "promotion": {
+    "target_level": 2,
+    "subject_type": "component",
+    "probe_provider": "blackridge-semanticscholar-replay/1",
+    "probe_subject": "semanticscholar-search-v1@abd382538346c5a29a5ce9dd5da932616291075565071c2dca78f289d32a7556",
+    "probe_completed": true,
+    "subject_revision": "0fff162c803a20fc818fc267d8e5beb0b1d898d6",
+    "subject_license_spdx": "Apache-2.0",
+    "artifact_sha256": "abd382538346c5a29a5ce9dd5da932616291075565071c2dca78f289d32a7556"
+  },
+  "notes": "Manual L2 review compared the full raw probe, summarized repository probe, request paths, normalized outputs, dependency versions, resource boundary, egress checks, and cleanup. L3 remains withheld because this is deterministic replay plus one mutable live calibration, while upstream provenance and Scorecard coverage remain unresolved."
+}

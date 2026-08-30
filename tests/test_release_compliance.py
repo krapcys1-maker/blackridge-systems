@@ -231,3 +231,24 @@ def test_v1_workflow_cannot_publish_internal_runtime_image() -> None:
     assert 'manifest["runtime_locks"]["complete"] is True' in workflow
     assert 'review["valid_entry_count"] == 6' in workflow
     assert 'observed["release_blockers"] == expected_blockers' in workflow
+
+
+def test_ci_enforces_format_components_and_seventy_percent_coverage() -> None:
+    workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
+
+    assert "ruff format --check src tests tools components" in workflow
+    assert "python -m compileall -q src tests tools components" in workflow
+    assert "--cov-fail-under=70" in workflow
+
+
+def test_distribution_license_files_use_checkout_independent_line_endings() -> None:
+    attributes = Path(".gitattributes").read_text(encoding="utf-8").splitlines()
+
+    assert "*.in text eol=lf" in attributes
+    assert "*.json text eol=lf" in attributes
+    assert "*.lock text eol=lf" in attributes
+    assert ".dockerignore text eol=lf" in attributes
+    assert ".gitignore text eol=lf" in attributes
+    assert "LICENSE text eol=lf" in attributes
+    assert "NOTICE text eol=lf" in attributes
+    assert "THIRD_PARTY_NOTICES.md text eol=lf" in attributes

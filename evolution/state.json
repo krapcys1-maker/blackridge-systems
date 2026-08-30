@@ -1,0 +1,100 @@
+{
+  "schema_version": "1",
+  "updated_at": "2026-08-30T05:24:38+03:00",
+  "status": "round-007-complete-loop-closed",
+  "naming": {
+    "package_version": "0.1.1",
+    "current_architectural_champion": "v1.8",
+    "next_fresh_challenger_name": "none-loop-closed",
+    "rule": "Package versions and architectural line names are separate. Enhanced descendants of v1 remain on the v1 line; v2 names are reserved for the alternate ledger architecture, which lost all seven rounds and is retired."
+  },
+  "current_champion": {
+    "candidate_id": "candidate-operational-boundaries-round-007",
+    "architecture_line": "v1.8",
+    "package_version": "0.1.1",
+    "snapshot_commit": "7c7f46b00fed5d82388598b8d3b27923941c5ea0",
+    "winning_attempts": [
+      1,
+      2,
+      3
+    ],
+    "generation_success": "3/3",
+    "operational_evaluator": "11/11",
+    "total_provider_cost_usd": 0.03016303,
+    "total_builder_wall_seconds": 119.782,
+    "main_integration_commit": "b6c5521133b155504ef3f83193cbcdd10e4f3754",
+    "selection_round": "round-007"
+  },
+  "round_history": [
+    {
+      "round_id": "round-000",
+      "status": "complete-bootstrap",
+      "winner": "champion-v1-1",
+      "comparison": "benchmarks/blackridge-self-hosting-v2/round-000-v1.1-comparison.json",
+      "comparison_sha256": "e85a0c3ac027441aec809e13e2bacece8bb7fb15882f8d7251ca6094f851651f"
+    },
+    {
+      "round_id": "round-001",
+      "status": "terminated-no-promotion",
+      "winner": "champion-v1-1",
+      "reason": "Candidate A did not change project-building modules; candidate B failed architecture review; hybrids were not built.",
+      "audit": "evolution/rounds/001/a-vs-champion-project-builder-audit.json"
+    },
+    {
+      "round_id": "round-002",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-blackbox-tests-round-002",
+      "architecture_line": "v1.2",
+      "result": "evolution/rounds/002/measured-results.json",
+      "reason": "The improved v1 and B+A each passed 1/3. B+A failed the no-worse-regression prerequisite, so the fully gated v1 line won."
+    },
+    {
+      "round_id": "round-003",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-public-evaluator-json-safe-round-003",
+      "architecture_line": "v1.3.1",
+      "result": "evolution/rounds/003/measured-results.json",
+      "reason": "v1.3.1 and A+B each passed 2/3, but v1.3.1 had lower total provider cost; v2.2 and B+A passed 1/3. All winner release gates passed."
+    },
+    {
+      "round_id": "round-004",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-test-repair-round-004",
+      "architecture_line": "v1.4",
+      "result": "evolution/rounds/004/measured-results.json",
+      "reason": "v1.4 passed 3/3 and every release gate; A+B and B+A passed 2/3, v2.4 passed 1/3. The selected base remains the enhanced v1 line."
+    },
+    {
+      "round_id": "round-005",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-a-plus-b-round-005",
+      "architecture_line": "v1.6",
+      "result": "evolution/rounds/005/measured-results.json",
+      "reason": "v1.6 passed 3/3 with the lowest current-round cost and time among perfect candidates and passed every release, provenance, frozen-workload, wheel, Docker, and system-E2E gate; B+A passed 1/3."
+    },
+    {
+      "round_id": "round-006",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-security-boundaries-round-006",
+      "architecture_line": "v1.7",
+      "result": "evolution/rounds/006/measured-results.json",
+      "reason": "v1.7 passed 2/3 and all five new critical provenance/sandbox gates; v2.7 and B+A passed 1/3. The v1.7 generator remained byte-identical to v1.6 and every release gate passed."
+    },
+    {
+      "round_id": "round-007",
+      "status": "complete-v1-line-promoted",
+      "winner": "candidate-operational-boundaries-round-007",
+      "architecture_line": "v1.8",
+      "result": "evolution/rounds/007/measured-results.json",
+      "reason": "v1.8 passed 3/3 generation attempts and 11/11 frozen operational tests against the incumbent's 2/11, at the lowest cost and wall time of the round. v2.9 passed 0/3 and B+A passed 2/3. A+B was not materialized because B produced no transferable advantage."
+    }
+  ],
+  "loop_status": {
+    "champion_challenger_loop": "closed",
+    "closed_after_round": "round-007",
+    "closed_on": "2026-08-30T05:24:38+03:00",
+    "reason": "The v2 ledger line lost all seven rounds and the Duplicate Finder workload reached 3/3, so it can no longer discriminate between candidates. That workload records only the Python standard library in component_decisions, so it never exercised the reuse-first composition path the product is built around.",
+    "successor": "evolution/benchmark/composition-reuse-v1.json",
+    "successor_measures": "Assembly of real evidence-backed components behind declared contracts, which is the capability the retired benchmark could not measure."
+  }
+}

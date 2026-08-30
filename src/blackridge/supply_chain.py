@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ast
+import configparser
 import hashlib
 import importlib.metadata
 import json
@@ -29,6 +31,7 @@ PYPI_INTEGRITY_DOCS = "https://docs.pypi.org/api/integrity/"
 SYFT_SOURCE = "https://github.com/anchore/syft/tree/v1.51.0"
 OSV_SCANNER_SOURCE = "https://github.com/google/osv-scanner/tree/v2.5.1"
 PYPI_ATTESTATIONS_VERSION = "0.0.30"
+EXACT_LOCK_FILENAMES = ("Pipfile.lock", "pdm.lock", "poetry.lock", "requirements.lock", "uv.lock")
 
 
 class SupplyChainExperiment(BaseModel):
@@ -45,9 +48,7 @@ class SupplyChainExperiment(BaseModel):
     package_name: str = Field(min_length=1)
     package_version: str = Field(min_length=1)
     syft_image: str = Field(pattern=r"^anchore/syft@sha256:[a-f0-9]{64}$")
-    osv_scanner_image: str = Field(
-        pattern=r"^ghcr\.io/google/osv-scanner@sha256:[a-f0-9]{64}$"
-    )
+    osv_scanner_image: str = Field(pattern=r"^ghcr\.io/google/osv-scanner@sha256:[a-f0-9]{64}$")
 
     def model_post_init(self, _context: object) -> None:
         if self.package_system != PackageSystem.PYPI:
@@ -58,9 +59,38 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _object_list(
-    value: object, context: str, *, required: bool = True
-) -> list[dict[str, Any]]:
+def _canonical_json(value: object) -> str:
+    """Serialize JSON data with mapping and collection ordering removed."""
+
+    normalized: object
+    if isinstance(value, dict):
+        normalized = {key: json.loads(_canonical_json(item)) for key, item in value.items()}
+    elif isinstance(value, list):
+        items = [json.loads(_canonical_json(item)) for item in value]
+        normalized = sorted(
+            items,
+            key=lambda item: json.dumps(item, sort_keys=True, separators=(",", ":")),
+        )
+    else:
+        normalized = value
+    return json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def _inventory_sha256(document: dict[str, object], sections: tuple[str, ...]) -> str:
+    """Hash the stable package graph while excluding generator timestamps and UUIDs."""
+
+    inventory = {
+        section: _object_list(
+            document.get(section),
+            f"SBOM {section}",
+            required=section in {"packages", "components"},
+        )
+        for section in sections
+    }
+    return hashlib.sha256(_canonical_json(inventory).encode()).hexdigest()
+
+
+def _object_list(value: object, context: str, *, required: bool = True) -> list[dict[str, Any]]:
     if value is None and not required:
         return []
     if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
@@ -74,6 +104,81 @@ def _optional_object(value: object, context: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise BlackridgeError(f"{context} must be a JSON object")
     return value
+
+
+def _packaging_metadata(source_dir: Path) -> tuple[dict[str, Any], str | None]:
+    """Read packaging metadata without importing or executing untrusted project code."""
+
+    pyproject_path = source_dir / "pyproject.toml"
+    if pyproject_path.is_file():
+        try:
+            pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+        except (OSError, tomllib.TOMLDecodeError) as exc:
+            raise BlackridgeError(f"cannot parse pyproject.toml: {exc}") from exc
+        project = pyproject.get("project")
+        return (project if isinstance(project, dict) else {}), "pyproject.toml"
+
+    setup_cfg_path = source_dir / "setup.cfg"
+    if setup_cfg_path.is_file():
+        parser = configparser.ConfigParser(interpolation=None)
+        try:
+            parser.read(setup_cfg_path, encoding="utf-8")
+        except (OSError, configparser.Error) as exc:
+            raise BlackridgeError(f"cannot parse setup.cfg: {exc}") from exc
+        metadata: dict[str, Any] = {}
+        if parser.has_option("metadata", "license"):
+            metadata["license"] = parser.get("metadata", "license")
+        if parser.has_option("options", "install_requires"):
+            metadata["dependencies"] = [
+                value.strip()
+                for value in parser.get("options", "install_requires").splitlines()
+                if value.strip()
+            ]
+        return metadata, "setup.cfg"
+
+    setup_py_path = source_dir / "setup.py"
+    if setup_py_path.is_file():
+        try:
+            tree = ast.parse(setup_py_path.read_text(encoding="utf-8"), filename="setup.py")
+        except (OSError, SyntaxError) as exc:
+            raise BlackridgeError(f"cannot statically parse setup.py: {exc}") from exc
+        calls = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and (
+                (isinstance(node.func, ast.Name) and node.func.id == "setup")
+                or (isinstance(node.func, ast.Attribute) and node.func.attr == "setup")
+            )
+        ]
+        metadata = {}
+        if calls:
+            for keyword in calls[0].keywords:
+                target = "dependencies" if keyword.arg == "install_requires" else keyword.arg
+                if target not in {"name", "version", "license", "dependencies"}:
+                    continue
+                try:
+                    metadata[target] = ast.literal_eval(keyword.value)
+                except (TypeError, ValueError):
+                    continue
+        return metadata, "setup.py (static AST)"
+
+    return {}, None
+
+
+def _dependency_input_summary(source_dir: Path) -> dict[str, object]:
+    manifests = {
+        name
+        for name in ("Pipfile", "pyproject.toml", "setup.cfg", "setup.py")
+        if (source_dir / name).is_file()
+    }
+    manifests.update(path.name for path in source_dir.glob("requirements*.txt") if path.is_file())
+    lockfiles = [name for name in EXACT_LOCK_FILENAMES if (source_dir / name).is_file()]
+    return {
+        "manifest_files": sorted(manifests),
+        "lockfiles": lockfiles,
+        "exact_lock_present": bool(lockfiles),
+    }
 
 
 def _run(
@@ -100,9 +205,9 @@ def _run(
     if completed.output_limit_exceeded:
         raise BlackridgeError(f"command exceeded the output limit: {argv[0]}")
     if completed.returncode not in accepted:
+        detail = completed.stderr.strip() or completed.stdout.strip() or "no output"
         raise BlackridgeError(
-            f"command failed with exit {completed.returncode}: {argv[0]} "
-            f"{completed.stderr.strip()}"
+            f"command failed with exit {completed.returncode}: {argv[0]} {detail[:1000]}"
         )
     return observation
 
@@ -118,9 +223,7 @@ def _json_command(argv: list[str]) -> tuple[dict[str, object], dict[str, object]
     return data, command
 
 
-def _http_observation(
-    url: str, *, headers: dict[str, str] | None = None
-) -> dict[str, object]:
+def _http_observation(url: str, *, headers: dict[str, str] | None = None) -> dict[str, object]:
     try:
         response = httpx.get(url, headers=headers, timeout=30, follow_redirects=True)
         try:
@@ -161,11 +264,7 @@ def _inspect_checkout(
 def _ensure_exact_checkout(
     repository: str, commit: str, source_dir: Path
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
-    if (
-        source_dir.exists()
-        and not (source_dir / ".git").is_dir()
-        and any(source_dir.iterdir())
-    ):
+    if source_dir.exists() and not (source_dir / ".git").is_dir() and any(source_dir.iterdir()):
         raise BlackridgeError("supply-chain source directory is non-empty and is not Git")
     source_dir.mkdir(parents=True, exist_ok=True)
     commands: list[dict[str, object]] = []
@@ -206,9 +305,7 @@ def _ensure_exact_checkout(
             ]
         )
     )
-    commands.append(
-        _run(["git", "-C", str(source_dir), "checkout", "--detach", "FETCH_HEAD"])
-    )
+    commands.append(_run(["git", "-C", str(source_dir), "checkout", "--detach", "FETCH_HEAD"]))
     identity_commands, state = _inspect_checkout(
         source_dir,
         expected_commit=commit,
@@ -329,9 +426,7 @@ class SupplyChainProbe:
                 "status_code": response["status_code"],
                 "licenses": licenses,
                 "advisories": [
-                    item.get("id")
-                    for item in advisories or []
-                    if isinstance(item, dict)
+                    item.get("id") for item in advisories or [] if isinstance(item, dict)
                 ],
                 "source": url,
                 "error": response["error"],
@@ -486,9 +581,7 @@ class SupplyChainProbe:
                 provenance_url,
                 headers={"Accept": "application/vnd.pypi.integrity.v1+json"},
             )
-            data = _optional_object(
-                observation.get("data"), "PyPI provenance response"
-            )
+            data = _optional_object(observation.get("data"), "PyPI provenance response")
             bundles = data.get("attestation_bundles")
             if bundles is not None and not isinstance(bundles, list):
                 raise BlackridgeError("PyPI provenance attestation_bundles must be a list")
@@ -524,11 +617,8 @@ class SupplyChainProbe:
                 }
             )
 
-        pyproject_path = source_dir / "pyproject.toml"
-        pyproject = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
-        project_metadata = pyproject.get("project")
-        if not isinstance(project_metadata, dict):
-            project_metadata = {}
+        project_metadata, packaging_metadata_source = _packaging_metadata(source_dir)
+        dependency_inputs = _dependency_input_summary(source_dir)
         repo_license_path = repo_license.get("path")
         if not isinstance(repo_license_path, str) or not repo_license_path:
             raise BlackridgeError("GitHub license response does not identify a repository path")
@@ -539,9 +629,7 @@ class SupplyChainProbe:
             repo_license.get("license"), "GitHub repository license"
         )
         commit = _optional_object(commit_data.get("commit"), "GitHub commit")
-        verification = _optional_object(
-            commit.get("verification"), "GitHub commit verification"
-        )
+        verification = _optional_object(commit.get("verification"), "GitHub commit verification")
         license_summary = _license_summary(spdx)
         vulnerability_summary = _vulnerability_summary(osv)
         nonstandard_dependencies: list[dict[str, object]] = []
@@ -550,8 +638,10 @@ class SupplyChainProbe:
             if not isinstance(licenses, list):
                 nonstandard_dependencies.append(item)
                 continue
-            if not licenses or "non-standard" in licenses or any(
-                "GPL" in str(value) for value in licenses
+            if (
+                not licenses
+                or "non-standard" in licenses
+                or any("GPL" in str(value) for value in licenses)
             ):
                 nonstandard_dependencies.append(item)
         post_checkout_commands, checkout_after = _inspect_checkout(
@@ -561,9 +651,7 @@ class SupplyChainProbe:
         )
         missing_provenance = [item["filename"] for item in provenance if not item["available"]]
         unverified_provenance = [
-            item["filename"]
-            for item in provenance
-            if not item["cryptographically_verified"]
+            item["filename"] for item in provenance if not item["cryptographically_verified"]
         ]
         pypi_metadata_available = pypi["status_code"] == 200
         if not pypi_metadata_available:
@@ -584,6 +672,18 @@ class SupplyChainProbe:
         if nonstandard_dependencies:
             warnings.append(
                 "Direct dependency licenses include unknown, non-standard, or GPL-family results."
+            )
+        if not dependency_inputs["exact_lock_present"]:
+            warnings.append(
+                "No recognized exact dependency lockfile is present; resolved-version evidence "
+                "is not a reproducible runtime closure."
+            )
+        cdx_dependencies = _object_list(
+            cdx.get("dependencies"), "CycloneDX dependencies", required=False
+        )
+        if not cdx_dependencies:
+            warnings.append(
+                "The CycloneDX SBOM contains no dependency edges; reachability remains unknown."
             )
         if not pypi_metadata_available:
             warnings.append("PyPI release metadata is unavailable; provenance remains unknown.")
@@ -647,6 +747,8 @@ class SupplyChainProbe:
                     "html_url": repo_license.get("html_url"),
                     "local_sha256": _sha256(local_license_path),
                     "pyproject_license": project_metadata.get("license"),
+                    "packaging_metadata_license": project_metadata.get("license"),
+                    "packaging_metadata_source": packaging_metadata_source,
                     "github_command": license_command,
                 },
                 "dependency_licenses": {
@@ -654,6 +756,7 @@ class SupplyChainProbe:
                     "packages": dependency_licenses,
                     "concern_count": len(nonstandard_dependencies),
                     "concerns": nonstandard_dependencies,
+                    "dependency_inputs": dependency_inputs,
                     "sbom_license_coverage": license_summary,
                 },
                 "security_posture": {
@@ -674,23 +777,27 @@ class SupplyChainProbe:
                     "spdx": {
                         "filename": spdx_path.name,
                         "sha256": _sha256(spdx_path),
+                        "inventory_sha256": _inventory_sha256(spdx, ("packages", "relationships")),
                         "size": spdx_path.stat().st_size,
                         "package_count": len(_object_list(spdx.get("packages"), "SPDX packages")),
                         "relationship_count": len(
-                            _object_list(spdx.get("relationships"), "SPDX relationships")
+                            _object_list(
+                                spdx.get("relationships"),
+                                "SPDX relationships",
+                                required=False,
+                            )
                         ),
                         "document_name": spdx.get("name"),
                     },
                     "cyclonedx": {
                         "filename": cdx_path.name,
                         "sha256": _sha256(cdx_path),
+                        "inventory_sha256": _inventory_sha256(cdx, ("components", "dependencies")),
                         "size": cdx_path.stat().st_size,
                         "component_count": len(
                             _object_list(cdx.get("components"), "CycloneDX components")
                         ),
-                        "dependency_count": len(
-                            _object_list(cdx.get("dependencies"), "CycloneDX dependencies")
-                        ),
+                        "dependency_count": len(cdx_dependencies),
                     },
                 },
                 "vulnerability_artifact": {

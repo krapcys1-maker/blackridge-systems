@@ -1,0 +1,365 @@
+schema_version: '1'
+name: deterministic-duplicate-file-finder
+goal: Build a portable Python 3.11+ command-line program that recursively finds duplicate
+  regular files by SHA-256. It must never modify input files, directories, permissions,
+  or timestamps. It must emit deterministic JSON containing duplicate groups and explicit
+  unreadable-file errors, exclude its output file when that file is inside the scanned
+  tree, reject an output path that is the same file as any input, handle symbolic
+  links without escaping the requested tree, and include executable tests. Prefer
+  a verified component only when it materially reduces new code; otherwise use the
+  Python standard library and state that choice honestly.
+constraints:
+  reuse_policy: reuse-first
+capabilities:
+- id: cli-entrypoint
+  description: Provide a command-line interface that accepts a root directory and
+    an output file path, validates arguments, and invokes the scanning pipeline.
+  accepts:
+  - command-line-arguments/v1
+  produces:
+  - exit-code/v1
+  - stdout-messages/v1
+  searches:
+  - keywords:
+    - python
+    - argparse
+    - cli
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - click
+    - command
+    - line
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - cli
+    - framework
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: cli-valid-invocation
+    description: Running the program with a valid root and output path produces a
+      JSON file and exits with code 0.
+    given: A temporary directory containing a few files and a writable output path
+      outside it.
+    when: The program is invoked with the root directory and output path as arguments.
+    then:
+    - The program exits with code 0.
+    - The output file exists and contains valid JSON.
+  required: true
+- id: tree-walker
+  description: Recursively traverse the input directory, following symbolic links
+    only within the tree, and yield regular files with their paths.
+  accepts:
+  - root-directory/v1
+  produces:
+  - file-path-stream/v1
+  searches:
+  - keywords:
+    - python
+    - os.walk
+    - symlink
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - pathlib
+    - rglob
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - directory
+    - traversal
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: walk-regular-files
+    description: Walking a directory tree yields all regular files, including those
+      in subdirectories, and does not follow symlinks that point outside the tree.
+    given: A temporary directory with a subdirectory containing a file, and a symlink
+      pointing outside the tree.
+    when: The tree walker is executed on that directory.
+    then:
+    - The file inside the subdirectory is yielded.
+    - The symlink target outside the tree is not yielded.
+  required: true
+- id: file-hasher
+  description: Compute the SHA-256 hash of a file's contents without modifying the
+    file, and report unreadable files with errors.
+  accepts:
+  - file-path/v1
+  produces:
+  - file-hash/v1
+  - unreadable-file-error/v1
+  searches:
+  - keywords:
+    - python
+    - hashlib
+    - sha256
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - file
+    - checksum
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - read
+    - binary
+    - hash
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: hash-known-file
+    description: Hashing a known file returns its SHA-256 digest.
+    given: A temporary file with known content.
+    when: The file hasher is called on that file.
+    then:
+    - The returned hash matches the expected SHA-256 digest.
+  required: true
+- id: duplicate-grouping
+  description: Group files by their SHA-256 hash and produce a deterministic list
+    of groups that contain more than one file.
+  accepts:
+  - file-hash-map/v1
+  produces:
+  - duplicate-groups/v1
+  searches:
+  - keywords:
+    - python
+    - group
+    - dictionary
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - duplicate
+    - files
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - collections
+    - defaultdict
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: group-duplicates
+    description: Given hashes for two identical files and one unique file, the grouping
+      returns one group with the two identical files.
+    given: A mapping of file paths to hashes where two files share a hash.
+    when: The duplicate grouping is applied to that mapping.
+    then:
+    - The result contains exactly one group with the two duplicate files.
+  required: true
+- id: output-exclusion
+  description: Exclude the output file from scanning when it is inside the scanned
+    tree, and reject an output path that is the same file as any input.
+  accepts:
+  - output-path/v1
+  - file-path-stream/v1
+  produces:
+  - filtered-file-path-stream/v1
+  - output-path-error/v1
+  searches:
+  - keywords:
+    - python
+    - samefile
+    - path
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - os.path
+    - realpath
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - exclude
+    - file
+    - scan
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: exclude-output-inside-tree
+    description: When the output file is inside the scanned tree, it is not included
+      in the duplicate groups.
+    given: A temporary directory containing a file and an output path inside that
+      directory.
+    when: The output exclusion is applied to the file stream.
+    then:
+    - The output file is not present in the filtered stream.
+  required: true
+- id: json-output-writer
+  description: Write the duplicate groups and unreadable-file errors to the output
+    file as deterministic JSON, without modifying any input files.
+  accepts:
+  - duplicate-groups/v1
+  - unreadable-file-errors/v1
+  - output-path/v1
+  produces:
+  - json-output-file/v1
+  searches:
+  - keywords:
+    - python
+    - json
+    - dump
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - json
+    - sort_keys
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - write
+    - json
+    - file
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: write-json-output
+    description: Writing a set of duplicate groups and errors to a file produces a
+      JSON file with the expected structure.
+    given: A temporary output path, a list of duplicate groups, and a list of unreadable-file
+      errors.
+    when: The JSON output writer is called with those inputs.
+    then:
+    - The output file exists and contains valid JSON.
+    - The JSON content matches the expected structure.
+  required: true
+- id: deterministic-ordering
+  description: Ensure all output (duplicate groups, errors, and JSON keys) is sorted
+    deterministically so that repeated runs produce identical output.
+  accepts:
+  - duplicate-groups/v1
+  - unreadable-file-errors/v1
+  produces:
+  - sorted-duplicate-groups/v1
+  - sorted-unreadable-file-errors/v1
+  searches:
+  - keywords:
+    - python
+    - sort
+    - list
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - sorted
+    - key
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - deterministic
+    - order
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: deterministic-output
+    description: Running the program twice on the same input produces identical output
+      files.
+    given: A temporary directory with known files and an output path.
+    when: The program is run twice with the same arguments.
+    then:
+    - The two output files are byte-for-byte identical.
+  required: true
+- id: test-suite
+  description: Provide executable tests that verify the program's behavior, including
+    duplicate detection, unreadable files, symlink handling, and output exclusion.
+  accepts:
+  - test-framework/v1
+  produces:
+  - test-results/v1
+  searches:
+  - keywords:
+    - python
+    - pytest
+    - unittest
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - testing
+    - cli
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  - keywords:
+    - python
+    - tmp_path
+    - fixture
+    language: Python
+    stars: null
+    updated: null
+    license: null
+  seeds: []
+  acceptance:
+  - id: tests-pass
+    description: Running the test suite reports all tests passing.
+    given: A checkout of the project with the test suite.
+    when: The test runner is executed.
+    then:
+    - All tests pass.
+  required: true

@@ -1,0 +1,48 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 10,
+  "proposal_sha256": "0cdeca7e7ef55fc093d7ee30d21e3608ba333983dd67b8cb64fe936df47eeeb4",
+  "parent_completion_sha256": "84bc67bb02da4053712b921b6e41ba31edd8d12b9c9071e5339524fab800e0ec",
+  "verdict": "rejected-before-build",
+  "reviewer": "codex-independent-architecture-review",
+  "champion_source_disclosed_to_builder": false,
+  "strengths": [
+    "Write-ahead ledger, post-commit dispatcher, deterministic control owner, provider-neutral operator boundary, deny retention, and independent evaluator are explicit.",
+    "The proposal is structurally valid after a fully recorded interface-only repair."
+  ],
+  "findings": [
+    {
+      "severity": "critical",
+      "id": "untyped-broadcast-routing",
+      "finding": "dispatcher sends artifact-released/v1 to every consumer without typed subscriptions or projector rules, so irrelevant artifacts can trigger the wrong worker and stage transitions are not enforced by the control plane."
+    },
+    {
+      "severity": "critical",
+      "id": "evidence-recursion",
+      "finding": "evidence-collector receives every released artifact, emits another ledger artifact, then receives that released evidence again; no exclusion or idempotency rule prevents an infinite evidence loop."
+    },
+    {
+      "severity": "critical",
+      "id": "generated-adapter-not-independently-probed",
+      "finding": "adapter-builder runs in the sandbox but its adapter artifact can reach composer without a separate verification decision proving the exact generated hash passed tests."
+    },
+    {
+      "severity": "critical",
+      "id": "vertical-slice-not-executable",
+      "finding": "The slice omits planner, discovery, license inspection, probe scheduler, adapter verification, and composer while still claiming deny enforcement, candidate probing, and a system bundle."
+    },
+    {
+      "severity": "high",
+      "id": "control-plane-not-authoritative",
+      "finding": "The dispatcher broadcasts committed artifacts directly to workers; control-plane stage-transition decisions do not gate those releases, contradicting deterministic stage ownership."
+    },
+    {
+      "severity": "medium",
+      "id": "duplicate-flows",
+      "finding": "policy-gate to ledger and dispatcher to policy-gate flows are duplicated, increasing ambiguity and the risk of repeated actions."
+    }
+  ],
+  "conclusion": "Do not implement, benchmark, hybridize, or promote this proposal. It contains useful design ideas but no measured component strength and fails critical architecture gates."
+}

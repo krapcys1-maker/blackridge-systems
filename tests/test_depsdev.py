@@ -96,6 +96,4 @@ def test_probe_rejects_malformed_upstream_objects_with_a_domain_error() -> None:
     )
 
     with pytest.raises(ExternalToolError, match="non-object packageKey"):
-        DepsDevClient(fetch=lambda _url: next(responses)).probe_package(
-            PackageSystem.GO, "demo"
-        )
+        DepsDevClient(fetch=lambda _url: next(responses)).probe_package(PackageSystem.GO, "demo")

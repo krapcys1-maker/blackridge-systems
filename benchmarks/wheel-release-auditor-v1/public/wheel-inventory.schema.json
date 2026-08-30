@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "wheel-inventory/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "artifact", "metadata", "archive", "license_files"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "request_id": {"type": "string", "minLength": 1},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filename", "sha256", "size"],
+      "properties": {
+        "filename": {"type": "string", "pattern": "^[^/\\\\]+\\.whl$"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "size": {"type": "integer", "minimum": 1}
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "license", "requires_python", "requires_dist", "provides_extra", "metadata_path", "metadata_sha256"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "license": {"type": "string"},
+        "requires_python": {"type": "string"},
+        "requires_dist": {"type": "array", "items": {"type": "string"}},
+        "provides_extra": {"type": "array", "items": {"type": "string"}},
+        "metadata_path": {"type": "string", "minLength": 1},
+        "metadata_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_count", "members", "duplicate_names", "unsafe_paths", "record_path", "record_valid", "record_errors"],
+      "properties": {
+        "member_count": {"type": "integer", "minimum": 1},
+        "members": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "duplicate_names": {"type": "array", "items": {"type": "string"}},
+        "unsafe_paths": {"type": "array", "items": {"type": "string"}},
+        "record_path": {"type": "string", "minLength": 1},
+        "record_valid": {"type": "boolean"},
+        "record_errors": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "license_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "kind", "sha256", "size"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES"]},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "size": {"type": "integer", "minimum": 1}
+        }
+      }
+    }
+  }
+}

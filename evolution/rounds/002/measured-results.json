@@ -1,0 +1,125 @@
+{
+  "schema_version": "1",
+  "round_id": "round-002",
+  "status": "complete-v1-line-promoted",
+  "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
+  "attempts_per_candidate": 3,
+  "results_root": "../blackridge-evolution-round-002/results",
+  "candidates": [
+    {
+      "candidate_id": "champion-v1-1",
+      "architecture_origin": "champion",
+      "commit": "0bdfd5ac055118fcd38f157522a88f460d6ba64e",
+      "successes": 0,
+      "attempts": 3,
+      "summary_sha256": "721a3d681f1ccfb7adb6c1a15830304c7b809862be4e98c3ebeae3ef2733510a"
+    },
+    {
+      "candidate_id": "candidate-a-round-002",
+      "architecture_origin": "A",
+      "commit": "2e60a54c2a10e642591bf1654b1288efd2070a80",
+      "successes": 0,
+      "attempts": 3,
+      "summary_sha256": "e1118f1fec2cffb392d06f4e9fa1e9715a3c9f230f494482de8c818a6761bf00"
+    },
+    {
+      "candidate_id": "candidate-b-ledger-round-002",
+      "architecture_origin": "B",
+      "commit": "1b1c61f6d7664bdaf83c0ec68b7254b616e7ed4c",
+      "successes": 0,
+      "attempts": 3,
+      "promotion_eligible": false,
+      "reason": "The builder was incorrectly given the external evaluator path; it failed all attempts independently, but the protocol breach also disqualifies promotion."
+    },
+    {
+      "candidate_id": "candidate-a-plus-b-round-002",
+      "architecture_origin": "A+B",
+      "commit": "b64caa33056965b329e51b99773f6ed012ace93b",
+      "successes": 0,
+      "attempts": 3,
+      "summary_sha256": "a7eca87912365c9ad494afd1e4cdff9f3dcf2c2ccfe3f8a5295b880c9d6e8d51"
+    },
+    {
+      "candidate_id": "candidate-component-lock-round-002",
+      "architecture_origin": "successive-A+B",
+      "commit": "f4e844604aea343ccb3668d77faf4882e53a2e0d",
+      "successes": 0,
+      "attempts": 3,
+      "summary_sha256": "61cf4099b728d37beef0236a2ff1b3dd6b5c311171e4d09f3a1d4c49f1668e48"
+    },
+    {
+      "candidate_id": "candidate-blackbox-tests-round-002",
+      "architecture_origin": "successive-A+B",
+      "commit": "5a0c6e348c725578650fbd668245a39658083e92",
+      "successes": 1,
+      "attempts": 3,
+      "summary_sha256": "a16844876e02658fe45be21f1e843301cf8953dc3a27bd1ba5d29abbb48380cb",
+      "winning_proposal_sha256": "cd3f40f4bc7484f06733682c01a86218d42e211e4be9a072c7a2d05819275506",
+      "winning_program_sha256": "dc74d49358fca82ad1b0eb5b33689a0f70e5b2697fd94066835ec017d4404142",
+      "winning_tests_sha256": "661ac79af815fd930ad705e92d9c55440152df50c977f188ec3df793eabd2fc1",
+      "winning_generated_tests": "11/11",
+      "winning_public_evaluator": "7/7",
+      "winning_independent_evaluator": "7/7",
+      "winning_provider_cost_usd": 0.03003612,
+      "winning_repair_iterations": 3,
+      "manual_interventions": 0
+    },
+    {
+      "candidate_id": "candidate-b-plus-a-round-002",
+      "architecture_origin": "B+A",
+      "commit": "6bd8882b536164503c1a5a2d04952a6aa6408e2e",
+      "successes": 1,
+      "attempts": 3,
+      "summary_sha256": "5eb420684526701de0e1d518c6c2dc495ae0ea36190ea952fc6691028fd76c6c",
+      "winning_proposal_sha256": "321f32bb1c26e7e149abd67449c0e35ffd2523d2cf1bf9a622c414c1827bd54b",
+      "winning_program_sha256": "3c22ffb7b3bb45e26dea2c0a660974d6f73965205e2c1c67f46112f4e6d70f06",
+      "winning_generated_tests": "10/10",
+      "winning_public_evaluator": "7/7",
+      "winning_independent_evaluator": "7/7",
+      "winning_provider_cost_usd": 0.01926666,
+      "winning_repair_iterations": 2,
+      "manual_interventions": 0,
+      "promotion_eligible": false,
+      "critical_regressions": [
+        "one of three attempts crashed before summary when provider returned malformed JSON",
+        "engine unit-test coverage was 46.02 percent, below the frozen 70 percent gate",
+        "no installable package, notices/provenance checks, wheel/sdist, or installed-wheel system E2E"
+      ]
+    }
+  ],
+  "selected_champion": "candidate-blackbox-tests-round-002",
+  "selected_architecture_line": "v1.2",
+  "selection_reason": "A+B and B+A tied at 1/3 with zero manual interventions. B+A's successful attempt was cheaper, but it failed the frozen no-worse-regression prerequisite through an unhandled provider-output crash, 46.02 percent engine coverage, and missing release/package gates. The fully gated improved v1 line therefore wins.",
+  "selection_complete": true,
+  "transfer_to_next_round": {
+    "from_b_plus_a": [
+      "evaluate whether supplying the known public evaluator contract to the v1 builder reduces repair cost without weakening hidden evaluation",
+      "retain append-only per-iteration ledger evidence",
+      "add a regression test that malformed provider JSON is retained as a failed iteration rather than crashing the run"
+    ],
+    "rejected_from_b_plus_a": [
+      "standalone unpackageable foundry base",
+      "weaker unit-test and release coverage",
+      "uncaught provider JSON failure boundary"
+    ]
+  },
+  "release_gates": {
+    "clean_environment_pip_check": "pass",
+    "ruff": "pass",
+    "format": "pass",
+    "mypy": "pass",
+    "compileall": "pass",
+    "bandit_medium_high": "pass",
+    "pip_audit": "pass-no-known-vulnerabilities",
+    "third_party_notices": "pass",
+    "copy_provenance": "pass",
+    "repository_tests": "239 passed, 3 skipped after integration",
+    "coverage_percent_after_integration": 72.39,
+    "build": "pass",
+    "twine": "pass",
+    "wheel_sha256": "9588b234bd617887b71201ef5f6ad6e548dc1b813d17affb75caad004bed7132",
+    "sdist_sha256": "64db83b5da2c5fb71816448ff4123d80f1b17ecbb5554ff2bbac3e2e23f62eab",
+    "installed_wheel_system_e2e": "pass",
+    "system_e2e_summary_sha256": "b878c8496c4e70ae50a5ea9d01326bb93cd99d2ece3640aa004725df825d3bd1"
+  }
+}

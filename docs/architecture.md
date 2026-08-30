@@ -26,6 +26,35 @@ goal
   -> provenance-locked generated system
 ```
 
+## Operator and control-plane boundary
+
+The intellectual operator is replaceable behind `AgentBackend`. It may be the current Codex
+subscription session, DeepSeek, Anthropic, or another implementation. It proposes capability
+plans, search variants, candidate interpretations, adapters, patches, and the next experiment.
+Provider output is always schema-validated and remains a proposal.
+
+The deterministic control plane owns secrets, call and token budgets, executable allowlists,
+timeouts, artifact hashes, query limits, evidence, state transitions, and final acceptance. The
+operator cannot promote its own output. API-backed implementations load only their named secret;
+credential values are never serialized into planning evidence.
+
+The first executable backend is DeepSeek JSON chat. The current Codex desktop session can perform
+the same operator role interactively without an OpenAI API key, but the packaged Windows app
+executable was not callable as a child process in the retained experiment. Unattended Codex and
+Anthropic adapters therefore remain explicit follow-up integrations, not present capabilities.
+
+The integrated self-hosting experiment separates three authorities:
+
+1. the deterministic v1 control plane that plans, searches, validates, hashes, and retains evidence;
+2. a replaceable operator that may propose a plan or generated gap but cannot write or execute it;
+3. an external reviewer/evaluator that may approve one exact hash for sandbox execution and
+   compare results against the frozen baseline.
+
+The earlier isolated-builder r4 artifact remains immutable baseline evidence. It was not promoted.
+The maintained 0.2 path instead integrates its useful boundaries into v1, removes denied repository
+identities before enrichment or model context, and preserves all existing supply-chain,
+composition, provenance, release, and sandbox gates.
+
 The solver may replace any failing candidate and rerun only affected graph branches. It writes new
 code only when no candidate satisfies the contract or when a small adapter is cheaper and safer
 than a replacement.
@@ -127,10 +156,11 @@ relocking.
    are active; API extraction and policy resolution remain next.
 3. **Experimenter** — disposable sandbox boot is active for pinned public GitHub repositories;
    generalized boot recipes, contract suites, and resource measurements remain next.
-4. **Composer** — declarative JSON Patch adaptation and paired contract verification are active;
-   linear compatibility solving, locked generation, provenance validation, and a shell-free
-   calibration runtime are active; multi-input DAGs, sandbox-backed production execution,
-   structural/AI adapter generation, and replacement loops remain next.
+4. **Composer** — declarative JSON Patch adaptation, paired contract verification, multi-input DAG
+   solving, bundled hash-locked resources, locked generation, provenance validation, and
+   shell-free host and sandbox calibration runtimes are active. Production execution,
+   component-specific locked dependency images, structural/AI adapter generation, and replacement
+   loops remain next.
 5. **Foundry** — reusable integration memory and delivery of verified systems from natural-language goals.
 
 ## Comparative benchmark boundary

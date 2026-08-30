@@ -1,0 +1,38 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 2,
+  "proposal_sha256": "c6e432b5a8cce2809f80de26aedb630a160d6b053e8e7bed1a23b0bdff339ce6",
+  "verdict": "rejected-before-build",
+  "reviewer": "codex-independent-architecture-review",
+  "champion_source_disclosed_to_builder": false,
+  "findings": [
+    {
+      "severity": "critical",
+      "id": "flow-contract-mismatch",
+      "finding": "Flow contracts are not consistently declared in the source produces list and target accepts list, so the proposed graph cannot be composed from its own interfaces."
+    },
+    {
+      "severity": "high",
+      "id": "missing-event-ledger",
+      "finding": "The thesis promises event-sourced orchestration, but no event ledger, event boundary, append-only persistence rule, or replay component is declared."
+    },
+    {
+      "severity": "high",
+      "id": "missing-capability-broker",
+      "finding": "The thesis names a capability broker as the main differentiator, but no component or responsibility implements that mechanism."
+    },
+    {
+      "severity": "high",
+      "id": "broken-evidence-path",
+      "finding": "License and verification evidence do not have complete declared flows into the evidence store, weakening provenance and promotion evidence."
+    },
+    {
+      "severity": "medium",
+      "id": "vertical-slice-gap",
+      "finding": "The first vertical slice promises a generated bundle without specifying the probe, adapter, composition, verification, and evidence transitions needed by the proposed architecture."
+    }
+  ],
+  "repair_instruction": "Produce a coherent independent v2 proposal. Make every flow contract appear in the source produces and target accepts lists. Add explicit components or responsibilities for the event ledger and capability broker, including replay and immutable evidence. Complete license and verification flows into the evidence store. Make the first vertical slice follow the declared graph end to end. Do not request or use champion source code."
+}

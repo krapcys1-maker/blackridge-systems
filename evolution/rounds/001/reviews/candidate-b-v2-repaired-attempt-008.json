@@ -1,0 +1,44 @@
+{
+  "schema_version": "1",
+  "round_id": "round-001",
+  "candidate_id": "candidate-b-v2",
+  "attempt": 8,
+  "proposal_sha256": "b2201d9a4eb4c256253c5344578799e3fccc5d0c4d9402bcfba19bc50005ebd2",
+  "parent_completion_sha256": "bffec4c0311a6ea2685fef27e74e0fc71324729ad6b5cafee1252d497bad0689",
+  "verdict": "rejected-before-build",
+  "reviewer": "codex-independent-architecture-review",
+  "champion_source_disclosed_to_builder": false,
+  "strengths": [
+    "Explicit ledger-based artifact paths replace the previous sink-only event bus.",
+    "License, probe, selection, composition, evaluation, and evidence stages are represented.",
+    "Evaluator remains a separate trust zone and workers do not select the champion."
+  ],
+  "findings": [
+    {
+      "severity": "critical",
+      "id": "brief-ingress-missing",
+      "finding": "No component or flow supplies brief/v1 to planner even though the vertical slice begins with it."
+    },
+    {
+      "severity": "critical",
+      "id": "license-binding-ambiguous",
+      "finding": "Sandbox receives candidate/v1 and license-verdict/v1 independently, so the interface does not enforce an approved verdict bound to the exact candidate hash."
+    },
+    {
+      "severity": "critical",
+      "id": "generated-adapter-not-probed",
+      "finding": "Untrusted adapter-builder output reaches composer without an intervening sandbox probe and verified-adapter decision."
+    },
+    {
+      "severity": "high",
+      "id": "deny-policy-owner-missing",
+      "finding": "The design promises denial before probing but no policy component owns deny-list enforcement between discovery and license approval."
+    },
+    {
+      "severity": "high",
+      "id": "evidence-retention-incomplete",
+      "finding": "Evidence store omits brief, plan, and candidate artifacts despite the stated rule that all artifacts are retained."
+    }
+  ],
+  "repair_instruction": "Add explicit brief ingress. Add a policy/license gate that emits approved-candidate/v1 bound to exact candidate identity and only that contract may enter probe. Route generated adapters through the sandbox and emit verified-adapter/v1 before composer accepts them. Give deny-policy enforcement an explicit owner before approval. Persist brief, plan, candidates, approvals, probes, selections, adapters, bundles, and evaluations in evidence store. Keep evaluator independent and every flow contract declared at both endpoints. Do not request or use champion source code."
+}

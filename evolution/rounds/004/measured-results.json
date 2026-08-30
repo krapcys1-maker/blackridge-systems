@@ -1,0 +1,78 @@
+{
+  "schema_version": "1",
+  "round_id": "round-004",
+  "status": "complete-v1-line-promoted",
+  "benchmark_sha256": "a68b458b45e6b514ff85db5bd2b04fb8473563c2a53252e9297b5e8b54c22f45",
+  "attempts_per_candidate": 3,
+  "results_root": "../blackridge-evolution-round-004/results",
+  "retained_champion": {
+    "candidate_id": "candidate-public-evaluator-json-safe-round-003",
+    "architecture_line": "v1.3.1",
+    "commit": "8a37ae109c9c3dda8d86194a6c96cb1242daa655",
+    "successes": 2,
+    "attempts": 3,
+    "total_provider_cost_usd": 0.04173154
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate-test-repair-round-004",
+      "architecture_line": "v1.4",
+      "commit": "871a469963420d9965c8f477f7c9a31a5b2c301d",
+      "successes": 3,
+      "attempts": 3,
+      "summary_sha256": "0b0b50be2824d2e0343a3171c1ef2d47bd9fff9a9408c024cabaf8222e84ffc5",
+      "total_provider_cost_usd": 0.0309198,
+      "manual_interventions": 0,
+      "successful_attempts": [
+        {
+          "attempt": 1,
+          "proposal_sha256": "bd4aaf323da6ce598c6abcc8c971cdea009e97cee3f12e388ec52f7db877bb59",
+          "program_sha256": "e3c57e05804caebee6c0231915d744fe3df7b501bd97db197e8a5589fdfc65bd",
+          "tests_sha256": "af4331007ff4762d3cec81f2c2679bcc9fb0e06ef1166f575e5bcac55855c643",
+          "generated_tests": "10/10",
+          "independent_evaluator": "7/7",
+          "repair_iterations": 1,
+          "provider_cost_usd": 0.01595578
+        },
+        {
+          "attempt": 2,
+          "proposal_sha256": "2bdbfe6e939b3f1476ac324cb3819cb07ecf123e3aa0bc50f094e04f9e399ba8",
+          "program_sha256": "3e94ec0d8d39a59d3af5f14953dc69b961ceb8d2e0ffac57f415d33f82738811",
+          "tests_sha256": "ad40eceddf0d583da9b601fdd799d594ad019bbf42e3f1c2eb218f2e7f28a77d",
+          "generated_tests": "10/10",
+          "independent_evaluator": "7/7",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00741799
+        },
+        {
+          "attempt": 3,
+          "proposal_sha256": "ec8fbf3f88c0423fb60c9603c5ed37bc28cc2e14e27948059954ea623f99f092",
+          "program_sha256": "fb4c3d1d440ef245ad97a9c9a5b59e5f061ac8077f85dbaf967e577c7fca9d9f",
+          "tests_sha256": "ae3e530a3b0f5bb5e6f87c3230172507aada89723ab2390f342e6c3861b737d6",
+          "generated_tests": "11/11",
+          "independent_evaluator": "7/7",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00754603
+        }
+      ],
+      "feature_exercised_in_measured_series": false,
+      "causal_claim_limit": "The snapshot achieved 3/3, but no attempt entered test-only repair; the result does not causally attribute the improvement to that path.",
+      "release_gates": {
+        "repository_tests": "240 passed, 3 skipped",
+        "coverage_percent": 72.76,
+        "static_dependency_provenance_package_gates": "pass",
+        "installed_wheel_system_e2e": "pass-on-fresh-clone",
+        "wheel_sha256": "685ceca142eefce4637fd8cd71633af74fd5f4ddbdaac97e06ee39028ae29b2b",
+        "sdist_sha256": "d314739ec69460b59d4f4719729ca15ffeb3a5e05421a5194bc8076267783243",
+        "system_e2e_summary_sha256": "9732bf2f8d29e3df5924f2912e5429280c52bb2c5680f5abe0f182405fac3149"
+      }
+    },
+    {"candidate_id":"candidate-v2-4-round-004","architecture_line":"v2.4","commit":"9747096f6a8eae23a929f3b138f41ee41da624fc","successes":1,"attempts":3,"total_provider_cost_usd":0.05782487,"manual_interventions":0},
+    {"candidate_id":"candidate-a-plus-b-round-004","architecture_line":"v1.4+B","commit":"dca18de","successes":2,"attempts":3,"total_provider_cost_usd":0.05163112,"manual_interventions":0,"note":"The test-only path was exercised safely but failed to repair three identical invalid test suites in attempt 1."},
+    {"candidate_id":"candidate-b-plus-a-round-004","architecture_line":"v2.5","commit":"e6d7741","successes":2,"attempts":3,"total_provider_cost_usd":0.04331627,"manual_interventions":0}
+  ],
+  "selected_champion": "candidate-test-repair-round-004",
+  "selected_architecture_line": "v1.4",
+  "selection_reason": "v1.4 was the only 3/3 candidate and passed every critical release gate.",
+  "selection_complete": true
+}

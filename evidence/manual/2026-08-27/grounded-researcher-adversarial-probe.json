@@ -1,0 +1,3845 @@
+{
+  "schema_version": "1",
+  "probe_id": "5485f919be104403b4ddff6dfb66c617",
+  "observed_at": "2026-08-27T15:37:49.693239Z",
+  "provider": "blackridge-grounded-researcher-adversarial/1",
+  "subject": "grounded-researcher-v1@c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+  "request": {
+    "repository": "D:\\Skladacz aplikacji\\blackridge-systems",
+    "repository_revision": "fc3b7705f620132f5c5ad866b75a66ab5cc9c775",
+    "component_sha256": "c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+    "input_contract_sha256": "bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f",
+    "output_contract_sha256": "5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409",
+    "image": "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+    "seed": 20260827
+  },
+  "observations": {
+    "probe_completed": true,
+    "case_count": 11,
+    "check_count": 162,
+    "matched_check_count": 162,
+    "all_checks_matched": true,
+    "cases": [
+      {
+        "case_id": "policy-order-reversed",
+        "request": {
+          "schema_version": "1",
+          "request_id": "policy-order-reversed",
+          "question": "Which controls make an internal data release decision reviewable and reversible?",
+          "minimum_sources": 5,
+          "documents": [
+            {
+              "document_id": "keyword-stuffing",
+              "title": "Reviewable Reversible Release Decision",
+              "full_text": "Reviewable reversible release decision controls reviewable reversible release decision. This note is actually about arranging colored labels on storage boxes and contains no data governance evidence."
+            },
+            {
+              "document_id": "kitchen-bread",
+              "title": "Cooling Sourdough Bread",
+              "full_text": "Fresh sourdough should cool on a rack before slicing. The crumb continues setting as steam leaves the loaf."
+            },
+            {
+              "document_id": "garden-compost",
+              "title": "Compost for Raised Beds",
+              "full_text": "Finished compost improves soil structure in raised vegetable beds. Gardeners mix it into the upper layer before spring planting."
+            },
+            {
+              "document_id": "policy-audit",
+              "title": "Raw Audit Trail",
+              "full_text": "Raw validation output, warnings, and failed checks remain attached to the release decision. A summary never replaces the underlying audit trail."
+            },
+            {
+              "document_id": "policy-negative",
+              "title": "Adverse Data Control",
+              "full_text": "A deliberately malformed record must be rejected even when the import command reports success. The adverse control proves validation observes the artifact rather than an exit code."
+            },
+            {
+              "document_id": "policy-rollback",
+              "title": "Reversible Publication",
+              "full_text": "A staged release keeps the prior dataset available and documents a tested rollback procedure. Publication stops when rollback cannot be demonstrated."
+            },
+            {
+              "document_id": "policy-approval",
+              "title": "Named Approval",
+              "full_text": "A named owner records approval only after inspecting the retained evidence. The decision log includes the reviewer, time, and explicit limitations."
+            },
+            {
+              "document_id": "policy-identity",
+              "title": "Immutable Dataset Identity",
+              "full_text": "A release record binds the dataset to an immutable snapshot digest. Reviewers can reconstruct the exact bytes instead of relying on a moving folder."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "policy-approval",
+          "policy-audit",
+          "policy-identity",
+          "policy-negative",
+          "policy-rollback"
+        ],
+        "exact_sources": [
+          "policy-approval",
+          "policy-audit",
+          "policy-identity",
+          "policy-negative",
+          "policy-rollback"
+        ],
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-48a88ee629374debb2cd10342b41ada9",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.497,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"policy-order-reversed\", \"status\": \"answered\", \"answer\": \"A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision. The decision log includes the reviewer, time, and explicit limitations.\", \"claims\": [{\"text\": \"A deliberately malformed record must be rejected even when the import command reports success.\", \"citations\": [{\"document_id\": \"policy-negative\", \"quote\": \"A deliberately malformed record must be rejected even when the import command reports success.\"}]}, {\"text\": \"A release record binds the dataset to an immutable snapshot digest.\", \"citations\": [{\"document_id\": \"policy-identity\", \"quote\": \"A release record binds the dataset to an immutable snapshot digest.\"}]}, {\"text\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\", \"citations\": [{\"document_id\": \"policy-rollback\", \"quote\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\"}]}, {\"text\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\", \"citations\": [{\"document_id\": \"policy-audit\", \"quote\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\"}]}, {\"text\": \"The decision log includes the reviewer, time, and explicit limitations.\", \"citations\": [{\"document_id\": \"policy-approval\", \"quote\": \"The decision log includes the reviewer, time, and explicit limitations.\"}]}], \"sources\": [{\"document_id\": \"policy-negative\", \"title\": \"Adverse Data Control\"}, {\"document_id\": \"policy-identity\", \"title\": \"Immutable Dataset Identity\"}, {\"document_id\": \"policy-rollback\", \"title\": \"Reversible Publication\"}, {\"document_id\": \"policy-audit\", \"title\": \"Raw Audit Trail\"}, {\"document_id\": \"policy-approval\", \"title\": \"Named Approval\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "policy-order-reversed",
+          "status": "answered",
+          "answer": "A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision. The decision log includes the reviewer, time, and explicit limitations.",
+          "claims": [
+            {
+              "text": "A deliberately malformed record must be rejected even when the import command reports success.",
+              "citations": [
+                {
+                  "document_id": "policy-negative",
+                  "quote": "A deliberately malformed record must be rejected even when the import command reports success."
+                }
+              ]
+            },
+            {
+              "text": "A release record binds the dataset to an immutable snapshot digest.",
+              "citations": [
+                {
+                  "document_id": "policy-identity",
+                  "quote": "A release record binds the dataset to an immutable snapshot digest."
+                }
+              ]
+            },
+            {
+              "text": "A staged release keeps the prior dataset available and documents a tested rollback procedure.",
+              "citations": [
+                {
+                  "document_id": "policy-rollback",
+                  "quote": "A staged release keeps the prior dataset available and documents a tested rollback procedure."
+                }
+              ]
+            },
+            {
+              "text": "Raw validation output, warnings, and failed checks remain attached to the release decision.",
+              "citations": [
+                {
+                  "document_id": "policy-audit",
+                  "quote": "Raw validation output, warnings, and failed checks remain attached to the release decision."
+                }
+              ]
+            },
+            {
+              "text": "The decision log includes the reviewer, time, and explicit limitations.",
+              "citations": [
+                {
+                  "document_id": "policy-approval",
+                  "quote": "The decision log includes the reviewer, time, and explicit limitations."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "policy-negative",
+              "title": "Adverse Data Control"
+            },
+            {
+              "document_id": "policy-identity",
+              "title": "Immutable Dataset Identity"
+            },
+            {
+              "document_id": "policy-rollback",
+              "title": "Reversible Publication"
+            },
+            {
+              "document_id": "policy-audit",
+              "title": "Raw Audit Trail"
+            },
+            {
+              "document_id": "policy-approval",
+              "title": "Named Approval"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.497
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "policy-order-reversed"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "policy-negative",
+              "policy-identity",
+              "policy-rollback",
+              "policy-audit",
+              "policy-approval"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 5
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "policy-approval",
+              "policy-audit",
+              "policy-identity",
+              "policy-negative",
+              "policy-rollback"
+            ]
+          },
+          {
+            "check": "exact-source-selection",
+            "matched": true,
+            "observed": [
+              "policy-approval",
+              "policy-audit",
+              "policy-identity",
+              "policy-negative",
+              "policy-rollback"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 5,
+              "citations": 5
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 420
+          }
+        ]
+      },
+      {
+        "case_id": "policy-order-seeded",
+        "request": {
+          "schema_version": "1",
+          "request_id": "policy-order-seeded",
+          "question": "Which controls make an internal data release decision reviewable and reversible?",
+          "minimum_sources": 5,
+          "documents": [
+            {
+              "document_id": "keyword-stuffing",
+              "title": "Reviewable Reversible Release Decision",
+              "full_text": "Reviewable reversible release decision controls reviewable reversible release decision. This note is actually about arranging colored labels on storage boxes and contains no data governance evidence."
+            },
+            {
+              "document_id": "garden-compost",
+              "title": "Compost for Raised Beds",
+              "full_text": "Finished compost improves soil structure in raised vegetable beds. Gardeners mix it into the upper layer before spring planting."
+            },
+            {
+              "document_id": "policy-identity",
+              "title": "Immutable Dataset Identity",
+              "full_text": "A release record binds the dataset to an immutable snapshot digest. Reviewers can reconstruct the exact bytes instead of relying on a moving folder."
+            },
+            {
+              "document_id": "policy-negative",
+              "title": "Adverse Data Control",
+              "full_text": "A deliberately malformed record must be rejected even when the import command reports success. The adverse control proves validation observes the artifact rather than an exit code."
+            },
+            {
+              "document_id": "policy-approval",
+              "title": "Named Approval",
+              "full_text": "A named owner records approval only after inspecting the retained evidence. The decision log includes the reviewer, time, and explicit limitations."
+            },
+            {
+              "document_id": "kitchen-bread",
+              "title": "Cooling Sourdough Bread",
+              "full_text": "Fresh sourdough should cool on a rack before slicing. The crumb continues setting as steam leaves the loaf."
+            },
+            {
+              "document_id": "policy-audit",
+              "title": "Raw Audit Trail",
+              "full_text": "Raw validation output, warnings, and failed checks remain attached to the release decision. A summary never replaces the underlying audit trail."
+            },
+            {
+              "document_id": "policy-rollback",
+              "title": "Reversible Publication",
+              "full_text": "A staged release keeps the prior dataset available and documents a tested rollback procedure. Publication stops when rollback cannot be demonstrated."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "policy-approval",
+          "policy-audit",
+          "policy-identity",
+          "policy-negative",
+          "policy-rollback"
+        ],
+        "exact_sources": [
+          "policy-approval",
+          "policy-audit",
+          "policy-identity",
+          "policy-negative",
+          "policy-rollback"
+        ],
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-2baab791a2864b09a683c649eec376ac",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.416,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"policy-order-seeded\", \"status\": \"answered\", \"answer\": \"A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision. The decision log includes the reviewer, time, and explicit limitations.\", \"claims\": [{\"text\": \"A deliberately malformed record must be rejected even when the import command reports success.\", \"citations\": [{\"document_id\": \"policy-negative\", \"quote\": \"A deliberately malformed record must be rejected even when the import command reports success.\"}]}, {\"text\": \"A release record binds the dataset to an immutable snapshot digest.\", \"citations\": [{\"document_id\": \"policy-identity\", \"quote\": \"A release record binds the dataset to an immutable snapshot digest.\"}]}, {\"text\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\", \"citations\": [{\"document_id\": \"policy-rollback\", \"quote\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\"}]}, {\"text\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\", \"citations\": [{\"document_id\": \"policy-audit\", \"quote\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\"}]}, {\"text\": \"The decision log includes the reviewer, time, and explicit limitations.\", \"citations\": [{\"document_id\": \"policy-approval\", \"quote\": \"The decision log includes the reviewer, time, and explicit limitations.\"}]}], \"sources\": [{\"document_id\": \"policy-negative\", \"title\": \"Adverse Data Control\"}, {\"document_id\": \"policy-identity\", \"title\": \"Immutable Dataset Identity\"}, {\"document_id\": \"policy-rollback\", \"title\": \"Reversible Publication\"}, {\"document_id\": \"policy-audit\", \"title\": \"Raw Audit Trail\"}, {\"document_id\": \"policy-approval\", \"title\": \"Named Approval\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "policy-order-seeded",
+          "status": "answered",
+          "answer": "A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision. The decision log includes the reviewer, time, and explicit limitations.",
+          "claims": [
+            {
+              "text": "A deliberately malformed record must be rejected even when the import command reports success.",
+              "citations": [
+                {
+                  "document_id": "policy-negative",
+                  "quote": "A deliberately malformed record must be rejected even when the import command reports success."
+                }
+              ]
+            },
+            {
+              "text": "A release record binds the dataset to an immutable snapshot digest.",
+              "citations": [
+                {
+                  "document_id": "policy-identity",
+                  "quote": "A release record binds the dataset to an immutable snapshot digest."
+                }
+              ]
+            },
+            {
+              "text": "A staged release keeps the prior dataset available and documents a tested rollback procedure.",
+              "citations": [
+                {
+                  "document_id": "policy-rollback",
+                  "quote": "A staged release keeps the prior dataset available and documents a tested rollback procedure."
+                }
+              ]
+            },
+            {
+              "text": "Raw validation output, warnings, and failed checks remain attached to the release decision.",
+              "citations": [
+                {
+                  "document_id": "policy-audit",
+                  "quote": "Raw validation output, warnings, and failed checks remain attached to the release decision."
+                }
+              ]
+            },
+            {
+              "text": "The decision log includes the reviewer, time, and explicit limitations.",
+              "citations": [
+                {
+                  "document_id": "policy-approval",
+                  "quote": "The decision log includes the reviewer, time, and explicit limitations."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "policy-negative",
+              "title": "Adverse Data Control"
+            },
+            {
+              "document_id": "policy-identity",
+              "title": "Immutable Dataset Identity"
+            },
+            {
+              "document_id": "policy-rollback",
+              "title": "Reversible Publication"
+            },
+            {
+              "document_id": "policy-audit",
+              "title": "Raw Audit Trail"
+            },
+            {
+              "document_id": "policy-approval",
+              "title": "Named Approval"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.416
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "policy-order-seeded"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "policy-negative",
+              "policy-identity",
+              "policy-rollback",
+              "policy-audit",
+              "policy-approval"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 5
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "policy-approval",
+              "policy-audit",
+              "policy-identity",
+              "policy-negative",
+              "policy-rollback"
+            ]
+          },
+          {
+            "check": "exact-source-selection",
+            "matched": true,
+            "observed": [
+              "policy-approval",
+              "policy-audit",
+              "policy-identity",
+              "policy-negative",
+              "policy-rollback"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 5,
+              "citations": 5
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 420
+          }
+        ]
+      },
+      {
+        "case_id": "bridge-distractor",
+        "request": {
+          "schema_version": "1",
+          "request_id": "bridge-distractor",
+          "question": "Which calibration instrument evidence records make the measurement reproducible?",
+          "minimum_sources": 5,
+          "documents": [
+            {
+              "document_id": "cal-01",
+              "title": "Calibration Record 1",
+              "full_text": "Calibration evidence record 1 retains an immutable measurement and a named instrument owner. The calibration audit links this observation to item 1."
+            },
+            {
+              "document_id": "cal-02",
+              "title": "Calibration Record 2",
+              "full_text": "Calibration evidence record 2 retains an immutable measurement and a named instrument owner. The calibration audit links this observation to item 2."
+            },
+            {
+              "document_id": "cal-03",
+              "title": "Calibration Record 3",
+              "full_text": "Calibration evidence record 3 retains an immutable measurement and a named instrument owner. The calibration audit links this observation to item 3."
+            },
+            {
+              "document_id": "cal-04",
+              "title": "Calibration Record 4",
+              "full_text": "Calibration evidence record 4 retains an immutable measurement and a named instrument owner. The calibration audit links this observation to item 4."
+            },
+            {
+              "document_id": "cal-05",
+              "title": "Calibration Record 5",
+              "full_text": "Calibration evidence record 5 retains an immutable measurement and a named instrument owner. The calibration audit links this observation to item 5."
+            },
+            {
+              "document_id": "bridge-label",
+              "title": "Calibration Instrument Kitchen Labels",
+              "full_text": "Calibration instrument evidence record reproducible calibration instrument. These words are decorative labels for kitchen storage jars; the note contains no measurement, test result, or instrument observation."
+            },
+            {
+              "document_id": "kitchen-01",
+              "title": "Kitchen Record 1",
+              "full_text": "Kitchen evidence record 1 retains a recipe temperature and a clean preparation surface. The kitchen audit links this observation to item 1."
+            },
+            {
+              "document_id": "kitchen-02",
+              "title": "Kitchen Record 2",
+              "full_text": "Kitchen evidence record 2 retains a recipe temperature and a clean preparation surface. The kitchen audit links this observation to item 2."
+            },
+            {
+              "document_id": "kitchen-03",
+              "title": "Kitchen Record 3",
+              "full_text": "Kitchen evidence record 3 retains a recipe temperature and a clean preparation surface. The kitchen audit links this observation to item 3."
+            },
+            {
+              "document_id": "kitchen-04",
+              "title": "Kitchen Record 4",
+              "full_text": "Kitchen evidence record 4 retains a recipe temperature and a clean preparation surface. The kitchen audit links this observation to item 4."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "cal-01",
+          "cal-02",
+          "cal-03",
+          "cal-04",
+          "cal-05"
+        ],
+        "exact_sources": [
+          "cal-01",
+          "cal-02",
+          "cal-03",
+          "cal-04",
+          "cal-05"
+        ],
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-ad277b2cdd95483b8a4e049f4c4811d9",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.557,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"bridge-distractor\", \"status\": \"answered\", \"answer\": \"Calibration evidence record 1 retains an immutable measurement and a named instrument owner. Calibration evidence record 2 retains an immutable measurement and a named instrument owner. Calibration evidence record 3 retains an immutable measurement and a named instrument owner. Calibration evidence record 4 retains an immutable measurement and a named instrument owner. Calibration evidence record 5 retains an immutable measurement and a named instrument owner.\", \"claims\": [{\"text\": \"Calibration evidence record 1 retains an immutable measurement and a named instrument owner.\", \"citations\": [{\"document_id\": \"cal-01\", \"quote\": \"Calibration evidence record 1 retains an immutable measurement and a named instrument owner.\"}]}, {\"text\": \"Calibration evidence record 2 retains an immutable measurement and a named instrument owner.\", \"citations\": [{\"document_id\": \"cal-02\", \"quote\": \"Calibration evidence record 2 retains an immutable measurement and a named instrument owner.\"}]}, {\"text\": \"Calibration evidence record 3 retains an immutable measurement and a named instrument owner.\", \"citations\": [{\"document_id\": \"cal-03\", \"quote\": \"Calibration evidence record 3 retains an immutable measurement and a named instrument owner.\"}]}, {\"text\": \"Calibration evidence record 4 retains an immutable measurement and a named instrument owner.\", \"citations\": [{\"document_id\": \"cal-04\", \"quote\": \"Calibration evidence record 4 retains an immutable measurement and a named instrument owner.\"}]}, {\"text\": \"Calibration evidence record 5 retains an immutable measurement and a named instrument owner.\", \"citations\": [{\"document_id\": \"cal-05\", \"quote\": \"Calibration evidence record 5 retains an immutable measurement and a named instrument owner.\"}]}], \"sources\": [{\"document_id\": \"cal-01\", \"title\": \"Calibration Record 1\"}, {\"document_id\": \"cal-02\", \"title\": \"Calibration Record 2\"}, {\"document_id\": \"cal-03\", \"title\": \"Calibration Record 3\"}, {\"document_id\": \"cal-04\", \"title\": \"Calibration Record 4\"}, {\"document_id\": \"cal-05\", \"title\": \"Calibration Record 5\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "bridge-distractor",
+          "status": "answered",
+          "answer": "Calibration evidence record 1 retains an immutable measurement and a named instrument owner. Calibration evidence record 2 retains an immutable measurement and a named instrument owner. Calibration evidence record 3 retains an immutable measurement and a named instrument owner. Calibration evidence record 4 retains an immutable measurement and a named instrument owner. Calibration evidence record 5 retains an immutable measurement and a named instrument owner.",
+          "claims": [
+            {
+              "text": "Calibration evidence record 1 retains an immutable measurement and a named instrument owner.",
+              "citations": [
+                {
+                  "document_id": "cal-01",
+                  "quote": "Calibration evidence record 1 retains an immutable measurement and a named instrument owner."
+                }
+              ]
+            },
+            {
+              "text": "Calibration evidence record 2 retains an immutable measurement and a named instrument owner.",
+              "citations": [
+                {
+                  "document_id": "cal-02",
+                  "quote": "Calibration evidence record 2 retains an immutable measurement and a named instrument owner."
+                }
+              ]
+            },
+            {
+              "text": "Calibration evidence record 3 retains an immutable measurement and a named instrument owner.",
+              "citations": [
+                {
+                  "document_id": "cal-03",
+                  "quote": "Calibration evidence record 3 retains an immutable measurement and a named instrument owner."
+                }
+              ]
+            },
+            {
+              "text": "Calibration evidence record 4 retains an immutable measurement and a named instrument owner.",
+              "citations": [
+                {
+                  "document_id": "cal-04",
+                  "quote": "Calibration evidence record 4 retains an immutable measurement and a named instrument owner."
+                }
+              ]
+            },
+            {
+              "text": "Calibration evidence record 5 retains an immutable measurement and a named instrument owner.",
+              "citations": [
+                {
+                  "document_id": "cal-05",
+                  "quote": "Calibration evidence record 5 retains an immutable measurement and a named instrument owner."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "cal-01",
+              "title": "Calibration Record 1"
+            },
+            {
+              "document_id": "cal-02",
+              "title": "Calibration Record 2"
+            },
+            {
+              "document_id": "cal-03",
+              "title": "Calibration Record 3"
+            },
+            {
+              "document_id": "cal-04",
+              "title": "Calibration Record 4"
+            },
+            {
+              "document_id": "cal-05",
+              "title": "Calibration Record 5"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.557
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "bridge-distractor"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "cal-01",
+              "cal-02",
+              "cal-03",
+              "cal-04",
+              "cal-05"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 5
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "cal-01",
+              "cal-02",
+              "cal-03",
+              "cal-04",
+              "cal-05"
+            ]
+          },
+          {
+            "check": "exact-source-selection",
+            "matched": true,
+            "observed": [
+              "cal-01",
+              "cal-02",
+              "cal-03",
+              "cal-04",
+              "cal-05"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 5,
+              "citations": 5
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 464
+          }
+        ]
+      },
+      {
+        "case_id": "negated-near-duplicate",
+        "request": {
+          "schema_version": "1",
+          "request_id": "negated-near-duplicate",
+          "question": "Which checksum evidence records support the package release decision?",
+          "minimum_sources": 3,
+          "documents": [
+            {
+              "document_id": "release-01",
+              "title": "Checksum Record 1",
+              "full_text": "Checksum evidence record 1 retains a verified package digest and a retained release decision. The checksum audit links this observation to item 1."
+            },
+            {
+              "document_id": "negated-near-duplicate",
+              "title": "Checksum Package Release Evidence",
+              "full_text": "This memo does not contain checksum evidence for a package release and must not be used as a release record. It discusses the font used on empty archive labels."
+            },
+            {
+              "document_id": "release-02",
+              "title": "Checksum Record 2",
+              "full_text": "Checksum evidence record 2 retains a verified package digest and a retained release decision. The checksum audit links this observation to item 2."
+            },
+            {
+              "document_id": "release-03",
+              "title": "Checksum Record 3",
+              "full_text": "Checksum evidence record 3 retains a verified package digest and a retained release decision. The checksum audit links this observation to item 3."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "release-01",
+          "release-02",
+          "release-03"
+        ],
+        "exact_sources": [
+          "release-01",
+          "release-02",
+          "release-03"
+        ],
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-3d4c3bdf5dfa4777b7b15977a74a4ede",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.387,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"negated-near-duplicate\", \"status\": \"answered\", \"answer\": \"Checksum evidence record 1 retains a verified package digest and a retained release decision. Checksum evidence record 2 retains a verified package digest and a retained release decision. Checksum evidence record 3 retains a verified package digest and a retained release decision.\", \"claims\": [{\"text\": \"Checksum evidence record 1 retains a verified package digest and a retained release decision.\", \"citations\": [{\"document_id\": \"release-01\", \"quote\": \"Checksum evidence record 1 retains a verified package digest and a retained release decision.\"}]}, {\"text\": \"Checksum evidence record 2 retains a verified package digest and a retained release decision.\", \"citations\": [{\"document_id\": \"release-02\", \"quote\": \"Checksum evidence record 2 retains a verified package digest and a retained release decision.\"}]}, {\"text\": \"Checksum evidence record 3 retains a verified package digest and a retained release decision.\", \"citations\": [{\"document_id\": \"release-03\", \"quote\": \"Checksum evidence record 3 retains a verified package digest and a retained release decision.\"}]}], \"sources\": [{\"document_id\": \"release-01\", \"title\": \"Checksum Record 1\"}, {\"document_id\": \"release-02\", \"title\": \"Checksum Record 2\"}, {\"document_id\": \"release-03\", \"title\": \"Checksum Record 3\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "negated-near-duplicate",
+          "status": "answered",
+          "answer": "Checksum evidence record 1 retains a verified package digest and a retained release decision. Checksum evidence record 2 retains a verified package digest and a retained release decision. Checksum evidence record 3 retains a verified package digest and a retained release decision.",
+          "claims": [
+            {
+              "text": "Checksum evidence record 1 retains a verified package digest and a retained release decision.",
+              "citations": [
+                {
+                  "document_id": "release-01",
+                  "quote": "Checksum evidence record 1 retains a verified package digest and a retained release decision."
+                }
+              ]
+            },
+            {
+              "text": "Checksum evidence record 2 retains a verified package digest and a retained release decision.",
+              "citations": [
+                {
+                  "document_id": "release-02",
+                  "quote": "Checksum evidence record 2 retains a verified package digest and a retained release decision."
+                }
+              ]
+            },
+            {
+              "text": "Checksum evidence record 3 retains a verified package digest and a retained release decision.",
+              "citations": [
+                {
+                  "document_id": "release-03",
+                  "quote": "Checksum evidence record 3 retains a verified package digest and a retained release decision."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "release-01",
+              "title": "Checksum Record 1"
+            },
+            {
+              "document_id": "release-02",
+              "title": "Checksum Record 2"
+            },
+            {
+              "document_id": "release-03",
+              "title": "Checksum Record 3"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.387
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "negated-near-duplicate"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "release-01",
+              "release-02",
+              "release-03"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 3
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "release-01",
+              "release-02",
+              "release-03"
+            ]
+          },
+          {
+            "check": "exact-source-selection",
+            "matched": true,
+            "observed": [
+              "release-01",
+              "release-02",
+              "release-03"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 3,
+              "citations": 3
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 281
+          }
+        ]
+      },
+      {
+        "case_id": "partial-insufficient",
+        "request": {
+          "schema_version": "1",
+          "request_id": "partial-insufficient",
+          "question": "Which spectral observations establish detector calibration?",
+          "minimum_sources": 4,
+          "documents": [
+            {
+              "document_id": "spectral-01",
+              "title": "Spectral Record 1",
+              "full_text": "Spectral evidence record 1 retains a wavelength observation from the calibrated detector. The spectral audit links this observation to item 1."
+            },
+            {
+              "document_id": "spectral-02",
+              "title": "Spectral Record 2",
+              "full_text": "Spectral evidence record 2 retains a wavelength observation from the calibrated detector. The spectral audit links this observation to item 2."
+            },
+            {
+              "document_id": "orchard-01",
+              "title": "Orchard Record 1",
+              "full_text": "Orchard evidence record 1 retains a pruning date and seasonal fruit count. The orchard audit links this observation to item 1."
+            },
+            {
+              "document_id": "orchard-02",
+              "title": "Orchard Record 2",
+              "full_text": "Orchard evidence record 2 retains a pruning date and seasonal fruit count. The orchard audit links this observation to item 2."
+            },
+            {
+              "document_id": "orchard-03",
+              "title": "Orchard Record 3",
+              "full_text": "Orchard evidence record 3 retains a pruning date and seasonal fruit count. The orchard audit links this observation to item 3."
+            },
+            {
+              "document_id": "orchard-04",
+              "title": "Orchard Record 4",
+              "full_text": "Orchard evidence record 4 retains a pruning date and seasonal fruit count. The orchard audit links this observation to item 4."
+            },
+            {
+              "document_id": "orchard-05",
+              "title": "Orchard Record 5",
+              "full_text": "Orchard evidence record 5 retains a pruning date and seasonal fruit count. The orchard audit links this observation to item 5."
+            }
+          ]
+        },
+        "expected_status": "insufficient-evidence",
+        "allowed_sources": [],
+        "exact_sources": null,
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-68ef73167ad24d2d9a9b0d6a0c65ef6a",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.386,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"partial-insufficient\", \"status\": \"insufficient-evidence\", \"answer\": \"The corpus does not contain enough relevant evidence.\", \"claims\": [], \"sources\": []}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "partial-insufficient",
+          "status": "insufficient-evidence",
+          "answer": "The corpus does not contain enough relevant evidence.",
+          "claims": [],
+          "sources": []
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.386
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "partial-insufficient"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "insufficient-evidence"
+          },
+          {
+            "check": "clean-abstention",
+            "matched": true,
+            "observed": {
+              "claims": 0,
+              "sources": 0
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "variable-minimum-1",
+        "request": {
+          "schema_version": "1",
+          "request_id": "variable-minimum-1",
+          "question": "Which custody records prove the sample handoff?",
+          "minimum_sources": 1,
+          "documents": [
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 1",
+              "full_text": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 1."
+            },
+            {
+              "document_id": "custody-02",
+              "title": "Custody Record 2",
+              "full_text": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 2."
+            },
+            {
+              "document_id": "custody-03",
+              "title": "Custody Record 3",
+              "full_text": "Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 3."
+            },
+            {
+              "document_id": "custody-04",
+              "title": "Custody Record 4",
+              "full_text": "Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 4."
+            },
+            {
+              "document_id": "custody-05",
+              "title": "Custody Record 5",
+              "full_text": "Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 5."
+            },
+            {
+              "document_id": "custody-06",
+              "title": "Custody Record 6",
+              "full_text": "Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 6."
+            },
+            {
+              "document_id": "travel-01",
+              "title": "Travel Record 1",
+              "full_text": "Travel evidence record 1 retains a walking route and an estimated arrival time. The travel audit links this observation to item 1."
+            },
+            {
+              "document_id": "travel-02",
+              "title": "Travel Record 2",
+              "full_text": "Travel evidence record 2 retains a walking route and an estimated arrival time. The travel audit links this observation to item 2."
+            },
+            {
+              "document_id": "travel-03",
+              "title": "Travel Record 3",
+              "full_text": "Travel evidence record 3 retains a walking route and an estimated arrival time. The travel audit links this observation to item 3."
+            },
+            {
+              "document_id": "travel-04",
+              "title": "Travel Record 4",
+              "full_text": "Travel evidence record 4 retains a walking route and an estimated arrival time. The travel audit links this observation to item 4."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "custody-01",
+          "custody-02",
+          "custody-03",
+          "custody-04",
+          "custody-05",
+          "custody-06"
+        ],
+        "exact_sources": null,
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-f43361e0dfbd460fa235e2a9b35f8811",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.386,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"variable-minimum-1\", \"status\": \"answered\", \"answer\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.\", \"claims\": [{\"text\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-01\", \"quote\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.\"}]}], \"sources\": [{\"document_id\": \"custody-01\", \"title\": \"Custody Record 1\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "variable-minimum-1",
+          "status": "answered",
+          "answer": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.",
+          "claims": [
+            {
+              "text": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-01",
+                  "quote": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 1"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.386
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "variable-minimum-1"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "custody-01"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 1
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "custody-01"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 1,
+              "citations": 1
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 91
+          }
+        ]
+      },
+      {
+        "case_id": "variable-minimum-3",
+        "request": {
+          "schema_version": "1",
+          "request_id": "variable-minimum-3",
+          "question": "Which custody records prove the sample handoff?",
+          "minimum_sources": 3,
+          "documents": [
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 1",
+              "full_text": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 1."
+            },
+            {
+              "document_id": "custody-02",
+              "title": "Custody Record 2",
+              "full_text": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 2."
+            },
+            {
+              "document_id": "custody-03",
+              "title": "Custody Record 3",
+              "full_text": "Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 3."
+            },
+            {
+              "document_id": "custody-04",
+              "title": "Custody Record 4",
+              "full_text": "Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 4."
+            },
+            {
+              "document_id": "custody-05",
+              "title": "Custody Record 5",
+              "full_text": "Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 5."
+            },
+            {
+              "document_id": "custody-06",
+              "title": "Custody Record 6",
+              "full_text": "Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 6."
+            },
+            {
+              "document_id": "travel-01",
+              "title": "Travel Record 1",
+              "full_text": "Travel evidence record 1 retains a walking route and an estimated arrival time. The travel audit links this observation to item 1."
+            },
+            {
+              "document_id": "travel-02",
+              "title": "Travel Record 2",
+              "full_text": "Travel evidence record 2 retains a walking route and an estimated arrival time. The travel audit links this observation to item 2."
+            },
+            {
+              "document_id": "travel-03",
+              "title": "Travel Record 3",
+              "full_text": "Travel evidence record 3 retains a walking route and an estimated arrival time. The travel audit links this observation to item 3."
+            },
+            {
+              "document_id": "travel-04",
+              "title": "Travel Record 4",
+              "full_text": "Travel evidence record 4 retains a walking route and an estimated arrival time. The travel audit links this observation to item 4."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "custody-01",
+          "custody-02",
+          "custody-03",
+          "custody-04",
+          "custody-05",
+          "custody-06"
+        ],
+        "exact_sources": null,
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-965903f3d0c34108a8b34977766d8a3f",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.385,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"variable-minimum-3\", \"status\": \"answered\", \"answer\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.\", \"claims\": [{\"text\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-01\", \"quote\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.\"}]}, {\"text\": \"Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-02\", \"quote\": \"Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier.\"}]}, {\"text\": \"Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-03\", \"quote\": \"Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.\"}]}], \"sources\": [{\"document_id\": \"custody-01\", \"title\": \"Custody Record 1\"}, {\"document_id\": \"custody-02\", \"title\": \"Custody Record 2\"}, {\"document_id\": \"custody-03\", \"title\": \"Custody Record 3\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "variable-minimum-3",
+          "status": "answered",
+          "answer": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.",
+          "claims": [
+            {
+              "text": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-01",
+                  "quote": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            },
+            {
+              "text": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-02",
+                  "quote": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            },
+            {
+              "text": "Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-03",
+                  "quote": "Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 1"
+            },
+            {
+              "document_id": "custody-02",
+              "title": "Custody Record 2"
+            },
+            {
+              "document_id": "custody-03",
+              "title": "Custody Record 3"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.385
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "variable-minimum-3"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "custody-01",
+              "custody-02",
+              "custody-03"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 3
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "custody-01",
+              "custody-02",
+              "custody-03"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 3,
+              "citations": 3
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 275
+          }
+        ]
+      },
+      {
+        "case_id": "variable-minimum-6",
+        "request": {
+          "schema_version": "1",
+          "request_id": "variable-minimum-6",
+          "question": "Which custody records prove the sample handoff?",
+          "minimum_sources": 6,
+          "documents": [
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 1",
+              "full_text": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 1."
+            },
+            {
+              "document_id": "custody-02",
+              "title": "Custody Record 2",
+              "full_text": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 2."
+            },
+            {
+              "document_id": "custody-03",
+              "title": "Custody Record 3",
+              "full_text": "Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 3."
+            },
+            {
+              "document_id": "custody-04",
+              "title": "Custody Record 4",
+              "full_text": "Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 4."
+            },
+            {
+              "document_id": "custody-05",
+              "title": "Custody Record 5",
+              "full_text": "Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 5."
+            },
+            {
+              "document_id": "custody-06",
+              "title": "Custody Record 6",
+              "full_text": "Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 6."
+            },
+            {
+              "document_id": "travel-01",
+              "title": "Travel Record 1",
+              "full_text": "Travel evidence record 1 retains a walking route and an estimated arrival time. The travel audit links this observation to item 1."
+            },
+            {
+              "document_id": "travel-02",
+              "title": "Travel Record 2",
+              "full_text": "Travel evidence record 2 retains a walking route and an estimated arrival time. The travel audit links this observation to item 2."
+            },
+            {
+              "document_id": "travel-03",
+              "title": "Travel Record 3",
+              "full_text": "Travel evidence record 3 retains a walking route and an estimated arrival time. The travel audit links this observation to item 3."
+            },
+            {
+              "document_id": "travel-04",
+              "title": "Travel Record 4",
+              "full_text": "Travel evidence record 4 retains a walking route and an estimated arrival time. The travel audit links this observation to item 4."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "custody-01",
+          "custody-02",
+          "custody-03",
+          "custody-04",
+          "custody-05",
+          "custody-06"
+        ],
+        "exact_sources": null,
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-8891c60389d94d6bad99785a60024a1c",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.448,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"variable-minimum-6\", \"status\": \"answered\", \"answer\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier.\", \"claims\": [{\"text\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-01\", \"quote\": \"Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.\"}]}, {\"text\": \"Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-02\", \"quote\": \"Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier.\"}]}, {\"text\": \"Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-03\", \"quote\": \"Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.\"}]}, {\"text\": \"Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-04\", \"quote\": \"Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier.\"}]}, {\"text\": \"Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-05\", \"quote\": \"Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier.\"}]}, {\"text\": \"Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier.\", \"citations\": [{\"document_id\": \"custody-06\", \"quote\": \"Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier.\"}]}], \"sources\": [{\"document_id\": \"custody-01\", \"title\": \"Custody Record 1\"}, {\"document_id\": \"custody-02\", \"title\": \"Custody Record 2\"}, {\"document_id\": \"custody-03\", \"title\": \"Custody Record 3\"}, {\"document_id\": \"custody-04\", \"title\": \"Custody Record 4\"}, {\"document_id\": \"custody-05\", \"title\": \"Custody Record 5\"}, {\"document_id\": \"custody-06\", \"title\": \"Custody Record 6\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "variable-minimum-6",
+          "status": "answered",
+          "answer": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier. Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier.",
+          "claims": [
+            {
+              "text": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-01",
+                  "quote": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            },
+            {
+              "text": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-02",
+                  "quote": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            },
+            {
+              "text": "Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-03",
+                  "quote": "Custody evidence record 3 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            },
+            {
+              "text": "Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-04",
+                  "quote": "Custody evidence record 4 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            },
+            {
+              "text": "Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-05",
+                  "quote": "Custody evidence record 5 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            },
+            {
+              "text": "Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier.",
+              "citations": [
+                {
+                  "document_id": "custody-06",
+                  "quote": "Custody evidence record 6 retains a signed handoff receipt and immutable sample identifier."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 1"
+            },
+            {
+              "document_id": "custody-02",
+              "title": "Custody Record 2"
+            },
+            {
+              "document_id": "custody-03",
+              "title": "Custody Record 3"
+            },
+            {
+              "document_id": "custody-04",
+              "title": "Custody Record 4"
+            },
+            {
+              "document_id": "custody-05",
+              "title": "Custody Record 5"
+            },
+            {
+              "document_id": "custody-06",
+              "title": "Custody Record 6"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.448
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "variable-minimum-6"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "custody-01",
+              "custody-02",
+              "custody-03",
+              "custody-04",
+              "custody-05",
+              "custody-06"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 6
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "custody-01",
+              "custody-02",
+              "custody-03",
+              "custody-04",
+              "custody-05",
+              "custody-06"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 6,
+              "citations": 6
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 551
+          }
+        ]
+      },
+      {
+        "case_id": "large-corpus",
+        "request": {
+          "schema_version": "1",
+          "request_id": "large-corpus",
+          "question": "Which seismic evidence records retain calibrated waveform observations?",
+          "minimum_sources": 20,
+          "documents": [
+            {
+              "document_id": "seismic-01",
+              "title": "Seismic Record 1",
+              "full_text": "Seismic evidence record 1 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 1."
+            },
+            {
+              "document_id": "seismic-02",
+              "title": "Seismic Record 2",
+              "full_text": "Seismic evidence record 2 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 2."
+            },
+            {
+              "document_id": "seismic-03",
+              "title": "Seismic Record 3",
+              "full_text": "Seismic evidence record 3 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 3."
+            },
+            {
+              "document_id": "seismic-04",
+              "title": "Seismic Record 4",
+              "full_text": "Seismic evidence record 4 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 4."
+            },
+            {
+              "document_id": "seismic-05",
+              "title": "Seismic Record 5",
+              "full_text": "Seismic evidence record 5 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 5."
+            },
+            {
+              "document_id": "seismic-06",
+              "title": "Seismic Record 6",
+              "full_text": "Seismic evidence record 6 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 6."
+            },
+            {
+              "document_id": "seismic-07",
+              "title": "Seismic Record 7",
+              "full_text": "Seismic evidence record 7 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 7."
+            },
+            {
+              "document_id": "seismic-08",
+              "title": "Seismic Record 8",
+              "full_text": "Seismic evidence record 8 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 8."
+            },
+            {
+              "document_id": "seismic-09",
+              "title": "Seismic Record 9",
+              "full_text": "Seismic evidence record 9 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 9."
+            },
+            {
+              "document_id": "seismic-10",
+              "title": "Seismic Record 10",
+              "full_text": "Seismic evidence record 10 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 10."
+            },
+            {
+              "document_id": "seismic-11",
+              "title": "Seismic Record 11",
+              "full_text": "Seismic evidence record 11 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 11."
+            },
+            {
+              "document_id": "seismic-12",
+              "title": "Seismic Record 12",
+              "full_text": "Seismic evidence record 12 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 12."
+            },
+            {
+              "document_id": "seismic-13",
+              "title": "Seismic Record 13",
+              "full_text": "Seismic evidence record 13 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 13."
+            },
+            {
+              "document_id": "seismic-14",
+              "title": "Seismic Record 14",
+              "full_text": "Seismic evidence record 14 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 14."
+            },
+            {
+              "document_id": "seismic-15",
+              "title": "Seismic Record 15",
+              "full_text": "Seismic evidence record 15 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 15."
+            },
+            {
+              "document_id": "seismic-16",
+              "title": "Seismic Record 16",
+              "full_text": "Seismic evidence record 16 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 16."
+            },
+            {
+              "document_id": "seismic-17",
+              "title": "Seismic Record 17",
+              "full_text": "Seismic evidence record 17 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 17."
+            },
+            {
+              "document_id": "seismic-18",
+              "title": "Seismic Record 18",
+              "full_text": "Seismic evidence record 18 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 18."
+            },
+            {
+              "document_id": "seismic-19",
+              "title": "Seismic Record 19",
+              "full_text": "Seismic evidence record 19 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 19."
+            },
+            {
+              "document_id": "seismic-20",
+              "title": "Seismic Record 20",
+              "full_text": "Seismic evidence record 20 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 20."
+            },
+            {
+              "document_id": "seismic-21",
+              "title": "Seismic Record 21",
+              "full_text": "Seismic evidence record 21 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 21."
+            },
+            {
+              "document_id": "seismic-22",
+              "title": "Seismic Record 22",
+              "full_text": "Seismic evidence record 22 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 22."
+            },
+            {
+              "document_id": "seismic-23",
+              "title": "Seismic Record 23",
+              "full_text": "Seismic evidence record 23 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 23."
+            },
+            {
+              "document_id": "seismic-24",
+              "title": "Seismic Record 24",
+              "full_text": "Seismic evidence record 24 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 24."
+            },
+            {
+              "document_id": "seismic-25",
+              "title": "Seismic Record 25",
+              "full_text": "Seismic evidence record 25 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 25."
+            },
+            {
+              "document_id": "seismic-26",
+              "title": "Seismic Record 26",
+              "full_text": "Seismic evidence record 26 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 26."
+            },
+            {
+              "document_id": "seismic-27",
+              "title": "Seismic Record 27",
+              "full_text": "Seismic evidence record 27 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 27."
+            },
+            {
+              "document_id": "seismic-28",
+              "title": "Seismic Record 28",
+              "full_text": "Seismic evidence record 28 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 28."
+            },
+            {
+              "document_id": "seismic-29",
+              "title": "Seismic Record 29",
+              "full_text": "Seismic evidence record 29 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 29."
+            },
+            {
+              "document_id": "seismic-30",
+              "title": "Seismic Record 30",
+              "full_text": "Seismic evidence record 30 retains a timestamped waveform and calibrated station identity. The seismic audit links this observation to item 30."
+            },
+            {
+              "document_id": "garden-large-42",
+              "title": "Garden Record 42",
+              "full_text": "Garden evidence record 42 retains a planting date and measured row spacing. The garden audit links this observation to item 42."
+            },
+            {
+              "document_id": "garden-large-23",
+              "title": "Garden Record 23",
+              "full_text": "Garden evidence record 23 retains a planting date and measured row spacing. The garden audit links this observation to item 23."
+            },
+            {
+              "document_id": "garden-large-12",
+              "title": "Garden Record 12",
+              "full_text": "Garden evidence record 12 retains a planting date and measured row spacing. The garden audit links this observation to item 12."
+            },
+            {
+              "document_id": "recipe-large-07",
+              "title": "Recipe Record 7",
+              "full_text": "Recipe evidence record 7 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 7."
+            },
+            {
+              "document_id": "recipe-large-47",
+              "title": "Recipe Record 47",
+              "full_text": "Recipe evidence record 47 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 47."
+            },
+            {
+              "document_id": "recipe-large-36",
+              "title": "Recipe Record 36",
+              "full_text": "Recipe evidence record 36 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 36."
+            },
+            {
+              "document_id": "recipe-large-17",
+              "title": "Recipe Record 17",
+              "full_text": "Recipe evidence record 17 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 17."
+            },
+            {
+              "document_id": "garden-large-66",
+              "title": "Garden Record 66",
+              "full_text": "Garden evidence record 66 retains a planting date and measured row spacing. The garden audit links this observation to item 66."
+            },
+            {
+              "document_id": "recipe-large-21",
+              "title": "Recipe Record 21",
+              "full_text": "Recipe evidence record 21 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 21."
+            },
+            {
+              "document_id": "recipe-large-33",
+              "title": "Recipe Record 33",
+              "full_text": "Recipe evidence record 33 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 33."
+            },
+            {
+              "document_id": "recipe-large-85",
+              "title": "Recipe Record 85",
+              "full_text": "Recipe evidence record 85 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 85."
+            },
+            {
+              "document_id": "recipe-large-06",
+              "title": "Recipe Record 6",
+              "full_text": "Recipe evidence record 6 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 6."
+            },
+            {
+              "document_id": "garden-large-50",
+              "title": "Garden Record 50",
+              "full_text": "Garden evidence record 50 retains a planting date and measured row spacing. The garden audit links this observation to item 50."
+            },
+            {
+              "document_id": "garden-large-38",
+              "title": "Garden Record 38",
+              "full_text": "Garden evidence record 38 retains a planting date and measured row spacing. The garden audit links this observation to item 38."
+            },
+            {
+              "document_id": "recipe-large-69",
+              "title": "Recipe Record 69",
+              "full_text": "Recipe evidence record 69 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 69."
+            },
+            {
+              "document_id": "garden-large-30",
+              "title": "Garden Record 30",
+              "full_text": "Garden evidence record 30 retains a planting date and measured row spacing. The garden audit links this observation to item 30."
+            },
+            {
+              "document_id": "garden-large-77",
+              "title": "Garden Record 77",
+              "full_text": "Garden evidence record 77 retains a planting date and measured row spacing. The garden audit links this observation to item 77."
+            },
+            {
+              "document_id": "recipe-large-39",
+              "title": "Recipe Record 39",
+              "full_text": "Recipe evidence record 39 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 39."
+            },
+            {
+              "document_id": "recipe-large-13",
+              "title": "Recipe Record 13",
+              "full_text": "Recipe evidence record 13 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 13."
+            },
+            {
+              "document_id": "recipe-large-50",
+              "title": "Recipe Record 50",
+              "full_text": "Recipe evidence record 50 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 50."
+            },
+            {
+              "document_id": "recipe-large-03",
+              "title": "Recipe Record 3",
+              "full_text": "Recipe evidence record 3 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 3."
+            },
+            {
+              "document_id": "garden-large-58",
+              "title": "Garden Record 58",
+              "full_text": "Garden evidence record 58 retains a planting date and measured row spacing. The garden audit links this observation to item 58."
+            },
+            {
+              "document_id": "recipe-large-74",
+              "title": "Recipe Record 74",
+              "full_text": "Recipe evidence record 74 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 74."
+            },
+            {
+              "document_id": "garden-large-59",
+              "title": "Garden Record 59",
+              "full_text": "Garden evidence record 59 retains a planting date and measured row spacing. The garden audit links this observation to item 59."
+            },
+            {
+              "document_id": "recipe-large-32",
+              "title": "Recipe Record 32",
+              "full_text": "Recipe evidence record 32 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 32."
+            },
+            {
+              "document_id": "recipe-large-04",
+              "title": "Recipe Record 4",
+              "full_text": "Recipe evidence record 4 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 4."
+            },
+            {
+              "document_id": "recipe-large-48",
+              "title": "Recipe Record 48",
+              "full_text": "Recipe evidence record 48 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 48."
+            },
+            {
+              "document_id": "recipe-large-19",
+              "title": "Recipe Record 19",
+              "full_text": "Recipe evidence record 19 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 19."
+            },
+            {
+              "document_id": "recipe-large-77",
+              "title": "Recipe Record 77",
+              "full_text": "Recipe evidence record 77 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 77."
+            },
+            {
+              "document_id": "recipe-large-72",
+              "title": "Recipe Record 72",
+              "full_text": "Recipe evidence record 72 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 72."
+            },
+            {
+              "document_id": "garden-large-84",
+              "title": "Garden Record 84",
+              "full_text": "Garden evidence record 84 retains a planting date and measured row spacing. The garden audit links this observation to item 84."
+            },
+            {
+              "document_id": "garden-large-19",
+              "title": "Garden Record 19",
+              "full_text": "Garden evidence record 19 retains a planting date and measured row spacing. The garden audit links this observation to item 19."
+            },
+            {
+              "document_id": "garden-large-49",
+              "title": "Garden Record 49",
+              "full_text": "Garden evidence record 49 retains a planting date and measured row spacing. The garden audit links this observation to item 49."
+            },
+            {
+              "document_id": "recipe-large-55",
+              "title": "Recipe Record 55",
+              "full_text": "Recipe evidence record 55 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 55."
+            },
+            {
+              "document_id": "recipe-large-29",
+              "title": "Recipe Record 29",
+              "full_text": "Recipe evidence record 29 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 29."
+            },
+            {
+              "document_id": "recipe-large-66",
+              "title": "Recipe Record 66",
+              "full_text": "Recipe evidence record 66 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 66."
+            },
+            {
+              "document_id": "recipe-large-63",
+              "title": "Recipe Record 63",
+              "full_text": "Recipe evidence record 63 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 63."
+            },
+            {
+              "document_id": "recipe-large-24",
+              "title": "Recipe Record 24",
+              "full_text": "Recipe evidence record 24 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 24."
+            },
+            {
+              "document_id": "garden-large-55",
+              "title": "Garden Record 55",
+              "full_text": "Garden evidence record 55 retains a planting date and measured row spacing. The garden audit links this observation to item 55."
+            },
+            {
+              "document_id": "recipe-large-46",
+              "title": "Recipe Record 46",
+              "full_text": "Recipe evidence record 46 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 46."
+            },
+            {
+              "document_id": "recipe-large-42",
+              "title": "Recipe Record 42",
+              "full_text": "Recipe evidence record 42 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 42."
+            },
+            {
+              "document_id": "recipe-large-75",
+              "title": "Recipe Record 75",
+              "full_text": "Recipe evidence record 75 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 75."
+            },
+            {
+              "document_id": "recipe-large-40",
+              "title": "Recipe Record 40",
+              "full_text": "Recipe evidence record 40 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 40."
+            },
+            {
+              "document_id": "garden-large-67",
+              "title": "Garden Record 67",
+              "full_text": "Garden evidence record 67 retains a planting date and measured row spacing. The garden audit links this observation to item 67."
+            },
+            {
+              "document_id": "garden-large-56",
+              "title": "Garden Record 56",
+              "full_text": "Garden evidence record 56 retains a planting date and measured row spacing. The garden audit links this observation to item 56."
+            },
+            {
+              "document_id": "recipe-large-70",
+              "title": "Recipe Record 70",
+              "full_text": "Recipe evidence record 70 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 70."
+            },
+            {
+              "document_id": "garden-large-06",
+              "title": "Garden Record 6",
+              "full_text": "Garden evidence record 6 retains a planting date and measured row spacing. The garden audit links this observation to item 6."
+            },
+            {
+              "document_id": "garden-large-27",
+              "title": "Garden Record 27",
+              "full_text": "Garden evidence record 27 retains a planting date and measured row spacing. The garden audit links this observation to item 27."
+            },
+            {
+              "document_id": "garden-large-11",
+              "title": "Garden Record 11",
+              "full_text": "Garden evidence record 11 retains a planting date and measured row spacing. The garden audit links this observation to item 11."
+            },
+            {
+              "document_id": "garden-large-57",
+              "title": "Garden Record 57",
+              "full_text": "Garden evidence record 57 retains a planting date and measured row spacing. The garden audit links this observation to item 57."
+            },
+            {
+              "document_id": "garden-large-53",
+              "title": "Garden Record 53",
+              "full_text": "Garden evidence record 53 retains a planting date and measured row spacing. The garden audit links this observation to item 53."
+            },
+            {
+              "document_id": "recipe-large-53",
+              "title": "Recipe Record 53",
+              "full_text": "Recipe evidence record 53 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 53."
+            },
+            {
+              "document_id": "garden-large-70",
+              "title": "Garden Record 70",
+              "full_text": "Garden evidence record 70 retains a planting date and measured row spacing. The garden audit links this observation to item 70."
+            },
+            {
+              "document_id": "garden-large-20",
+              "title": "Garden Record 20",
+              "full_text": "Garden evidence record 20 retains a planting date and measured row spacing. The garden audit links this observation to item 20."
+            },
+            {
+              "document_id": "garden-large-79",
+              "title": "Garden Record 79",
+              "full_text": "Garden evidence record 79 retains a planting date and measured row spacing. The garden audit links this observation to item 79."
+            },
+            {
+              "document_id": "recipe-large-60",
+              "title": "Recipe Record 60",
+              "full_text": "Recipe evidence record 60 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 60."
+            },
+            {
+              "document_id": "garden-large-04",
+              "title": "Garden Record 4",
+              "full_text": "Garden evidence record 4 retains a planting date and measured row spacing. The garden audit links this observation to item 4."
+            },
+            {
+              "document_id": "recipe-large-43",
+              "title": "Recipe Record 43",
+              "full_text": "Recipe evidence record 43 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 43."
+            },
+            {
+              "document_id": "recipe-large-73",
+              "title": "Recipe Record 73",
+              "full_text": "Recipe evidence record 73 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 73."
+            },
+            {
+              "document_id": "garden-large-44",
+              "title": "Garden Record 44",
+              "full_text": "Garden evidence record 44 retains a planting date and measured row spacing. The garden audit links this observation to item 44."
+            },
+            {
+              "document_id": "garden-large-73",
+              "title": "Garden Record 73",
+              "full_text": "Garden evidence record 73 retains a planting date and measured row spacing. The garden audit links this observation to item 73."
+            },
+            {
+              "document_id": "recipe-large-51",
+              "title": "Recipe Record 51",
+              "full_text": "Recipe evidence record 51 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 51."
+            },
+            {
+              "document_id": "recipe-large-41",
+              "title": "Recipe Record 41",
+              "full_text": "Recipe evidence record 41 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 41."
+            },
+            {
+              "document_id": "garden-large-76",
+              "title": "Garden Record 76",
+              "full_text": "Garden evidence record 76 retains a planting date and measured row spacing. The garden audit links this observation to item 76."
+            },
+            {
+              "document_id": "garden-large-24",
+              "title": "Garden Record 24",
+              "full_text": "Garden evidence record 24 retains a planting date and measured row spacing. The garden audit links this observation to item 24."
+            },
+            {
+              "document_id": "recipe-large-64",
+              "title": "Recipe Record 64",
+              "full_text": "Recipe evidence record 64 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 64."
+            },
+            {
+              "document_id": "recipe-large-34",
+              "title": "Recipe Record 34",
+              "full_text": "Recipe evidence record 34 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 34."
+            },
+            {
+              "document_id": "recipe-large-31",
+              "title": "Recipe Record 31",
+              "full_text": "Recipe evidence record 31 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 31."
+            },
+            {
+              "document_id": "recipe-large-56",
+              "title": "Recipe Record 56",
+              "full_text": "Recipe evidence record 56 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 56."
+            },
+            {
+              "document_id": "recipe-large-25",
+              "title": "Recipe Record 25",
+              "full_text": "Recipe evidence record 25 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 25."
+            },
+            {
+              "document_id": "garden-large-81",
+              "title": "Garden Record 81",
+              "full_text": "Garden evidence record 81 retains a planting date and measured row spacing. The garden audit links this observation to item 81."
+            },
+            {
+              "document_id": "garden-large-63",
+              "title": "Garden Record 63",
+              "full_text": "Garden evidence record 63 retains a planting date and measured row spacing. The garden audit links this observation to item 63."
+            },
+            {
+              "document_id": "garden-large-10",
+              "title": "Garden Record 10",
+              "full_text": "Garden evidence record 10 retains a planting date and measured row spacing. The garden audit links this observation to item 10."
+            },
+            {
+              "document_id": "garden-large-34",
+              "title": "Garden Record 34",
+              "full_text": "Garden evidence record 34 retains a planting date and measured row spacing. The garden audit links this observation to item 34."
+            },
+            {
+              "document_id": "recipe-large-82",
+              "title": "Recipe Record 82",
+              "full_text": "Recipe evidence record 82 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 82."
+            },
+            {
+              "document_id": "garden-large-26",
+              "title": "Garden Record 26",
+              "full_text": "Garden evidence record 26 retains a planting date and measured row spacing. The garden audit links this observation to item 26."
+            },
+            {
+              "document_id": "garden-large-83",
+              "title": "Garden Record 83",
+              "full_text": "Garden evidence record 83 retains a planting date and measured row spacing. The garden audit links this observation to item 83."
+            },
+            {
+              "document_id": "garden-large-61",
+              "title": "Garden Record 61",
+              "full_text": "Garden evidence record 61 retains a planting date and measured row spacing. The garden audit links this observation to item 61."
+            },
+            {
+              "document_id": "recipe-large-01",
+              "title": "Recipe Record 1",
+              "full_text": "Recipe evidence record 1 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 1."
+            },
+            {
+              "document_id": "garden-large-60",
+              "title": "Garden Record 60",
+              "full_text": "Garden evidence record 60 retains a planting date and measured row spacing. The garden audit links this observation to item 60."
+            },
+            {
+              "document_id": "garden-large-03",
+              "title": "Garden Record 3",
+              "full_text": "Garden evidence record 3 retains a planting date and measured row spacing. The garden audit links this observation to item 3."
+            },
+            {
+              "document_id": "recipe-large-08",
+              "title": "Recipe Record 8",
+              "full_text": "Recipe evidence record 8 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 8."
+            },
+            {
+              "document_id": "recipe-large-38",
+              "title": "Recipe Record 38",
+              "full_text": "Recipe evidence record 38 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 38."
+            },
+            {
+              "document_id": "garden-large-02",
+              "title": "Garden Record 2",
+              "full_text": "Garden evidence record 2 retains a planting date and measured row spacing. The garden audit links this observation to item 2."
+            },
+            {
+              "document_id": "recipe-large-05",
+              "title": "Recipe Record 5",
+              "full_text": "Recipe evidence record 5 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 5."
+            },
+            {
+              "document_id": "recipe-large-84",
+              "title": "Recipe Record 84",
+              "full_text": "Recipe evidence record 84 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 84."
+            },
+            {
+              "document_id": "recipe-large-35",
+              "title": "Recipe Record 35",
+              "full_text": "Recipe evidence record 35 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 35."
+            },
+            {
+              "document_id": "garden-large-74",
+              "title": "Garden Record 74",
+              "full_text": "Garden evidence record 74 retains a planting date and measured row spacing. The garden audit links this observation to item 74."
+            },
+            {
+              "document_id": "garden-large-13",
+              "title": "Garden Record 13",
+              "full_text": "Garden evidence record 13 retains a planting date and measured row spacing. The garden audit links this observation to item 13."
+            },
+            {
+              "document_id": "garden-large-43",
+              "title": "Garden Record 43",
+              "full_text": "Garden evidence record 43 retains a planting date and measured row spacing. The garden audit links this observation to item 43."
+            },
+            {
+              "document_id": "garden-large-22",
+              "title": "Garden Record 22",
+              "full_text": "Garden evidence record 22 retains a planting date and measured row spacing. The garden audit links this observation to item 22."
+            },
+            {
+              "document_id": "garden-large-41",
+              "title": "Garden Record 41",
+              "full_text": "Garden evidence record 41 retains a planting date and measured row spacing. The garden audit links this observation to item 41."
+            },
+            {
+              "document_id": "recipe-large-80",
+              "title": "Recipe Record 80",
+              "full_text": "Recipe evidence record 80 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 80."
+            },
+            {
+              "document_id": "garden-large-40",
+              "title": "Garden Record 40",
+              "full_text": "Garden evidence record 40 retains a planting date and measured row spacing. The garden audit links this observation to item 40."
+            },
+            {
+              "document_id": "recipe-large-61",
+              "title": "Recipe Record 61",
+              "full_text": "Recipe evidence record 61 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 61."
+            },
+            {
+              "document_id": "garden-large-33",
+              "title": "Garden Record 33",
+              "full_text": "Garden evidence record 33 retains a planting date and measured row spacing. The garden audit links this observation to item 33."
+            },
+            {
+              "document_id": "garden-large-17",
+              "title": "Garden Record 17",
+              "full_text": "Garden evidence record 17 retains a planting date and measured row spacing. The garden audit links this observation to item 17."
+            },
+            {
+              "document_id": "garden-large-71",
+              "title": "Garden Record 71",
+              "full_text": "Garden evidence record 71 retains a planting date and measured row spacing. The garden audit links this observation to item 71."
+            },
+            {
+              "document_id": "garden-large-69",
+              "title": "Garden Record 69",
+              "full_text": "Garden evidence record 69 retains a planting date and measured row spacing. The garden audit links this observation to item 69."
+            },
+            {
+              "document_id": "recipe-large-28",
+              "title": "Recipe Record 28",
+              "full_text": "Recipe evidence record 28 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 28."
+            },
+            {
+              "document_id": "recipe-large-83",
+              "title": "Recipe Record 83",
+              "full_text": "Recipe evidence record 83 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 83."
+            },
+            {
+              "document_id": "recipe-large-71",
+              "title": "Recipe Record 71",
+              "full_text": "Recipe evidence record 71 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 71."
+            },
+            {
+              "document_id": "garden-large-25",
+              "title": "Garden Record 25",
+              "full_text": "Garden evidence record 25 retains a planting date and measured row spacing. The garden audit links this observation to item 25."
+            },
+            {
+              "document_id": "recipe-large-65",
+              "title": "Recipe Record 65",
+              "full_text": "Recipe evidence record 65 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 65."
+            },
+            {
+              "document_id": "recipe-large-16",
+              "title": "Recipe Record 16",
+              "full_text": "Recipe evidence record 16 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 16."
+            },
+            {
+              "document_id": "garden-large-09",
+              "title": "Garden Record 9",
+              "full_text": "Garden evidence record 9 retains a planting date and measured row spacing. The garden audit links this observation to item 9."
+            },
+            {
+              "document_id": "garden-large-35",
+              "title": "Garden Record 35",
+              "full_text": "Garden evidence record 35 retains a planting date and measured row spacing. The garden audit links this observation to item 35."
+            },
+            {
+              "document_id": "garden-large-08",
+              "title": "Garden Record 8",
+              "full_text": "Garden evidence record 8 retains a planting date and measured row spacing. The garden audit links this observation to item 8."
+            },
+            {
+              "document_id": "garden-large-47",
+              "title": "Garden Record 47",
+              "full_text": "Garden evidence record 47 retains a planting date and measured row spacing. The garden audit links this observation to item 47."
+            },
+            {
+              "document_id": "garden-large-68",
+              "title": "Garden Record 68",
+              "full_text": "Garden evidence record 68 retains a planting date and measured row spacing. The garden audit links this observation to item 68."
+            },
+            {
+              "document_id": "recipe-large-67",
+              "title": "Recipe Record 67",
+              "full_text": "Recipe evidence record 67 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 67."
+            },
+            {
+              "document_id": "garden-large-28",
+              "title": "Garden Record 28",
+              "full_text": "Garden evidence record 28 retains a planting date and measured row spacing. The garden audit links this observation to item 28."
+            },
+            {
+              "document_id": "recipe-large-78",
+              "title": "Recipe Record 78",
+              "full_text": "Recipe evidence record 78 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 78."
+            },
+            {
+              "document_id": "garden-large-15",
+              "title": "Garden Record 15",
+              "full_text": "Garden evidence record 15 retains a planting date and measured row spacing. The garden audit links this observation to item 15."
+            },
+            {
+              "document_id": "garden-large-31",
+              "title": "Garden Record 31",
+              "full_text": "Garden evidence record 31 retains a planting date and measured row spacing. The garden audit links this observation to item 31."
+            },
+            {
+              "document_id": "garden-large-52",
+              "title": "Garden Record 52",
+              "full_text": "Garden evidence record 52 retains a planting date and measured row spacing. The garden audit links this observation to item 52."
+            },
+            {
+              "document_id": "recipe-large-27",
+              "title": "Recipe Record 27",
+              "full_text": "Recipe evidence record 27 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 27."
+            },
+            {
+              "document_id": "garden-large-01",
+              "title": "Garden Record 1",
+              "full_text": "Garden evidence record 1 retains a planting date and measured row spacing. The garden audit links this observation to item 1."
+            },
+            {
+              "document_id": "recipe-large-15",
+              "title": "Recipe Record 15",
+              "full_text": "Recipe evidence record 15 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 15."
+            },
+            {
+              "document_id": "recipe-large-81",
+              "title": "Recipe Record 81",
+              "full_text": "Recipe evidence record 81 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 81."
+            },
+            {
+              "document_id": "garden-large-48",
+              "title": "Garden Record 48",
+              "full_text": "Garden evidence record 48 retains a planting date and measured row spacing. The garden audit links this observation to item 48."
+            },
+            {
+              "document_id": "garden-large-62",
+              "title": "Garden Record 62",
+              "full_text": "Garden evidence record 62 retains a planting date and measured row spacing. The garden audit links this observation to item 62."
+            },
+            {
+              "document_id": "recipe-large-76",
+              "title": "Recipe Record 76",
+              "full_text": "Recipe evidence record 76 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 76."
+            },
+            {
+              "document_id": "garden-large-46",
+              "title": "Garden Record 46",
+              "full_text": "Garden evidence record 46 retains a planting date and measured row spacing. The garden audit links this observation to item 46."
+            },
+            {
+              "document_id": "recipe-large-10",
+              "title": "Recipe Record 10",
+              "full_text": "Recipe evidence record 10 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 10."
+            },
+            {
+              "document_id": "recipe-large-12",
+              "title": "Recipe Record 12",
+              "full_text": "Recipe evidence record 12 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 12."
+            },
+            {
+              "document_id": "recipe-large-30",
+              "title": "Recipe Record 30",
+              "full_text": "Recipe evidence record 30 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 30."
+            },
+            {
+              "document_id": "garden-large-14",
+              "title": "Garden Record 14",
+              "full_text": "Garden evidence record 14 retains a planting date and measured row spacing. The garden audit links this observation to item 14."
+            },
+            {
+              "document_id": "recipe-large-11",
+              "title": "Recipe Record 11",
+              "full_text": "Recipe evidence record 11 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 11."
+            },
+            {
+              "document_id": "recipe-large-26",
+              "title": "Recipe Record 26",
+              "full_text": "Recipe evidence record 26 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 26."
+            },
+            {
+              "document_id": "garden-large-05",
+              "title": "Garden Record 5",
+              "full_text": "Garden evidence record 5 retains a planting date and measured row spacing. The garden audit links this observation to item 5."
+            },
+            {
+              "document_id": "recipe-large-02",
+              "title": "Recipe Record 2",
+              "full_text": "Recipe evidence record 2 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 2."
+            },
+            {
+              "document_id": "recipe-large-62",
+              "title": "Recipe Record 62",
+              "full_text": "Recipe evidence record 62 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 62."
+            },
+            {
+              "document_id": "recipe-large-58",
+              "title": "Recipe Record 58",
+              "full_text": "Recipe evidence record 58 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 58."
+            },
+            {
+              "document_id": "garden-large-37",
+              "title": "Garden Record 37",
+              "full_text": "Garden evidence record 37 retains a planting date and measured row spacing. The garden audit links this observation to item 37."
+            },
+            {
+              "document_id": "recipe-large-37",
+              "title": "Recipe Record 37",
+              "full_text": "Recipe evidence record 37 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 37."
+            },
+            {
+              "document_id": "recipe-large-45",
+              "title": "Recipe Record 45",
+              "full_text": "Recipe evidence record 45 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 45."
+            },
+            {
+              "document_id": "garden-large-21",
+              "title": "Garden Record 21",
+              "full_text": "Garden evidence record 21 retains a planting date and measured row spacing. The garden audit links this observation to item 21."
+            },
+            {
+              "document_id": "recipe-large-20",
+              "title": "Recipe Record 20",
+              "full_text": "Recipe evidence record 20 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 20."
+            },
+            {
+              "document_id": "garden-large-80",
+              "title": "Garden Record 80",
+              "full_text": "Garden evidence record 80 retains a planting date and measured row spacing. The garden audit links this observation to item 80."
+            },
+            {
+              "document_id": "garden-large-18",
+              "title": "Garden Record 18",
+              "full_text": "Garden evidence record 18 retains a planting date and measured row spacing. The garden audit links this observation to item 18."
+            },
+            {
+              "document_id": "garden-large-32",
+              "title": "Garden Record 32",
+              "full_text": "Garden evidence record 32 retains a planting date and measured row spacing. The garden audit links this observation to item 32."
+            },
+            {
+              "document_id": "recipe-large-79",
+              "title": "Recipe Record 79",
+              "full_text": "Recipe evidence record 79 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 79."
+            },
+            {
+              "document_id": "garden-large-85",
+              "title": "Garden Record 85",
+              "full_text": "Garden evidence record 85 retains a planting date and measured row spacing. The garden audit links this observation to item 85."
+            },
+            {
+              "document_id": "garden-large-54",
+              "title": "Garden Record 54",
+              "full_text": "Garden evidence record 54 retains a planting date and measured row spacing. The garden audit links this observation to item 54."
+            },
+            {
+              "document_id": "recipe-large-59",
+              "title": "Recipe Record 59",
+              "full_text": "Recipe evidence record 59 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 59."
+            },
+            {
+              "document_id": "recipe-large-52",
+              "title": "Recipe Record 52",
+              "full_text": "Recipe evidence record 52 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 52."
+            },
+            {
+              "document_id": "garden-large-39",
+              "title": "Garden Record 39",
+              "full_text": "Garden evidence record 39 retains a planting date and measured row spacing. The garden audit links this observation to item 39."
+            },
+            {
+              "document_id": "garden-large-51",
+              "title": "Garden Record 51",
+              "full_text": "Garden evidence record 51 retains a planting date and measured row spacing. The garden audit links this observation to item 51."
+            },
+            {
+              "document_id": "recipe-large-68",
+              "title": "Recipe Record 68",
+              "full_text": "Recipe evidence record 68 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 68."
+            },
+            {
+              "document_id": "garden-large-16",
+              "title": "Garden Record 16",
+              "full_text": "Garden evidence record 16 retains a planting date and measured row spacing. The garden audit links this observation to item 16."
+            },
+            {
+              "document_id": "recipe-large-57",
+              "title": "Recipe Record 57",
+              "full_text": "Recipe evidence record 57 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 57."
+            },
+            {
+              "document_id": "garden-large-36",
+              "title": "Garden Record 36",
+              "full_text": "Garden evidence record 36 retains a planting date and measured row spacing. The garden audit links this observation to item 36."
+            },
+            {
+              "document_id": "recipe-large-18",
+              "title": "Recipe Record 18",
+              "full_text": "Recipe evidence record 18 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 18."
+            },
+            {
+              "document_id": "garden-large-82",
+              "title": "Garden Record 82",
+              "full_text": "Garden evidence record 82 retains a planting date and measured row spacing. The garden audit links this observation to item 82."
+            },
+            {
+              "document_id": "recipe-large-44",
+              "title": "Recipe Record 44",
+              "full_text": "Recipe evidence record 44 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 44."
+            },
+            {
+              "document_id": "garden-large-65",
+              "title": "Garden Record 65",
+              "full_text": "Garden evidence record 65 retains a planting date and measured row spacing. The garden audit links this observation to item 65."
+            },
+            {
+              "document_id": "recipe-large-23",
+              "title": "Recipe Record 23",
+              "full_text": "Recipe evidence record 23 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 23."
+            },
+            {
+              "document_id": "recipe-large-14",
+              "title": "Recipe Record 14",
+              "full_text": "Recipe evidence record 14 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 14."
+            },
+            {
+              "document_id": "garden-large-64",
+              "title": "Garden Record 64",
+              "full_text": "Garden evidence record 64 retains a planting date and measured row spacing. The garden audit links this observation to item 64."
+            },
+            {
+              "document_id": "garden-large-07",
+              "title": "Garden Record 7",
+              "full_text": "Garden evidence record 7 retains a planting date and measured row spacing. The garden audit links this observation to item 7."
+            },
+            {
+              "document_id": "garden-large-29",
+              "title": "Garden Record 29",
+              "full_text": "Garden evidence record 29 retains a planting date and measured row spacing. The garden audit links this observation to item 29."
+            },
+            {
+              "document_id": "garden-large-72",
+              "title": "Garden Record 72",
+              "full_text": "Garden evidence record 72 retains a planting date and measured row spacing. The garden audit links this observation to item 72."
+            },
+            {
+              "document_id": "recipe-large-54",
+              "title": "Recipe Record 54",
+              "full_text": "Recipe evidence record 54 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 54."
+            },
+            {
+              "document_id": "garden-large-45",
+              "title": "Garden Record 45",
+              "full_text": "Garden evidence record 45 retains a planting date and measured row spacing. The garden audit links this observation to item 45."
+            },
+            {
+              "document_id": "garden-large-75",
+              "title": "Garden Record 75",
+              "full_text": "Garden evidence record 75 retains a planting date and measured row spacing. The garden audit links this observation to item 75."
+            },
+            {
+              "document_id": "recipe-large-09",
+              "title": "Recipe Record 9",
+              "full_text": "Recipe evidence record 9 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 9."
+            },
+            {
+              "document_id": "garden-large-78",
+              "title": "Garden Record 78",
+              "full_text": "Garden evidence record 78 retains a planting date and measured row spacing. The garden audit links this observation to item 78."
+            },
+            {
+              "document_id": "recipe-large-22",
+              "title": "Recipe Record 22",
+              "full_text": "Recipe evidence record 22 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 22."
+            },
+            {
+              "document_id": "recipe-large-49",
+              "title": "Recipe Record 49",
+              "full_text": "Recipe evidence record 49 retains an ingredient quantity and oven temperature. The recipe audit links this observation to item 49."
+            }
+          ]
+        },
+        "expected_status": "answered",
+        "allowed_sources": [
+          "seismic-01",
+          "seismic-02",
+          "seismic-03",
+          "seismic-04",
+          "seismic-05",
+          "seismic-06",
+          "seismic-07",
+          "seismic-08",
+          "seismic-09",
+          "seismic-10",
+          "seismic-11",
+          "seismic-12",
+          "seismic-13",
+          "seismic-14",
+          "seismic-15",
+          "seismic-16",
+          "seismic-17",
+          "seismic-18",
+          "seismic-19",
+          "seismic-20",
+          "seismic-21",
+          "seismic-22",
+          "seismic-23",
+          "seismic-24",
+          "seismic-25",
+          "seismic-26",
+          "seismic-27",
+          "seismic-28",
+          "seismic-29",
+          "seismic-30"
+        ],
+        "exact_sources": null,
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-9ff6677df6544117b037b2cae09f9de0",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.432,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"large-corpus\", \"status\": \"answered\", \"answer\": \"Seismic evidence record 1 retains a timestamped waveform and calibrated station identity. Seismic evidence record 2 retains a timestamped waveform and calibrated station identity. Seismic evidence record 3 retains a timestamped waveform and calibrated station identity. Seismic evidence record 4 retains a timestamped waveform and calibrated station identity. Seismic evidence record 5 retains a timestamped waveform and calibrated station identity. Seismic evidence record 6 retains a timestamped waveform and calibrated station identity. Seismic evidence record 7 retains a timestamped waveform and calibrated station identity. Seismic evidence record 8 retains a timestamped waveform and calibrated station identity. Seismic evidence record 9 retains a timestamped waveform and calibrated station identity. Seismic evidence record 10 retains a timestamped waveform and calibrated station identity. Seismic evidence record 11 retains a timestamped waveform and calibrated station identity. Seismic evidence record 12 retains a timestamped waveform and calibrated station identity. Seismic evidence record 13 retains a timestamped waveform and calibrated station identity. Seismic evidence record 14 retains a timestamped waveform and calibrated station identity. Seismic evidence record 15 retains a timestamped waveform and calibrated station identity. Seismic evidence record 16 retains a timestamped waveform and calibrated station identity. Seismic evidence record 17 retains a timestamped waveform and calibrated station identity. Seismic evidence record 18 retains a timestamped waveform and calibrated station identity. Seismic evidence record 19 retains a timestamped waveform and calibrated station identity. Seismic evidence record 20 retains a timestamped waveform and calibrated station identity.\", \"claims\": [{\"text\": \"Seismic evidence record 1 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-01\", \"quote\": \"Seismic evidence record 1 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 2 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-02\", \"quote\": \"Seismic evidence record 2 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 3 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-03\", \"quote\": \"Seismic evidence record 3 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 4 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-04\", \"quote\": \"Seismic evidence record 4 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 5 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-05\", \"quote\": \"Seismic evidence record 5 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 6 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-06\", \"quote\": \"Seismic evidence record 6 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 7 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-07\", \"quote\": \"Seismic evidence record 7 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 8 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-08\", \"quote\": \"Seismic evidence record 8 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 9 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-09\", \"quote\": \"Seismic evidence record 9 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 10 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-10\", \"quote\": \"Seismic evidence record 10 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 11 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-11\", \"quote\": \"Seismic evidence record 11 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 12 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-12\", \"quote\": \"Seismic evidence record 12 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 13 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-13\", \"quote\": \"Seismic evidence record 13 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 14 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-14\", \"quote\": \"Seismic evidence record 14 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 15 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-15\", \"quote\": \"Seismic evidence record 15 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 16 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-16\", \"quote\": \"Seismic evidence record 16 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 17 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-17\", \"quote\": \"Seismic evidence record 17 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 18 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-18\", \"quote\": \"Seismic evidence record 18 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 19 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-19\", \"quote\": \"Seismic evidence record 19 retains a timestamped waveform and calibrated station identity.\"}]}, {\"text\": \"Seismic evidence record 20 retains a timestamped waveform and calibrated station identity.\", \"citations\": [{\"document_id\": \"seismic-20\", \"quote\": \"Seismic evidence record 20 retains a timestamped waveform and calibrated station identity.\"}]}], \"sources\": [{\"document_id\": \"seismic-01\", \"title\": \"Seismic Record 1\"}, {\"document_id\": \"seismic-02\", \"title\": \"Seismic Record 2\"}, {\"document_id\": \"seismic-03\", \"title\": \"Seismic Record 3\"}, {\"document_id\": \"seismic-04\", \"title\": \"Seismic Record 4\"}, {\"document_id\": \"seismic-05\", \"title\": \"Seismic Record 5\"}, {\"document_id\": \"seismic-06\", \"title\": \"Seismic Record 6\"}, {\"document_id\": \"seismic-07\", \"title\": \"Seismic Record 7\"}, {\"document_id\": \"seismic-08\", \"title\": \"Seismic Record 8\"}, {\"document_id\": \"seismic-09\", \"title\": \"Seismic Record 9\"}, {\"document_id\": \"seismic-10\", \"title\": \"Seismic Record 10\"}, {\"document_id\": \"seismic-11\", \"title\": \"Seismic Record 11\"}, {\"document_id\": \"seismic-12\", \"title\": \"Seismic Record 12\"}, {\"document_id\": \"seismic-13\", \"title\": \"Seismic Record 13\"}, {\"document_id\": \"seismic-14\", \"title\": \"Seismic Record 14\"}, {\"document_id\": \"seismic-15\", \"title\": \"Seismic Record 15\"}, {\"document_id\": \"seismic-16\", \"title\": \"Seismic Record 16\"}, {\"document_id\": \"seismic-17\", \"title\": \"Seismic Record 17\"}, {\"document_id\": \"seismic-18\", \"title\": \"Seismic Record 18\"}, {\"document_id\": \"seismic-19\", \"title\": \"Seismic Record 19\"}, {\"document_id\": \"seismic-20\", \"title\": \"Seismic Record 20\"}]}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "large-corpus",
+          "status": "answered",
+          "answer": "Seismic evidence record 1 retains a timestamped waveform and calibrated station identity. Seismic evidence record 2 retains a timestamped waveform and calibrated station identity. Seismic evidence record 3 retains a timestamped waveform and calibrated station identity. Seismic evidence record 4 retains a timestamped waveform and calibrated station identity. Seismic evidence record 5 retains a timestamped waveform and calibrated station identity. Seismic evidence record 6 retains a timestamped waveform and calibrated station identity. Seismic evidence record 7 retains a timestamped waveform and calibrated station identity. Seismic evidence record 8 retains a timestamped waveform and calibrated station identity. Seismic evidence record 9 retains a timestamped waveform and calibrated station identity. Seismic evidence record 10 retains a timestamped waveform and calibrated station identity. Seismic evidence record 11 retains a timestamped waveform and calibrated station identity. Seismic evidence record 12 retains a timestamped waveform and calibrated station identity. Seismic evidence record 13 retains a timestamped waveform and calibrated station identity. Seismic evidence record 14 retains a timestamped waveform and calibrated station identity. Seismic evidence record 15 retains a timestamped waveform and calibrated station identity. Seismic evidence record 16 retains a timestamped waveform and calibrated station identity. Seismic evidence record 17 retains a timestamped waveform and calibrated station identity. Seismic evidence record 18 retains a timestamped waveform and calibrated station identity. Seismic evidence record 19 retains a timestamped waveform and calibrated station identity. Seismic evidence record 20 retains a timestamped waveform and calibrated station identity.",
+          "claims": [
+            {
+              "text": "Seismic evidence record 1 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-01",
+                  "quote": "Seismic evidence record 1 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 2 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-02",
+                  "quote": "Seismic evidence record 2 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 3 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-03",
+                  "quote": "Seismic evidence record 3 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 4 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-04",
+                  "quote": "Seismic evidence record 4 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 5 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-05",
+                  "quote": "Seismic evidence record 5 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 6 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-06",
+                  "quote": "Seismic evidence record 6 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 7 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-07",
+                  "quote": "Seismic evidence record 7 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 8 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-08",
+                  "quote": "Seismic evidence record 8 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 9 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-09",
+                  "quote": "Seismic evidence record 9 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 10 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-10",
+                  "quote": "Seismic evidence record 10 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 11 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-11",
+                  "quote": "Seismic evidence record 11 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 12 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-12",
+                  "quote": "Seismic evidence record 12 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 13 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-13",
+                  "quote": "Seismic evidence record 13 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 14 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-14",
+                  "quote": "Seismic evidence record 14 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 15 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-15",
+                  "quote": "Seismic evidence record 15 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 16 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-16",
+                  "quote": "Seismic evidence record 16 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 17 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-17",
+                  "quote": "Seismic evidence record 17 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 18 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-18",
+                  "quote": "Seismic evidence record 18 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 19 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-19",
+                  "quote": "Seismic evidence record 19 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            },
+            {
+              "text": "Seismic evidence record 20 retains a timestamped waveform and calibrated station identity.",
+              "citations": [
+                {
+                  "document_id": "seismic-20",
+                  "quote": "Seismic evidence record 20 retains a timestamped waveform and calibrated station identity."
+                }
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "document_id": "seismic-01",
+              "title": "Seismic Record 1"
+            },
+            {
+              "document_id": "seismic-02",
+              "title": "Seismic Record 2"
+            },
+            {
+              "document_id": "seismic-03",
+              "title": "Seismic Record 3"
+            },
+            {
+              "document_id": "seismic-04",
+              "title": "Seismic Record 4"
+            },
+            {
+              "document_id": "seismic-05",
+              "title": "Seismic Record 5"
+            },
+            {
+              "document_id": "seismic-06",
+              "title": "Seismic Record 6"
+            },
+            {
+              "document_id": "seismic-07",
+              "title": "Seismic Record 7"
+            },
+            {
+              "document_id": "seismic-08",
+              "title": "Seismic Record 8"
+            },
+            {
+              "document_id": "seismic-09",
+              "title": "Seismic Record 9"
+            },
+            {
+              "document_id": "seismic-10",
+              "title": "Seismic Record 10"
+            },
+            {
+              "document_id": "seismic-11",
+              "title": "Seismic Record 11"
+            },
+            {
+              "document_id": "seismic-12",
+              "title": "Seismic Record 12"
+            },
+            {
+              "document_id": "seismic-13",
+              "title": "Seismic Record 13"
+            },
+            {
+              "document_id": "seismic-14",
+              "title": "Seismic Record 14"
+            },
+            {
+              "document_id": "seismic-15",
+              "title": "Seismic Record 15"
+            },
+            {
+              "document_id": "seismic-16",
+              "title": "Seismic Record 16"
+            },
+            {
+              "document_id": "seismic-17",
+              "title": "Seismic Record 17"
+            },
+            {
+              "document_id": "seismic-18",
+              "title": "Seismic Record 18"
+            },
+            {
+              "document_id": "seismic-19",
+              "title": "Seismic Record 19"
+            },
+            {
+              "document_id": "seismic-20",
+              "title": "Seismic Record 20"
+            }
+          ]
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.432
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "large-corpus"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "answered"
+          },
+          {
+            "check": "unique-source-identities",
+            "matched": true,
+            "observed": [
+              "seismic-01",
+              "seismic-02",
+              "seismic-03",
+              "seismic-04",
+              "seismic-05",
+              "seismic-06",
+              "seismic-07",
+              "seismic-08",
+              "seismic-09",
+              "seismic-10",
+              "seismic-11",
+              "seismic-12",
+              "seismic-13",
+              "seismic-14",
+              "seismic-15",
+              "seismic-16",
+              "seismic-17",
+              "seismic-18",
+              "seismic-19",
+              "seismic-20"
+            ]
+          },
+          {
+            "check": "minimum-source-count",
+            "matched": true,
+            "observed": 20
+          },
+          {
+            "check": "allowed-source-selection",
+            "matched": true,
+            "observed": [
+              "seismic-01",
+              "seismic-02",
+              "seismic-03",
+              "seismic-04",
+              "seismic-05",
+              "seismic-06",
+              "seismic-07",
+              "seismic-08",
+              "seismic-09",
+              "seismic-10",
+              "seismic-11",
+              "seismic-12",
+              "seismic-13",
+              "seismic-14",
+              "seismic-15",
+              "seismic-16",
+              "seismic-17",
+              "seismic-18",
+              "seismic-19",
+              "seismic-20"
+            ]
+          },
+          {
+            "check": "source-title-integrity",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "every-claim-cited",
+            "matched": true,
+            "observed": {
+              "claims": 20,
+              "citations": 20
+            }
+          },
+          {
+            "check": "citation-quotes-grounded",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "answer-length",
+            "matched": true,
+            "observed": 1810
+          }
+        ]
+      },
+      {
+        "case_id": "invalid-boolean-minimum",
+        "request": {
+          "schema_version": "1",
+          "request_id": "invalid-boolean-minimum",
+          "question": "Which checksum record supports this release?",
+          "minimum_sources": true,
+          "documents": [
+            {
+              "document_id": "release-01",
+              "title": "Checksum Record 1",
+              "full_text": "Checksum evidence record 1 retains a verified package digest and a retained release decision. The checksum audit links this observation to item 1."
+            }
+          ]
+        },
+        "expected_status": "insufficient-evidence",
+        "allowed_sources": [],
+        "exact_sources": null,
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-c9a1b3467d4849f4af1612c273f1edc0",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.398,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"invalid-boolean-minimum\", \"status\": \"insufficient-evidence\", \"answer\": \"The request does not satisfy the research-input contract.\", \"claims\": [], \"sources\": []}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "invalid-boolean-minimum",
+          "status": "insufficient-evidence",
+          "answer": "The request does not satisfy the research-input contract.",
+          "claims": [],
+          "sources": []
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": [
+              "True is not of type 'integer'"
+            ]
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.398
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "invalid-boolean-minimum"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "insufficient-evidence"
+          },
+          {
+            "check": "clean-abstention",
+            "matched": true,
+            "observed": {
+              "claims": 0,
+              "sources": 0
+            }
+          }
+        ]
+      },
+      {
+        "case_id": "invalid-duplicate-identifiers",
+        "request": {
+          "schema_version": "1",
+          "request_id": "invalid-duplicate-identifiers",
+          "question": "Which custody records prove the sample handoff?",
+          "minimum_sources": 2,
+          "documents": [
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 1",
+              "full_text": "Custody evidence record 1 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 1."
+            },
+            {
+              "document_id": "custody-01",
+              "title": "Custody Record 2",
+              "full_text": "Custody evidence record 2 retains a signed handoff receipt and immutable sample identifier. The custody audit links this observation to item 2."
+            }
+          ]
+        },
+        "expected_status": "insufficient-evidence",
+        "allowed_sources": [],
+        "exact_sources": null,
+        "execution": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-researcher-adversarial-ff85de2b0a5f4a4a81093850abd1c974",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "duration_seconds": 0.401,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"invalid-duplicate-identifiers\", \"status\": \"insufficient-evidence\", \"answer\": \"The request contains duplicate document identities.\", \"claims\": [], \"sources\": []}\n",
+          "stderr": "",
+          "parse_error": null,
+          "cleanup_exit_code": 0
+        },
+        "parsed_output": {
+          "schema_version": "1",
+          "request_id": "invalid-duplicate-identifiers",
+          "status": "insufficient-evidence",
+          "answer": "The request contains duplicate document identities.",
+          "claims": [],
+          "sources": []
+        },
+        "checks": [
+          {
+            "check": "public-input-schema",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "typed-input-contract",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "process-exit",
+            "matched": true,
+            "observed": 0
+          },
+          {
+            "check": "no-timeout",
+            "matched": true,
+            "observed": false
+          },
+          {
+            "check": "duration-budget",
+            "matched": true,
+            "observed": 0.401
+          },
+          {
+            "check": "output-object",
+            "matched": true,
+            "observed": true
+          },
+          {
+            "check": "public-output-contract",
+            "matched": true,
+            "observed": []
+          },
+          {
+            "check": "request-identity",
+            "matched": true,
+            "observed": "invalid-duplicate-identifiers"
+          },
+          {
+            "check": "expected-status",
+            "matched": true,
+            "observed": "insufficient-evidence"
+          },
+          {
+            "check": "clean-abstention",
+            "matched": true,
+            "observed": {
+              "claims": 0,
+              "sources": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "sources": [
+    "blackridge://components/grounded-researcher-v1/adversarial-suite"
+  ],
+  "warnings": [
+    "This deterministic suite is adversarial remediation evidence, not a blinded holdout.",
+    "Passing synthetic lexical attacks does not prove universal semantic relevance."
+  ]
+}

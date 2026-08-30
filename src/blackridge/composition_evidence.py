@@ -146,7 +146,11 @@ def verify_evidence(
         elif promotion.artifact_sha256 != artifact_sha256:
             reasons.append("review promotion artifact does not match qualified subject")
 
-    probe_path = Path(review.probe_file)
+    # Retained reviews record the probe path as it looked on the machine that wrote them, so a
+    # review written on Windows carries backslash separators. POSIX would read those as one
+    # filename and report the probe as missing, silently failing every promotion above L0.
+    # Normalizing on read keeps the recorded bytes, and their hashes, unchanged.
+    probe_path = Path(review.probe_file.replace("\\", "/"))
     if not probe_path.is_absolute():
         probe_path = (repository_root / probe_path).resolve()
     observations["probe_file"] = str(probe_path)
@@ -164,9 +168,7 @@ def verify_evidence(
             reasons.append("probe SHA-256 no longer matches the manual review")
         else:
             try:
-                probe = ProbeEvidence.model_validate_json(
-                    probe_path.read_text(encoding="utf-8")
-                )
+                probe = ProbeEvidence.model_validate_json(probe_path.read_text(encoding="utf-8"))
             except (ValueError, OSError) as exc:
                 reasons.append(f"reviewed probe is invalid: {type(exc).__name__}: {exc}")
             else:

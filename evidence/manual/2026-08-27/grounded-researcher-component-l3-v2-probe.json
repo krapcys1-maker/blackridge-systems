@@ -1,0 +1,1149 @@
+{
+  "schema_version": "1",
+  "probe_id": "4cd6bdeb2fb04b579f2af3b208a2b5d0",
+  "observed_at": "2026-08-27T15:37:53.770106Z",
+  "provider": "blackridge-grounded-researcher-probe/1",
+  "subject": "grounded-researcher-v1@c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+  "request": {
+    "repository": "D:\\Skladacz aplikacji\\blackridge-systems",
+    "repository_revision": "fc3b7705f620132f5c5ad866b75a66ab5cc9c775",
+    "component_file": "D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1\\grounded_researcher.py",
+    "component_sha256": "c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+    "broken_control_file": "D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1\\fixtures\\broken_grounded_researcher.py",
+    "broken_control_sha256": "386c0f0ffdb3632b06da7eb94d351bdf2bed74f20ac5ac9acdf469e326135e2d",
+    "input_contract_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\public\\research-input.schema.json",
+    "input_contract_sha256": "bd9169918a86eae1933f333998c00e6776e3e0e9245d53ce09ebcb19548f3d5f",
+    "output_contract_file": "D:\\Skladacz aplikacji\\blackridge-systems\\benchmarks\\scientific-researcher-v1\\public\\research-output.schema.json",
+    "output_contract_sha256": "5b107a0c53dae17df2b01f0efd08d1be8a3b59b06814c02ddce2790de712c409",
+    "image": "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903"
+  },
+  "observations": {
+    "probe_completed": true,
+    "case_count": 4,
+    "candidate_all_checks_matched": true,
+    "broken_all_processes_exited_zero": true,
+    "broken_detected_check_count": 10,
+    "cases": [
+      {
+        "fixture": "policy-answerable.json",
+        "fixture_sha256": "11185e9798bf28288e114e8508be163293c99123482da7d3786628c8eabec091",
+        "expected_source_ids": [
+          "policy-approval",
+          "policy-audit",
+          "policy-identity",
+          "policy-negative",
+          "policy-rollback"
+        ],
+        "candidate": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-fe58096f1a2344b0bfed731d141b5f34",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"policy-answerable\", \"status\": \"answered\", \"answer\": \"A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision. The decision log includes the reviewer, time, and explicit limitations.\", \"claims\": [{\"text\": \"A deliberately malformed record must be rejected even when the import command reports success.\", \"citations\": [{\"document_id\": \"policy-negative\", \"quote\": \"A deliberately malformed record must be rejected even when the import command reports success.\"}]}, {\"text\": \"A release record binds the dataset to an immutable snapshot digest.\", \"citations\": [{\"document_id\": \"policy-identity\", \"quote\": \"A release record binds the dataset to an immutable snapshot digest.\"}]}, {\"text\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\", \"citations\": [{\"document_id\": \"policy-rollback\", \"quote\": \"A staged release keeps the prior dataset available and documents a tested rollback procedure.\"}]}, {\"text\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\", \"citations\": [{\"document_id\": \"policy-audit\", \"quote\": \"Raw validation output, warnings, and failed checks remain attached to the release decision.\"}]}, {\"text\": \"The decision log includes the reviewer, time, and explicit limitations.\", \"citations\": [{\"document_id\": \"policy-approval\", \"quote\": \"The decision log includes the reviewer, time, and explicit limitations.\"}]}], \"sources\": [{\"document_id\": \"policy-negative\", \"title\": \"Adverse Data Control\"}, {\"document_id\": \"policy-identity\", \"title\": \"Immutable Dataset Identity\"}, {\"document_id\": \"policy-rollback\", \"title\": \"Reversible Publication\"}, {\"document_id\": \"policy-audit\", \"title\": \"Raw Audit Trail\"}, {\"document_id\": \"policy-approval\", \"title\": \"Named Approval\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "policy-answerable",
+            "status": "answered",
+            "answer": "A deliberately malformed record must be rejected even when the import command reports success. A release record binds the dataset to an immutable snapshot digest. A staged release keeps the prior dataset available and documents a tested rollback procedure. Raw validation output, warnings, and failed checks remain attached to the release decision. The decision log includes the reviewer, time, and explicit limitations.",
+            "claims": [
+              {
+                "text": "A deliberately malformed record must be rejected even when the import command reports success.",
+                "citations": [
+                  {
+                    "document_id": "policy-negative",
+                    "quote": "A deliberately malformed record must be rejected even when the import command reports success."
+                  }
+                ]
+              },
+              {
+                "text": "A release record binds the dataset to an immutable snapshot digest.",
+                "citations": [
+                  {
+                    "document_id": "policy-identity",
+                    "quote": "A release record binds the dataset to an immutable snapshot digest."
+                  }
+                ]
+              },
+              {
+                "text": "A staged release keeps the prior dataset available and documents a tested rollback procedure.",
+                "citations": [
+                  {
+                    "document_id": "policy-rollback",
+                    "quote": "A staged release keeps the prior dataset available and documents a tested rollback procedure."
+                  }
+                ]
+              },
+              {
+                "text": "Raw validation output, warnings, and failed checks remain attached to the release decision.",
+                "citations": [
+                  {
+                    "document_id": "policy-audit",
+                    "quote": "Raw validation output, warnings, and failed checks remain attached to the release decision."
+                  }
+                ]
+              },
+              {
+                "text": "The decision log includes the reviewer, time, and explicit limitations.",
+                "citations": [
+                  {
+                    "document_id": "policy-approval",
+                    "quote": "The decision log includes the reviewer, time, and explicit limitations."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "policy-negative",
+                "title": "Adverse Data Control"
+              },
+              {
+                "document_id": "policy-identity",
+                "title": "Immutable Dataset Identity"
+              },
+              {
+                "document_id": "policy-rollback",
+                "title": "Reversible Publication"
+              },
+              {
+                "document_id": "policy-audit",
+                "title": "Raw Audit Trail"
+              },
+              {
+                "document_id": "policy-approval",
+                "title": "Named Approval"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": true,
+              "observed": [
+                "policy-approval",
+                "policy-audit",
+                "policy-identity",
+                "policy-negative",
+                "policy-rollback"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 5,
+                "source_count": 5
+              }
+            }
+          ]
+        },
+        "broken_control": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-745465d9e5bf47e994e18422ac704c36",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "fixtures/broken_grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"policy-answerable\", \"status\": \"answered\", \"answer\": \"The requested conclusion is fully supported.\", \"claims\": [{\"text\": \"The requested conclusion is fully supported.\", \"citations\": [{\"document_id\": \"policy-identity\", \"quote\": \"This fabricated quote is absent from the document.\"}]}], \"sources\": [{\"document_id\": \"policy-identity\", \"title\": \"Immutable Dataset Identity\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "policy-answerable",
+            "status": "answered",
+            "answer": "The requested conclusion is fully supported.",
+            "claims": [
+              {
+                "text": "The requested conclusion is fully supported.",
+                "citations": [
+                  {
+                    "document_id": "policy-identity",
+                    "quote": "This fabricated quote is absent from the document."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "policy-identity",
+                "title": "Immutable Dataset Identity"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": false,
+              "observed": [
+                "policy-identity"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": false,
+              "observed": false
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 1,
+                "source_count": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fixture": "backup-answerable.json",
+        "fixture_sha256": "d1abaa08fb79da3ea318f46254a480945e8c4fe00f6fd45a2a6422d372f722b0",
+        "expected_source_ids": [
+          "backup-offsite",
+          "backup-restore",
+          "backup-review",
+          "backup-snapshot"
+        ],
+        "candidate": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-556f04908e594176bb1d7c694ed054cb",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"backup-answerable\", \"status\": \"answered\", \"answer\": \"A copied archive is not accepted until the restored content matches. Operators do not replace failed drill evidence with a later successful screenshot. Every backup run records a content digest and completion timestamp. This separation preserves recovery material after a local or account-wide failure.\", \"claims\": [{\"text\": \"A copied archive is not accepted until the restored content matches.\", \"citations\": [{\"document_id\": \"backup-restore\", \"quote\": \"A copied archive is not accepted until the restored content matches.\"}]}, {\"text\": \"Operators do not replace failed drill evidence with a later successful screenshot.\", \"citations\": [{\"document_id\": \"backup-review\", \"quote\": \"Operators do not replace failed drill evidence with a later successful screenshot.\"}]}, {\"text\": \"Every backup run records a content digest and completion timestamp.\", \"citations\": [{\"document_id\": \"backup-snapshot\", \"quote\": \"Every backup run records a content digest and completion timestamp.\"}]}, {\"text\": \"This separation preserves recovery material after a local or account-wide failure.\", \"citations\": [{\"document_id\": \"backup-offsite\", \"quote\": \"This separation preserves recovery material after a local or account-wide failure.\"}]}], \"sources\": [{\"document_id\": \"backup-restore\", \"title\": \"Restore Drill\"}, {\"document_id\": \"backup-review\", \"title\": \"Failed Recovery Evidence\"}, {\"document_id\": \"backup-snapshot\", \"title\": \"Pinned Backup Snapshot\"}, {\"document_id\": \"backup-offsite\", \"title\": \"Independent Storage\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "backup-answerable",
+            "status": "answered",
+            "answer": "A copied archive is not accepted until the restored content matches. Operators do not replace failed drill evidence with a later successful screenshot. Every backup run records a content digest and completion timestamp. This separation preserves recovery material after a local or account-wide failure.",
+            "claims": [
+              {
+                "text": "A copied archive is not accepted until the restored content matches.",
+                "citations": [
+                  {
+                    "document_id": "backup-restore",
+                    "quote": "A copied archive is not accepted until the restored content matches."
+                  }
+                ]
+              },
+              {
+                "text": "Operators do not replace failed drill evidence with a later successful screenshot.",
+                "citations": [
+                  {
+                    "document_id": "backup-review",
+                    "quote": "Operators do not replace failed drill evidence with a later successful screenshot."
+                  }
+                ]
+              },
+              {
+                "text": "Every backup run records a content digest and completion timestamp.",
+                "citations": [
+                  {
+                    "document_id": "backup-snapshot",
+                    "quote": "Every backup run records a content digest and completion timestamp."
+                  }
+                ]
+              },
+              {
+                "text": "This separation preserves recovery material after a local or account-wide failure.",
+                "citations": [
+                  {
+                    "document_id": "backup-offsite",
+                    "quote": "This separation preserves recovery material after a local or account-wide failure."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "backup-restore",
+                "title": "Restore Drill"
+              },
+              {
+                "document_id": "backup-review",
+                "title": "Failed Recovery Evidence"
+              },
+              {
+                "document_id": "backup-snapshot",
+                "title": "Pinned Backup Snapshot"
+              },
+              {
+                "document_id": "backup-offsite",
+                "title": "Independent Storage"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": true,
+              "observed": [
+                "backup-offsite",
+                "backup-restore",
+                "backup-review",
+                "backup-snapshot"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 4,
+                "source_count": 4
+              }
+            }
+          ]
+        },
+        "broken_control": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-98015ba94d6045b1ae1628ebd9edfe02",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "fixtures/broken_grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"backup-answerable\", \"status\": \"answered\", \"answer\": \"The requested conclusion is fully supported.\", \"claims\": [{\"text\": \"The requested conclusion is fully supported.\", \"citations\": [{\"document_id\": \"backup-snapshot\", \"quote\": \"This fabricated quote is absent from the document.\"}]}], \"sources\": [{\"document_id\": \"backup-snapshot\", \"title\": \"Pinned Backup Snapshot\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "backup-answerable",
+            "status": "answered",
+            "answer": "The requested conclusion is fully supported.",
+            "claims": [
+              {
+                "text": "The requested conclusion is fully supported.",
+                "citations": [
+                  {
+                    "document_id": "backup-snapshot",
+                    "quote": "This fabricated quote is absent from the document."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "backup-snapshot",
+                "title": "Pinned Backup Snapshot"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": false,
+              "observed": [
+                "backup-snapshot"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": false,
+              "observed": false
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 1,
+                "source_count": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fixture": "museum-loan-answerable.json",
+        "fixture_sha256": "917affcfd13bfb4b42d448ae8774747db06fcd83137ec7b70ab67a44604ad084",
+        "expected_source_ids": [
+          "loan-approval",
+          "loan-audit",
+          "loan-condition",
+          "loan-custody",
+          "loan-environment",
+          "loan-identity",
+          "loan-incident",
+          "loan-insurance",
+          "loan-packaging",
+          "loan-return"
+        ],
+        "candidate": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-eb4becdd652e43b192b846b0ea57852b",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"museum-loan-answerable\", \"status\": \"answered\", \"answer\": \"Return inspection compares the object with this retained condition evidence. Return staff reconcile every accession number and repeat the condition review. The loan record binds every object to its accession number and catalog revision. Dispatch waits until coverage matches the object list. A named curator approves the exact object list after reviewing the destination. Each custody transfer records the sender, receiver, time, and object identifier. Raw approvals, custody receipts, sensor exports, and inspection results remain in one audit trail. Excursions remain visible in the object record. The packing record identifies the crate and tamper seal used for each object. Corrective actions stay linked to the affected object.\", \"claims\": [{\"text\": \"Return inspection compares the object with this retained condition evidence.\", \"citations\": [{\"document_id\": \"loan-condition\", \"quote\": \"Return inspection compares the object with this retained condition evidence.\"}]}, {\"text\": \"Return staff reconcile every accession number and repeat the condition review.\", \"citations\": [{\"document_id\": \"loan-return\", \"quote\": \"Return staff reconcile every accession number and repeat the condition review.\"}]}, {\"text\": \"The loan record binds every object to its accession number and catalog revision.\", \"citations\": [{\"document_id\": \"loan-identity\", \"quote\": \"The loan record binds every object to its accession number and catalog revision.\"}]}, {\"text\": \"Dispatch waits until coverage matches the object list.\", \"citations\": [{\"document_id\": \"loan-insurance\", \"quote\": \"Dispatch waits until coverage matches the object list.\"}]}, {\"text\": \"A named curator approves the exact object list after reviewing the destination.\", \"citations\": [{\"document_id\": \"loan-approval\", \"quote\": \"A named curator approves the exact object list after reviewing the destination.\"}]}, {\"text\": \"Each custody transfer records the sender, receiver, time, and object identifier.\", \"citations\": [{\"document_id\": \"loan-custody\", \"quote\": \"Each custody transfer records the sender, receiver, time, and object identifier.\"}]}, {\"text\": \"Raw approvals, custody receipts, sensor exports, and inspection results remain in one audit trail.\", \"citations\": [{\"document_id\": \"loan-audit\", \"quote\": \"Raw approvals, custody receipts, sensor exports, and inspection results remain in one audit trail.\"}]}, {\"text\": \"Excursions remain visible in the object record.\", \"citations\": [{\"document_id\": \"loan-environment\", \"quote\": \"Excursions remain visible in the object record.\"}]}, {\"text\": \"The packing record identifies the crate and tamper seal used for each object.\", \"citations\": [{\"document_id\": \"loan-packaging\", \"quote\": \"The packing record identifies the crate and tamper seal used for each object.\"}]}, {\"text\": \"Corrective actions stay linked to the affected object.\", \"citations\": [{\"document_id\": \"loan-incident\", \"quote\": \"Corrective actions stay linked to the affected object.\"}]}], \"sources\": [{\"document_id\": \"loan-condition\", \"title\": \"Condition Evidence\"}, {\"document_id\": \"loan-return\", \"title\": \"Return Reconciliation\"}, {\"document_id\": \"loan-identity\", \"title\": \"Object Identity\"}, {\"document_id\": \"loan-insurance\", \"title\": \"Coverage Evidence\"}, {\"document_id\": \"loan-approval\", \"title\": \"Named Loan Approval\"}, {\"document_id\": \"loan-custody\", \"title\": \"Custody Handoffs\"}, {\"document_id\": \"loan-audit\", \"title\": \"Retained Audit Trail\"}, {\"document_id\": \"loan-environment\", \"title\": \"Environmental Monitoring\"}, {\"document_id\": \"loan-packaging\", \"title\": \"Packaging Seal\"}, {\"document_id\": \"loan-incident\", \"title\": \"Incident History\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "museum-loan-answerable",
+            "status": "answered",
+            "answer": "Return inspection compares the object with this retained condition evidence. Return staff reconcile every accession number and repeat the condition review. The loan record binds every object to its accession number and catalog revision. Dispatch waits until coverage matches the object list. A named curator approves the exact object list after reviewing the destination. Each custody transfer records the sender, receiver, time, and object identifier. Raw approvals, custody receipts, sensor exports, and inspection results remain in one audit trail. Excursions remain visible in the object record. The packing record identifies the crate and tamper seal used for each object. Corrective actions stay linked to the affected object.",
+            "claims": [
+              {
+                "text": "Return inspection compares the object with this retained condition evidence.",
+                "citations": [
+                  {
+                    "document_id": "loan-condition",
+                    "quote": "Return inspection compares the object with this retained condition evidence."
+                  }
+                ]
+              },
+              {
+                "text": "Return staff reconcile every accession number and repeat the condition review.",
+                "citations": [
+                  {
+                    "document_id": "loan-return",
+                    "quote": "Return staff reconcile every accession number and repeat the condition review."
+                  }
+                ]
+              },
+              {
+                "text": "The loan record binds every object to its accession number and catalog revision.",
+                "citations": [
+                  {
+                    "document_id": "loan-identity",
+                    "quote": "The loan record binds every object to its accession number and catalog revision."
+                  }
+                ]
+              },
+              {
+                "text": "Dispatch waits until coverage matches the object list.",
+                "citations": [
+                  {
+                    "document_id": "loan-insurance",
+                    "quote": "Dispatch waits until coverage matches the object list."
+                  }
+                ]
+              },
+              {
+                "text": "A named curator approves the exact object list after reviewing the destination.",
+                "citations": [
+                  {
+                    "document_id": "loan-approval",
+                    "quote": "A named curator approves the exact object list after reviewing the destination."
+                  }
+                ]
+              },
+              {
+                "text": "Each custody transfer records the sender, receiver, time, and object identifier.",
+                "citations": [
+                  {
+                    "document_id": "loan-custody",
+                    "quote": "Each custody transfer records the sender, receiver, time, and object identifier."
+                  }
+                ]
+              },
+              {
+                "text": "Raw approvals, custody receipts, sensor exports, and inspection results remain in one audit trail.",
+                "citations": [
+                  {
+                    "document_id": "loan-audit",
+                    "quote": "Raw approvals, custody receipts, sensor exports, and inspection results remain in one audit trail."
+                  }
+                ]
+              },
+              {
+                "text": "Excursions remain visible in the object record.",
+                "citations": [
+                  {
+                    "document_id": "loan-environment",
+                    "quote": "Excursions remain visible in the object record."
+                  }
+                ]
+              },
+              {
+                "text": "The packing record identifies the crate and tamper seal used for each object.",
+                "citations": [
+                  {
+                    "document_id": "loan-packaging",
+                    "quote": "The packing record identifies the crate and tamper seal used for each object."
+                  }
+                ]
+              },
+              {
+                "text": "Corrective actions stay linked to the affected object.",
+                "citations": [
+                  {
+                    "document_id": "loan-incident",
+                    "quote": "Corrective actions stay linked to the affected object."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "loan-condition",
+                "title": "Condition Evidence"
+              },
+              {
+                "document_id": "loan-return",
+                "title": "Return Reconciliation"
+              },
+              {
+                "document_id": "loan-identity",
+                "title": "Object Identity"
+              },
+              {
+                "document_id": "loan-insurance",
+                "title": "Coverage Evidence"
+              },
+              {
+                "document_id": "loan-approval",
+                "title": "Named Loan Approval"
+              },
+              {
+                "document_id": "loan-custody",
+                "title": "Custody Handoffs"
+              },
+              {
+                "document_id": "loan-audit",
+                "title": "Retained Audit Trail"
+              },
+              {
+                "document_id": "loan-environment",
+                "title": "Environmental Monitoring"
+              },
+              {
+                "document_id": "loan-packaging",
+                "title": "Packaging Seal"
+              },
+              {
+                "document_id": "loan-incident",
+                "title": "Incident History"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": true,
+              "observed": [
+                "loan-approval",
+                "loan-audit",
+                "loan-condition",
+                "loan-custody",
+                "loan-environment",
+                "loan-identity",
+                "loan-incident",
+                "loan-insurance",
+                "loan-packaging",
+                "loan-return"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 10,
+                "source_count": 10
+              }
+            }
+          ]
+        },
+        "broken_control": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-e4e0aa04c703489c8fdd01cb99056b86",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "fixtures/broken_grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"museum-loan-answerable\", \"status\": \"answered\", \"answer\": \"The requested conclusion is fully supported.\", \"claims\": [{\"text\": \"The requested conclusion is fully supported.\", \"citations\": [{\"document_id\": \"loan-identity\", \"quote\": \"This fabricated quote is absent from the document.\"}]}], \"sources\": [{\"document_id\": \"loan-identity\", \"title\": \"Object Identity\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "museum-loan-answerable",
+            "status": "answered",
+            "answer": "The requested conclusion is fully supported.",
+            "claims": [
+              {
+                "text": "The requested conclusion is fully supported.",
+                "citations": [
+                  {
+                    "document_id": "loan-identity",
+                    "quote": "This fabricated quote is absent from the document."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "loan-identity",
+                "title": "Object Identity"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": false,
+              "observed": [
+                "loan-identity"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": false,
+              "observed": false
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 1,
+                "source_count": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fixture": "astronomy-insufficient.json",
+        "fixture_sha256": "b92c08c05559b864ff52067f362a0d799e3e028927a61bb5e72270894978a0d6",
+        "expected_source_ids": [],
+        "candidate": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-bea75a2cc6e64572a1fe28513c361ad4",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"astronomy-insufficient\", \"status\": \"insufficient-evidence\", \"answer\": \"The corpus does not contain enough relevant evidence.\", \"claims\": [], \"sources\": []}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "astronomy-insufficient",
+            "status": "insufficient-evidence",
+            "answer": "The corpus does not contain enough relevant evidence.",
+            "claims": [],
+            "sources": []
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": true,
+              "observed": "insufficient-evidence"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "clean-abstention",
+              "matched": true,
+              "observed": {
+                "claim_count": 0,
+                "source_count": 0
+              }
+            }
+          ]
+        },
+        "broken_control": {
+          "command": [
+            "docker",
+            "run",
+            "--rm",
+            "--interactive",
+            "--name",
+            "blackridge-grounded-researcher-90771df43069460fb11e8e08b07011bf",
+            "--network",
+            "none",
+            "--read-only",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges:true",
+            "--user",
+            "65534:65534",
+            "--pids-limit",
+            "32",
+            "--memory",
+            "128m",
+            "--memory-swap",
+            "128m",
+            "--cpus",
+            "1",
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=16m",
+            "--mount",
+            "type=bind,source=D:\\Skladacz aplikacji\\blackridge-systems\\components\\grounded_researcher_v1,target=/workspace,readonly",
+            "--workdir",
+            "/workspace",
+            "sha256:a03f1852c1c437df005ee33b01a26d5e55714c670d3e2273e007c56fd16a5903",
+            "python",
+            "fixtures/broken_grounded_researcher.py"
+          ],
+          "exit_code": 0,
+          "timed_out": false,
+          "output_limit_exceeded": false,
+          "stdout": "{\"schema_version\": \"1\", \"request_id\": \"astronomy-insufficient\", \"status\": \"answered\", \"answer\": \"The requested conclusion is fully supported.\", \"claims\": [{\"text\": \"The requested conclusion is fully supported.\", \"citations\": [{\"document_id\": \"garden-mulch\", \"quote\": \"This fabricated quote is absent from the document.\"}]}], \"sources\": [{\"document_id\": \"garden-mulch\", \"title\": \"Mulching Berry Plants\"}]}\n",
+          "stderr": "",
+          "parsed_output": {
+            "schema_version": "1",
+            "request_id": "astronomy-insufficient",
+            "status": "answered",
+            "answer": "The requested conclusion is fully supported.",
+            "claims": [
+              {
+                "text": "The requested conclusion is fully supported.",
+                "citations": [
+                  {
+                    "document_id": "garden-mulch",
+                    "quote": "This fabricated quote is absent from the document."
+                  }
+                ]
+              }
+            ],
+            "sources": [
+              {
+                "document_id": "garden-mulch",
+                "title": "Mulching Berry Plants"
+              }
+            ]
+          },
+          "parse_error": null,
+          "cleanup_exit_code": 0,
+          "checks": [
+            {
+              "check": "public-input-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "output-object",
+              "matched": true,
+              "observed": true
+            },
+            {
+              "check": "public-output-contract",
+              "matched": true,
+              "observed": []
+            },
+            {
+              "check": "expected-status",
+              "matched": false,
+              "observed": "answered"
+            },
+            {
+              "check": "exact-source-selection",
+              "matched": false,
+              "observed": [
+                "garden-mulch"
+              ]
+            },
+            {
+              "check": "citation-quotes-grounded",
+              "matched": false,
+              "observed": false
+            },
+            {
+              "check": "clean-abstention",
+              "matched": false,
+              "observed": {
+                "claim_count": 1,
+                "source_count": 1
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "sources": [
+    "blackridge://components/grounded-researcher-v1"
+  ],
+  "warnings": [
+    "The probe covers three independent answerable domains and one unrelated corpus; it is not a universal relevance claim.",
+    "A named review is required before evidence promotion."
+  ]
+}
