@@ -23,7 +23,7 @@
   "evaluator_sha256": "82fa92c83c7ae3399e5f69c2b523d5e44aa86efca4b26d360fd728fdabd8de3d",
   "evaluator_test_count": 8,
   "freeze_tool": "tools/freeze_composition_reuse.py",
-  "freeze_tool_sha256": "ad54845b6028617dda5d5ba8a73d9a1789af0f31efe0f800eea68b2ef5d20521",
+  "freeze_tool_sha256": "df143e14fc68a5ef387a18f9b0154c2416af9e3c2162df91fdb3ce04e3f51a4d",
   "cases": [
     {
       "id": "reuse-complete",

@@ -316,7 +316,7 @@ def main() -> int:
         indent=2,
     )
     if not args.check:
-        manifest_path.write_text(manifest_payload + "\n", encoding="utf-8")
+        manifest_path.write_bytes((manifest_payload + "\n").encode("utf-8"))
 
     if args.check and changed:
         print("frozen cases would change: " + ", ".join(sorted(changed)))
