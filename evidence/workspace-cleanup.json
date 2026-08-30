@@ -1,0 +1,1960 @@
+{
+  "schema_version": "1",
+  "root": "D:\\Skladacz aplikacji",
+  "removed": {
+    "virtual_environments": {
+      "restore": "python -m venv <path> && pip install -e '.[dev]'",
+      "count": 52,
+      "entries": [
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\.venv",
+          "bytes": 145984064,
+          "files": 7060
+        },
+        {
+          "path": "blackridge-evolution-round-002\\release-gates\\blackbox-runtime",
+          "bytes": 88904420,
+          "files": 5625
+        },
+        {
+          "path": "blackridge-evolution-round-002\\release-gates\\blackbox-venv",
+          "bytes": 150947452,
+          "files": 7662
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-runtime",
+          "bytes": 83898847,
+          "files": 5025
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-venv",
+          "bytes": 150942065,
+          "files": 7662
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v2.2-smoke",
+          "bytes": 43536199,
+          "files": 2966
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-runtime",
+          "bytes": 83502522,
+          "files": 5056
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-venv",
+          "bytes": 150936409,
+          "files": 7662
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\runtime-v1.5",
+          "bytes": 88971201,
+          "files": 5625
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\runtime-v1.6",
+          "bytes": 83511610,
+          "files": 5056
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\runtime-v2.5",
+          "bytes": 89117947,
+          "files": 5628
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\.gate-venv",
+          "bytes": 150974887,
+          "files": 7662
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\.gate-venv",
+          "bytes": 182280767,
+          "files": 8872
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\runtime-v1.7",
+          "bytes": 83519581,
+          "files": 5056
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\.gate-venv",
+          "bytes": 182280767,
+          "files": 8872
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\runtime-v1.8",
+          "bytes": 88987517,
+          "files": 5625
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\.gate-venv",
+          "bytes": 150974885,
+          "files": 7662
+        },
+        {
+          "path": "blackridge-experiments\\blackridge-build-21c05e1\\runtime",
+          "bytes": 56657590,
+          "files": 2830
+        },
+        {
+          "path": "blackridge-experiments\\blackridge-build-cd68a5c\\runtime",
+          "bytes": 56644963,
+          "files": 2830
+        },
+        {
+          "path": "blackridge-experiments\\blackridge-build-manual-20260827-2\\runtime",
+          "bytes": 56657928,
+          "files": 2830
+        },
+        {
+          "path": "blackridge-experiments\\final-7186342-venv",
+          "bytes": 56644657,
+          "files": 2830
+        },
+        {
+          "path": "blackridge-experiments\\installed-cf12a45",
+          "bytes": 26217568,
+          "files": 1617
+        },
+        {
+          "path": "blackridge-experiments\\real-project-b4b9093-venv",
+          "bytes": 51437760,
+          "files": 2398
+        },
+        {
+          "path": "blackridge-experiments\\semanticscholar-adapter-venv",
+          "bytes": 9078463,
+          "files": 681
+        },
+        {
+          "path": "blackridge-experiments\\semanticscholar-networkless-v1\\eval\\venv",
+          "bytes": 7981757,
+          "files": 679
+        },
+        {
+          "path": "blackridge-experiments\\semanticscholar-upstream-tests-eval\\venv",
+          "bytes": 12565544,
+          "files": 827
+        },
+        {
+          "path": "blackridge-experiments\\system-e2e-219e3fc-venv",
+          "bytes": 56640935,
+          "files": 2830
+        },
+        {
+          "path": "blackridge-experiments\\system-e2e-7ff3ee2-venv",
+          "bytes": 32695362,
+          "files": 2140
+        },
+        {
+          "path": "blackridge-experiments\\system-e2e-a5aa13a-venv",
+          "bytes": 56640728,
+          "files": 2830
+        },
+        {
+          "path": "blackridge-experiments\\system-e2e-a77441d-venv",
+          "bytes": 32697686,
+          "files": 2140
+        },
+        {
+          "path": "blackridge-experiments\\system-e2e-c0bd13b-venv",
+          "bytes": 32695362,
+          "files": 2140
+        },
+        {
+          "path": "blackridge-experiments\\wheel-install-v5",
+          "bytes": 26217145,
+          "files": 1617
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\audit\\clean-final-7832",
+          "bytes": 42643289,
+          "files": 2976
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\audit\\clean-install-43116",
+          "bytes": 43043282,
+          "files": 2943
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\audit-tools",
+          "bytes": 96378107,
+          "files": 5760
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\final-py311",
+          "bytes": 154336901,
+          "files": 7727
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\final-py312",
+          "bytes": 145478637,
+          "files": 7091
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\final-regression-6265709b5cde44f6a397a61901476348\\clean-wheel",
+          "bytes": 12976135,
+          "files": 924
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\final-wheel-install",
+          "bytes": 48099513,
+          "files": 3545
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\manual-release-venv",
+          "bytes": 13521862,
+          "files": 993
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\spikes\\swerex-metadata-venv",
+          "bytes": 44038293,
+          "files": 3020
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\spikes\\swerex-venv",
+          "bytes": 51642377,
+          "files": 3603
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\venv-composer-sandbox-final-v2",
+          "bytes": 54422859,
+          "files": 3826
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\venv-composer-sandbox-final-v3",
+          "bytes": 54424029,
+          "files": 3826
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\venv-hostile-controls-final-v4",
+          "bytes": 54437081,
+          "files": 3826
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\venv-hostile-controls-final-v5",
+          "bytes": 54437163,
+          "files": 3826
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\venv-wheel-locked-runtime-final",
+          "bytes": 42990021,
+          "files": 2943
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\wheel-clean",
+          "bytes": 42841361,
+          "files": 2939
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\wheel-install-venv",
+          "bytes": 42941910,
+          "files": 2943
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\wheel-real-install-8631efc8c1d048539e7eaeecb845c415\\venv",
+          "bytes": 43187930,
+          "files": 2951
+        },
+        {
+          "path": "blackridge-systems\\.blackridge\\wheel-smoke",
+          "bytes": 12409041,
+          "files": 906
+        },
+        {
+          "path": "blackridge-wheel-smoke-v2",
+          "bytes": 43338986,
+          "files": 2959
+        }
+      ]
+    },
+    "tool_caches": {
+      "restore": "regenerated automatically by the next run",
+      "count": 316,
+      "entries": [
+        {
+          "path": ".mypy_cache",
+          "bytes": 11002101,
+          "files": 19
+        },
+        {
+          "path": ".pytest_cache",
+          "bytes": 4293,
+          "files": 5
+        },
+        {
+          "path": ".ruff_cache",
+          "bytes": 78,
+          "files": 2
+        },
+        {
+          "path": "blackridge-champion-v1.1-snapshot-20260828-r1\\src\\blackridge\\__pycache__",
+          "bytes": 319489,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-evaluator\\round-005\\tests\\__pycache__",
+          "bytes": 52948,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-evaluator\\round-006\\tests\\__pycache__",
+          "bytes": 23232,
+          "files": 2
+        },
+        {
+          "path": "blackridge-evolution-evaluator\\round-007\\tests\\__pycache__",
+          "bytes": 21696,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\.mypy_cache",
+          "bytes": 10866917,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\.pytest_cache",
+          "bytes": 22691,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\.ruff_cache",
+          "bytes": 12814,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9642,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13458,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5213,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\src\\blackridge\\__pycache__",
+          "bytes": 591668,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\tests\\__pycache__",
+          "bytes": 838218,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-001\\candidate-a-v1.2\\tools\\__pycache__",
+          "bytes": 71837,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-002\\.mypy_cache",
+          "bytes": 27140325,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-002\\.ruff_cache",
+          "bytes": 203,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-002\\__pycache__",
+          "bytes": 12220,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\.mypy_cache",
+          "bytes": 26964197,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\.pytest_cache",
+          "bytes": 22485,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\.ruff_cache",
+          "bytes": 4165,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\src\\blackridge\\__pycache__",
+          "bytes": 573256,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\tests\\__pycache__",
+          "bytes": 820121,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\.mypy_cache",
+          "bytes": 26964197,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\.pytest_cache",
+          "bytes": 22685,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\.ruff_cache",
+          "bytes": 4235,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\src\\blackridge\\__pycache__",
+          "bytes": 576294,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\tests\\__pycache__",
+          "bytes": 826757,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-a-plus-b\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-b\\.mypy_cache",
+          "bytes": 24805605,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-b\\.pytest_cache",
+          "bytes": 899,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-b\\.ruff_cache",
+          "bytes": 378,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-b\\__pycache__",
+          "bytes": 30208,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-b\\tests\\__pycache__",
+          "bytes": 11840,
+          "files": 2
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\.mypy_cache",
+          "bytes": 27468021,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\.pytest_cache",
+          "bytes": 22972,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\.ruff_cache",
+          "bytes": 11503,
+          "files": 24
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\src\\blackridge\\__pycache__",
+          "bytes": 578449,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\tests\\__pycache__",
+          "bytes": 839851,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-blackbox-tests\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\.mypy_cache",
+          "bytes": 26972389,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\.pytest_cache",
+          "bytes": 22883,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\.ruff_cache",
+          "bytes": 4295,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\src\\blackridge\\__pycache__",
+          "bytes": 579440,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\tests\\__pycache__",
+          "bytes": 835901,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-002\\candidate-component-lock\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\.mypy_cache",
+          "bytes": 10903797,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\.pytest_cache",
+          "bytes": 23562,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\.ruff_cache",
+          "bytes": 7318,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\src\\blackridge\\__pycache__",
+          "bytes": 601937,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\tests\\__pycache__",
+          "bytes": 874379,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-003\\release-gates\\v1.3.1-clean\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-004\\__pycache__",
+          "bytes": 22800,
+          "files": 2
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\.mypy_cache",
+          "bytes": 27062501,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\.pytest_cache",
+          "bytes": 23862,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\.ruff_cache",
+          "bytes": 2524,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9644,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13460,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5215,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\src\\blackridge\\__pycache__",
+          "bytes": 617709,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\tests\\__pycache__",
+          "bytes": 603504,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-a-plus-b\\tools\\__pycache__",
+          "bytes": 71843,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-b-plus-a\\.mypy_cache",
+          "bytes": 27042129,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-b-plus-a\\.pytest_cache",
+          "bytes": 1251,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-b-plus-a\\.ruff_cache",
+          "bytes": 2605,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-b-plus-a\\src\\blackridge\\__pycache__",
+          "bytes": 50564,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-b-plus-a\\tests\\__pycache__",
+          "bytes": 16331,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\.mypy_cache",
+          "bytes": 27042021,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\.pytest_cache",
+          "bytes": 23765,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\.ruff_cache",
+          "bytes": 2624,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9647,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13463,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5218,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\src\\blackridge\\__pycache__",
+          "bytes": 617355,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\tests\\__pycache__",
+          "bytes": 601455,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-test-repair\\tools\\__pycache__",
+          "bytes": 71852,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\.mypy_cache",
+          "bytes": 28090628,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\.pytest_cache",
+          "bytes": 24280,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\.ruff_cache",
+          "bytes": 9899,
+          "files": 17
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9640,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13456,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5211,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\src\\blackridge\\__pycache__",
+          "bytes": 637349,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\tests\\__pycache__",
+          "bytes": 604822,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-004\\candidate-v2-4\\tools\\__pycache__",
+          "bytes": 71831,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\.mypy_cache",
+          "bytes": 10928373,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\.pytest_cache",
+          "bytes": 23763,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\.ruff_cache",
+          "bytes": 7286,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\src\\blackridge\\__pycache__",
+          "bytes": 615014,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\tests\\__pycache__",
+          "bytes": 891076,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-004\\release-gates\\v1.4-clean\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-005\\__pycache__",
+          "bytes": 23112,
+          "files": 2
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\.mypy_cache",
+          "bytes": 11849957,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\.pytest_cache",
+          "bytes": 24149,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\.ruff_cache",
+          "bytes": 7222,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9644,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13460,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5215,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\src\\blackridge\\__pycache__",
+          "bytes": 621915,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\tests\\__pycache__",
+          "bytes": 614628,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-a-plus-b\\tools\\__pycache__",
+          "bytes": 71843,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\.mypy_cache",
+          "bytes": 11862245,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\.pytest_cache",
+          "bytes": 24614,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\.ruff_cache",
+          "bytes": 7326,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9644,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13460,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5215,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\src\\blackridge\\__pycache__",
+          "bytes": 643556,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\tests\\__pycache__",
+          "bytes": 612796,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-b-plus-a\\tools\\__pycache__",
+          "bytes": 71843,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\.mypy_cache",
+          "bytes": 11849957,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\.pytest_cache",
+          "bytes": 24167,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\.ruff_cache",
+          "bytes": 13262,
+          "files": 34
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9640,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13456,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5211,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\src\\blackridge\\__pycache__",
+          "bytes": 620795,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\tests\\__pycache__",
+          "bytes": 611871,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v1-5\\tools\\__pycache__",
+          "bytes": 71831,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\.mypy_cache",
+          "bytes": 11862245,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\.pytest_cache",
+          "bytes": 24512,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\.ruff_cache",
+          "bytes": 7286,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9640,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13456,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5211,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\src\\blackridge\\__pycache__",
+          "bytes": 641781,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\tests\\__pycache__",
+          "bytes": 607576,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-005\\candidate-v2-5\\tools\\__pycache__",
+          "bytes": 71831,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\.mypy_cache",
+          "bytes": 10961141,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\.pytest_cache",
+          "bytes": 24058,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\.ruff_cache",
+          "bytes": 7286,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\src\\blackridge\\__pycache__",
+          "bytes": 618671,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\tests\\__pycache__",
+          "bytes": 906259,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.5-clean\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\.mypy_cache",
+          "bytes": 11936004,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\.pytest_cache",
+          "bytes": 24149,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\.ruff_cache",
+          "bytes": 7286,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\src\\blackridge\\__pycache__",
+          "bytes": 619667,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\tests\\__pycache__",
+          "bytes": 910543,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v1.6-clean\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\.mypy_cache",
+          "bytes": 10957045,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\.pytest_cache",
+          "bytes": 24512,
+          "files": 5
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\.ruff_cache",
+          "bytes": 7390,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9650,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13466,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5221,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\src\\blackridge\\__pycache__",
+          "bytes": 642101,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\tests\\__pycache__",
+          "bytes": 607896,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-005\\release-gates\\v2.5-clean\\tools\\__pycache__",
+          "bytes": 71861,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\.mypy_cache",
+          "bytes": 11829508,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\.pytest_cache",
+          "bytes": 25160,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\.ruff_cache",
+          "bytes": 7326,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9644,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13460,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5215,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\src\\blackridge\\__pycache__",
+          "bytes": 647850,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\tests\\__pycache__",
+          "bytes": 937887,
+          "files": 64
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-b-plus-a\\tools\\__pycache__",
+          "bytes": 183707,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\.mypy_cache",
+          "bytes": 11858149,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\.pytest_cache",
+          "bytes": 25083,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\.ruff_cache",
+          "bytes": 7182,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\src\\blackridge\\__pycache__",
+          "bytes": 624641,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\tests\\__pycache__",
+          "bytes": 930267,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v1-7\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\.mypy_cache",
+          "bytes": 11829508,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\.pytest_cache",
+          "bytes": 25056,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\.ruff_cache",
+          "bytes": 7286,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9640,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13456,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5211,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\src\\blackridge\\__pycache__",
+          "bytes": 646075,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\tests\\__pycache__",
+          "bytes": 927575,
+          "files": 64
+        },
+        {
+          "path": "blackridge-evolution-round-006\\candidate-v2-7\\tools\\__pycache__",
+          "bytes": 183695,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\.mypy_cache",
+          "bytes": 11940100,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\.pytest_cache",
+          "bytes": 24695,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\.ruff_cache",
+          "bytes": 7286,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9650,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13466,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5221,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\src\\blackridge\\__pycache__",
+          "bytes": 626395,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\tests\\__pycache__",
+          "bytes": 930577,
+          "files": 62
+        },
+        {
+          "path": "blackridge-evolution-round-006\\release-gates\\v1.7-clean\\tools\\__pycache__",
+          "bytes": 183725,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\.mypy_cache",
+          "bytes": 27046225,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\.pytest_cache",
+          "bytes": 26185,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\.ruff_cache",
+          "bytes": 2636,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9644,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13460,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5215,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\src\\blackridge\\__pycache__",
+          "bytes": 651501,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\tests\\__pycache__",
+          "bytes": 644774,
+          "files": 33
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-b-plus-a\\tools\\__pycache__",
+          "bytes": 71843,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\.mypy_cache",
+          "bytes": 27066597,
+          "files": 18
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\.pytest_cache",
+          "bytes": 25639,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\.ruff_cache",
+          "bytes": 4916,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9640,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13456,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5211,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\src\\blackridge\\__pycache__",
+          "bytes": 629720,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\tests\\__pycache__",
+          "bytes": 957217,
+          "files": 64
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v1-8\\tools\\__pycache__",
+          "bytes": 183695,
+          "files": 12
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\.mypy_cache",
+          "bytes": 27042129,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\.pytest_cache",
+          "bytes": 25160,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\.ruff_cache",
+          "bytes": 2597,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9640,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13456,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5211,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\src\\blackridge\\__pycache__",
+          "bytes": 647722,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\tests\\__pycache__",
+          "bytes": 623744,
+          "files": 32
+        },
+        {
+          "path": "blackridge-evolution-round-007\\candidate-v2-9\\tools\\__pycache__",
+          "bytes": 71831,
+          "files": 3
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\.mypy_cache",
+          "bytes": 10965237,
+          "files": 19
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\.pytest_cache",
+          "bytes": 25639,
+          "files": 4
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\.ruff_cache",
+          "bytes": 7334,
+          "files": 14
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 10346,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9572,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\src\\blackridge\\__pycache__",
+          "bytes": 627596,
+          "files": 31
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\tests\\__pycache__",
+          "bytes": 957537,
+          "files": 64
+        },
+        {
+          "path": "blackridge-evolution-round-007\\release-gates\\v1.8-clean\\tools\\__pycache__",
+          "bytes": 183491,
+          "files": 12
+        },
+        {
+          "path": "blackridge-systems\\.mypy_cache",
+          "bytes": 58070286,
+          "files": 729
+        },
+        {
+          "path": "blackridge-systems\\.pytest_cache",
+          "bytes": 26252,
+          "files": 5
+        },
+        {
+          "path": "blackridge-systems\\.ruff_cache",
+          "bytes": 29295,
+          "files": 73
+        },
+        {
+          "path": "blackridge-systems\\components\\grounded_researcher_v1\\__pycache__",
+          "bytes": 17957,
+          "files": 1
+        },
+        {
+          "path": "blackridge-systems\\components\\grounded_researcher_v1\\fixtures\\__pycache__",
+          "bytes": 913,
+          "files": 1
+        },
+        {
+          "path": "blackridge-systems\\components\\scifact_auditor_v1\\__pycache__",
+          "bytes": 39968,
+          "files": 3
+        },
+        {
+          "path": "blackridge-systems\\components\\scifact_retriever_v1\\__pycache__",
+          "bytes": 9461,
+          "files": 1
+        },
+        {
+          "path": "blackridge-systems\\components\\semanticscholar_search_v1\\__pycache__",
+          "bytes": 9613,
+          "files": 1
+        },
+        {
+          "path": "blackridge-systems\\components\\wheel_inspector_v1\\__pycache__",
+          "bytes": 13388,
+          "files": 1
+        },
+        {
+          "path": "blackridge-systems\\components\\wheel_policy_v1\\__pycache__",
+          "bytes": 5143,
+          "files": 1
+        },
+        {
+          "path": "blackridge-systems\\src\\blackridge\\__pycache__",
+          "bytes": 1102200,
+          "files": 55
+        },
+        {
+          "path": "blackridge-systems\\tests\\__pycache__",
+          "bytes": 1812623,
+          "files": 126
+        },
+        {
+          "path": "blackridge-systems\\tools\\__pycache__",
+          "bytes": 241203,
+          "files": 15
+        }
+      ]
+    },
+    "model_weights": {
+      "restore": "Public checkpoints. Identities and SHA-256 values are recorded in blackridge-systems/benchmarks/scientific-claim-auditor-v1/manual-findings.md; re-extract with tools/extract_multivers_checkpoint.py.",
+      "count": 24,
+      "entries": [
+        {
+          "path": "blackridge-experiments\\multivers-checkpoints-v1\\scifact.ckpt",
+          "bytes": 5253770098
+        },
+        {
+          "path": "blackridge-experiments\\multivers-inference-v1\\model.safetensors",
+          "bytes": 1751153168
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-b95119c\\model.safetensors",
+          "bytes": 328499560
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-b95119c\\onnx\\model_quint8_avx2.onnx",
+          "bytes": 82823063
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-hardneg-onnx-v1\\model.onnx",
+          "bytes": 328606504
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-hardneg-v1\\model.safetensors",
+          "bytes": 328495340
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-onnx-v1\\model-qint8-reduced.onnx",
+          "bytes": 82742631
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-onnx-v1\\model-qint8-tensor-reduced.onnx",
+          "bytes": 82531232
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-onnx-v1\\model-qint8.onnx",
+          "bytes": 82742631
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-onnx-v1\\model-quint8-perchannel.onnx",
+          "bytes": 82759857
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-onnx-v1\\model-quint8.onnx",
+          "bytes": 82531248
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-onnx-v1\\model.onnx",
+          "bytes": 328606533
+        },
+        {
+          "path": "blackridge-experiments\\nli-minilm2-scifact-train-v1\\model.safetensors",
+          "bytes": 328495340
+        },
+        {
+          "path": "blackridge-experiments\\official-verisci-models-v1\\label_roberta_large_fever_scifact\\pytorch_model.bin",
+          "bytes": 1425748974
+        },
+        {
+          "path": "blackridge-experiments\\official-verisci-models-v1\\rationale_roberta_large_scifact\\pytorch_model.bin",
+          "bytes": 1425744872
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\bundle\\resources\\scifact-nli-auditor-v1\\model.onnx",
+          "bytes": 328606533
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\bundle-final\\resources\\scifact-nli-auditor-v1\\model.onnx",
+          "bytes": 328606533
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\bundle-multivers-v1\\resources\\scifact-multivers-auditor-v1\\model.safetensors",
+          "bytes": 1751153168
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\bundle-multivers-v2\\resources\\scifact-multivers-auditor-v1\\model.safetensors",
+          "bytes": 1751153168
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\bundle-multivers-v3\\resources\\scifact-multivers-auditor-v1\\model.safetensors",
+          "bytes": 1751153168
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\bundle-multivers-v4\\resources\\scifact-multivers-auditor-v1\\model.safetensors",
+          "bytes": 1751153168
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\bundle-multivers-v5\\resources\\scifact-multivers-auditor-v1\\model.safetensors",
+          "bytes": 1751153168
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\tampered-bundle-model-v1\\resources\\scifact-nli-auditor-v1\\model.onnx",
+          "bytes": 328606533
+        },
+        {
+          "path": "blackridge-experiments\\scifact-composed-v1\\tampered-bundle-multivers-v2\\resources\\scifact-multivers-auditor-v1\\model.safetensors",
+          "bytes": 1751153168
+        }
+      ]
+    }
+  }
+}
