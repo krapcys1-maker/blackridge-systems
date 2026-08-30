@@ -1,81 +1,94 @@
 # Blackridge Systems
 
-**Build from what already works. Write only what is missing.**
+**An auditable control plane for assembling software from components you can prove things about.**
 
-Blackridge Systems is an evidence-driven system foundry. It turns a desired outcome into
-capabilities, discovers strong open-source implementations for each capability, verifies that
-they are legally and technically usable, adapts their seams, and tests the resulting system.
+Blackridge turns a desired outcome into capabilities, finds candidate open-source implementations,
+and — this is the part that matters — refuses to use any of them until their license, provenance,
+supply chain, and behavior are recorded as evidence rather than assumed. It writes new code only
+for the gap that no reviewed component fills.
 
-The product rule is:
+The design rule is:
 
 > **Reuse → inspect → verify → adapt → integrate → test → build only the gap.**
 
-Implementation is experiment-first: freeze a falsifiable scenario, exercise the smallest real
-vertical slice with positive and broken controls, inspect the artifacts, and only then expand the
-code. Mocks and green CI protect regressions; they do not prove that a capability works.
+Stars are not quality. A green CI run is not proof. An exit code of zero is not a verdict. Every
+candidate climbs an explicit evidence ladder (`L0 discovered` → `L4 system verified`), and a named
+human review is required for the top of it.
 
-Blackridge does not blindly merge repositories and does not treat GitHub stars as proof of
-quality. Every candidate moves through explicit evidence levels before it may enter a generated
-system.
+## What this is today
 
-## Current status
+Two things work, are tested, and are honest about their limits.
 
-This repository contains an executable, manually reviewed vertical slice:
+**1. An evidence and supply-chain control plane.** This is the mature part. It discovers
+repositories through the GitHub CLI and Octocode, enriches them with deps.dev and OpenSSF
+Scorecard, applies license/maintenance/security gates, inspects exact releases with Syft,
+OSV-Scanner and PyPI Integrity, solves acyclic contract graphs with fan-out and fan-in, generates
+provenance-locked runnable bundles, and executes them in a networkless non-root Docker sandbox with
+enforced memory, CPU, PID, and timeout limits. Every boundary fails closed and retains raw
+evidence. Composition **selection** is measured by
+[`benchmarks/composition-reuse-v1`](benchmarks/composition-reuse-v1).
 
-1. describe a system as capabilities with concrete acceptance scenarios;
-2. search GitHub through the existing Octocode research engine;
-3. enrich candidates with official GitHub metadata and OpenSSF Scorecard data;
-4. apply license, maintenance, security, and adoption gates;
-5. inspect real package versions and resolved dependency graphs through deps.dev;
-6. separate raw probe evidence from named, explicit manual review;
-7. build and exercise an exact public commit in disposable Docker through SWE-ReX;
-8. adapt and validate JSON contracts with RFC 6902 and JSON Schema, including a broken control;
-9. inspect an exact release independently with Syft, OSV-Scanner, Scorecard, deps.dev, GitHub,
-   and PyPI Integrity;
-10. freeze and calibrate an artifact-first A/B benchmark before either builder is run;
-11. solve acyclic compatibility graphs with fan-out and fan-in, reject blocked or unreviewed
-    choices, and generate a provenance-locked runnable system bundle;
-12. audit source history and exact multi-line similarity against frozen upstream commits;
-13. generate artifact-specific notices, package manifests, SBOMs, and license bundles;
-14. fail closed on incomplete copy provenance and unresolved image-distribution obligations;
-15. emit an auditable discovery run and a **provisional** system blueprint.
-16. freeze the internal SWE-ReX runtime through a Debian snapshot, a 118-package OS lock, and
-    hash-locked 35-distribution Python closure while prohibiting public image publication.
-17. split sandbox preparation from production workload execution, detach every Docker network
-    before workload argv runs, forward no host environment, and verify exact container cleanup.
-18. copy hash-locked generated-system components into that boundary without host mounts and run
-    contract validation and trusted adapters while production mode remains disabled.
-19. run workloads as UID/GID 65534, enforce TERM-to-KILL deadlines inside the container, disable
-    memory swap, and retain real filesystem, memory, PID, timeout, and signal hostile controls.
-20. bundle separately licensed, hash-locked component resources and carry explicit memory, CPU,
-    and PID limits from the frozen definition through Docker and live cgroup verification.
-21. turn a plain-language brief into a strictly validated capability request through a
-    provider-neutral operator contract, with DeepSeek JSON mode as the first optional backend;
-22. perform official GitHub CLI search with a deterministic query budget and one auditable
-    fallback when a model-generated query is too restrictive;
-23. enforce case-insensitive denied-repository policy before enrichment and generation, while
-    retaining explicitly partial discovery when an opted-in query budget is exhausted;
-24. propose only the remaining code gap, reject unsafe cross-platform paths and unsupported
-    provenance claims, and materialize only the exact manually approved SHA-256;
-25. retain schema-rejected provider completions, feed hash-bound review findings into bounded
-    repair iterations, and evaluate generated code independently in a networkless non-root sandbox.
+**2. A bounded code generator for the remaining gap.** A replaceable operator (DeepSeek today,
+behind the provider-neutral `AgentBackend` protocol) proposes a program and its tests. The
+deterministic control plane owns everything else: schemas, hashes, budgets, allowlists, repair
+limits, and acceptance. The operator cannot promote its own output. On the frozen Duplicate Finder
+workload this reached 3/3 with zero manual interventions at USD 0.030 per series.
 
-These probes produce evidence, not automatic approval. A candidate cannot be marked
-production-ready until its concrete acceptance scenarios pass named manual review through L4.
+Calibrated results on independent workloads are recorded, including the ones that failed. The
+scientific claim auditor reproduces MultiVerS on SciFact against the **official** evaluator at
+abstract label F1 `0.8385`, improved to `0.8608` by a bounded retrieval cascade; a cheaper ONNX NLI
+candidate reached `0.4045` and was rejected rather than quietly dropped. See
+[`benchmarks/scientific-claim-auditor-v1`](benchmarks/scientific-claim-auditor-v1).
 
-```mermaid
-flowchart LR
-    A[Goal] --> B[Capability specification]
-    B --> C[Discover repositories]
-    C --> D[Inspect source and provenance]
-    D --> E[License and security gates]
-    E --> F[Sandbox experiments]
-    F --> G[Compatibility graph]
-    G --> H[Adapters]
-    H --> I[Generated system]
-    I --> J[End-to-end evaluation]
-    J -- failed --> C
-```
+## What this is not
+
+Being precise here is cheaper than being discovered later.
+
+- **Not an autonomous software factory.** L4 promotion requires a named human reviewer by design.
+  A person is in the loop, not a temporary scaffold to be removed.
+- **Not a general system generator.** The demonstrated generation workload is a single-file
+  command-line utility of roughly 200 lines. Nothing here shows that an arbitrary application can
+  be generated.
+- **Not a proof that reuse scales.** The composition benchmark covers one capability and one
+  reviewed implementation. Multi-capability routing and adapter synthesis beyond JSON Patch are
+  unmeasured.
+- **Not a legal or security certification.** A wheel policy pass is a technical artifact check. A
+  passing supply-chain probe is evidence, not approval.
+- **Not published.** No image or package from this repository is released for public consumption.
+
+The evolution loop that produced the current champion is **closed**. Seven champion-challenger
+rounds ran; the alternate ledger architecture lost all seven, and the generation workload saturated
+at 3/3, so it can no longer separate candidates. History and reasoning are in
+[`evolution/state.json`](evolution/state.json) and
+[`evolution/rounds`](evolution/rounds); the successor measurement is the composition-reuse
+benchmark above.
+
+## Current capabilities
+
+| Area | Status | Evidence |
+| --- | --- | --- |
+| Capability planning from a brief | working, provider-optional | `blackridge plan` |
+| GitHub discovery with deny policy and query budget | working | `blackridge discover` |
+| deps.dev / Scorecard / OSV / Syft / PyPI Integrity probes | working | `blackridge probe-supply-chain` |
+| Evidence ladder with named manual review | working | `blackridge review-probe` |
+| Pinned disposable Docker experiments (SWE-ReX) | working | `blackridge probe-environment` |
+| Contract graph solving, fan-out and fan-in | working | `blackridge compose-solve` |
+| Provenance-locked bundle generation and execution | working | `blackridge probe-composer` |
+| Networkless non-root sandbox with resource limits | working | `blackridge compose-run-sandbox` |
+| Component selection under license/evidence/hash gates | **measured** | `tools/evaluate_composition_reuse.py` |
+| Bounded gap generation with fail-closed repair | working, narrow | `blackridge propose-gap` |
+| Adapter synthesis beyond JSON Patch | not implemented | — |
+| Multi-capability composition at scale | not measured | — |
+| Autonomous L4 promotion | out of scope by design | — |
+
+The full numbered list of implemented boundaries, including every negative control, is in
+[`docs/architecture.md`](docs/architecture.md). Exact evaluated upstream versions and their
+integration status are in [`upstream-catalog.yaml`](upstream-catalog.yaml); rejected options are
+documented in [`docs/research-landscape.md`](docs/research-landscape.md).
+
+The gated path toward a scientific researcher and an evidence-controlled research loop is in
+[`docs/research-loop-roadmap.md`](docs/research-loop-roadmap.md). It is a roadmap. It is not a claim
+that Blackridge performs autonomous scientific discovery.
 
 ## Quick start
 
@@ -320,6 +333,9 @@ examples/                 capability specifications
 tests/                    deterministic unit and integration regression tests
 tools/system_e2e.py       installed-wheel host/Docker E2E and fail-closed controls used by CI
 evidence/manual/          retained real-world probes and named manual verdicts
+benchmarks/               independent workloads, including composition-reuse-v1
+evolution/                closed champion-challenger history and frozen benchmark specs
+components/               reviewed components with contracts and dependency locks
 docs/                     architecture, research, and security decisions
 upstream-catalog.yaml     pinned upstream choices and provenance
 compliance/               active distribution manifest used to generate notices
@@ -329,13 +345,21 @@ docker/                   runtime Dockerfile and declared image component manife
 
 ## Scope boundary
 
-Blackridge is not yet a one-command autonomous software factory. Discovery, package and
-exact-release supply-chain inspection, commit-pinned Docker experiments, declarative payload
-adapters, paired negative contract verification, frozen benchmark calibration, multi-input DAG
-solving, hash-locked resource bundling, locked generation, and host/sandbox calibration runtime
-execution now produce raw evidence. Production-scope dependency images, production sandbox
-execution, adapter synthesis beyond JSON Patch, hardened remote isolation through OpenSandbox,
-additional independent workloads, and L4 delivery are next.
+Blackridge is not a one-command autonomous software factory, and the gap is specific rather than
+vague.
+
+**Producing raw evidence today:** discovery, package and exact-release supply-chain inspection,
+commit-pinned Docker experiments, declarative payload adapters, paired negative contract
+verification, frozen benchmark calibration, multi-input DAG solving, hash-locked resource bundling,
+locked generation, component selection under license/evidence/hash gates, and host/sandbox
+calibration runtime execution.
+
+**Not built:** adapter synthesis beyond JSON Patch, production-scope dependency images, production
+sandbox execution, hardened remote isolation through OpenSandbox, and L4 delivery.
+
+**Deliberately human:** L4 promotion. A named reviewer compares the retained artifact against a
+concrete acceptance scenario. Removing that step would remove the only thing separating this from a
+code generator with good logging.
 
 ## License
 

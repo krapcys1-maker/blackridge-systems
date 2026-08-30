@@ -1,42 +1,158 @@
 # Project handoff
 
-Updated: 2026-08-29 07:25 +03:00.
+Updated: 2026-08-30.
 
 ## Read this first
 
-The current architectural champion is **v1.7**, packaged as `0.1.1`. It is the original v1 control
-plane enhanced with selected planner, operator, GitHub-search, deny-policy, repair-feedback,
-hash-gated generation boundaries, a hash-bound public evaluator contract, JSON-safe rejection
-evidence, a fail-closed test-only repair boundary, repeated-test-suite rejection, concrete
-acceptance-test binding, and a minimum-nine-concrete-generated-tests gate. It is not v2. The name
-**v2** is reserved for the alternate ledger challenger architecture. Machine-readable truth is in
-`evolution/state.json`.
+**The product goal, restated by the owner and now the only one:** build systems from ready
+components on GitHub. Design the architecture, identify the pieces, find their best versions,
+write only what does not exist, connect it, test it. The scientific-researcher and LLM-memory
+directions are a **separate project** and are out of scope here.
 
-Round 005 is complete. The promoted candidate is `candidate-a-plus-b-round-005`, snapshot
-`8e4d4891370087d9711cd024817b01b78839e6ae`, integrated on the main audit branch as `73d9095`.
-It passed 3/3 frozen Duplicate Finder attempts with zero intervention, total provider cost
-USD 0.02968519, and 123.812 seconds total builder time. v1.5 and v2.5 also passed 3/3 but cost more;
-B+A passed only 1/3. The winner passed 244 repository tests with 3 skips and 72.85% coverage,
-23 hash-identical frozen project-workload tests, all static/dependency/provenance/package gates,
-an isolated wheel installation, and the complete Docker system-E2E fail-closed suite. Exact hashes,
-known infrastructure-only false starts, and selection evidence are in
-`evolution/rounds/005/measured-results.json`.
+**The foundry has now produced its first system.**
+`systems/supply-chain-auditor-v1` audits a repository's declared dependency versions and reports
+its independent security posture. Two of its three capabilities are satisfied by existing public
+infrastructure (OSV, OpenSSF Scorecard); the third is glue that was written because nothing
+publishes it. Live run against `pallets/jinja`: verdict `findings`, 16 vulnerabilities, posture
+5.9, zero contract-validation errors.
 
-Round 006 is also complete. The promoted candidate is
-`candidate-security-boundaries-round-006`, tested snapshot
-`47c8ff9948a762b64dfe19d52ef768fb65ca09f9`, integrated as `893e290`. It adds
-unambiguous canonical provenance manifests and runs user preparation commands through the bounded,
-shell-free, non-root Docker executor. The first real sandbox attempt correctly failed closed on
-checkout permissions; the revised candidate grants write access only to the disposable checkout
-and then passed all 13 production-sandbox commands, network isolation, host-integrity, and cleanup
-checks. v1.7 passed 2/3 new Duplicate Finder attempts, while v2.7 and B+A passed 1/3. A+B was not
-materialized because no unique safe ledger advantage remained to transfer. Exact evaluator
-revision history, failures, costs, package hashes, and E2E evidence are in
-`evolution/rounds/006/measured-results.json`.
+Before this, the foundry had composed only fixtures. Every entry in `components/` had been written
+by hand.
 
-The earlier isolated v2 r4 prototype lost v1 verification and safety gates and was rejected. Its
-artifacts remain immutable evidence under `benchmarks/blackridge-self-hosting-v2` and the sibling
-`blackridge-experiments` directory. Do not promote or silently delete them.
+**Read `../blackridge-run-001-supply-chain-auditor/INTERVENTION-LOG.md` before planning anything.**
+It is a measured record of one real end-to-end run: what worked, what broke, and what it cost to
+do the broken parts by hand. It replaces roadmap opinion with evidence, and it defines the build
+order below.
+
+## The rule that governs this project now
+
+> **No new control-plane feature until a real run proves it is needed.**
+
+This is the project's own "experiment before expansion" doctrine, finally applied to the foundry
+itself. Had it been in force, rounds 002-007 would not exist: seven measured rounds improved a
+duplicate-finder from 1/3 to 3/3 while the product's actual claim went untested.
+
+## Measured build order
+
+From the intervention log, in order. Nothing else earns control-plane code yet.
+
+1. ~~**`adopt`**~~ — **done.** `src/blackridge/adoption.py`. A human declares the contract; the
+   operator writes the adapter body; the control plane keeps schema validation, the repair budget,
+   hashes, and acceptance. A proposal that fails its own tests is never written to the registry.
+   Falsified against a hand-written component: `adopt` reproduced `scorecard-posture` from the
+   contract alone in two iterations (152 lines, 6 tests) and matched its contract-governed
+   behaviour on every case. The only divergence was the *error envelope*, which the contract never
+   declared — a finding about the spec format, not the bridge.
+   **Next change to `AdoptionSpec`, and nothing beyond it:** declare the rejection envelope
+   alongside the success contract.
+2. **Capability kind** — `found` / `written` / `platform`. The run proved the distinction is real:
+   `audit-merge` should never have been searched for, and discovery correctly returned nothing
+   usable for it after spending its budget.
+3. **Relevance over popularity** — an irrelevant repository scored 90.4 against a relevant one at
+   83.6, and `anchore/syft` never surfaced despite being in this repository's own
+   `upstream-catalog.yaml`.
+
+### Superseded ordering (kept for the record)
+
+1. **`adopt`** — repository plus a declared contract to a registry-grade `ComponentOption`.
+   This is the single blocker: `blueprint` emits a repository *name*, `ComponentOption` needs a
+   runnable artifact with argv, hashes, and an evidence chain. Nothing bridges them, which is why
+   every component so far was hand-written.
+   Doing it by hand measured the cost: 90-160 lines of contract-shaped wrapper per component, plus
+   a JSON Schema per contract. That is the size of artefact the existing generator already produces
+   reliably, so `adopt` needs no new generation machinery — only a new target and a
+   `ComponentOption` emitted around the result.
+   **Falsifiable first test:** regenerate one of the three hand-written auditor components and
+   compare against it.
+2. **Capability kind** — `found` / `written` / `platform`. The run proved the distinction is real:
+   `audit-merge` should never have been searched for, and discovery correctly returned nothing
+   usable for it, after spending its budget.
+3. **Relevance over popularity** — an irrelevant repository scored 90.4 against a relevant one at
+   83.6, and `anchore/syft` never surfaced at all despite being in this repository's own
+   `upstream-catalog.yaml`.
+
+Contracts with schemas were solved for this system by hand in `tools/freeze_supply_chain_auditor.py`.
+Generating them stays deferred until a second system shows what actually varies between them.
+
+## Repository state
+
+- 338 tests passing, 3 skipped; coverage 78%. Ruff, format, mypy clean.
+- The champion-challenger loop is **closed** at round 007; champion v1.8, integrated at `b6c5521`.
+- Hash locks were confirmed fail-closed on a real system, not a fixture: `ruff format` changed the
+  component bytes and the next solve returned `Selected components: none` until the definition was
+  re-frozen.
+- Workspace cleaned from 30.8 GB / 277k files to **4.9 GB / 63k files**. Removed: 52 virtual
+  environments, 316 tool caches, and the scientific-auditor model weights (a separate project;
+  public checkpoints whose SHA-256 values stay recorded). Every metric, report, manual finding,
+  frozen archive, and git object was kept. Manifest: `evidence/workspace-cleanup.json`.
+  Explorer had been over-reporting by 8.77 GB because it counts hard links repeatedly.
+
+## Modules to freeze rather than extend
+
+Working, tested, and not load-bearing for the goal above. Keep the code and its tests; stop
+developing them until a real run demands it.
+
+- `benchmark.py` (1232 lines) — A/B harness with nothing to compare yet.
+- `release_compliance.py` (937 lines) — release engineering for an unreleased product.
+- `evolution.py` (525 lines) — the closed champion-challenger loop.
+
+## Why the loop is closed
+
+Four reasons, recorded in `evolution/state.json` under `loop_status`:
+
+1. The v2 ledger architecture lost all seven rounds (0/3, 1/3, 1/3, 1/3, 1/3, 1/3, 0/3). Its
+   architectural question is answered; rerunning it buys nothing.
+2. The Duplicate Finder workload saturated at 3/3. A benchmark every candidate passes cannot
+   discriminate between candidates.
+3. That workload's `component_decisions` record only `python-standard-library`. It never observed
+   reuse, so seven rounds of tuning optimized generation while the product's actual claim went
+   unmeasured.
+4. Continuing would have kept improving a number that no longer means anything.
+
+Do not open round 008. If a future change needs measurement, measure it against the successor
+benchmark below.
+
+## Successor benchmark
+
+`evolution/benchmark/composition-reuse-v1.json`, with cases in
+`benchmarks/composition-reuse-v1/cases` and the evaluator at
+`tools/evaluate_composition_reuse.py` (8 tests, all passing).
+
+It measures **selection**, which nothing measured before: given a pool containing a reviewed L3
+implementation, does the solver reuse it, and does it fail closed with an actionable reason when
+the pool does not qualify? Six frozen cases cover reuse, blocked-entry fallback, the evidence
+floor, license policy, artifact hash drift, and an unroutable contract graph. The positive case
+executes the real component and validates its output against the declared contract.
+
+The cases lock the exact component artifact and manual-review SHA-256. Re-freezing with
+`tools/freeze_composition_reuse.py` is a deliberate, separately reviewed act — `--check` reports
+drift without writing.
+
+## Current repository state
+
+- 314 tests passing, 3 skipped (was 260); coverage 77% (was 74%).
+- `cli.py` coverage 36% → 48%. Nineteen commands previously had no test at all; they now have
+  registration, help-render, fail-closed, and — where hermetic — full command-body tests in
+  `tests/test_cli_command_surface.py` and `tests/test_cli_command_bodies.py`.
+- Ruff, format, and mypy all clean.
+- The README no longer leads with a twenty-five item claim list. It states what works, what is
+  not built, and what is deliberately human, and it links measurement to evidence.
+
+## Known outstanding work
+
+- **Rotate the GitHub PAT and DeepSeek key in `.env`.** The file is correctly gitignored but the
+  PAT was exposed in a terminal session, and `.env` contains a malformed bare-token line.
+- `tools/archive_experiments.py` identifies 8.77 GB of byte-identical duplicated model weights in
+  the sibling `blackridge-experiments` tree, reclaimable by hard link with no evidence loss, plus
+  0.29 GB of regenerable `__pycache__`. It has not been applied; it is a dry run by default.
+- `provenance.py` (56%) and `quality.py` (55%) remain the weakest tested modules.
+- Adapter synthesis beyond JSON Patch, multi-capability composition at scale, and production
+  sandbox execution are unbuilt and unmeasured.
+
+## What follows is historical
+
+Everything below is the retained round-by-round record. It is evidence, not instruction. Where it
+conflicts with this header or with `evolution/state.json`, the header and the state file win.
 
 ## Completed bootstrap work
 
