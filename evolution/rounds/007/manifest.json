@@ -1,7 +1,7 @@
 {
   "schema_version": "1",
   "round_id": "round-007",
-  "status": "frozen-builders-not-started",
+  "status": "complete-v1-line-promoted",
   "incumbent": {
     "candidate_id": "candidate-security-boundaries-round-006",
     "architecture_line": "v1.7",
@@ -25,37 +25,44 @@
     "tests_passed": 2,
     "tests_failed": 9,
     "manual_interventions": 0,
-    "interpretation": "The frozen tests expose missing operational guarantees. The two passing tests preserve atomic replacement cleanup and the existing raw-calibration CLI contract."
+    "interpretation": "The frozen tests exposed missing operational guarantees. The two passing tests preserved atomic replacement cleanup and the existing raw-calibration CLI contract. Candidate A closed the remaining nine and now passes 11/11."
   },
   "candidate_slots": [
     {
       "origin": "champion",
       "candidate_id": "candidate-security-boundaries-round-006",
       "architecture_line": "v1.7",
-      "status": "retained"
+      "status": "retained",
+      "outcome": "2/11 operational; superseded by candidate A"
     },
     {
       "origin": "A",
       "candidate_id": "candidate-operational-boundaries-round-007",
       "architecture_line": "v1.8",
-      "status": "not-built"
+      "status": "selected-champion",
+      "outcome": "3/3 generation, 11/11 operational, all release gates green"
     },
     {
       "origin": "B",
       "candidate_id": "candidate-ledger-operational-round-007",
       "architecture_line": "v2.9",
-      "status": "not-built"
+      "status": "measured-rejected",
+      "outcome": "0/3 generation at ~3x winner cost"
     },
     {
       "origin": "A+B",
       "candidate_id": "candidate-a-plus-b-round-007",
-      "status": "not-built"
+      "status": "not-materialized",
+      "outcome": "B produced no evidence-backed advantage to transfer"
     },
     {
       "origin": "B+A",
       "candidate_id": "candidate-b-plus-a-round-007",
-      "status": "not-built"
+      "status": "measured-rejected",
+      "outcome": "2/3 generation at ~2.4x winner cost; unpackageable ledger base"
     }
   ],
-  "selection_status": "pending"
+  "selection_status": "complete",
+  "measured_results": "evolution/rounds/007/measured-results.json",
+  "loop_closure": "This is the final champion-challenger round on the Duplicate Finder workload. See measured-results.json loop_closure."
 }

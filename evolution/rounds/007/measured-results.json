@@ -1,0 +1,139 @@
+{
+  "schema_version": "1",
+  "round_id": "round-007",
+  "status": "complete-v1-line-promoted",
+  "base_benchmark": "evolution/benchmark/ultimate-system-suite-v1.json",
+  "base_benchmark_sha256": "609195e6d56b2d110d4aa8e34698674055c3f8eb798b5aad8659e2f80e7e3685",
+  "operational_evaluator": "D:/Skladacz aplikacji/blackridge-evolution-evaluator/round-007/tests/test_operational_boundaries_round007.py",
+  "operational_evaluator_sha256": "53149d14e4114b8209db92c528ea08b49a0b1730017d93d1bc5579e1014699b9",
+  "operational_evaluator_test_count": 11,
+  "attempts_per_measured_candidate": 3,
+  "results_root": "../blackridge-evolution-round-007/results",
+  "retained_champion": {
+    "candidate_id": "candidate-security-boundaries-round-006",
+    "architecture_line": "v1.7",
+    "commit": "47c8ff9948a762b64dfe19d52ef768fb65ca09f9",
+    "historical_duplicate_finder": "2/3 in round-006",
+    "operational_evaluator": "2/11",
+    "eligibility": "superseded-by-candidate-a"
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate-operational-boundaries-round-007",
+      "architecture_line": "v1.8",
+      "origin": "A",
+      "commit": "7c7f46b00fed5d82388598b8d3b27923941c5ea0",
+      "main_integration_commit": "b6c5521133b155504ef3f83193cbcdd10e4f3754",
+      "successes": 3,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.03016303,
+      "total_builder_wall_seconds": 119.782,
+      "manual_interventions": 0,
+      "operational_evaluator": "11/11",
+      "attempt_results": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00687283,
+          "builder_wall_seconds": 27.891,
+          "generated_source_lines": 177,
+          "generated_tests_count": 10,
+          "independent_tests_count": 7,
+          "proposal_sha256": "a92aa33f91104a3d4e2207540ab3ccc8cdbe40b792382468ee0a3b86dc5b6cae",
+          "program_sha256": "4243055e0b6371406adcbfa83b7f9abec0873e2984f4b29245f2619888e42950",
+          "summary_sha256": "15ab84271f9697fdeb6ba5644fec6b8e3a49eb683ba9cf58918bb9698219f952"
+        },
+        {
+          "attempt": 2,
+          "status": "pass",
+          "repair_iterations": 0,
+          "provider_cost_usd": 0.00768067,
+          "builder_wall_seconds": 30.969,
+          "generated_source_lines": 216,
+          "generated_tests_count": 11,
+          "independent_tests_count": 7,
+          "proposal_sha256": "17fb9cc61e71294fd5dd87d81fe04e42b2d5fbd3540fe32deda4abb7d7ba6d40",
+          "program_sha256": "4e6018d589bb52ec3f73a73c3d6c692e36144cf95e0e90dcf5d0794b377f016b",
+          "summary_sha256": "01f0add3c24610c6be7c2ac602d858687ad358c61cdf20e77fe0a5da7800875f"
+        },
+        {
+          "attempt": 3,
+          "status": "pass",
+          "repair_iterations": 1,
+          "provider_cost_usd": 0.01560953,
+          "builder_wall_seconds": 60.922,
+          "generated_source_lines": 201,
+          "generated_tests_count": 11,
+          "independent_tests_count": 7,
+          "proposal_sha256": "85d322003055f5791a97faf881989758dff9f584e1568275b3cb97aa48ff6726",
+          "program_sha256": "bb8c105ce8b6ffa33aa1e13508a6222b9185cefe47b35596f99b432bdd0c706f",
+          "summary_sha256": "b2c352f2e082eeb2672540e8630f35fe2cf940355f3fd1aec0e3cadfbb135e6c"
+        }
+      ],
+      "operational_changes": [
+        "Route every persistent evidence writer through the atomic replacement boundary.",
+        "Retain previous evidence and remove the partial file when an atomic write fails.",
+        "Record injected OpenSSF Scorecard provider failures as explicit error observations.",
+        "Add an opt-in fail-closed environment-probe completion gate that leaves raw calibration semantics unchanged."
+      ],
+      "release_gates": {
+        "repository_tests": "260 passed, 3 skipped",
+        "coverage_percent": 74.0,
+        "ruff": "pass",
+        "format": "pass",
+        "mypy": "pass",
+        "wheel_and_sdist": "pass",
+        "clean_clone_system_e2e": "pass",
+        "system_e2e_summary_sha256": "verified-in-release-gates/system-e2e-v1.8/system-e2e-summary.json",
+        "system_e2e_commit": "7c7f46b00fed5d82388598b8d3b27923941c5ea0",
+        "strict_environment_probe": "pass"
+      }
+    },
+    {
+      "candidate_id": "candidate-ledger-operational-round-007",
+      "architecture_line": "v2.9",
+      "origin": "B",
+      "successes": 0,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.0895445,
+      "total_builder_wall_seconds": 412.937,
+      "manual_interventions": 0,
+      "repair_iterations_per_attempt": [3, 3, 3],
+      "rejection_reason": "0/3 on the frozen Duplicate Finder benchmark at roughly three times the winner's cost and 3.4 times its wall time. Every attempt exhausted the repair budget."
+    },
+    {
+      "candidate_id": "candidate-b-plus-a-round-007",
+      "origin": "B+A",
+      "successes": 2,
+      "attempts": 3,
+      "total_provider_cost_usd": 0.07152791,
+      "total_builder_wall_seconds": 230.062,
+      "manual_interventions": 0,
+      "repair_iterations_per_attempt": [1, 3, 1],
+      "rejection_reason": "2/3 versus candidate A at 3/3, with 2.4 times the provider cost and 1.9 times the wall time. It also inherits the unpackageable ledger foundry base, so it cannot satisfy the packaging and installed-wheel gates."
+    },
+    {
+      "candidate_id": "candidate-a-plus-b-round-007",
+      "origin": "A+B",
+      "status": "not-materialized",
+      "reason": "The ledger line measured 0/3 in this round and produced no evidence-backed advantage to transfer. Constructing a hybrid from model claims alone is prohibited by the round rules."
+    }
+  ],
+  "selected_champion": "candidate-operational-boundaries-round-007",
+  "selected_architecture_line": "v1.8",
+  "selection_reason": "Candidate A won on every predeclared dimension at once: 3/3 generation success versus 2/3 for B+A and 0/3 for v2.9, 11/11 on the frozen operational evaluator versus the incumbent's 2/11, the lowest total provider cost, the lowest total wall time, zero manual interventions, and every release gate green. No tie-break was required.",
+  "selection_complete": true,
+  "loop_closure": {
+    "status": "champion-challenger-loop-closed-after-this-round",
+    "decision": "Round 007 is the final champion-challenger round on the Duplicate Finder workload.",
+    "rationale": [
+      "The v2 ledger line lost all seven rounds (0/3, 1/3, 1/3, 1/3, 1/3, 1/3, 0/3). Its architectural question is answered.",
+      "Generation success on this workload moved from 1/3 in round 002 to 3/3 here, so the measurable headroom on it is exhausted.",
+      "The workload is a single-file 177-216 line utility. Its component_decisions record only the Python standard library, so it does not exercise the reuse-first composition path that the product claims as its core.",
+      "Further rounds would keep optimizing a benchmark that cannot measure the capability the system exists to provide."
+    ],
+    "successor_benchmark": "evolution/benchmark/composition-reuse-v1.json",
+    "successor_rationale": "The successor measures assembly of real evidence-backed components behind contracts, which is the claim the Duplicate Finder benchmark never tested."
+  }
+}
