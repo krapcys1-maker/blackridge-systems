@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from _terminal import plain
 from test_evolution import _round
 from typer.testing import CliRunner
 
@@ -39,7 +40,7 @@ def test_probe_adapter_retains_evidence_without_assigning_a_verdict(tmp_path: Pa
     assert result.exit_code == 0, result.output
     evidence = _evidence(output)
     assert evidence["observations"]["probe_completed"] is True
-    assert "manual review" in result.output.lower()
+    assert "manual review" in plain(result.output).lower()
 
 
 def test_probe_adapter_retains_the_broken_control_as_evidence(tmp_path: Path) -> None:
@@ -64,7 +65,7 @@ def test_check_provenance_passes_on_the_committed_registry(tmp_path: Path) -> No
     output = tmp_path / "provenance.json"
     result = runner.invoke(app, ["check-provenance", "--output", str(output)])
     assert result.exit_code == 0, result.output
-    assert "Provenance issues: 0" in result.output
+    assert "Provenance issues: 0" in plain(result.output)
     assert output.is_file()
 
 
@@ -94,7 +95,7 @@ def test_probe_source_provenance_retains_raw_matches(tmp_path: Path) -> None:
         ],
     )
     assert result.exit_code == 0, result.output
-    assert "zero matches is not proof of originality" in result.output
+    assert "zero matches is not proof of originality" in plain(result.output)
     assert _evidence(output)["observations"]
 
 
@@ -120,7 +121,7 @@ def test_probe_composer_solves_generates_and_runs_a_reused_component(tmp_path: P
     assert observations["plan"]["complete"] is True
     assert observations["plan"]["selected_component_ids"] == ["grounded-researcher-v1"]
     assert observations["runtime"]["observations"]["all_steps_completed"] is True
-    assert "No manual PASS/FAIL was assigned." in result.output
+    assert "No manual PASS/FAIL was assigned." in plain(result.output)
 
 
 def test_compose_generate_writes_a_provenance_locked_bundle(tmp_path: Path) -> None:
@@ -133,7 +134,7 @@ def test_compose_generate_writes_a_provenance_locked_bundle(tmp_path: Path) -> N
     generated = runner.invoke(app, ["compose-generate", str(case), str(plan), str(bundle)])
     assert generated.exit_code == 0, generated.output
     assert (bundle / "provenance.json").is_file()
-    assert "Trusted provenance SHA-256:" in generated.output
+    assert "Trusted provenance SHA-256:" in plain(generated.output)
 
 
 def test_select_champion_writes_a_deterministic_selection(tmp_path: Path) -> None:

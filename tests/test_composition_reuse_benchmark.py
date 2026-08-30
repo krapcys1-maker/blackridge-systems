@@ -105,3 +105,37 @@ def test_freeze_tool_reports_no_drift() -> None:
         cwd=REPOSITORY_ROOT,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_evidence_chain_resolves_a_probe_path_recorded_on_another_platform() -> None:
+    """Retained reviews store the probe path as written, so it may carry backslashes.
+
+    Reading that literally on POSIX yields one filename, the probe is reported missing, and
+    every promotion above L0 fails silently. This regressed the whole benchmark on Linux while
+    passing on Windows.
+    """
+
+    review = json.loads(
+        (
+            REPOSITORY_ROOT
+            / "evidence"
+            / "manual"
+            / "2026-08-27"
+            / "grounded-researcher-component-l3-v2-review.json"
+        ).read_text(encoding="utf-8")
+    )
+    recorded = review["probe_file"]
+    assert "\\" in recorded, "fixture no longer exercises a foreign-platform path"
+    resolved = REPOSITORY_ROOT / recorded.replace("\\", "/")
+    assert resolved.is_file(), "the recorded probe must resolve on every platform"
+
+
+def test_qualification_reports_the_probe_as_present_on_this_platform() -> None:
+    plan = _plan("reuse-complete")
+    observations = next(
+        item.evidence_observations
+        for item in plan.qualifications
+        if item.subject_id == "grounded-researcher-v1"
+    )
+    assert observations["probe_exists"] is True
+    assert observations["probe_completed"] is True

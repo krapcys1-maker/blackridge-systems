@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 import pytest
+from _terminal import plain
 from typer.main import get_command
 from typer.testing import CliRunner
 
@@ -55,8 +56,9 @@ def test_command_help_renders(command: str) -> None:
     assert result.exit_code == 0, result.output
     # A truncated or empty help body means the signature failed to render, not that the
     # command is simple.
-    assert command in result.output
-    assert "Usage:" in result.output
+    rendered = plain(result.output)
+    assert command in rendered
+    assert "Usage:" in rendered
 
 
 @pytest.mark.parametrize(
