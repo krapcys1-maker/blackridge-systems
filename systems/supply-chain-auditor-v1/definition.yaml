@@ -1,0 +1,207 @@
+schema_version: '1'
+name: supply-chain-auditor
+goal: Audit one repository's declared dependency versions for published vulnerabilities and report its
+  independent security posture in a single deterministic verdict.
+mode: calibration
+external_input: audit-request/v1
+required_output: audit-report/v1
+required_capabilities:
+- vulnerability-scan
+- security-posture
+- audit-merge
+allowed_licenses:
+- Apache-2.0
+allowed_integrations:
+- command-json
+minimum_evidence_level: 0
+contracts:
+- contract_id: audit-request/v1
+  schema:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    type: object
+    additionalProperties: true
+    required:
+    - schema_version
+    - request_id
+    - repository
+    - packages
+    properties:
+      schema_version:
+        const: '1'
+      request_id:
+        type: string
+        minLength: 1
+      repository:
+        type: string
+        pattern: ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$
+      packages:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          required:
+          - ecosystem
+          - name
+          - version
+          properties:
+            ecosystem:
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+- contract_id: vulnerability-report/v1
+  schema:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    type: object
+    additionalProperties: true
+    required:
+    - schema_version
+    - request_id
+    - status
+    - packages
+    - total_vulnerabilities
+    - unknown
+    properties:
+      schema_version:
+        const: '1'
+      request_id:
+        type: string
+      status:
+        enum:
+        - ok
+        - partial
+      packages:
+        type: array
+      total_vulnerabilities:
+        type: integer
+        minimum: 0
+      unknown:
+        type: array
+- contract_id: security-posture/v1
+  schema:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    type: object
+    additionalProperties: true
+    required:
+    - schema_version
+    - request_id
+    - repository
+    - status
+    - score
+    - checks
+    properties:
+      schema_version:
+        const: '1'
+      request_id:
+        type: string
+      repository:
+        type: string
+      status:
+        enum:
+        - ok
+        - unavailable
+      score:
+        type:
+        - number
+        - 'null'
+      checks:
+        type: array
+- contract_id: audit-report/v1
+  schema:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    type: object
+    additionalProperties: true
+    required:
+    - schema_version
+    - request_id
+    - verdict
+    - vulnerability_count
+    - unknown
+    - limitations
+    properties:
+      schema_version:
+        const: '1'
+      request_id:
+        type: string
+      verdict:
+        enum:
+        - clean
+        - findings
+        - unknown
+      vulnerability_count:
+        type: integer
+        minimum: 0
+      unknown:
+        type: array
+      limitations:
+        type: array
+        minItems: 1
+components:
+- component_id: osv-scanner
+  capability_id: vulnerability-scan
+  source_uri: blackridge://components/osv-scanner
+  revision: sha256:cee40e402106c4a80e489b0a4c12f78ac052caece661dd0a0a7e8c7e9d82f35d
+  license_spdx: Apache-2.0
+  integration: command-json
+  accepts:
+  - audit-request/v1
+  produces:
+  - vulnerability-report/v1
+  launch:
+    argv:
+    - '{python}'
+    - '{definition_dir}/../../components/osv_scanner_v1/osv_scanner.py'
+    artifact_file: '{definition_dir}/../../components/osv_scanner_v1/osv_scanner.py'
+    artifact_sha256: cee40e402106c4a80e489b0a4c12f78ac052caece661dd0a0a7e8c7e9d82f35d
+    working_directory: '{definition_dir}'
+    timeout_seconds: 60
+    environment_allowlist: []
+  evidence:
+    level: 0
+  selection_priority: 10
+- component_id: scorecard-posture
+  capability_id: security-posture
+  source_uri: blackridge://components/scorecard-posture
+  revision: sha256:8a34efaeccc834916ddd7fcfbfe0d80012b0bf2aaef8e2639f8b8cdd4d5760ee
+  license_spdx: Apache-2.0
+  integration: command-json
+  accepts:
+  - audit-request/v1
+  produces:
+  - security-posture/v1
+  launch:
+    argv:
+    - '{python}'
+    - '{definition_dir}/../../components/scorecard_posture_v1/scorecard_posture.py'
+    artifact_file: '{definition_dir}/../../components/scorecard_posture_v1/scorecard_posture.py'
+    artifact_sha256: 8a34efaeccc834916ddd7fcfbfe0d80012b0bf2aaef8e2639f8b8cdd4d5760ee
+    working_directory: '{definition_dir}'
+    timeout_seconds: 60
+    environment_allowlist: []
+  evidence:
+    level: 0
+  selection_priority: 10
+- component_id: audit-merger
+  capability_id: audit-merge
+  source_uri: blackridge://components/audit-merger
+  revision: sha256:96b0ec57cf4ca4ccaa272e46cdb33c96028fbb3f9ace6e9b6ee583becb7eb168
+  license_spdx: Apache-2.0
+  integration: command-json
+  accepts:
+  - vulnerability-report/v1
+  - security-posture/v1
+  produces:
+  - audit-report/v1
+  launch:
+    argv:
+    - '{python}'
+    - '{definition_dir}/../../components/audit_merger_v1/audit_merger.py'
+    artifact_file: '{definition_dir}/../../components/audit_merger_v1/audit_merger.py'
+    artifact_sha256: 96b0ec57cf4ca4ccaa272e46cdb33c96028fbb3f9ace6e9b6ee583becb7eb168
+    working_directory: '{definition_dir}'
+    timeout_seconds: 60
+    environment_allowlist: []
+  evidence:
+    level: 0
+  selection_priority: 10

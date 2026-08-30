@@ -1,0 +1,103 @@
+schema_version: '1'
+component_id: scorecard-posture-adopted
+capability_id: security-posture
+module_name: scorecard_posture
+upstream:
+  name: OpenSSF Scorecard public API
+  source_uri: https://api.securityscorecards.dev
+  revision: public-api-2026-08
+  license_spdx: Apache-2.0
+accepts:
+- audit-request/v1
+produces: security-posture/v1
+contracts:
+- contract_id: audit-request/v1
+  schema:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    type: object
+    additionalProperties: true
+    required:
+    - schema_version
+    - request_id
+    - repository
+    - packages
+    properties:
+      schema_version:
+        const: '1'
+      request_id:
+        type: string
+        minLength: 1
+      repository:
+        type: string
+        pattern: ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$
+      packages:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          required:
+          - ecosystem
+          - name
+          - version
+          properties:
+            ecosystem:
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+- contract_id: security-posture/v1
+  schema:
+    $schema: https://json-schema.org/draft/2020-12/schema
+    type: object
+    additionalProperties: true
+    required:
+    - schema_version
+    - request_id
+    - repository
+    - status
+    - score
+    - checks
+    properties:
+      schema_version:
+        const: '1'
+      request_id:
+        type: string
+      repository:
+        type: string
+      status:
+        enum:
+        - ok
+        - unavailable
+      score:
+        type:
+        - number
+        - 'null'
+      checks:
+        type: array
+behavior: 'Fetch an independent OpenSSF Scorecard assessment for the repository named in the request and
+  return it as security-posture/v1.
+
+
+  GET https://api.securityscorecards.dev/projects/github.com/{owner}/{name} with an Accept: application/json
+  header, using urllib from the standard library with a bounded timeout and a bounded response read.
+
+
+  The response carries a numeric ''score'' and a ''checks'' array of objects with ''name'', ''score''
+  and ''reason''. Normalize checks into a list sorted by name.
+
+
+  If the request object contains a ''replay'' object with a ''scorecard'' key, use that recorded payload
+  instead of calling the network, so the component runs unchanged in a networkless sandbox and its tests
+  need no network.
+
+
+  An HTTP 404 means no scorecard has been published for that repository. Report status ''unavailable''
+  with score null and an explicit error string. Never report a missing or unreachable scorecard as a passing
+  score.'
+acceptance:
+- A replayed scorecard payload yields status 'ok' and the numeric score from the payload.
+- Checks are normalized to objects with name, score and reason, sorted by name.
+- A repository string that is not 'owner/name' is rejected with exit code 1.
+- A missing published scorecard yields status 'unavailable' with score null, never 'ok'.
+- A request without a request_id is rejected with exit code 1.
