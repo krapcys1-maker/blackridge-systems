@@ -1,0 +1,77 @@
+{
+  "schema_version": "1",
+  "id": "blackridge-composition-reuse-v1",
+  "status": "frozen",
+  "supersedes": "evolution/benchmark/measured-duplicate-finder-v1.json",
+  "question": "Given a pool that contains a reviewed implementation of a required capability, does the solver reuse it, and does it fail closed with an explicit reason when the pool does not qualify?",
+  "why_this_exists": [
+    "The retired Duplicate Finder workload measured code generation. Its component decisions recorded only the Python standard library, so it never observed reuse.",
+    "The calibration and system-E2E workloads execute a composition a human already chose, so they measure execution, not selection.",
+    "Selection is the product claim. Until this benchmark, nothing measured it."
+  ],
+  "subject": {
+    "kind": "deterministic-solver",
+    "component_pool_source": "components/grounded_researcher_v1",
+    "component_artifact_sha256": "c8b34ceaed8980bcb70a4a63c7afe713e9f4cdecec655f1a314d448086dfe56d",
+    "manual_review": "evidence/manual/2026-08-27/grounded-researcher-component-l3-v2-review.json",
+    "manual_review_sha256": "d8eede51f0111b06673b7e0c1e4ea85bba1ee420a736b6fcb89fab614f658fec",
+    "claimed_evidence_level": 3
+  },
+  "cases_directory": "benchmarks/composition-reuse-v1/cases",
+  "case_manifest": "benchmarks/composition-reuse-v1/case-manifest.json",
+  "evaluator": "tools/evaluate_composition_reuse.py",
+  "evaluator_sha256": "82fa92c83c7ae3399e5f69c2b523d5e44aa86efca4b26d360fd728fdabd8de3d",
+  "evaluator_test_count": 8,
+  "freeze_tool": "tools/freeze_composition_reuse.py",
+  "freeze_tool_sha256": "ad54845b6028617dda5d5ba8a73d9a1789af0f31efe0f800eea68b2ef5d20521",
+  "cases": [
+    {
+      "id": "reuse-complete",
+      "file_sha256": "50627a65ee02f5060052dc6c1d44141cb0adb0f447b4d1e31b304a6d9fc7df1f",
+      "expected": "complete plan, grounded-researcher-v1 selected, zero adapters, zero generated files",
+      "measures": "reuse of a qualified reviewed component"
+    },
+    {
+      "id": "blocked-preferred-fallback",
+      "file_sha256": "584a662c2ae9d159eff2df0e0892d5f031daf754835dd28d77608d5eaae52329",
+      "expected": "complete plan on the qualified alternative; the higher-priority blocked entry is never selected",
+      "measures": "explicit blocks outrank selection priority"
+    },
+    {
+      "id": "evidence-floor",
+      "file_sha256": "9811fc1e108fe0473cc60fab5affc32d66f8ec5f2b58644043b9bd777984cf48",
+      "expected": "incomplete plan; reason 'evidence L3 is below required L4'",
+      "measures": "the evidence ladder is not lowered to complete a plan"
+    },
+    {
+      "id": "license-blocked",
+      "file_sha256": "95d7598074571292d864290368aae7630604e007992847f2b6a50e0b6fa78fc9",
+      "expected": "incomplete plan; reason 'license GPL-3.0-only is not allowed'",
+      "measures": "license policy is enforced before selection"
+    },
+    {
+      "id": "hash-drift",
+      "file_sha256": "5cd41074317175d59b140f3392001b6ec20061c105d25ebce98627fd5095e8e5",
+      "expected": "incomplete plan; both the launch lock and the review promotion binding reject the drift",
+      "measures": "supply-chain identity is verified independently at two boundaries"
+    },
+    {
+      "id": "adapter-gap",
+      "file_sha256": "75643c97c8c9be57a1dfc3c6c38e6a5e6626d493524442b86856827e360ac89a",
+      "expected": "incomplete plan with an eligible component and the 'no complete contract route' warning",
+      "measures": "an unroutable graph is reported distinctly from an empty pool"
+    }
+  ],
+  "measurement_rules": [
+    "The evaluator owns the expected outcomes. A candidate may not read or modify it during measurement.",
+    "A case file whose SHA-256 differs from this manifest invalidates the run.",
+    "Re-freezing the cases after a component or review changes is a deliberate, separately reviewed act.",
+    "A complete plan is selection evidence only. It is not an L4 system-verification verdict.",
+    "The executable case must produce a schema-valid required output through the real component process."
+  ],
+  "limitations": [
+    "The pool holds one capability and one reviewed implementation, so this benchmark does not measure multi-capability routing or adapter synthesis.",
+    "It measures the deterministic solver. It says nothing about discovery quality or about whether a better component exists upstream.",
+    "Passing every case is not evidence that an arbitrary real-world system can be composed."
+  ]
+}
